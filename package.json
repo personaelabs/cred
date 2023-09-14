@@ -1,0 +1,10 @@
+{
+  "name": "anon-boost",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "prettier": "^3.0.3"
+  }
+}
