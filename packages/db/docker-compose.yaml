@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  database:
+    image: "postgres:14"
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=anon
+      - POSTGRES_PASSWORD=iamanon
+      - POSTGRES_DB=anon-boost
+    volumes:
+      - anon_boost_pg_data:/var/lib/postgresql/data
+volumes:
+  anon_boost_pg_data:

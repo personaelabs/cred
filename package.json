@@ -4,6 +4,17 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "db:start": "pnpm -F db run start",
+    "db:down": "pnpm -F db run down",
+    "format": "pnpm -r format",
+    "format:check": "pnpm -r format:check",
+    "frontend:dev": "pnpm db:start && sleep 1 && pnpm -F frontend run dev",
+    "lint": "pnpm -r lint",
+    "prepare": "husky install && pnpm -F db run build && pnpm -F nymjs run build",
+    "studio": "pnpm -F db run studio",
+    "test": "pnpm -r test"
+  },
   "devDependencies": {
     "prettier": "^3.0.3"
   }

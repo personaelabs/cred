@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TreeNode {
+  pubkey    String
+  address   String
+  path      String[]
+  indices   String[]
+  root      String
+  createdAt DateTime @default(now())
+
+  @@unique([pubkey, root])
+}
+
+model Tree {
+  root        String
+  blockHeight Int
+  createdAt   DateTime @default(now())
+
+  @@unique([root, blockHeight])
+}
+
+model CachedEOA {
+  address   String   @id
+  pubkey    String   @unique
+  createdAt DateTime @default(now())
+}
+
+model CachedCode {
+  address   String   @id
+  code      String
+  createdAt DateTime @default(now())
+}
+
+model Gruop {
+  name        String @id
+  root        String
+  blockHeight Int
+
+  @@unique([root, blockHeight])
+}
