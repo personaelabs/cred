@@ -1,0 +1,11 @@
+databases:
+  - name: cred
+    databaseName: cred
+    region: oregon
+    plan: pro
+    postgresMajorVersion: 15
+  - name: cred-staging
+    databaseName: cred-staging
+    region: oregon
+    plan: pro
+    postgresMajorVersion: 15

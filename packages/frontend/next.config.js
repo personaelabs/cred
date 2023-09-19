@@ -1,12 +1,48 @@
 /** @type {import('next').NextConfig} */
+const FilterWarningsPlugin = require('webpack-filter-warnings-plugin');
+
 const nextConfig = {
   reactStrictMode: true,
-  webpack: config => {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*',
+      },
+    ],
+  },
+  transpilePackages: [
+    'react-syntax-highlighter',
+    'react-native',
+  ],
+  webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
-    config.externals.push('pino-pretty', 'lokijs', 'encoding');
+    config.experiments = { asyncWebAssembly: true, layers: true };
+    config.plugins.push(
+      new FilterWarningsPlugin({
+        exclude: [/Critical dependency: the request of a dependency is an expression/],
+      }),
+    );
     return config;
   },
 
-}
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+        ],
+      },
+    ];
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

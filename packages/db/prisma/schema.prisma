@@ -10,41 +10,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TreeNode {
-  pubkey    String
-  address   String
-  path      String[]
-  indices   String[]
-  root      String
-  createdAt DateTime @default(now())
-
-  @@unique([pubkey, root])
-}
-
-model Tree {
-  root        String
-  blockHeight Int
-  createdAt   DateTime @default(now())
-
-  @@unique([root, blockHeight])
-}
-
-model CachedEOA {
-  address   String   @id
-  pubkey    String   @unique
-  createdAt DateTime @default(now())
-}
-
-model CachedCode {
-  address   String   @id
-  code      String
-  createdAt DateTime @default(now())
-}
-
-model Gruop {
-  name        String @id
-  root        String
-  blockHeight Int
-
-  @@unique([root, blockHeight])
+model MembershipProof {
+  proofHash   String @id
+  proof       String
+  publicInput String
 }
