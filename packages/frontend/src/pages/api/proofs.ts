@@ -28,4 +28,6 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
       proofHash,
     },
   });
+
+  res.send({ proofHash });
 }

@@ -4,11 +4,7 @@ import { useVerify } from '@/hooks/useVerify';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import { useCallback, useState } from 'react';
 import { Hex } from 'viem';
-
-// Append the "0x" prefix to the string if it doesn't have it
-const toPrefixedHex = (str: String): Hex => {
-  return (str.startsWith('0x') ? str : '0x' + str) as Hex;
-};
+import { toPrefixedHex } from '@/lib/utils';
 
 export default function VerifyPage() {
   const getProof = useGetProof();
