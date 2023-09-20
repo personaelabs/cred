@@ -6,13 +6,16 @@ import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import { toPrefixedHex } from '@/lib/utils';
-import { SETS } from '@/lib/sets';
+import SETS from '@/lib/sets';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [username, setUsername] = useState<string>('');
   // The set to prove membership
   const [selectedSet, setSelectedSet] = useState(SETS[0]);
+
+  // Hash of the generate proof
+  const [proofHash, setProofHash] = useState<string | undefined>();
 
   const { signMessageAsync } = useSignMessage();
 
@@ -38,7 +41,8 @@ export default function Home() {
       );
 
       // Submit the proof to the backend
-      await submitProof({ proof, publicInput });
+      const proofHash = await submitProof({ proof, publicInput });
+      setProofHash(proofHash);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
 
@@ -79,12 +83,19 @@ export default function Home() {
             ))}
           </select>
         </div>
-        <div className="flex  justify-center">
+        <div className="mb-2 flex justify-center">
           <MainButton
             handler={handleProveClick}
             message={proving ? 'Proving...' : 'Prove'}
             disabled={isConnected == false}
           ></MainButton>
+        </div>
+        <div className="flex  justify-center">
+          {proofHash && (
+            <div>
+              <p>Done! Proof hash: {proofHash}</p>
+            </div>
+          )}
         </div>
       </div>
     </main>

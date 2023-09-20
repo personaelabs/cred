@@ -3,7 +3,6 @@ import axios from 'axios';
 
 export const useGetMerkleProof = (jsonFileName: string) => {
   const getMerkleProof = async (address: string): Promise<MerkleProof> => {
-    console.log({ jsonFileName });
     const res = await axios.get(`/${jsonFileName}.json`);
     const merkleProofs: {
       address: string;
