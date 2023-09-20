@@ -1,5 +1,5 @@
 import { FullProof } from '@/types';
-import { MembershipVerifier, defaultPubkeyMembershipVConfig } from '@personaelabs/spartan-ecdsa';
+import { MembershipVerifier, defaultAddressMembershipVConfig } from '@personaelabs/spartan-ecdsa';
 import { useEffect, useMemo, useState } from 'react';
 
 export const useVerify = () => {
@@ -7,7 +7,7 @@ export const useVerify = () => {
 
   const verifier = useMemo(() => {
     if (typeof window !== 'undefined') {
-      return new MembershipVerifier(defaultPubkeyMembershipVConfig);
+      return new MembershipVerifier(defaultAddressMembershipVConfig);
     }
   }, []);
 
