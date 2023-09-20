@@ -7,6 +7,7 @@ import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
+// Using the  WalletConnect Cloud project from Noun Nyms for now
 const { connectors } = getDefaultWallets({
   appName: 'Nouns Nymz',
   projectId: '564add972ca30e293482fd9361543d69',

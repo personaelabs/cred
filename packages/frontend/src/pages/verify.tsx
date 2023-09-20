@@ -5,6 +5,7 @@ import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import { useCallback, useState } from 'react';
 import { Hex } from 'viem';
 
+// Append the "0x" prefix to the string if it doesn't have it
 const toPrefixedHex = (str: String): Hex => {
   return (str.startsWith('0x') ? str : '0x' + str) as Hex;
 };
@@ -13,6 +14,7 @@ export default function VerifyPage() {
   const getProof = useGetProof();
   const { verify, verifying } = useVerify();
 
+  // Hash of the proof to verify
   const [proofHash, setProofHash] = useState<string>('');
 
   const handleVerifyClick = useCallback(async () => {
@@ -30,6 +32,7 @@ export default function VerifyPage() {
 
       // Get the merkle root from the public input
       const groupRoot = publicInput.circuitPubInput.merkleRoot;
+      // TODO: Render the merkle root and the relevant data
     }
   }, [verify, getProof, proofHash]);
 
@@ -42,7 +45,6 @@ export default function VerifyPage() {
             className="border-b-2 bg-transparent"
             placeholder="Proof hash"
             onChange={(e) => {
-              // TODO: Check if the entered value is a valid hex string
               setProofHash(e.target.value as Hex);
             }}
             value={proofHash}

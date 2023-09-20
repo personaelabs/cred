@@ -7,7 +7,7 @@ import { useCallback, useState } from 'react';
 
 export default function Home() {
   const { isConnected } = useAccount();
-  const [message, setMessage] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
 
   const { signMessageAsync } = useSignMessage();
 
@@ -16,14 +16,15 @@ export default function Home() {
 
   const handleProveClick = useCallback(async () => {
     // TODO: Add a timestamp to the message being signed?
-    const sig = await signMessageAsync({ message });
+    const sig = await signMessageAsync({ message: username });
 
+    // TODO: Get the merkle proof
     const merkleProof = null;
     // @ts-ignore
     // const proof = await prove(sig, message, merkleProof);
 
     await submitProof({ proof: '0xdeadbeef', publicInput: '0xdeadbeef' });
-  }, [message, signMessageAsync, prove, submitProof]);
+  }, [username, signMessageAsync, prove, submitProof]);
 
   return (
     // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
@@ -39,9 +40,9 @@ export default function Home() {
         <div className="mb-4 flex justify-center">
           <input
             onChange={(e) => {
-              setMessage(e.target.value);
+              setUsername(e.target.value);
             }}
-            value={message}
+            value={username}
             className="border-b-2 bg-transparent"
             type="text"
             placeholder="@username"
