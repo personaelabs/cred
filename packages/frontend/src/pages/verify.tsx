@@ -15,10 +15,10 @@ export default function VerifyPage() {
   const router = useRouter();
   const { h } = router.query;
 
-  const set = handleToSet[h];
-  const metadata = setMetadata[set];
+  const set = handleToSet[h as string];
+  const metadata = set ? setMetadata[set] : {};
 
-  const proofHash = handleToProofHash[h];
+  const proofHash = handleToProofHash[h as string];
 
   const handleVerifyClick = useCallback(async () => {
     if (proofHash) {
@@ -40,7 +40,7 @@ export default function VerifyPage() {
 
   return (
     <>
-      {h && (
+      {h && set ? (
         <div className="flex h-full w-full  flex-col justify-center gap-4 px-4 py-3 md:px-0 md:py-6 ">
           <div className="mb-4 flex justify-center">
             <form className="w-full max-w-sm">
@@ -115,9 +115,13 @@ export default function VerifyPage() {
                   </label>
                 </div>
                 <div className="md:w-2/3">
-                  <a href={metadata.duneURL} target="_blank" rel="noreferrer">
-                    {proofHash}
-                  </a>
+                  <input
+                    className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
+                    id="inline-full-name"
+                    type="text"
+                    value={proofHash}
+                    disabled
+                  />
                 </div>
               </div>
             </form>
@@ -125,6 +129,10 @@ export default function VerifyPage() {
           <div className="flex  justify-center">
             <MainButton message="Verify" handler={handleVerifyClick}></MainButton>
           </div>
+        </div>
+      ) : (
+        <div className="flex h-full w-full  flex-col justify-center gap-4 px-4 py-3 md:px-0 md:py-6 ">
+          <div className="mb-4 flex justify-center">handle not found</div>
         </div>
       )}
     </>
