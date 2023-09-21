@@ -10,14 +10,14 @@ if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
 // NOTE: below maps should be in db in the future
 
 // NOTE: placeholders
-export const handleToSet = {
+export const handleToSet: { [key: string]: string } = {
   '0xFork': 'nouns-forker',
   '0xDev': 'large-contract-deployer',
   '0xNFTrader': 'large-nft-trader',
 };
 
 // NOTE: placeholders
-export const handleToProofHash = {
+export const handleToProofHash: { [key: string]: string } = {
   '0xFork': '0x0',
   '0xDev': '0x0',
   '0xNFTrader': '0x0',
