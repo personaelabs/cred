@@ -11,16 +11,16 @@ if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
 
 // NOTE: placeholders
 export const handleToSet: { [key: string]: string } = {
-  '0xFork': 'nouns-forker',
+  noun_null: 'nouns-forker',
   '0xDev': 'large-contract-deployer',
   '0x_pixl': 'large-nft-trader',
 };
 
 // NOTE: placeholders
 export const handleToProofHash: { [key: string]: string } = {
-  '0xFork': '0x120c61dbbeb11fe81c6eab784018d31aca04c4c74b680deb54256c1457e9185e',
+  noun_null: '0x1f88d2044653b3a2618a481cf06c9266b4d81ab93ea65abf38f4f1f486ba34de',
   '0xDev': '0x0',
-  '0x_pixl': '0x0',
+  '0x_pixl': '0x120c61dbbeb11fe81c6eab784018d31aca04c4c74b680deb54256c1457e9185e',
 };
 
 export type SetMetadata = {
@@ -42,7 +42,7 @@ export const setMetadata: { [key: string]: SetMetadata } = {
     count: 141,
     duneURL: 'https://dune.com/queries/3037583',
     description: 'Joined nouns fork 0',
-    displayName: 'Nouns Forker',
+    displayName: 'Noun Fork 0 Member',
   },
   'large-contract-deployer': {
     count: 5152,
