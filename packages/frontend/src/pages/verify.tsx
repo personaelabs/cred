@@ -4,7 +4,7 @@ import { useVerify } from '@/hooks/useVerify';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import { useCallback } from 'react';
 import { toPrefixedHex } from '@/lib/utils';
-import { handleToProofHash, handleToSet, setMetadata } from '@/lib/sets';
+import { emptyMetadata, handleToProofHash, handleToSet, setMetadata } from '@/lib/sets';
 
 import { useRouter } from 'next/router';
 
@@ -16,7 +16,7 @@ export default function VerifyPage() {
   const { h } = router.query;
 
   const set = handleToSet[h as string];
-  const metadata = set ? setMetadata[set] : {};
+  const metadata = set ? setMetadata[set] : emptyMetadata;
 
   const proofHash = handleToProofHash[h as string];
 
@@ -32,7 +32,6 @@ export default function VerifyPage() {
       );
       // Get the merkle root from the public input
       const groupRoot = publicInput.circuitPubInput.merkleRoot;
-      // TODO: Render the merkle root and the relevant data
       // TODO: indicate verification complete + option to download proof
       // TODO: download proof?
     }
@@ -53,7 +52,6 @@ export default function VerifyPage() {
                 <div className="md:w-2/3">
                   <input
                     className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    id="inline-full-name"
                     type="text"
                     value={h}
                     disabled
@@ -70,9 +68,24 @@ export default function VerifyPage() {
                 <div className="md:w-2/3">
                   <input
                     className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    id="inline-full-name"
                     type="text"
                     value={metadata.displayName}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="mb-6 md:flex md:items-center">
+                <div className="md:w-1/3">
+                  <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                    description
+                  </label>
+                </div>
+                <div className="md:w-2/3">
+                  <textarea
+                    className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
+                    wrap="soft"
+                    value={metadata.description}
                     disabled
                   />
                 </div>
@@ -87,7 +100,6 @@ export default function VerifyPage() {
                 <div className="md:w-2/3">
                   <input
                     className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    id="inline-full-name"
                     type="text"
                     value={metadata.count}
                     disabled
@@ -117,7 +129,6 @@ export default function VerifyPage() {
                 <div className="md:w-2/3">
                   <input
                     className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    id="inline-full-name"
                     type="text"
                     value={proofHash}
                     disabled
