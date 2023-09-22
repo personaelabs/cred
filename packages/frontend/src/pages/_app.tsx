@@ -4,7 +4,7 @@ import '@/styles/globals.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { publicProvider } from 'wagmi/providers/public';
-import Head from 'next/head';
+import Script from 'next/script';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -24,13 +24,11 @@ const config = createConfig({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Head>
-        <script
-          defer
-          data-domain="cred-frontend.vercel.app"
-          src="https://plausible.io/js/script.js"
-        ></script>
-      </Head>
+      <Script
+        defer
+        data-domain="cred-frontend.vercel.app"
+        src="https://plausible.io/js/script.js"
+      ></Script>
       <WagmiConfig config={config}>
         <RainbowKitProvider chains={chains}>
           <Component {...pageProps} />
