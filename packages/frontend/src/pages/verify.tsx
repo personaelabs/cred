@@ -2,7 +2,7 @@ import { MainButton } from '@/components/MainButton';
 import { useGetProof } from '@/hooks/useGetProof';
 import { useVerify } from '@/hooks/useVerify';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { toPrefixedHex } from '@/lib/utils';
 import { emptyMetadata, handleToProofHash, handleToSet, setMetadata } from '@/lib/sets';
 
@@ -11,6 +11,8 @@ import { useRouter } from 'next/router';
 export default function VerifyPage() {
   const getProof = useGetProof();
   const { verify, verifying } = useVerify();
+
+  const [verified, setVerified] = useState<boolean>(false);
 
   const router = useRouter();
   const { h } = router.query;
@@ -26,14 +28,14 @@ export default function VerifyPage() {
       const proof = await getProof(toPrefixedHex(proofHash));
       // Verify the proof
       await verify(proof);
+
+      setVerified(true);
       // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
       const publicInput = PublicInput.deserialize(
         Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
       );
       // Get the merkle root from the public input
       const groupRoot = publicInput.circuitPubInput.merkleRoot;
-      // TODO: indicate verification complete + option to download proof
-      // TODO: download proof?
     }
   }, [verify, getProof, proofHash]);
 
@@ -124,7 +126,11 @@ export default function VerifyPage() {
             </form>
           </div>
           <div className="flex  justify-center">
-            <MainButton message="Verify" handler={handleVerifyClick}></MainButton>
+            <MainButton
+              message={verifying ? 'Verifying...' : verified ? 'Verified!' : 'Verify'}
+              disabled={verifying || verified}
+              handler={handleVerifyClick}
+            ></MainButton>
           </div>
         </div>
       ) : (

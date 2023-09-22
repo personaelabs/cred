@@ -17,8 +17,8 @@ export const MainButton = (props: {
       className="pointer-cursor rounded-xl px-4 py-2.5 font-bold text-white transition-all hover:scale-105 active:scale-100"
       style={{
         backgroundColor: color ? color : BLUE,
-        // opacity: disabled ? 0.5 : 1,
-        //pointerEvents: disabled ? 'none' : 'all',
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? 'none' : 'all',
       }}
       onClick={handler}
     >

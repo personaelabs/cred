@@ -27,7 +27,10 @@ export const useVerify = () => {
 
     const proofBytes = Buffer.from(fullProof.proof.replace('0x', ''), 'hex');
     const publicInputBytes = Buffer.from(fullProof.publicInput.replace('0x', ''), 'hex');
-    return await verifier.verify(proofBytes, publicInputBytes);
+    const result = await verifier.verify(proofBytes, publicInputBytes);
+
+    setVerifying(false);
+    return result;
   };
 
   return { verify, verifying };
