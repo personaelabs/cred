@@ -41,19 +41,19 @@ export const setMetadata: { [key: string]: SetMetadata } = {
   'nouns-forker': {
     count: 141,
     duneURL: 'https://dune.com/queries/3037583',
-    description: 'Joined nouns fork 0',
+    description: 'Joined Nouns Fork #0',
     displayName: 'Noun Fork 0 Member',
   },
   'large-contract-deployer': {
     count: 5152,
     duneURL: 'https://dune.com/queries/3028106',
-    description: 'Deployed a contract with > 15k total transactions',
+    description: 'Deployed a contract with > 15k transactions',
     displayName: 'Large Contract Deployer',
   },
   'large-nft-trader': {
     count: 8708,
     duneURL: 'https://dune.com/queries/3036968',
-    description: 'Has made an NFT purchase > $150k (priced at time of purchase)',
+    description: 'Made an NFT purchase > $150k',
     displayName: 'Large NFT Trader',
   },
 };

@@ -62,23 +62,7 @@ export default function VerifyPage() {
               <div className="mb-6 md:flex md:items-center">
                 <div className="md:w-1/3">
                   <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                    set name
-                  </label>
-                </div>
-                <div className="md:w-2/3">
-                  <input
-                    className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    type="text"
-                    value={metadata.displayName}
-                    disabled
-                  />
-                </div>
-              </div>
-
-              <div className="mb-6 md:flex md:items-center">
-                <div className="md:w-1/3">
-                  <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                    description
+                    proof description
                   </label>
                 </div>
                 <div className="md:w-2/3">
@@ -120,19 +104,21 @@ export default function VerifyPage() {
                 </div>
               </div>
 
+              {/* TODO: replace with proof link */}
               <div className="mb-6 md:flex md:items-center">
                 <div className="md:w-1/3">
                   <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                    proof hash
+                    proof
                   </label>
                 </div>
                 <div className="md:w-2/3">
-                  <input
-                    className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                    type="text"
-                    value={proofHash}
-                    disabled
-                  />
+                  <a
+                    href={`${window.location.origin}/api/proofs/${proofHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    proof URL
+                  </a>
                 </div>
               </div>
             </form>
