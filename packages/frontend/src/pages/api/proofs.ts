@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Hex, keccak256 } from 'viem';
+import { Hex, hashMessage, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
 import {
   MembershipVerifier,
@@ -37,6 +37,8 @@ const VALID_ROOTS: bigint[] = [
 export default async function submitProof(req: NextApiRequest, res: NextApiResponse) {
   const proof: Hex = req.body.proof;
   const publicInput: Hex = req.body.publicInput;
+  // The signed message
+  const message: string = req.body.message;
 
   // Convert submitted proof from hex to bytes
   const proofBytes = Buffer.from(proof.replace('0x', ''), 'hex');
@@ -55,10 +57,17 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     return;
   }
 
-  const merkleRoot = PublicInput.deserialize(publicInputBytes).circuitPubInput.merkleRoot;
+  const publicInputDeserialized = PublicInput.deserialize(publicInputBytes);
+  const merkleRoot = publicInputDeserialized.circuitPubInput.merkleRoot;
   // Check if the merkle root is valid
   if (!VALID_ROOTS.includes(merkleRoot)) {
     res.status(400).send({ error: 'Invalid merkle root' });
+    return;
+  }
+  const msgHash = publicInputDeserialized.msgHash;
+  // Check that the message hashes to msgHash
+  if (msgHash.toString() !== Buffer.from(hashMessage(message, 'bytes')).toString()) {
+    res.status(400).send({ error: 'Invalid message hash' });
     return;
   }
 
@@ -68,6 +77,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   // Save the proof to the database. We save the proof the public input in hex format.
   await prisma.membershipProof.create({
     data: {
+      message,
       proof,
       publicInput,
       proofHash,

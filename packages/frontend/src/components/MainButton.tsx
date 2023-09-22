@@ -18,7 +18,7 @@ export const MainButton = (props: {
       style={{
         backgroundColor: color ? color : BLUE,
         // opacity: disabled ? 0.5 : 1,
-        //pointerEvents: disabled ? 'none' : 'all',
+        // pointerEvents: disabled ? 'none' : 'all',
       }}
       onClick={handler}
     >
