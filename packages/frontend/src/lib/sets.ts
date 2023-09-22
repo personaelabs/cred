@@ -12,14 +12,14 @@ if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
 // NOTE: placeholders
 export const handleToSet: { [key: string]: string } = {
   noun_null: 'nouns-forker',
-  '0xDev': 'large-contract-deployer',
+  '0xlindhquist': 'large-contract-deployer',
   '0x_pixl': 'large-nft-trader',
 };
 
 // NOTE: placeholders
 export const handleToProofHash: { [key: string]: string } = {
   noun_null: '0x1f88d2044653b3a2618a481cf06c9266b4d81ab93ea65abf38f4f1f486ba34de',
-  '0xDev': '0x0',
+  '0xlindhquist': '0xad5d5172f69a582d6b5df24feb2d09c9d56d009d4d540ed1b309b8a538657376',
   '0x_pixl': '0x120c61dbbeb11fe81c6eab784018d31aca04c4c74b680deb54256c1457e9185e',
 };
 
