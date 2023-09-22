@@ -2,6 +2,7 @@ import {
   MembershipProver,
   MerkleProof,
   NIZK,
+  PublicInput,
   defaultAddressMembershipPConfig,
 } from '@personaelabs/spartan-ecdsa';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,8 +30,8 @@ export const useProve = () => {
     }
 
     await prover.initWasm();
-    const msgHash = Buffer.from(hashMessage(message).replace('0x', ''), 'hex');
-    const proof = await prover.prove(sig, msgHash, merkleProof);
+    const msgHash = hashMessage(message, 'bytes');
+    const proof = await prover.prove(sig, Buffer.from(msgHash), merkleProof);
     setProving(false);
 
     return proof;

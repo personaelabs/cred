@@ -10,17 +10,24 @@ if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
 // NOTE: below maps should be in db in the future
 
 // NOTE: placeholders
-export const handleToSet: { [key: string]: string } = {
-  noun_null: 'nouns-forker',
-  '0xlindhquist': 'large-contract-deployer',
-  '0x_pixl': 'large-nft-trader',
-};
-
-// NOTE: placeholders
-export const handleToProofHash: { [key: string]: string } = {
-  noun_null: '0x1f88d2044653b3a2618a481cf06c9266b4d81ab93ea65abf38f4f1f486ba34de',
-  '0xlindhquist': '0xad5d5172f69a582d6b5df24feb2d09c9d56d009d4d540ed1b309b8a538657376',
-  '0x_pixl': '0x120c61dbbeb11fe81c6eab784018d31aca04c4c74b680deb54256c1457e9185e',
+export const ROOT_TO_SET: { [key: string]: string } = {
+  // Large contract deployer
+  '86520291978624795409826466754796404277900417237047839256067126838468965580206':
+    'large-contract-deployer',
+  // Large contract deployer (dev)
+  '43586171738911259590638859802512264024794694837033059618005748052121482475660':
+    'large-contract-deployer.dev',
+  // Large NFT trader
+  '115506313796009276995072773495553577923872462746114834281855760647854325264663':
+    'large-nft-trader',
+  // Large NFT trader (dev)
+  '68671494614999045282544969156783145684018586914629850691182214915143043900453':
+    'large-nft-trader.dev',
+  // Noun forker
+  '77044991691308501276947077453618380236307246951439978663535817972735697388814': 'nouns-forker',
+  // Noun forker (dev)
+  '87114648479628679554879858936270603929868610217060348383220935508135278675371':
+    'nouns-forker.dev',
 };
 
 export type SetMetadata = {
@@ -30,14 +37,7 @@ export type SetMetadata = {
   description: string;
 };
 
-export const emptyMetadata = {
-  count: 0,
-  duneURL: '',
-  displayName: '',
-  description: '',
-};
-
-export const setMetadata: { [key: string]: SetMetadata } = {
+export const SET_METADATA: { [key: string]: SetMetadata } = {
   'nouns-forker': {
     count: 141,
     duneURL: 'https://dune.com/queries/3037583',
@@ -57,5 +57,12 @@ export const setMetadata: { [key: string]: SetMetadata } = {
     displayName: 'Large NFT Trader',
   },
 };
+
+if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
+  // Append the test sets
+  Object.keys(SET_METADATA).forEach((set) => {
+    SET_METADATA[`${set}.dev`] = SET_METADATA[set];
+  });
+}
 
 export default SETS;

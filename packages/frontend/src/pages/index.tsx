@@ -26,7 +26,8 @@ export default function Home() {
   const handleProveClick = useCallback(async () => {
     if (address) {
       // TODO: Add a timestamp to the message being signed?
-      const sig = await signMessageAsync({ message: username });
+      const message = username;
+      const sig = await signMessageAsync({ message });
 
       // Get the merkle proof from the backend
       const merkleProof = await getMerkleProof(address);
@@ -41,7 +42,7 @@ export default function Home() {
       );
 
       // Submit the proof to the backend
-      const proofHash = await submitProof({ proof, publicInput });
+      const proofHash = await submitProof({ proof, publicInput, message });
       setProofHash(proofHash);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
