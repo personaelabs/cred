@@ -70,93 +70,92 @@ export default function VerifyPage() {
 
   return (
     <>
-      <div className="flex h-full w-full  flex-col justify-center gap-4 px-4 py-3 md:px-0 md:py-6 ">
-        <div className="mb-4 flex justify-center">
-          <form className="w-full max-w-sm">
-            <div className="mb-6 md:flex md:items-center">
-              <div className="md:w-1/3">
-                <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                  handle
-                </label>
-              </div>
-              <div className="md:w-2/3">
-                <input
-                  className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                  type="text"
-                  value={handle}
-                  disabled
-                  style={{
-                    opacity: 1,
-                  }}
-                />
-              </div>
+      <div className="w-full max-w-sm">
+        <form>
+          <div className="mb-6 md:flex md:items-center">
+            <div className="md:w-1/3">
+              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                handle
+              </label>
             </div>
+            <div className="md:w-2/3">
+              <input
+                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
+                type="text"
+                value={handle}
+                disabled
+                style={{
+                  opacity: 1,
+                }}
+              />
+            </div>
+          </div>
 
-            <div className="mb-6 md:flex md:items-center">
-              <div className="md:w-1/3">
-                <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                  proof description
-                </label>
-              </div>
-              <div className="md:w-2/3">
-                <textarea
-                  className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                  wrap="soft"
-                  value={metadata?.description}
-                  disabled
-                  style={{
-                    opacity: 1,
-                  }}
-                />
-              </div>
+          <div className="mb-6 md:flex md:items-center">
+            <div className="md:w-1/3">
+              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                proof description
+              </label>
             </div>
+            <div className="md:w-2/3">
+              <textarea
+                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
+                wrap="soft"
+                value={metadata?.description}
+                disabled
+                style={{
+                  opacity: 1,
+                }}
+              />
+            </div>
+          </div>
 
-            <div className="mb-6 md:flex md:items-center">
-              <div className="md:w-1/3">
-                <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                  set count
-                </label>
-              </div>
-              <div className="md:w-2/3">
-                <input
-                  className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                  type="text"
-                  style={{
-                    opacity: 1,
-                  }}
-                  value={metadata?.count}
-                  disabled
-                />
-              </div>
+          <div className="mb-6 md:flex md:items-center">
+            <div className="md:w-1/3">
+              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                set count
+              </label>
             </div>
+            <div className="md:w-2/3">
+              <input
+                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
+                type="text"
+                style={{
+                  opacity: 1,
+                }}
+                value={metadata?.count}
+                disabled
+              />
+            </div>
+          </div>
 
-            <div className="mb-6 md:flex md:items-center">
-              <div className="md:w-1/3">
-                <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                  dune query
-                </label>
-              </div>
-              <div className="md:w-2/3">
-                <a href={metadata?.duneURL} target="_blank" rel="noreferrer" className="underline">
-                  {metadata?.duneURL}
-                </a>
-              </div>
+          <div className="mb-6 md:flex md:items-center">
+            <div className="md:w-1/3">
+              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                dune query
+              </label>
             </div>
+            <div className="md:w-2/3">
+              <a href={metadata?.duneURL} target="_blank" rel="noreferrer" className="underline">
+                {metadata?.duneURL}
+              </a>
+            </div>
+          </div>
 
-            <div className="mb-6 md:flex md:items-center">
-              <div className="md:w-1/3">
-                <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                  proof
-                </label>
-              </div>
-              <div className="md:w-2/3">
-                <a href={proofUrl} target="_blank" rel="noreferrer" className="underline">
-                  proof URL
-                </a>
-              </div>
+          <div className="mb-6 md:flex md:items-center">
+            <div className="md:w-1/3">
+              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
+                proof
+              </label>
             </div>
-          </form>
-        </div>
+            <div className="md:w-2/3">
+              <a href={proofUrl} target="_blank" rel="noreferrer" className="underline">
+                proof URL
+              </a>
+            </div>
+          </div>
+        </form>
+
         <div className="flex  justify-center">
           <MainButton
             message={verifying ? 'Verifying...' : verified ? 'Verified!' : 'Verify'}

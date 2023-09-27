@@ -31,7 +31,11 @@ export default function App({ Component, pageProps }: AppProps) {
       ></Script>
       <WagmiConfig config={config}>
         <RainbowKitProvider chains={chains}>
-          <Component {...pageProps} />
+          <div className="md:px-0 md:py-6">
+            <div className="mb-4 flex justify-center">
+              <Component {...pageProps} />
+            </div>
+          </div>
         </RainbowKitProvider>
       </WagmiConfig>
     </>
