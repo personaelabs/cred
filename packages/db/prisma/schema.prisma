@@ -14,6 +14,7 @@ model MembershipProof {
   proofHash   String   @id
   proof       String
   publicInput String
+  merkleRoot  String?
   message     String
   craetedAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

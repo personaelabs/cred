@@ -64,6 +64,10 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     res.status(400).send({ error: 'Invalid merkle root' });
     return;
   }
+
+  // Convert merkle root to hex
+  const merkleRootHex = `0x${merkleRoot.toString(16)}`;
+
   const msgHash = publicInputDeserialized.msgHash;
   // Check that the message hashes to msgHash
   if (msgHash.toString() !== Buffer.from(hashMessage(message, 'bytes')).toString()) {
@@ -79,6 +83,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     data: {
       message,
       proof,
+      merkleRoot: merkleRootHex,
       publicInput,
       proofHash,
     },
