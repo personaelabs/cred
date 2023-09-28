@@ -18,60 +18,65 @@ export default function VerifyPage() {
   const { verify, verifying } = useVerify();
 
   const [verified, setVerified] = useState<boolean | undefined>();
-  const [metadata, setMetadata] = useState<SetMetadata>();
-  const [handle, setHandle] = useState<string | undefined>();
-  const [proofUrl, setProofUrl] = useState<string>('');
+
   const [proof, setProof] = useState<FullProof | undefined>();
   const [msgHash, setMsgHash] = useState<string>('');
+
+  const [proofAttributes, setProofAttributes] = useState<Attribute[]>([]);
 
   const router = useRouter();
 
   useEffect(() => {
     // NOTE: temporary while working on the UI
-    // if (router.query.proofHash) {
-    //   const proofHash = router.query.proofHash as string;
-    //   setProofUrl(`${window.location.origin}/api/proofs/${proofHash}`);
-    //   if (!proof) {
-    //     getProof(toPrefixedHex(proofHash)).then((proof) => {
-    //       setProof(proof);
-    //       // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
-    //       const publicInput = PublicInput.deserialize(
-    //         Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-    //       );
-    //       // Get the merkle root from the public input
-    //       const groupRoot = publicInput.circuitPubInput.merkleRoot;
-    //       // msgHash will be used for verifying the proof
-    //       setMsgHash(publicInput.msgHash.toString('hex'));
-    //       setMetadata(SET_METADATA[ROOT_TO_SET[groupRoot.toString(10)]]);
-    //       setHandle(proof.message);
-    //     });
-    //   }
-    // }
-  }, [router.query.proofHash, getProof, proof]);
+    if (router.query.proofHash) {
+      const proofHash = router.query.proofHash as string;
+      if (!proof) {
+        getProof(toPrefixedHex(proofHash)).then((proof) => {
+          setProof(proof);
+          // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
+          const publicInput = PublicInput.deserialize(
+            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
+          );
+          // Get the merkle root from the public input
+          const groupRoot = publicInput.circuitPubInput.merkleRoot;
+          // msgHash will be used for verifying the proof
+          setMsgHash(publicInput.msgHash.toString('hex'));
 
-  // NOTE: temporary while iterating on UI
-  const attributes: Attribute[] = [
-    {
-      label: 'handle',
-      value: handle,
-    },
-    {
-      label: 'proof description',
-      value: metadata?.description,
-    },
-    {
-      label: 'set count',
-      value: metadata?.count,
-    },
-    {
-      label: 'dune query',
-      value: metadata?.duneURL,
-    },
-    {
-      label: 'proof',
-      value: proofUrl,
-    },
-  ];
+          const metadata = SET_METADATA[ROOT_TO_SET[groupRoot.toString(10)]];
+
+          // NOTE: order matters
+          setProofAttributes([
+            {
+              label: 'handle',
+              type: 'text',
+              value: proof.message,
+            },
+            {
+              label: 'proof description',
+              type: 'text',
+
+              value: metadata?.description,
+            },
+            {
+              label: 'set count',
+              type: 'text',
+              value: metadata?.count,
+            },
+            {
+              label: 'dune query',
+              type: 'url',
+              value: metadata?.duneURL,
+            },
+            {
+              label: 'proof',
+              type: 'url',
+              value: `${window.location.origin}/api/proofs/${proofHash}`,
+            },
+          ]);
+        });
+      }
+    }
+  }, [router.query.proofHash, getProof, proof]);
 
   const handleVerifyClick = useCallback(async () => {
     if (proof) {
@@ -93,7 +98,7 @@ export default function VerifyPage() {
   return (
     <>
       <div className="w-full max-w-sm">
-        <AttributeCard attributes={attributes} />;
+        <AttributeCard attributes={proofAttributes} />
         <div className="flex  justify-center">
           <MainButton
             message={verifying ? 'Verifying...' : verified ? 'Verified!' : 'Verify'}
