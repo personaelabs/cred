@@ -11,6 +11,7 @@ import { ROOT_TO_SET, SET_METADATA, SetMetadata } from '@/lib/sets';
 import { useRouter } from 'next/router';
 import { FullProof } from '@/types';
 import { hashMessage } from 'viem';
+import { Attribute, AttributeCard } from '@/components/global/AttributeCard';
 
 export default function VerifyPage() {
   const getProof = useGetProof();
@@ -26,30 +27,51 @@ export default function VerifyPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (router.query.proofHash) {
-      const proofHash = router.query.proofHash as string;
-      setProofUrl(`${window.location.origin}/api/proofs/${proofHash}`);
-
-      if (!proof) {
-        getProof(toPrefixedHex(proofHash)).then((proof) => {
-          setProof(proof);
-
-          // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
-          const publicInput = PublicInput.deserialize(
-            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-          );
-          // Get the merkle root from the public input
-          const groupRoot = publicInput.circuitPubInput.merkleRoot;
-
-          // msgHash will be used for verifying the proof
-          setMsgHash(publicInput.msgHash.toString('hex'));
-
-          setMetadata(SET_METADATA[ROOT_TO_SET[groupRoot.toString(10)]]);
-          setHandle(proof.message);
-        });
-      }
-    }
+    // NOTE: temporary while working on the UI
+    // if (router.query.proofHash) {
+    //   const proofHash = router.query.proofHash as string;
+    //   setProofUrl(`${window.location.origin}/api/proofs/${proofHash}`);
+    //   if (!proof) {
+    //     getProof(toPrefixedHex(proofHash)).then((proof) => {
+    //       setProof(proof);
+    //       // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
+    //       const publicInput = PublicInput.deserialize(
+    //         Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
+    //       );
+    //       // Get the merkle root from the public input
+    //       const groupRoot = publicInput.circuitPubInput.merkleRoot;
+    //       // msgHash will be used for verifying the proof
+    //       setMsgHash(publicInput.msgHash.toString('hex'));
+    //       setMetadata(SET_METADATA[ROOT_TO_SET[groupRoot.toString(10)]]);
+    //       setHandle(proof.message);
+    //     });
+    //   }
+    // }
   }, [router.query.proofHash, getProof, proof]);
+
+  // NOTE: temporary while iterating on UI
+  const attributes: Attribute[] = [
+    {
+      label: 'handle',
+      value: handle,
+    },
+    {
+      label: 'proof description',
+      value: metadata?.description,
+    },
+    {
+      label: 'set count',
+      value: metadata?.count,
+    },
+    {
+      label: 'dune query',
+      value: metadata?.duneURL,
+    },
+    {
+      label: 'proof',
+      value: proofUrl,
+    },
+  ];
 
   const handleVerifyClick = useCallback(async () => {
     if (proof) {
@@ -71,91 +93,7 @@ export default function VerifyPage() {
   return (
     <>
       <div className="w-full max-w-sm">
-        <form>
-          <div className="mb-6 md:flex md:items-center">
-            <div className="md:w-1/3">
-              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                handle
-              </label>
-            </div>
-            <div className="md:w-2/3">
-              <input
-                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                type="text"
-                value={handle}
-                disabled
-                style={{
-                  opacity: 1,
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="mb-6 md:flex md:items-center">
-            <div className="md:w-1/3">
-              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                proof description
-              </label>
-            </div>
-            <div className="md:w-2/3">
-              <textarea
-                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                wrap="soft"
-                value={metadata?.description}
-                disabled
-                style={{
-                  opacity: 1,
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="mb-6 md:flex md:items-center">
-            <div className="md:w-1/3">
-              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                set count
-              </label>
-            </div>
-            <div className="md:w-2/3">
-              <input
-                className="w-full appearance-none rounded border-2 border-gray-200 bg-gray-200 px-4 py-2 leading-tight text-gray-700 focus:border-purple-500 focus:bg-white focus:outline-none"
-                type="text"
-                style={{
-                  opacity: 1,
-                }}
-                value={metadata?.count}
-                disabled
-              />
-            </div>
-          </div>
-
-          <div className="mb-6 md:flex md:items-center">
-            <div className="md:w-1/3">
-              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                dune query
-              </label>
-            </div>
-            <div className="md:w-2/3">
-              <a href={metadata?.duneURL} target="_blank" rel="noreferrer" className="underline">
-                {metadata?.duneURL}
-              </a>
-            </div>
-          </div>
-
-          <div className="mb-6 md:flex md:items-center">
-            <div className="md:w-1/3">
-              <label className="mb-1 block pr-4 font-bold text-gray-500 md:mb-0 md:text-right">
-                proof
-              </label>
-            </div>
-            <div className="md:w-2/3">
-              <a href={proofUrl} target="_blank" rel="noreferrer" className="underline">
-                proof URL
-              </a>
-            </div>
-          </div>
-        </form>
-
+        <AttributeCard attributes={attributes} />;
         <div className="flex  justify-center">
           <MainButton
             message={verifying ? 'Verifying...' : verified ? 'Verified!' : 'Verify'}
