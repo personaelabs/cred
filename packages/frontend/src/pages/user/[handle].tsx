@@ -29,6 +29,20 @@ export default function UserPage() {
           value: handle,
         });
 
+        // TODO: calculate actual intersection on the fly
+        // for now, (while single badge), just use the first proof
+        const firstProof: any = data[0];
+        const publicInput = PublicInput.deserialize(
+          Buffer.from(firstProof.publicInput.replace('0x', ''), 'hex'),
+        );
+        const groupRoot = publicInput.circuitPubInput.merkleRoot;
+        const set = ROOT_TO_SET[groupRoot.toString()];
+        _cardAttributes.push({
+          label: 'anonymity set size',
+          type: 'text',
+          value: SET_METADATA[set].count,
+        });
+
         data.forEach((proof: any) => {
           const publicInput = PublicInput.deserialize(
             Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
@@ -46,7 +60,7 @@ export default function UserPage() {
         setCardAttributes(_cardAttributes);
       });
     }
-  }, [router.query.handle]);
+  }, [handle]);
 
   return (
     <>
