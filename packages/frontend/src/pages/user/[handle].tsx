@@ -1,4 +1,5 @@
 import { Attribute, AttributeCard } from '@/components/global/AttributeCard';
+import { useGetSetIntersection } from '@/hooks/useGetSetIntersection';
 import { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import axios from 'axios';
@@ -7,6 +8,8 @@ import { useEffect, useState } from 'react';
 
 export default function UserPage() {
   const router = useRouter();
+
+  const getSetIntersection = useGetSetIntersection();
 
   const [cardAttributes, setCardAttributes] = useState<Attribute[]>([]);
 
@@ -20,47 +23,52 @@ export default function UserPage() {
   };
 
   useEffect(() => {
-    if (handle) {
-      getUserProofs(handle).then((data) => {
-        let _cardAttributes: Attribute[] = [];
-        _cardAttributes.push({
-          label: 'handle',
-          type: 'text',
-          value: handle,
-        });
+    const populateCardAttributes = async (handle: string) => {
+      let _cardAttributes: Attribute[] = [];
+      _cardAttributes.push({
+        label: 'handle',
+        type: 'text',
+        value: handle,
+      });
 
-        // TODO: calculate actual intersection on the fly
-        // for now, (while single badge), just use the first proof
-        const firstProof: any = data[0];
+      const data = await getUserProofs(handle);
+      const sets = data.map((proof: any) => {
         const publicInput = PublicInput.deserialize(
-          Buffer.from(firstProof.publicInput.replace('0x', ''), 'hex'),
+          Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
+        );
+        const groupRoot = publicInput.circuitPubInput.merkleRoot;
+        return ROOT_TO_SET[groupRoot.toString()];
+      });
+
+      const intersectionCount = await getSetIntersection(sets);
+      _cardAttributes.push({
+        label: 'anonymity set size',
+        type: 'text',
+        value: intersectionCount,
+      });
+
+      data.forEach((proof: any) => {
+        // TODO: we're computing sets twice... above and here
+        const publicInput = PublicInput.deserialize(
+          Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
         );
         const groupRoot = publicInput.circuitPubInput.merkleRoot;
         const set = ROOT_TO_SET[groupRoot.toString()];
+
         _cardAttributes.push({
-          label: 'anonymity set size',
-          type: 'text',
-          value: SET_METADATA[set].count,
+          label: SET_METADATA[set].displayName,
+          type: 'url',
+          value: `${window.location.origin}/proof/${proof.proofHash}`,
         });
-
-        data.forEach((proof: any) => {
-          const publicInput = PublicInput.deserialize(
-            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-          );
-          const groupRoot = publicInput.circuitPubInput.merkleRoot;
-          const set = ROOT_TO_SET[groupRoot.toString()];
-
-          _cardAttributes.push({
-            label: SET_METADATA[set].displayName,
-            type: 'url',
-            value: `${window.location.origin}/proof/${proof.proofHash}`,
-          });
-        });
-
-        setCardAttributes(_cardAttributes);
       });
+
+      setCardAttributes(_cardAttributes);
+    };
+
+    if (handle && cardAttributes.length === 0) {
+      populateCardAttributes(handle).catch(console.error);
     }
-  }, [handle]);
+  }, [handle, getSetIntersection, cardAttributes.length]);
 
   return (
     <>
