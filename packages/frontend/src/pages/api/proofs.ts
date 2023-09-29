@@ -44,18 +44,18 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   const proofBytes = Buffer.from(proof.replace('0x', ''), 'hex');
   const publicInputBytes = Buffer.from(publicInput.replace('0x', ''), 'hex');
 
-  if (!verifiedInitialized) {
-    // Initialize the verifier's wasm
-    await verifier.initWasm();
-    verifiedInitialized = true;
-  }
+  // if (!verifiedInitialized) {
+  //   // Initialize the verifier's wasm
+  //   await verifier.initWasm();
+  //   verifiedInitialized = true;
+  // }
 
-  // Verify the proof
-  const verified = await verifier.verify(proofBytes, publicInputBytes);
-  if (!verified) {
-    res.status(400).send({ error: 'Invalid proof' });
-    return;
-  }
+  // // Verify the proof
+  // const verified = await verifier.verify(proofBytes, publicInputBytes);
+  // if (!verified) {
+  //   res.status(400).send({ error: 'Invalid proof' });
+  //   return;
+  // }
 
   const publicInputDeserialized = PublicInput.deserialize(publicInputBytes);
   const merkleRoot = publicInputDeserialized.circuitPubInput.merkleRoot;
