@@ -1,4 +1,9 @@
-const SETS = ['nouns-forker', 'large-contract-deployer', 'medium-nft-trader'];
+const SETS = [
+  'nouns-forker',
+  'large-contract-deployer',
+  'medium-nft-trader',
+  'beacon-genesis-depositor',
+];
 
 if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
   // Append the test sets
@@ -55,6 +60,9 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
     duneURL: 'https://dune.com/queries/3036968',
     description: 'Made an NFT purchase > $150k',
     displayName: 'Large NFT Trader',
+  },
+  'beacon-genesis-depositor': {
+    duneURL: 'https://dune.com/queries/3068965',
   },
 };
 
