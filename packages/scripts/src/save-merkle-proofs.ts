@@ -90,7 +90,7 @@ csvFiles.forEach((csvFile) => {
   const fileName = csvFile.split('.')[0];
 
   // Save the merkle proofs for the tree that includes the dev accounts
-  saveMerkleProofs(path.join(__dirname, `../sets/${csvFile}`), `${fileName}.dev.`, true);
+  saveMerkleProofs(path.join(__dirname, `../sets/${csvFile}`), `${fileName}.dev`, true);
 
   // Save the merkle proofs for the tree that doesn't include the dev accounts
   saveMerkleProofs(path.join(__dirname, `../sets/${csvFile}`), fileName, false);
