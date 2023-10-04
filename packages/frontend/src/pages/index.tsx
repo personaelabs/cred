@@ -66,7 +66,7 @@ export default function Home() {
             value={username}
             className="border-b-2 bg-transparent"
             type="text"
-            placeholder="@username"
+            placeholder="username"
           ></input>
         </div>
         <div className="mb-2 flex justify-center">
