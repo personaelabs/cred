@@ -3,7 +3,6 @@ import axios from 'axios';
 export const useGetCombinedAnonSet = () => {
   // NOTE: eventually this should use caching on the backend
   const getSetUnion = async (sets: string[]): Promise<number> => {
-    let intersectionAddresses: Set<string> = new Set();
     let unionAddresses: Set<string> = new Set();
     for (const set of sets) {
       const res = await axios.get(`/${set}.json`);
