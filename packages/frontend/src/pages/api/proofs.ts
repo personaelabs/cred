@@ -7,6 +7,7 @@ import {
   PublicInput,
   defaultAddressMembershipVConfig,
 } from '@personaelabs/spartan-ecdsa';
+import { ROOT_TO_SET } from '@/lib/sets';
 
 const concatHex = (hex1: Hex, hex2: Hex): Hex => {
   return `0x${hex1.replace('0x', '')}${hex2.replace('0x', '')}`;
@@ -18,6 +19,7 @@ const verifier = new MembershipVerifier({
 });
 let verifiedInitialized = false;
 
+// TODO: don't copy/paste this b/w ROOT_TO_SET (copy over)
 // Copied-pasted Merkle roots (from the JSON files)
 const VALID_ROOTS: bigint[] = [
   // Large contract deployer
@@ -32,6 +34,14 @@ const VALID_ROOTS: bigint[] = [
   '77044991691308501276947077453618380236307246951439978663535817972735697388814',
   // Noun forker (dev)
   '87114648479628679554879858936270603929868610217060348383220935508135278675371',
+  // Beacon genesis depositor
+  '72157638181807266957086961040251077246497044206384217064091112703078373626008',
+  // Beacon genesis depositor (dev)
+  '50777731812771869834226667887628150367101335181345852537964298579214415605348',
+  // Stateful Book funder
+  '6690976376652039843228206295576365750228117387661294120304573887453254943085',
+  // Stateful Book funder (dev)
+  '88250032628225067653553032155206207715967121794154946393982605502187531422469',
 ].map((root) => BigInt(root));
 
 export default async function submitProof(req: NextApiRequest, res: NextApiResponse) {

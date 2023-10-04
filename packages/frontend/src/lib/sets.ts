@@ -2,7 +2,8 @@ const SETS = [
   'nouns-forker',
   'large-contract-deployer',
   'medium-nft-trader',
-  'beacon-genesis-depositor',
+  'beacon-genesis-staker',
+  'stateful-book-funder',
 ];
 
 if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
@@ -33,6 +34,18 @@ export const ROOT_TO_SET: { [key: string]: string } = {
   // Noun forker (dev)
   '87114648479628679554879858936270603929868610217060348383220935508135278675371':
     'nouns-forker.dev',
+  // Beacon genesis depositor
+  '72157638181807266957086961040251077246497044206384217064091112703078373626008':
+    'beacon-genesis-staker',
+  // Beacon genesis depositor (dev)
+  '50777731812771869834226667887628150367101335181345852537964298579214415605348':
+    'beacon-genesis-staker.dev',
+  // Stateful Book funder
+  '6690976376652039843228206295576365750228117387661294120304573887453254943085':
+    'stateful-book-funder',
+  // Stateful Book funder (dev)
+  '88250032628225067653553032155206207715967121794154946393982605502187531422469':
+    'stateful-book-funder.dev',
 };
 
 export type SetMetadata = {
@@ -58,11 +71,20 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
   'medium-nft-trader': {
     count: 8708,
     duneURL: 'https://dune.com/queries/3036968',
-    description: 'Made an NFT purchase > $150k',
+    description: 'Made >=1 NFT purchase over $150k',
     displayName: 'Large NFT Trader',
   },
-  'beacon-genesis-depositor': {
+  'beacon-genesis-staker': {
+    count: 2780,
     duneURL: 'https://dune.com/queries/3068965',
+    description: 'Was a beacon chain genesis staker',
+    displayName: 'Beacon Chain Genesis Staker',
+  },
+  'stateful-book-funder': {
+    count: 201,
+    duneURL: 'https://dune.com/queries/3074856',
+    description: 'Purchased a Stateful works Beacon Book Genesis Edition',
+    displayName: 'Stateful Book Genesis Funder',
   },
 };
 
