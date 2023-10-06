@@ -1,11 +1,10 @@
-import { useAccount, usePublicClient, useSignMessage } from 'wagmi';
+import { useAccount, useSignMessage } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { MainButton } from '@/components/MainButton';
 import { useProve } from '@/hooks/useProve';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
-import { toPrefixedHex } from '@/lib/utils';
 import SETS from '@/lib/sets';
 
 export default function Home() {
@@ -33,13 +32,7 @@ export default function Home() {
       const merkleProof = await getMerkleProof(address);
 
       // Prove!
-      const fullProof = await prove(sig, username, merkleProof);
-
-      // Convert the proof and the public input into hex format
-      const proof = toPrefixedHex(Buffer.from(fullProof.proof).toString('hex'));
-      const publicInput = toPrefixedHex(
-        Buffer.from(fullProof.publicInput.serialize()).toString('hex'),
-      );
+      const { proof, publicInput } = await prove(sig, username, merkleProof);
 
       // Submit the proof to the backend
       const proofHash = await submitProof({ proof, publicInput, message });

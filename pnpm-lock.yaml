@@ -25,8 +25,8 @@ importers:
   packages/frontend:
     dependencies:
       '@personaelabs/spartan-ecdsa':
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: ^2.3.0
+        version: 2.3.0
       '@prisma/client':
         specifier: ^5.3.1
         version: 5.3.1(prisma@5.3.1)
@@ -45,6 +45,9 @@ importers:
       axios:
         specifier: ^1.5.0
         version: 1.5.0
+      comlink:
+        specifier: ^4.4.1
+        version: 4.4.1
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -530,8 +533,8 @@ packages:
       snarkjs: 0.5.0
     dev: false
 
-  /@personaelabs/spartan-ecdsa@2.2.0:
-    resolution: {integrity: sha512-MnV99k6sag1eOgtmd40Zp7oVl/6rmw/uzvduZFTbtpVHo4QMMo6Duw9pDHuzKgPgP6bcEw6VhnhPb4qOiTrjnw==}
+  /@personaelabs/spartan-ecdsa@2.3.0:
+    resolution: {integrity: sha512-E5FTZxLzR9WqkmP+8rpUfVGUp51/q4x4d6+cmUbo5Z4+BvqAmDaC1oU5CTTlghq0U1lvY6q2Xq7OwLs8L3YEfg==}
     dependencies:
       '@ethereumjs/util': 8.1.0
       '@zk-kit/incremental-merkle-tree': 1.1.0
@@ -2397,6 +2400,10 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
+    dev: false
+
+  /comlink@4.4.1:
+    resolution: {integrity: sha512-+1dlx0aY5Jo1vHy/tSsIGpSkN4tS9rZSW8FIhG0JH/crs9wwweswIo/POr451r7bZww3hFbPAKnTpimzL/mm4Q==}
     dev: false
 
   /commander@2.20.3:

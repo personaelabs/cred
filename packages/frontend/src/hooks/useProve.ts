@@ -1,40 +1,40 @@
-import {
-  MembershipProver,
-  MerkleProof,
-  NIZK,
-  PublicInput,
-  defaultAddressMembershipPConfig,
-} from '@personaelabs/spartan-ecdsa';
+import { MerkleProof } from '@personaelabs/spartan-ecdsa';
 import { useEffect, useMemo, useState } from 'react';
-import { hashMessage } from 'viem';
+import { Hex, hashMessage } from 'viem';
+import { Prover } from '@/lib/prover';
+import * as Comlink from 'comlink';
+
+let worker: Comlink.Remote<typeof Prover>;
 
 export const useProve = () => {
   const [proving, setProving] = useState<boolean>(false);
-  const prover = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return new MembershipProver(defaultAddressMembershipPConfig);
-    }
-  }, []);
 
   useEffect(() => {
-    if (prover) {
-      prover.initWasm();
-    }
-  }, [prover]);
+    // Initialize the web worker
+    worker = Comlink.wrap(new Worker(new URL('../lib/prover.ts', import.meta.url)));
+    worker.prepare();
+  }, []);
 
-  const prove = async (sig: string, message: string, merkleProof: MerkleProof): Promise<NIZK> => {
+  const prove = async (
+    sig: string,
+    message: string,
+    merkleProof: MerkleProof,
+  ): Promise<{
+    proof: Hex;
+    publicInput: Hex;
+  }> => {
     setProving(true);
 
-    if (!prover) {
+    if (!worker) {
       throw new Error('Prover not initialized');
     }
 
-    await prover.initWasm();
     const msgHash = hashMessage(message, 'bytes');
-    const proof = await prover.prove(sig, Buffer.from(msgHash), merkleProof);
+    // Generate the proof in the web worker
+    const { proof, publicInput } = await worker.prove(sig, Buffer.from(msgHash), merkleProof);
     setProving(false);
 
-    return proof;
+    return { proof, publicInput };
   };
 
   return { prove, proving };
