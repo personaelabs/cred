@@ -13,12 +13,8 @@ const concatHex = (hex1: Hex, hex2: Hex): Hex => {
   return `0x${hex1.replace('0x', '')}${hex2.replace('0x', '')}`;
 };
 
-// We use a circuit with a smaller tree than the default circuit.
-// The default circuit has 2^20 leaves and the circuit used here has 2^15 leaves.
-// We use a smaller circuit to make the merkle tree construction faster.
 const verifier = new MembershipVerifier({
-  circuit: 'https://storage.googleapis.com/personae-proving-keys/creddd/addr_membership.circuit',
-  enableProfiler: true,
+  ...defaultAddressMembershipVConfig,
   useRemoteCircuit: true,
 });
 let verifiedInitialized = false;

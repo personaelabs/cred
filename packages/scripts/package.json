@@ -1,0 +1,21 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "save-merkle-proofs": "ts-node ./src/save-merkle-proofs.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "5.2.2"
+  },
+  "dependencies": {
+    "@personaelabs/spartan-ecdsa": "^2.1.4",
+    "csv-parse": "^5.5.0",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1"
+  }
+}

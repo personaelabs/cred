@@ -1,5 +1,5 @@
 import { FullProof } from '@/types';
-import { MembershipVerifier } from '@personaelabs/spartan-ecdsa';
+import { MembershipVerifier, defaultAddressMembershipVConfig } from '@personaelabs/spartan-ecdsa';
 import { useEffect, useMemo, useState } from 'react';
 
 export const useVerify = () => {
@@ -7,15 +7,7 @@ export const useVerify = () => {
 
   const verifier = useMemo(() => {
     if (typeof window !== 'undefined') {
-      // We use a circuit with a smaller tree than the default circuit.
-      // The default circuit has 2^20 leaves and the circuit used here has 2^15 leaves.
-      // We use a smaller circuit to make the merkle tree construction faster.
-      return new MembershipVerifier({
-        circuit:
-          'https://storage.googleapis.com/personae-proving-keys/creddd/addr_membership.circuit',
-        enableProfiler: true,
-        useRemoteCircuit: true,
-      });
+      return new MembershipVerifier(defaultAddressMembershipVConfig);
     }
   }, []);
 

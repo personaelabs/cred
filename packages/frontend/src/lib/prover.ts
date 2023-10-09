@@ -3,18 +3,16 @@
 // prevent the UI from freezing.
 
 import * as Comlink from 'comlink';
-import { MembershipProver, MerkleProof } from '@personaelabs/spartan-ecdsa';
+import {
+  MembershipProver,
+  MerkleProof,
+  defaultAddressMembershipPConfig,
+} from '@personaelabs/spartan-ecdsa';
 import { toPrefixedHex } from './utils';
 import { Hex } from 'viem';
 
-// We use a circuit with a smaller tree than the default circuit.
-// The default circuit has 2^20 leaves and the circuit used here has 2^15 leaves.
-// We use a smaller circuit to make the merkle tree construction faster.
 const prover = new MembershipProver({
-  witnessGenWasm:
-    'https://storage.googleapis.com/personae-proving-keys/creddd/addr_membership.wasm',
-  circuit: 'https://storage.googleapis.com/personae-proving-keys/creddd/addr_membership.circuit',
-  enableProfiler: true,
+  ...defaultAddressMembershipPConfig,
   useRemoteCircuit: true,
 });
 
