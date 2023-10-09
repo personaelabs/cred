@@ -1,2 +1,5 @@
 node_modules/
 .env
+
+addr_membership_js/
+addr_membership.r1cs
