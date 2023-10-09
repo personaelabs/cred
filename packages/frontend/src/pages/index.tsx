@@ -6,6 +6,7 @@ import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
+import { Hex } from 'viem';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
@@ -33,8 +34,20 @@ export default function Home() {
       // Get the merkle proof from the backend
       const merkleProof = await getMerkleProof(address);
 
-      // Prove!
-      const { proof, publicInput } = await prove(sig, username, merkleProof);
+      let proof: Hex;
+      let publicInput: Hex;
+      // When NEXT_PUBLIC_USE_TEST_PROOF is true, we skip the proving step and use dummy proof.
+      // The backend is aware of this dummy proof and will accept it.
+      // This is useful for testing the UI.
+      if (process.env.NEXT_PUBLIC_USE_TEST_PROOF === 'true') {
+        proof = '0x';
+        publicInput = '0x';
+      } else {
+        // Prove!
+        const result = await prove(sig, username, merkleProof);
+        proof = result.proof;
+        publicInput = result.publicInput;
+      }
 
       // Submit the proof to the backend
       const proofHash = await submitProof({ proof, publicInput, message });
