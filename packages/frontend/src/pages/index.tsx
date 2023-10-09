@@ -82,10 +82,22 @@ export default function Home() {
         </div>
         <div className="mb-2 flex justify-center">
           <MainButton
+            message=""
             handler={handleProveClick}
-            message={proving ? 'Proving...' : 'Prove'}
             disabled={isConnected == false}
-          ></MainButton>
+            loading={proving}
+          >
+            <p>
+              {proving ? 'Proving' : 'Prove'}
+              {proving && (
+                <>
+                  <span className="dot1">.</span>
+                  <span className="dot2">.</span>
+                  <span className="dot3">.</span>
+                </>
+              )}
+            </p>
+          </MainButton>
         </div>
         <div className="flex  justify-center">
           {proofHash && (
