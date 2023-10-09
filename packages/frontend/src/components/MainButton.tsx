@@ -1,5 +1,4 @@
-import { ReactNode, useEffect } from 'react';
-import Spinner from './global/Spinner';
+import { ReactNode } from 'react';
 import { BLUE } from '@/lib/colors';
 
 export const MainButton = (props: {
@@ -10,11 +9,12 @@ export const MainButton = (props: {
   disabled?: boolean;
   children?: ReactNode;
 }) => {
-  const { color, message, loading, handler, disabled, children } = props;
+  const { color, message, loading, handler, disabled } = props;
 
   return (
     <button
       className="pointer-cursor rounded-xl px-4 py-2.5 font-bold text-white transition-all hover:scale-105 active:scale-100"
+      disabled={disabled}
       style={{
         backgroundColor: color ? color : BLUE,
         // opacity: disabled ? 0.5 : 1,
@@ -22,7 +22,14 @@ export const MainButton = (props: {
       }}
       onClick={handler}
     >
-      {children ? children : loading ? <Spinner /> : <p>{message}</p>}
+      {message}
+      {loading && (
+        <>
+          <span className="dot1">.</span>
+          <span className="dot2">.</span>
+          <span className="dot3">.</span>
+        </>
+      )}
     </button>
   );
 };
