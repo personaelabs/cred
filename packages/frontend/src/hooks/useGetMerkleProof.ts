@@ -33,8 +33,6 @@ export const useGetMerkleProof = (jsonFileName: string) => {
       root,
     };
 
-    console.log({ merkleProof });
-
     return merkleProof;
   };
 
