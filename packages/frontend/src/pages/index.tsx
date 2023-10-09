@@ -12,13 +12,14 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
   // The set to prove membership
   const [selectedSet, setSelectedSet] = useState(SETS[0]);
+  const [proving, setProving] = useState(false);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove, proving } = useProve();
+  const { prove } = useProve();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof(selectedSet);
 
@@ -28,6 +29,7 @@ export default function Home() {
       const message = username;
       const sig = await signMessageAsync({ message });
 
+      setProving(true);
       // Get the merkle proof from the backend
       const merkleProof = await getMerkleProof(address);
 
@@ -37,6 +39,7 @@ export default function Home() {
       // Submit the proof to the backend
       const proofHash = await submitProof({ proof, publicInput, message });
       setProofHash(proofHash);
+      setProving(false);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
 

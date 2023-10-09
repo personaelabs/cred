@@ -7,8 +7,6 @@ import * as Comlink from 'comlink';
 let worker: Comlink.Remote<typeof Prover>;
 
 export const useProve = () => {
-  const [proving, setProving] = useState<boolean>(false);
-
   useEffect(() => {
     // Initialize the web worker
     worker = Comlink.wrap(new Worker(new URL('../lib/prover.ts', import.meta.url)));
@@ -23,8 +21,6 @@ export const useProve = () => {
     proof: Hex;
     publicInput: Hex;
   }> => {
-    setProving(true);
-
     if (!worker) {
       throw new Error('Prover not initialized');
     }
@@ -32,10 +28,9 @@ export const useProve = () => {
     const msgHash = hashMessage(message, 'bytes');
     // Generate the proof in the web worker
     const { proof, publicInput } = await worker.prove(sig, Buffer.from(msgHash), merkleProof);
-    setProving(false);
 
     return { proof, publicInput };
   };
 
-  return { prove, proving };
+  return { prove };
 };
