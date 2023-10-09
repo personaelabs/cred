@@ -3,19 +3,7 @@ use ark_ff::{Field, PrimeField};
 use ark_secp256k1::Affine;
 use ark_secp256k1::Fq;
 use ark_secp256k1::Fr;
-use ethers::types::H160;
 use num_bigint::BigUint;
-
-pub fn bytes_le_to_bits(bytes: &[u8]) -> Vec<u8> {
-    let mut bits = Vec::new();
-    for &byte in bytes {
-        for i in (0..8).rev() {
-            let bit = (byte >> i) & 1;
-            bits.push(bit);
-        }
-    }
-    bits
-}
 
 pub fn efficient_ecdsa(msg_hash: BigUint, r: Fq, is_y_odd: bool) -> (Affine, Affine) {
     let g = Affine::generator();
@@ -43,12 +31,27 @@ pub fn efficient_ecdsa(msg_hash: BigUint, r: Fq, is_y_odd: bool) -> (Affine, Aff
     (u, t)
 }
 
+pub fn verify_efficient_ecdsa(
+    msg_hash: BigUint,
+    r: Fq,
+    is_y_odd: bool,
+    t: Affine,
+    u: Affine,
+) -> bool {
+    let (expected_u, expected_t) = efficient_ecdsa(msg_hash, r, is_y_odd);
+
+    t == expected_t && u == expected_u
+}
+
+#[cfg(test)]
 pub mod test_utils {
     use super::*;
+    use ethers::types::H160;
     use ethers::{
         prelude::*,
         utils::{hash_message, secret_key_to_address},
     };
+    use k256::ecdsa::RecoveryId;
     use k256::{ecdsa::SigningKey, elliptic_curve::ScalarPrimitive, SecretKey};
 
     pub struct EffEcdsaInput {
@@ -60,7 +63,7 @@ pub mod test_utils {
         pub address: H160,
     }
 
-    pub fn mock_eff_ecdsa_input(priv_key: u64) -> EffEcdsaInput {
+    pub fn mock_sig(priv_key: u64) -> (Fr, Fq, bool, BigUint, Affine, H160) {
         let signing_key = SigningKey::from(SecretKey::new(ScalarPrimitive::from(priv_key)));
         let g = Affine::generator();
         let pub_key = (g * Fr::from(priv_key)).into_affine();
@@ -77,10 +80,17 @@ pub mod test_utils {
         sig.s.to_big_endian(&mut s);
         sig.r.to_big_endian(&mut r);
 
+        let is_y_odd = sig.v == 27;
+
         let s = Fr::from(BigUint::from_bytes_be(&s));
         let r = Fq::from(BigUint::from_bytes_be(&r));
 
-        let (u, t) = efficient_ecdsa(msg_hash_bigint.clone(), r, false);
+        (s, r, is_y_odd, msg_hash_bigint, pub_key, address)
+    }
+
+    pub fn mock_eff_ecdsa_input(priv_key: u64) -> EffEcdsaInput {
+        let (s, r, is_y_odd, msg_hash_bigint, pub_key, address) = mock_sig(priv_key);
+        let (u, t) = efficient_ecdsa(msg_hash_bigint.clone(), r, is_y_odd);
 
         EffEcdsaInput {
             s,

@@ -6,6 +6,7 @@ import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
+import { SubmitData } from '@/types';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
@@ -32,10 +33,16 @@ export default function Home() {
       const merkleProof = await getMerkleProof(address);
 
       // Prove!
-      const { proof, publicInput } = await prove(sig, username, merkleProof);
+      const proof = await prove(sig, username, merkleProof);
 
       // Submit the proof to the backend
-      const proofHash = await submitProof({ proof, publicInput, message });
+
+      const data: SubmitData = {
+        proof,
+        message,
+      };
+
+      const proofHash = await submitProof(data);
       setProofHash(proofHash);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);

@@ -13,7 +13,8 @@
     "lint": "pnpm -r lint",
     "prepare": "pnpm -F db run build",
     "studio": "pnpm -F db run studio",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "compile-circuit": "cd ./packages/circuit && wasm-pack build --release --target bundler && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next"
   },
   "devDependencies": {
     "prettier": "^3.0.3"
