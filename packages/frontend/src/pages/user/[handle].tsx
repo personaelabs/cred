@@ -40,12 +40,13 @@ export default function UserPage() {
         return ROOT_TO_SET[groupRoot.toString()];
       });
 
-      const intersectionCount = await getCombinedAnonSet(sets);
-      _cardAttributes.push({
-        label: 'anonymity set size',
-        type: 'text',
-        value: intersectionCount,
-      });
+      // NOTE temporarily remove this indicator as 'union' isn't quite accurate
+      // const intersectionCount = await getCombinedAnonSet(sets);
+      // _cardAttributes.push({
+      //   label: 'anonymity set size',
+      //   type: 'text',
+      //   value: intersectionCount,
+      // });
 
       data.forEach((proof: any) => {
         // TODO: we're computing sets twice... above and here
