@@ -35,7 +35,7 @@ export default function Home() {
       const { proof, publicInput } = await prove(sig, username, merkleProof);
 
       // Submit the proof to the backend
-      const proofHash = await submitProof({ proof, publicInput, message });
+      const proofHash = await submitProof({ proof, publicInput, message, proofVersion: 'v2' });
       setProofHash(proofHash);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
