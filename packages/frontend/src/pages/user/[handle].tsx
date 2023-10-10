@@ -1,5 +1,5 @@
 import { Attribute, AttributeCard } from '@/components/global/AttributeCard';
-import { useGetSetIntersection } from '@/hooks/useGetSetIntersection';
+import { useGetCombinedAnonSet } from '@/hooks/useGetCombinedAnonSet';
 import { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import axios from 'axios';
@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 export default function UserPage() {
   const router = useRouter();
 
-  const getSetIntersection = useGetSetIntersection();
+  const getCombinedAnonSet = useGetCombinedAnonSet();
 
   const [cardAttributes, setCardAttributes] = useState<Attribute[]>([]);
 
@@ -40,12 +40,13 @@ export default function UserPage() {
         return ROOT_TO_SET[groupRoot.toString()];
       });
 
-      const intersectionCount = await getSetIntersection(sets);
-      _cardAttributes.push({
-        label: 'anonymity set size',
-        type: 'text',
-        value: intersectionCount,
-      });
+      // NOTE temporarily remove this indicator as 'union' isn't quite accurate
+      // const intersectionCount = await getCombinedAnonSet(sets);
+      // _cardAttributes.push({
+      //   label: 'anonymity set size',
+      //   type: 'text',
+      //   value: intersectionCount,
+      // });
 
       data.forEach((proof: any) => {
         // TODO: we're computing sets twice... above and here
@@ -68,7 +69,7 @@ export default function UserPage() {
     if (handle && cardAttributes.length === 0) {
       populateCardAttributes(handle).catch(console.error);
     }
-  }, [handle, getSetIntersection, cardAttributes.length]);
+  }, [handle, getCombinedAnonSet, cardAttributes.length]);
 
   return (
     <>
