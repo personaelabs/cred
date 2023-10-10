@@ -4,19 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm wasm-pack build ../circuit/ --release --target bundler && next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@personaelabs/spartan-ecdsa": "^2.3.0",
-    "circuits": "../circuit/pkg",
     "@prisma/client": "^5.3.1",
     "@rainbow-me/rainbowkit": "^1.0.11",
     "@types/node": "20.6.0",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "axios": "^1.5.0",
+    "circuits": "../circuit/pkg",
     "comlink": "^4.4.1",
     "dotenv": "^16.3.1",
     "eslint": "8.49.0",
@@ -35,6 +34,7 @@
     "postcss": "^8.4.29",
     "prettier-plugin-tailwindcss": "^0.5.4",
     "prisma": "^5.3.1",
+    "wasm-pack": "^0.12.1",
     "webpack-filter-warnings-plugin": "^1.2.1"
   }
 }
