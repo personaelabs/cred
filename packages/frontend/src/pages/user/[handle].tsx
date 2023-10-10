@@ -1,7 +1,7 @@
 import { Attribute, AttributeCard } from '@/components/global/AttributeCard';
 import { useGetCombinedAnonSet } from '@/hooks/useGetCombinedAnonSet';
 import { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
-import { PublicInput } from '@personaelabs/spartan-ecdsa';
+import { MembershipProof } from '@prisma/client';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ export default function UserPage() {
   const handle = router.query.handle as string;
 
   // NOTE: move to hook once we need to do this logic more than once
-  const getUserProofs = async (handle: string): Promise<string[]> => {
+  const getUserProofs = async (handle: string): Promise<MembershipProof[]> => {
     const { data } = await axios.get(`/api/users/${handle}/proofs`);
 
     return data;
@@ -32,12 +32,9 @@ export default function UserPage() {
       });
 
       const data = await getUserProofs(handle);
-      const sets = data.map((proof: any) => {
-        const publicInput = PublicInput.deserialize(
-          Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-        );
-        const groupRoot = publicInput.circuitPubInput.merkleRoot;
-        return ROOT_TO_SET[groupRoot.toString()];
+      const sets = data.map((proof: MembershipProof) => {
+        const groupRoot = BigInt(proof.merkleRoot || 0).toString(10);
+        return ROOT_TO_SET[groupRoot];
       });
 
       // NOTE temporarily remove this indicator as 'union' isn't quite accurate
@@ -48,13 +45,10 @@ export default function UserPage() {
       //   value: intersectionCount,
       // });
 
-      data.forEach((proof: any) => {
+      data.forEach((proof: MembershipProof) => {
         // TODO: we're computing sets twice... above and here
-        const publicInput = PublicInput.deserialize(
-          Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-        );
-        const groupRoot = publicInput.circuitPubInput.merkleRoot;
-        const set = ROOT_TO_SET[groupRoot.toString()];
+        const groupRoot = BigInt(proof.merkleRoot || 0).toString(10);
+        const set = ROOT_TO_SET[groupRoot];
 
         _cardAttributes.push({
           label: SET_METADATA[set].displayName,

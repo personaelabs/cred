@@ -1,7 +1,7 @@
 import { useAccount, useSignMessage } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { MainButton } from '@/components/MainButton';
-import { useProve } from '@/hooks/useProve';
+import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
@@ -19,7 +19,7 @@ export default function Home() {
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove, proving } = useProve();
+  const { prove, proving } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof(selectedSet);
 

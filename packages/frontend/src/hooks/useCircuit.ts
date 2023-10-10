@@ -1,18 +1,10 @@
-import { MerkleProof } from '@personaelabs/spartan-ecdsa';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Hex,
-  bytesToHex,
-  hashMessage,
-  hexToBigInt,
-  hexToBytes,
-  hexToSignature,
-  recoverPublicKey,
-} from 'viem';
+import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
 import { ProofSystem } from '@/lib/proofSystem';
 import * as Comlink from 'comlink';
 import { toPrefixedHex } from '@/lib/utils';
-import { WitnessInput } from '@/types';
+import { MerkleProof, WitnessInput } from '@/types';
+import { MembershipProof } from '@prisma/client';
 
 let worker: Comlink.Remote<typeof ProofSystem>;
 
@@ -64,7 +56,7 @@ const bigIntToBytes = (x: bigint): Uint8Array => {
   });
 };
 
-export const useProve = () => {
+export const useCircuit = () => {
   const [proving, setProving] = useState<boolean>(false);
 
   useEffect(() => {
@@ -131,11 +123,11 @@ export const useProve = () => {
     return bytesToHex(proof);
   };
 
-  const verify = async (proof: Hex): Promise<boolean> => {
+  const verify = async (proof: MembershipProof): Promise<boolean> => {
     if (!worker) {
       throw new Error('Prover not initialized');
     }
-    const isVerified = await worker.verify(proof);
+    const isVerified = await worker.verify(proof.proof as Hex);
     return isVerified;
   };
 

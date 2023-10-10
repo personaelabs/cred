@@ -1,22 +1,22 @@
 import { MainButton } from '@/components/MainButton';
 import { Attribute, AttributeCard } from '@/components/global/AttributeCard';
 import { useGetProof } from '@/hooks/useGetProof';
-import { useVerify } from '@/hooks/useVerify';
+import { useCircuit } from '@/hooks/useCircuit';
 import { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
-import { FullProof } from '@/types';
-import { PublicInput } from '@personaelabs/spartan-ecdsa';
+import { MembershipProof } from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import { hashMessage } from 'viem';
+import { Hex, hashMessage } from 'viem';
 
 export default function ProofPage() {
   const getProof = useGetProof();
-  const { verify, verifying } = useVerify();
+  const { verify } = useCircuit();
 
   const [verified, setVerified] = useState<boolean | undefined>();
+  const [verifying, setVerifying] = useState<boolean>(false);
 
-  const [proof, setProof] = useState<FullProof | undefined>();
+  const [proof, setProof] = useState<MembershipProof | undefined>();
   const [msgHash, setMsgHash] = useState<string>('');
 
   const [proofAttributes, setProofAttributes] = useState<Attribute[]>([]);
@@ -31,15 +31,10 @@ export default function ProofPage() {
         getProof(toPrefixedHex(proofHash)).then((proof) => {
           setProof(proof);
           // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
-          const publicInput = PublicInput.deserialize(
-            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-          );
-          // Get the merkle root from the public input
-          const groupRoot = publicInput.circuitPubInput.merkleRoot;
-          // msgHash will be used for verifying the proof
-          setMsgHash(publicInput.msgHash.toString('hex'));
 
-          const metadata = SET_METADATA[ROOT_TO_SET[groupRoot.toString(10)]];
+          // Convert Merkle root in hex to BigInt
+          const root = BigInt(proof.merkleRoot || 0).toString(10);
+          const metadata = SET_METADATA[ROOT_TO_SET[root]];
 
           // NOTE: order matters
           setProofAttributes([
@@ -79,12 +74,14 @@ export default function ProofPage() {
     if (proof) {
       try {
         // Verify the proof
+        setVerifying(true);
         const proofVerified = await verify(proof);
 
         // Check that the message hashes to the msgHash in the public input
         const msgVerified =
           Buffer.from(hashMessage(proof.message, 'bytes')).toString('hex') === msgHash;
 
+        setVerifying(false);
         setVerified(msgVerified && proofVerified);
       } catch (_err) {
         setVerified(false);

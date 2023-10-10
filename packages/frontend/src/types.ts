@@ -23,3 +23,9 @@ export interface PublicInput {
   indices: Uint8Array;
   root: Uint8Array;
 }
+
+export interface MerkleProof {
+  root: bigint;
+  pathIndices: number[];
+  siblings: [bigint][];
+}
