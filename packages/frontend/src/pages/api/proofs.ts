@@ -2,19 +2,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, hashMessage, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
-import {
-  MembershipVerifier,
-  PublicInput,
-  defaultAddressMembershipVConfig,
-} from '@personaelabs/spartan-ecdsa';
+import { MembershipVerifier, PublicInput } from '@personaelabs/spartan-ecdsa';
 import { ROOT_TO_SET } from '@/lib/sets';
 
 const concatHex = (hex1: Hex, hex2: Hex): Hex => {
   return `0x${hex1.replace('0x', '')}${hex2.replace('0x', '')}`;
 };
 
+// We use a circuit with a smaller tree than the default circuit.
+// The default circuit has 2^20 leaves and the circuit used here has 2^15 leaves.
+// We use a smaller circuit to make the merkle tree construction faster.
 const verifier = new MembershipVerifier({
-  ...defaultAddressMembershipVConfig,
+  circuit: 'https://storage.googleapis.com/personae-proving-keys/creddd/addr_membership.circuit',
+  enableProfiler: true,
   useRemoteCircuit: true,
 });
 let verifiedInitialized = false;
@@ -87,6 +87,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
       merkleRoot: merkleRootHex,
       publicInput,
       proofHash,
+      proofVersion: 'v2', // We expect the submitted proof to be a V2 proof
     },
   });
 
