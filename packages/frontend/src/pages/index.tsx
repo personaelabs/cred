@@ -50,7 +50,7 @@ export default function Home() {
       }
 
       // Submit the proof to the backend
-      const proofHash = await submitProof({ proof, publicInput, message });
+      const proofHash = await submitProof({ proof, publicInput, message, proofVersion: 'v2' });
       setProofHash(proofHash);
       setProving(false);
     }
