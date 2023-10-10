@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, hashMessage, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
-import { ProofSystem } from '@/lib/proofSystem';
+import { CircuitV3 } from '../../lib/circuit/circuit_v3';
 
 import { ROOT_TO_SET } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
@@ -23,27 +23,27 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
 
   if (!verifiedInitialized) {
     // Initialize the verifier's wasm
-    await ProofSystem.prepare();
+    await CircuitV3.prepare();
     verifiedInitialized = true;
   }
 
   // Verify the proof
   console.time('verify');
-  const verified = await ProofSystem.verify(proof);
+  const verified = await CircuitV3.verify(proof);
   console.timeEnd('verify');
   if (!verified) {
     res.status(400).send({ error: 'Invalid proof' });
     return;
   }
 
-  const merkleRoot = ProofSystem.getMerkleRoot(proof);
+  const merkleRoot = CircuitV3.getMerkleRoot(proof);
   // Check if the merkle root is valid
   if (!VALID_ROOTS.includes(merkleRoot)) {
     res.status(400).send({ error: 'Invalid merkle root' });
     return;
   }
 
-  const msgHash = ProofSystem.getMsgHash(proof);
+  const msgHash = CircuitV3.getMsgHash(proof);
   // Check if the message hash is valid
   if (msgHash !== hashMessage(message)) {
     res.status(400).send({ error: 'Invalid message hash' });
@@ -61,6 +61,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
       merkleRoot,
       proofHash,
       publicInput: '',
+      proofVersion: 'v3',
     },
   });
 

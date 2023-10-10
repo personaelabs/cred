@@ -24,6 +24,9 @@ importers:
 
   packages/frontend:
     dependencies:
+      '@personaelabs/spartan-ecdsa':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@prisma/client':
         specifier: ^5.3.1
         version: 5.3.1(prisma@5.3.1)
@@ -529,6 +532,15 @@ packages:
 
   /@personaelabs/spartan-ecdsa@2.1.4:
     resolution: {integrity: sha512-nqArRr1m5bjQOKKPaf+tSumfQ8sfIH021fhsmsy8epccp95/gM955VsgUSNSHcLTddHPrO5lI14oDOsXALPGYQ==}
+    dependencies:
+      '@ethereumjs/util': 8.1.0
+      '@zk-kit/incremental-merkle-tree': 1.1.0
+      elliptic: 6.5.4
+      snarkjs: 0.5.0
+    dev: false
+
+  /@personaelabs/spartan-ecdsa@2.3.0:
+    resolution: {integrity: sha512-E5FTZxLzR9WqkmP+8rpUfVGUp51/q4x4d6+cmUbo5Z4+BvqAmDaC1oU5CTTlghq0U1lvY6q2Xq7OwLs8L3YEfg==}
     dependencies:
       '@ethereumjs/util': 8.1.0
       '@zk-kit/incremental-merkle-tree': 1.1.0

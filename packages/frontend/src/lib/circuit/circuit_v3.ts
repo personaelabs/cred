@@ -1,14 +1,10 @@
-// File that runs in a web worker to generate proofs.
-// Proof generation takes time, so we run it in a web worker to
-// prevent the UI from freezing.
-
 import { WitnessInput } from '@/types';
 import { Hex, bytesToHex, hexToBytes } from 'viem';
 
 let wasmPkg: any;
-
-export const ProofSystem = {
+export const CircuitV3 = {
   async prepare() {
+    // V3 verifier
     // We need to import the wasm package in run-time because
     // it only runs in browser environment.
     // @ts-ignore
@@ -20,8 +16,7 @@ export const ProofSystem = {
   },
 
   async prove(input: WitnessInput): Promise<Uint8Array> {
-    console.log('Proving');
-    const proof = wasmPkg.prove_membership(
+    const proof = await wasmPkg.prove_membership(
       input.s,
       input.r,
       input.isYOdd,
@@ -35,25 +30,23 @@ export const ProofSystem = {
   },
 
   async verify(proof: Hex): Promise<boolean> {
-    console.log('Verifying');
     const proofBytes = hexToBytes(proof);
-    const result = wasmPkg.verify_membership(proofBytes);
-    return result;
+    return await wasmPkg.verify_membership(proofBytes);
   },
 
+  // Get the merkle root from the proof's public input
   getMerkleRoot(proof: Hex): Hex {
-    console.log('Getting merkle root');
     const proofBytes = hexToBytes(proof);
     const result = wasmPkg.get_root(proofBytes);
     return bytesToHex(result);
   },
 
+  // Get the message hash from the proof's public input
   getMsgHash(proof: Hex): Hex {
-    console.log('Getting msg hash');
     const proofBytes = hexToBytes(proof);
     const result = wasmPkg.get_msg_hash(proofBytes);
     return bytesToHex(result);
   },
 };
 
-const WrappedProofSystem = ProofSystem;
+export const WrapperCircuit = CircuitV3;

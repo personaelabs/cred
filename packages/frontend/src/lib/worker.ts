@@ -3,6 +3,6 @@
 // prevent the UI from freezing.
 
 import * as Comlink from 'comlink';
-import { ProofSystem } from './proofSystem';
+import { WrapperCircuit } from './circuit/circuit_v3';
 
-Comlink.expose(ProofSystem);
+Comlink.expose(WrapperCircuit);

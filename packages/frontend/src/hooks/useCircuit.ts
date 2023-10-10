@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
-import { ProofSystem } from '@/lib/proofSystem';
+import { WrapperCircuit } from '../lib/circuit/circuit_v3';
 import * as Comlink from 'comlink';
 import { toPrefixedHex } from '@/lib/utils';
 import { MerkleProof, WitnessInput } from '@/types';
 import { MembershipProof } from '@prisma/client';
 
-let worker: Comlink.Remote<typeof ProofSystem>;
+let worker: Comlink.Remote<typeof WrapperCircuit>;
 
 // Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46
 // Returns if y is odd or not
