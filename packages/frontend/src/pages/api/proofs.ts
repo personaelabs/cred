@@ -2,11 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, hashMessage, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
-import {
-  MembershipVerifier,
-  PublicInput,
-  defaultAddressMembershipVConfig,
-} from '@personaelabs/spartan-ecdsa';
+import { MembershipVerifier, PublicInput } from '@personaelabs/spartan-ecdsa';
 import { ROOT_TO_SET } from '@/lib/sets';
 
 const concatHex = (hex1: Hex, hex2: Hex): Hex => {
@@ -78,6 +74,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
       merkleRoot: merkleRootHex,
       publicInput,
       proofHash,
+      proofVersion: 'v2', // We expect the submitted proof to be a V2 proof
     },
   });
 

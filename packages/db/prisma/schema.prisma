@@ -11,11 +11,12 @@ datasource db {
 }
 
 model MembershipProof {
-  proofHash   String   @id
-  proof       String
-  publicInput String
-  merkleRoot  String?
-  message     String
-  craetedAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  proofHash    String   @id
+  proof        String
+  proofVersion String   @default("v1")
+  publicInput  String
+  merkleRoot   String?
+  message      String
+  craetedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
