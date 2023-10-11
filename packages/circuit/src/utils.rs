@@ -5,9 +5,11 @@ use ark_secp256k1::Fq;
 use ark_secp256k1::Fr;
 use num_bigint::BigUint;
 
+// Compute `T` and `U` for efficient ECDSA verification
 pub fn efficient_ecdsa(msg_hash: BigUint, r: Fq, is_y_odd: bool) -> (Affine, Affine) {
     let g = Affine::generator();
 
+    // Recover the `R` point
     let r_ys = Affine::get_ys_from_x_unchecked(r);
     let r_point = if is_y_odd {
         Affine::new(r, r_ys.unwrap().0)
@@ -31,6 +33,7 @@ pub fn efficient_ecdsa(msg_hash: BigUint, r: Fq, is_y_odd: bool) -> (Affine, Aff
     (u, t)
 }
 
+// Verify that `T` and `U` are computed correctly
 pub fn verify_efficient_ecdsa(
     msg_hash: BigUint,
     r: Fq,
@@ -51,10 +54,9 @@ pub mod test_utils {
         prelude::*,
         utils::{hash_message, secret_key_to_address},
     };
-    use k256::ecdsa::RecoveryId;
     use k256::{ecdsa::SigningKey, elliptic_curve::ScalarPrimitive, SecretKey};
 
-    pub struct EffEcdsaInput {
+    pub struct MockEffEcdsaInput {
         pub s: Fr,
         pub u: Affine,
         pub t: Affine,
@@ -88,11 +90,11 @@ pub mod test_utils {
         (s, r, is_y_odd, msg_hash_bigint, pub_key, address)
     }
 
-    pub fn mock_eff_ecdsa_input(priv_key: u64) -> EffEcdsaInput {
+    pub fn mock_eff_ecdsa_input(priv_key: u64) -> MockEffEcdsaInput {
         let (s, r, is_y_odd, msg_hash_bigint, pub_key, address) = mock_sig(priv_key);
         let (u, t) = efficient_ecdsa(msg_hash_bigint.clone(), r, is_y_odd);
 
-        EffEcdsaInput {
+        MockEffEcdsaInput {
             s,
             u,
             t,

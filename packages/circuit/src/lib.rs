@@ -13,57 +13,20 @@ use spartan::{circuit, wasm::wasm_deps::*};
 type Curve = spartan::ark_secq256k1::Projective;
 type F = ark_secq256k1::Fr;
 
+// Produce the code to generate and verify the proof of the `eth_membership` circuit.
+// We wrap the `prove` and `verify` functions with additional logic
+// and expose them to the JavaScript runtime.
 circuit!(|cs: &mut ConstraintSystem<F>| { eth_membership(cs) }, Curve);
 
+// `MembershipProof` consists of a Spartan proof
+// and auxiliary inputs necessary for full verification.
+// This proof is serialized and passed around in the JavaScript runtime.
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct MembershipProof {
     pub proof: SpartanProof<Curve>,
     r: Fq,
     is_y_odd: bool,
     msg_hash: BigUint,
-}
-
-// Get the Merkle root from the proof's publici nput
-#[wasm_bindgen]
-pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
-    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
-    let pub_inputs = creddd_proof.proof.pub_input.clone();
-    let root = pub_inputs[4];
-
-    root.into_bigint().to_bytes_be()
-}
-
-// Get the Merkle root from the proof's public input
-#[wasm_bindgen]
-pub fn get_msg_hash(creddd_proof: &[u8]) -> Vec<u8> {
-    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
-    creddd_proof.msg_hash.to_bytes_be()
-}
-
-#[wasm_bindgen]
-pub fn verify_membership(creddd_proof: &[u8]) -> bool {
-    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
-    let pub_inputs = creddd_proof.proof.pub_input.clone();
-
-    // Verify that the public inputs are valid
-
-    let tx = pub_inputs[0];
-    let ty = pub_inputs[1];
-    let ux = pub_inputs[2];
-    let uy = pub_inputs[3];
-
-    let t = Affine::new(tx, ty);
-    let u = Affine::new(ux, uy);
-
-    let r = creddd_proof.r;
-    let is_y_odd = creddd_proof.is_y_odd;
-    let msg_hash = creddd_proof.msg_hash;
-
-    let is_proof_valid = verify(creddd_proof.proof);
-
-    let is_efficient_ecdsa_valid = verify_efficient_ecdsa(msg_hash, r, is_y_odd, t, u);
-
-    is_proof_valid && is_efficient_ecdsa_valid
 }
 
 #[wasm_bindgen]
@@ -76,28 +39,26 @@ pub fn prove_membership(
     merkle_indices: &[u8],
     root: &[u8],
 ) -> Vec<u8> {
+    // Deserialize the inputs
     let s = Fr::from(BigUint::from_bytes_be(s));
-
     let r = Fq::from(BigUint::from_bytes_be(r));
-
     let msg_hash = BigUint::from_bytes_be(msg_hash);
-
     let merkle_siblings = merkle_siblings
         .to_vec()
         .chunks(32)
         .map(|sibling| F::from(BigUint::from_bytes_be(&sibling)))
         .collect::<Vec<F>>();
-
     let merkle_indices = merkle_indices
         .to_vec()
         .chunks(32)
         .map(|index| F::from(BigUint::from_bytes_be(&index)))
         .collect::<Vec<F>>();
-
     let root = F::from(BigUint::from_bytes_be(root));
 
+    // Compute the efficient ECDSA input
     let (u, t) = efficient_ecdsa(msg_hash.clone(), r, is_y_odd);
 
+    // Construct the private input
     let mut priv_input = vec![];
 
     let s_bits = s
@@ -111,6 +72,7 @@ pub fn prove_membership(
     priv_input.extend_from_slice(&merkle_indices);
     priv_input.extend_from_slice(&merkle_siblings);
 
+    // Construct the public input
     let pub_input = [
         to_cs_field(t.x),
         to_cs_field(t.y),
@@ -119,6 +81,7 @@ pub fn prove_membership(
         root,
     ];
 
+    // Generate the proof
     let proof = prove(&pub_input, &priv_input);
 
     let membership_proof = MembershipProof {
@@ -128,12 +91,61 @@ pub fn prove_membership(
         msg_hash,
     };
 
+    // Serialize the full proof
     let mut membership_proof_bytes = Vec::new();
     membership_proof
         .serialize_compressed(&mut membership_proof_bytes)
         .unwrap();
 
     membership_proof_bytes
+}
+
+#[wasm_bindgen]
+pub fn verify_membership(creddd_proof: &[u8]) -> bool {
+    // Get the public inputs from the proof
+    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
+    let pub_inputs = creddd_proof.proof.pub_input.clone();
+
+    let tx = pub_inputs[0];
+    let ty = pub_inputs[1];
+    let ux = pub_inputs[2];
+    let uy = pub_inputs[3];
+
+    let t = Affine::new(tx, ty);
+    let u = Affine::new(ux, uy);
+
+    let r = creddd_proof.r;
+    let is_y_odd = creddd_proof.is_y_odd;
+    let msg_hash = creddd_proof.msg_hash;
+
+    // Verify the proof
+    let is_proof_valid = verify(creddd_proof.proof);
+
+    // Verify the efficient ECDSA input
+    let is_efficient_ecdsa_valid = verify_efficient_ecdsa(msg_hash, r, is_y_odd, t, u);
+
+    is_proof_valid && is_efficient_ecdsa_valid
+}
+
+// ####################################
+// Helper functions
+// ####################################
+
+// Get the Merkle root from the proof's public input
+#[wasm_bindgen]
+pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
+    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
+    let pub_inputs = creddd_proof.proof.pub_input.clone();
+    let root = pub_inputs[4];
+
+    root.into_bigint().to_bytes_be()
+}
+
+// Get the  message hash from the proof's public input
+#[wasm_bindgen]
+pub fn get_msg_hash(creddd_proof: &[u8]) -> Vec<u8> {
+    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
+    creddd_proof.msg_hash.to_bytes_be()
 }
 
 #[cfg(test)]

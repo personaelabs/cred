@@ -49,9 +49,9 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
 
     // Get the Ethereum address from the public key
     let address = to_addr(pub_key_bits.try_into().unwrap());
-    // 2. Verify the Merkle proof
 
     let poseidon_chip = PoseidonChip::new(cs, secp256k1_w3());
+    // Verify the Merkle proof
     let root = verify_merkle_proof(
         address,
         &merkle_siblings,
@@ -72,7 +72,7 @@ mod tests {
     use super::*;
     use crate::utils::test_utils::mock_eff_ecdsa_input;
     use ark_ec::AffineRepr;
-    use ark_ff::{BigInteger, Field};
+    use ark_ff::BigInteger;
     use num_bigint::BigUint;
     use spartan::merkle_tree::{MerkleProof, MerkleTree};
 
@@ -135,23 +135,7 @@ mod tests {
             tree.root.unwrap(),
         ];
 
-        println!("root: {}", tree.root.unwrap());
-
         let witness: Vec<F> = cs.gen_witness(&synthesizer, &pub_input, &priv_input);
-
-        let mut num_zeros = 0;
-        let mut num_ones = 0;
-        for w_i in witness.iter() {
-            if *w_i == F::ZERO {
-                num_zeros += 1;
-            } else if *w_i == F::ONE {
-                num_ones += 1;
-            }
-        }
-
-        println!("witness size: {}", witness.len());
-        println!("num_zeros: {}", num_zeros);
-        println!("num_ones: {}", num_ones);
 
         assert!(cs.is_sat(&witness, &pub_input));
     }
