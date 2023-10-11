@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && mkdir .next/server/static/ && cp -r .next/server/chunks/static/wasm/ .next/server/static/wasm",
     "start": "next start",
     "lint": "next lint"
   },

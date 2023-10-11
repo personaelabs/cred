@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, hashMessage, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
+import { CircuitV3 } from '../../lib/circuit/circuit_v3';
 
 import { ROOT_TO_SET } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
@@ -16,8 +17,6 @@ const VALID_ROOTS: Hex[] = Object.keys(ROOT_TO_SET).map((root) =>
 export default async function submitProof(req: NextApiRequest, res: NextApiResponse) {
   const proof: Hex = req.body.proof;
   console.log('Proof', proof.length);
-
-  const { CircuitV3 } = await import('../../lib/circuit/circuit_v3');
 
   // The signed message
   const message: string = req.body.message;
@@ -59,7 +58,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     data: {
       message,
       proof,
-      merkleRoot,
+      merkleRoot: '',
       proofHash,
       publicInput: '',
       // proofVersion: 'v3',
