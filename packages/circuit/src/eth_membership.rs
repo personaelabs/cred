@@ -1,8 +1,8 @@
 use ark_ff::PrimeField;
 use spartan::{
-    constraint_system::ConstraintSystem,
+    constraint_system::{ConstraintSystem, Wire},
     frontend::gadgets::{
-        ec_add_complete, ec_mul, poseidon::poseidon::PoseidonChip, to_addr, to_bits,
+        ec_add_complete, ec_mul, poseidon::poseidon::PoseidonChip, to_addr, to_le_bits,
         verify_merkle_proof, AffinePoint,
     },
     poseidon::constants::secp256k1_w3,
@@ -45,7 +45,26 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
     let u = AffinePoint::new(u_x, u_y);
     let pub_key = ec_add_complete(s_mul_t, u, cs);
 
-    let pub_key_bits = [to_bits(pub_key.x, 256), to_bits(pub_key.y, 256)].concat();
+    let pub_key_x_bits = to_le_bits(pub_key.x);
+    let pub_key_y_bits = to_le_bits(pub_key.y);
+
+    // We need this transformation because the bits should be in little endian
+    // and the bytes should be in big endian.
+    let pub_key_x_bits_be = pub_key_x_bits
+        .chunks(8)
+        .map(|byte| byte.to_vec())
+        .rev()
+        .flat_map(|x| x)
+        .collect::<Vec<Wire<F>>>();
+
+    let pub_key_y_bits_be = pub_key_y_bits
+        .chunks(8)
+        .map(|byte| byte.to_vec())
+        .rev()
+        .flat_map(|x| x)
+        .collect::<Vec<Wire<F>>>();
+
+    let pub_key_bits = [pub_key_x_bits_be, pub_key_y_bits_be].concat();
 
     // Get the Ethereum address from the public key
     let address = to_addr(pub_key_bits.try_into().unwrap());

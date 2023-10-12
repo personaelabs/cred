@@ -137,6 +137,53 @@ export function client_verify(proof_ser) {
 }
 
 /**
+* @param {Uint8Array} s
+* @param {Uint8Array} r
+* @param {boolean} is_y_odd
+* @param {Uint8Array} msg_hash
+* @param {Uint8Array} merkle_siblings
+* @param {Uint8Array} merkle_indices
+* @param {Uint8Array} root
+* @returns {Uint8Array}
+*/
+export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(r, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArray8ToWasm0(msg_hash, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ptr3 = passArray8ToWasm0(merkle_siblings, wasm.__wbindgen_malloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ptr4 = passArray8ToWasm0(merkle_indices, wasm.__wbindgen_malloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ptr5 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
+        const len5 = WASM_VECTOR_LEN;
+        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var v7 = getArrayU8FromWasm0(r0, r1).slice();
+        wasm.__wbindgen_free(r0, r1 * 1);
+        return v7;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
+* @param {Uint8Array} creddd_proof
+* @returns {boolean}
+*/
+export function verify_membership(creddd_proof) {
+    const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.verify_membership(ptr0, len0);
+    return ret !== 0;
+}
+
+/**
 * @param {Uint8Array} creddd_proof
 * @returns {Uint8Array}
 */
@@ -171,53 +218,6 @@ export function get_msg_hash(creddd_proof) {
         var v2 = getArrayU8FromWasm0(r0, r1).slice();
         wasm.__wbindgen_free(r0, r1 * 1);
         return v2;
-    } finally {
-        wasm.__wbindgen_add_to_stack_pointer(16);
-    }
-}
-
-/**
-* @param {Uint8Array} creddd_proof
-* @returns {boolean}
-*/
-export function verify_membership(creddd_proof) {
-    const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.verify_membership(ptr0, len0);
-    return ret !== 0;
-}
-
-/**
-* @param {Uint8Array} s
-* @param {Uint8Array} r
-* @param {boolean} is_y_odd
-* @param {Uint8Array} msg_hash
-* @param {Uint8Array} merkle_siblings
-* @param {Uint8Array} merkle_indices
-* @param {Uint8Array} root
-* @returns {Uint8Array}
-*/
-export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
-    try {
-        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passArray8ToWasm0(r, wasm.__wbindgen_malloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passArray8ToWasm0(msg_hash, wasm.__wbindgen_malloc);
-        const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passArray8ToWasm0(merkle_siblings, wasm.__wbindgen_malloc);
-        const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passArray8ToWasm0(merkle_indices, wasm.__wbindgen_malloc);
-        const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
-        const len5 = WASM_VECTOR_LEN;
-        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
-        var r0 = getInt32Memory0()[retptr / 4 + 0];
-        var r1 = getInt32Memory0()[retptr / 4 + 1];
-        var v7 = getArrayU8FromWasm0(r0, r1).slice();
-        wasm.__wbindgen_free(r0, r1 * 1);
-        return v7;
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
@@ -304,10 +304,6 @@ export function __wbindgen_number_new(arg0) {
 
 export const __wbg_now_1dfe92535ec53370 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
 
-export function __wbg_log_1d3ae0273d8f4f8a(arg0) {
-    console.log(getObject(arg0));
-};
-
 export function __wbg_new_abda76e883ba8a5f() {
     const ret = new Error();
     return addHeapObject(ret);
@@ -331,6 +327,10 @@ export function __wbg_error_f851667af71bcfc6(arg0, arg1) {
     } finally {
         wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
     }
+};
+
+export function __wbg_log_1d3ae0273d8f4f8a(arg0) {
+    console.log(getObject(arg0));
 };
 
 export function __wbg_getRandomValues_37fa2ca9e4e07fab() { return handleError(function (arg0, arg1) {

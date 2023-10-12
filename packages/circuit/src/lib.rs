@@ -8,7 +8,7 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use eth_membership::{eth_membership, to_cs_field};
 use num_bigint::BigUint;
 use spartan::constraint_system::ConstraintSystem;
-use spartan::{circuit, wasm::wasm_deps::*};
+use spartan::{circuit, wasm::prelude::*};
 
 type Curve = spartan::ark_secq256k1::Projective;
 type F = ark_secq256k1::Fr;
@@ -16,7 +16,11 @@ type F = ark_secq256k1::Fr;
 // Produce the code to generate and verify the proof of the `eth_membership` circuit.
 // We wrap the `prove` and `verify` functions with additional logic
 // and expose them to the JavaScript runtime.
-circuit!(|cs: &mut ConstraintSystem<F>| { eth_membership(cs) }, Curve);
+circuit!(
+    |cs: &mut ConstraintSystem<F>| { eth_membership(cs) },
+    Curve,
+    b"creddd"
+);
 
 // `MembershipProof` consists of a Spartan proof
 // and auxiliary inputs necessary for full verification.
