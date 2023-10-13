@@ -19,12 +19,15 @@ export default function Home() {
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove, proving } = useCircuit();
+  const { prove } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof(selectedSet);
+  const [proving, setProving] = useState(false);
 
   const handleProveClick = useCallback(async () => {
     if (address) {
+      setProving(true);
+
       // TODO: Add a timestamp to the message being signed?
       const message = username;
       const sig = await signMessageAsync({ message });
@@ -44,6 +47,7 @@ export default function Home() {
 
       const proofHash = await submitProof(data);
       setProofHash(proofHash);
+      setProving(false);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
 

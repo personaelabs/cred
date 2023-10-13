@@ -57,8 +57,6 @@ const bigIntToBytes = (x: bigint): Uint8Array => {
 };
 
 export const useCircuit = () => {
-  const [proving, setProving] = useState<boolean>(false);
-
   useEffect(() => {
     // Initialize the web worker
     worker = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
@@ -70,7 +68,6 @@ export const useCircuit = () => {
 
   const prove = async (sig: Hex, message: string, merkleProof: MerkleProof): Promise<Hex> => {
     console.log('Proving');
-    setProving(true);
 
     const { r, s, v } = hexToSignature(sig);
 
@@ -118,8 +115,6 @@ export const useCircuit = () => {
     console.timeEnd('prove');
     window.alert('Proving took ' + (end - start) + 'ms');
 
-    setProving(false);
-
     return bytesToHex(proof);
   };
 
@@ -131,5 +126,5 @@ export const useCircuit = () => {
     return isVerified;
   };
 
-  return { prove, proving, verify };
+  return { prove, verify };
 };
