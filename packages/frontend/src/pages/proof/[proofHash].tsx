@@ -98,8 +98,8 @@ export default function ProofPage() {
         <AttributeCard attributes={proofAttributes} />
         <div className="flex  justify-center">
           <MainButton
-            message={verifying ? 'Verifying...' : verified ? 'Verified!' : 'Verify'}
-            disabled={verifying || verified}
+            message={verified ? 'Verified!' : verifying ? 'Verifying' : 'Verify'}
+            loading={verifying}
             handler={handleVerifyClick}
           ></MainButton>
         </div>

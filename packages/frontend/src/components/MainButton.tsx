@@ -1,5 +1,4 @@
-import { ReactNode, useEffect } from 'react';
-import Spinner from './global/Spinner';
+import { ReactNode } from 'react';
 import { BLUE } from '@/lib/colors';
 
 export const MainButton = (props: {
@@ -10,7 +9,7 @@ export const MainButton = (props: {
   disabled?: boolean;
   children?: ReactNode;
 }) => {
-  const { color, message, loading, handler, disabled, children } = props;
+  const { color, message, loading, handler, disabled } = props;
 
   return (
     <button
@@ -22,7 +21,14 @@ export const MainButton = (props: {
       }}
       onClick={handler}
     >
-      {children ? children : loading ? <Spinner /> : <p>{message}</p>}
+      {message}
+      {loading && (
+        <>
+          <span className="dot1">.</span>
+          <span className="dot2">.</span>
+          <span className="dot3">.</span>
+        </>
+      )}
     </button>
   );
 };

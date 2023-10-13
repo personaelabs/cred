@@ -22,11 +22,24 @@ let verifiedInitialized = false;
 // Merkle roots copied from json files
 const VALID_ROOTS: bigint[] = Object.keys(ROOT_TO_SET).map((root) => BigInt(root));
 
+const TEST_PROOF: Hex = '0x';
+
 export default async function submitProof(req: NextApiRequest, res: NextApiResponse) {
   const proof: Hex = req.body.proof;
   const publicInput: Hex = req.body.publicInput;
   // The signed message
   const message: string = req.body.message;
+
+  // If we're not in production, we allow the TEST_PROOF to be submitted.
+  // This is useful for testing the UI without having to generate a proof
+  // every time.
+  if (process.env.NODE_ENV !== 'production') {
+    if (proof === TEST_PROOF) {
+      const proofHash = keccak256(proof);
+      res.send({ proofHash });
+      return;
+    }
+  }
 
   // Convert submitted proof from hex to bytes
   const proofBytes = Buffer.from(proof.replace('0x', ''), 'hex');

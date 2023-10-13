@@ -10,8 +10,8 @@ const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
 // Using the  WalletConnect Cloud project from Noun Nyms for now
 const { connectors } = getDefaultWallets({
-  appName: 'Nouns Nymz',
-  projectId: '564add972ca30e293482fd9361543d69',
+  appName: 'creddd',
+  projectId: '2ea91e648a2198845fee3ea267ff37dc',
   chains,
 });
 

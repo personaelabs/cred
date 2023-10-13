@@ -6,19 +6,21 @@ import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
+import { Hex } from 'viem';
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [username, setUsername] = useState<string>('');
   // The set to prove membership
   const [selectedSet, setSelectedSet] = useState(SETS[0]);
+  const [proving, setProving] = useState(false);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove, proving } = useProve();
+  const { prove } = useProve();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof(selectedSet);
 
@@ -28,15 +30,29 @@ export default function Home() {
       const message = username;
       const sig = await signMessageAsync({ message });
 
+      setProving(true);
       // Get the merkle proof from the backend
       const merkleProof = await getMerkleProof(address);
 
-      // Prove!
-      const { proof, publicInput } = await prove(sig, username, merkleProof);
+      let proof: Hex;
+      let publicInput: Hex;
+      // When NEXT_PUBLIC_USE_TEST_PROOF is true, we skip the proving step and use dummy proof.
+      // The backend is aware of this dummy proof and will accept it.
+      // This is useful for testing the UI.
+      if (process.env.NEXT_PUBLIC_USE_TEST_PROOF === 'true') {
+        proof = '0x';
+        publicInput = '0x';
+      } else {
+        // Prove!
+        const result = await prove(sig, username, merkleProof);
+        proof = result.proof;
+        publicInput = result.publicInput;
+      }
 
       // Submit the proof to the backend
       const proofHash = await submitProof({ proof, publicInput, message, proofVersion: 'v2' });
       setProofHash(proofHash);
+      setProving(false);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
 
@@ -79,9 +95,10 @@ export default function Home() {
         </div>
         <div className="mb-2 flex justify-center">
           <MainButton
+            message={proving ? 'Proving' : 'Prove'}
             handler={handleProveClick}
-            message={proving ? 'Proving...' : 'Prove'}
-            disabled={isConnected == false}
+            disabled={!isConnected}
+            loading={proving}
           ></MainButton>
         </div>
         <div className="flex  justify-center">
