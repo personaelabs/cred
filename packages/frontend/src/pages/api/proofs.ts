@@ -14,12 +14,25 @@ const VALID_ROOTS: Hex[] = Object.keys(ROOT_TO_SET).map((root) =>
   toPrefixedHex(BigInt(root).toString(16)),
 );
 
+const TEST_PROOF: Hex = '0x';
+
 export default async function submitProof(req: NextApiRequest, res: NextApiResponse) {
   const proof: Hex = req.body.proof;
   console.log('Proof', proof.length);
 
   // The signed message
   const message: string = req.body.message;
+
+  // If we're not in production, we allow the TEST_PROOF to be submitted.
+  // This is useful for testing the UI without having to generate a proof
+  // every time.
+  if (process.env.NODE_ENV !== 'production') {
+    if (proof === TEST_PROOF) {
+      const proofHash = keccak256(proof);
+      res.send({ proofHash });
+      return;
+    }
+  }
 
   if (!verifiedInitialized) {
     // Initialize the verifier's wasm
