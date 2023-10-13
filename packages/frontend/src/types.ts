@@ -32,7 +32,6 @@ export interface MerkleProof {
 
 type ProofVersion = 'v1' | 'v2' | 'v3';
 
-// Spartan-ecdsa proofs that was used in V1 and V2
 export interface FullProof {
   proof: Hex;
   publicInput: Hex;

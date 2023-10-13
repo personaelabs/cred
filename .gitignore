@@ -5,3 +5,5 @@ target/
 false/
 
 !./packages/circuit/pkg/*
+addr_membership_js/
+addr_membership.r1cs

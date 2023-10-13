@@ -58,10 +58,10 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     data: {
       message,
       proof,
-      merkleRoot: '',
-      proofHash,
+      merkleRoot,
       publicInput: '',
-      // proofVersion: 'v3',
+      proofHash,
+      proofVersion: 'v3', // We expect the submitted proof to be a V2 proof
     },
   });
 
