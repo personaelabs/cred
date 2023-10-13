@@ -5,7 +5,7 @@ use crate::utils::{efficient_ecdsa, verify_efficient_ecdsa};
 use ark_ff::BigInteger;
 use ark_secp256k1::{Affine, Fq, Fr};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use eth_membership::{eth_membership, to_cs_field};
+use eth_membership::{eth_membership, to_cs_field, TREE_DEPTH};
 use num_bigint::BigUint;
 use spartan::constraint_system::ConstraintSystem;
 use spartan::{circuit, wasm::prelude::*};
@@ -167,8 +167,6 @@ mod tests {
     #[test]
     fn bench_eth_membership() {
         client_prepare();
-
-        const TREE_DEPTH: usize = 20;
 
         let (s, r, is_y_odd, msg_hash, _, address) = mock_sig(42);
         let address = F::from(BigUint::from_bytes_be(&address.to_fixed_bytes()));

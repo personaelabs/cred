@@ -8,7 +8,7 @@ use spartan::{
     poseidon::constants::secp256k1_w3,
 };
 
-pub const TREE_DEPTH: usize = 20;
+pub const TREE_DEPTH: usize = 15;
 
 pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
     // #############################################
