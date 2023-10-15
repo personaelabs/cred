@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, bytesToHex, hashMessage, hexToBytes, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
-import { CircuitV3 } from '../../lib/circuit/circuit_v3';
+// import { CircuitV3 } from '../../lib/circuit/circuit_v3';
 
 import { ROOT_TO_SET } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
