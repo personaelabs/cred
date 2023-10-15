@@ -126,5 +126,13 @@ export const useCircuit = () => {
     return isVerified;
   };
 
-  return { prove, verify };
+  const getMsgHash = async (proof: Hex) => {
+    if (!worker) {
+      throw new Error('Prover not initialized');
+    }
+    const msgHash = await worker.getMsgHash(proof);
+    return msgHash;
+  };
+
+  return { prove, verify, getMsgHash };
 };

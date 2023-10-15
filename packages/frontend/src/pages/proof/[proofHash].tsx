@@ -11,13 +11,12 @@ import { Hex, hashMessage } from 'viem';
 
 export default function ProofPage() {
   const getProof = useGetProof();
-  const { verify } = useCircuit();
+  const { verify, getMsgHash } = useCircuit();
 
   const [verified, setVerified] = useState<boolean | undefined>();
   const [verifying, setVerifying] = useState<boolean>(false);
 
   const [proof, setProof] = useState<MembershipProof | undefined>();
-  const [msgHash, setMsgHash] = useState<string>('');
 
   const [proofAttributes, setProofAttributes] = useState<Attribute[]>([]);
 
@@ -77,17 +76,19 @@ export default function ProofPage() {
         setVerifying(true);
         const proofVerified = await verify(proof);
 
+        const msgHash = await getMsgHash(proof.proof as Hex);
+
         // Check that the message hashes to the msgHash in the public input
-        const msgVerified =
-          Buffer.from(hashMessage(proof.message, 'bytes')).toString('hex') === msgHash;
+        const msgVerified = hashMessage(proof.message, 'hex') === msgHash;
 
         setVerifying(false);
         setVerified(msgVerified && proofVerified);
       } catch (_err) {
+        console.error(_err);
         setVerified(false);
       }
     }
-  }, [verify, proof, msgHash]);
+  }, [proof, verify, getMsgHash]);
 
   return (
     <>
