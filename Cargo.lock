@@ -2973,7 +2973,7 @@ dependencies = [
 [[package]]
 name = "spartan"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/spartan-evm.git#965e1b2c2818fe975fd4339f588da9f3aba5e5b4"
+source = "git+https://github.com/personaelabs/spartan-evm.git#83202388c0911d33e39fe7ee242ab9fc328caff5"
 dependencies = [
  "ark-ec",
  "ark-ff",
