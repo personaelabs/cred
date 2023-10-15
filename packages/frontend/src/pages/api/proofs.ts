@@ -3,19 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, bytesToHex, hashMessage, hexToBytes, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
 // import { CircuitV3 } from '../../lib/circuit/circuit_v3';
+import * as circuit from 'pkgnode';
 
 import { ROOT_TO_SET } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
-import {
-  __wbg_set_wasm,
-  verify_membership,
-  client_prepare,
-  init_panic_hook,
-  get_root,
-  get_msg_hash,
-  // @ts-ignore
-} from '../../../node_modules/circuits/circuits_bg';
-import * as wasm from '../../../node_modules/circuits/circuits_bg.wasm';
 
 let verifiedInitialized = false;
 
@@ -33,8 +24,6 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   // The signed message
   const message: string = req.body.message;
 
-  __wbg_set_wasm(wasm);
-
   // If we're not in production, we allow the TEST_PROOF to be submitted.
   // This is useful for testing the UI without having to generate a proof
   // every time.
@@ -49,8 +38,8 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   if (!verifiedInitialized) {
     // Initialize the verifier's wasm
     // await CircuitV3.prepare();
-    await client_prepare();
-    await init_panic_hook();
+    await circuit.client_prepare();
+    await circuit.init_panic_hook();
     verifiedInitialized = true;
   }
 
@@ -58,21 +47,21 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   console.time('verify');
   // const verified = await CircuitV3.verify(proof);
   const proofBytes = hexToBytes(proof);
-  const verified = verify_membership(proofBytes);
+  const verified = circuit.verify_membership(proofBytes);
   console.timeEnd('verify');
   if (!verified) {
     res.status(400).send({ error: 'Invalid proof' });
     return;
   }
 
-  const merkleRoot = bytesToHex(get_root(proofBytes));
+  const merkleRoot = bytesToHex(circuit.get_root(proofBytes));
   // Check if the merkle root is valid
   if (!VALID_ROOTS.includes(merkleRoot)) {
     res.status(400).send({ error: 'Invalid merkle root' });
     return;
   }
 
-  const msgHash = bytesToHex(get_msg_hash(proofBytes));
+  const msgHash = bytesToHex(circuit.get_msg_hash(proofBytes));
   // Check if the message hash is valid
   if (msgHash !== hashMessage(message)) {
     res.status(400).send({ error: 'Invalid message hash' });
