@@ -5,6 +5,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { publicProvider } from 'wagmi/providers/public';
 import Script from 'next/script';
+import { AirstackProvider, useQuery } from '@airstack/airstack-react';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -29,15 +30,17 @@ export default function App({ Component, pageProps }: AppProps) {
         data-domain="cred-frontend.vercel.app"
         src="https://plausible.io/js/script.js"
       ></Script>
-      <WagmiConfig config={config}>
-        <RainbowKitProvider chains={chains}>
-          <div className="md:px-0 md:py-6">
-            <div className="mb-4 flex justify-center">
-              <Component {...pageProps} />
+      <AirstackProvider apiKey="03a483fcc74f4961be2cfc7b94305d7b">
+        <WagmiConfig config={config}>
+          <RainbowKitProvider chains={chains}>
+            <div className="md:px-0 md:py-6">
+              <div className="mb-4 flex justify-center">
+                <Component {...pageProps} />
+              </div>
             </div>
-          </div>
-        </RainbowKitProvider>
-      </WagmiConfig>
+          </RainbowKitProvider>
+        </WagmiConfig>
+      </AirstackProvider>
     </>
   );
 }

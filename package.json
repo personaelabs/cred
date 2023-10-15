@@ -14,7 +14,8 @@
     "prepare": "pnpm -F db run build",
     "studio": "pnpm -F db run studio",
     "test": "pnpm -r test",
-    "compile-circuit": "cd ./packages/circuit && wasm-pack build --release --target bundler && rm ./pkg/.gitignore && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next"
+    "compile-fc-anon": "cd ./packages/circuits/fc_anon && wasm-pack build --release --target bundler && rm ./pkg/.gitignore && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next",
+    "compile-twitter-anon": "cd ./packages/circuits/twitter_anon && wasm-pack build --release  --target bundler && rm ./pkg/.gitignore && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next"
   },
   "devDependencies": {
     "prettier": "^3.0.3"

@@ -1,3 +1,7 @@
 [workspace]
-members = ["packages/circuit"]
+members = [
+    "packages/circuits/fc_anon",
+    "packages/circuits/twitter_anon",
+    "packages/circuits/eth_membership",
+]
 resolver = "2"

@@ -173,11 +173,11 @@ export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merk
 }
 
 /**
-* @param {Uint8Array} creddd_proof
+* @param {Uint8Array} full_proof
 * @returns {boolean}
 */
-export function verify_membership(creddd_proof) {
-    const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
+export function verify_membership(full_proof) {
+    const ptr0 = passArray8ToWasm0(full_proof, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.verify_membership(ptr0, len0);
     return ret !== 0;
@@ -295,11 +295,6 @@ export function __wbindgen_string_new(arg0, arg1) {
 
 export function __wbindgen_object_drop_ref(arg0) {
     takeObject(arg0);
-};
-
-export function __wbindgen_number_new(arg0) {
-    const ret = arg0;
-    return addHeapObject(ret);
 };
 
 export const __wbg_now_1dfe92535ec53370 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');

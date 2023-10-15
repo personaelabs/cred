@@ -5,6 +5,17 @@ export interface SubmitData {
   message: string;
 }
 
+export interface FcAnonWitnessInput {
+  sFc: Uint8Array;
+  s: Uint8Array;
+  r: Uint8Array;
+  isYOdd: boolean;
+  msgHash: Uint8Array;
+  siblings: Uint8Array;
+  indices: Uint8Array;
+  root: Uint8Array;
+}
+
 export interface WitnessInput {
   s: Uint8Array;
   r: Uint8Array;

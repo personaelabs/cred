@@ -1,0 +1,16 @@
+{
+  "name": "fc_anon",
+  "version": "0.1.0",
+  "files": [
+    "fc_anon_bg.wasm",
+    "fc_anon.js",
+    "fc_anon_bg.js",
+    "fc_anon.d.ts"
+  ],
+  "module": "fc_anon.js",
+  "types": "fc_anon.d.ts",
+  "sideEffects": [
+    "./fc_anon.js",
+    "./snippets/*"
+  ]
+}

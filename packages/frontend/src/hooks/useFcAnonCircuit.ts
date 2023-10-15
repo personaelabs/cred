@@ -3,7 +3,7 @@ import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
 import { WrapperCircuit } from '../lib/circuit/circuit_v3';
 import * as Comlink from 'comlink';
 import { toPrefixedHex } from '@/lib/utils';
-import { MerkleProof, WitnessInput } from '@/types';
+import { FcAnonWitnessInput, MerkleProof, WitnessInput } from '@/types';
 import { MembershipProof } from '@prisma/client';
 
 let worker: Comlink.Remote<typeof WrapperCircuit>;
@@ -56,20 +56,22 @@ const bigIntToBytes = (x: bigint): Uint8Array => {
   });
 };
 
-export const useCircuit = () => {
+export const useFaAnonCircuit = () => {
   useEffect(() => {
-    (async () => {
-      // Initialize the web worker
-      worker = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
-      console.log('Preparing prover');
-
-      console.time('prepare');
-      await worker.prepare();
-      console.timeEnd('prepare');
-    })();
+    // Initialize the web worker
+    worker = Comlink.wrap(new Worker(new URL('../lib/workerFc.ts', import.meta.url)));
+    console.log('Preparing prover');
+    worker.prepare().then(() => {
+      console.log('Prover ready');
+    });
   }, []);
 
-  const prove = async (sig: Hex, message: string, merkleProof: MerkleProof): Promise<Hex> => {
+  const prove = async (
+    sigFc: Hex,
+    sig: Hex,
+    message: string,
+    merkleProof: MerkleProof,
+  ): Promise<Hex> => {
     console.log('Proving');
 
     const { r, s, v } = hexToSignature(sig);
@@ -78,6 +80,9 @@ export const useCircuit = () => {
       throw new Error('Prover not initialized');
     }
 
+    const sFcBytes = hexToBytes(hexToSignature(sig).s, {
+      size: 32,
+    });
     const sBytes = hexToBytes(s, {
       size: 32,
     });
@@ -102,7 +107,8 @@ export const useCircuit = () => {
     console.time('prove');
     let start = Date.now();
 
-    const input: WitnessInput = {
+    const input: FcAnonWitnessInput = {
+      sFc: sFcBytes,
       s: sBytes,
       r: rBytes,
       isYOdd,

@@ -1,4 +1,6 @@
-use ark_ff::PrimeField;
+use ark_ff::{BigInteger, PrimeField};
+use ark_secq256k1::Fr;
+use num_bigint::BigUint;
 use spartan::{
     constraint_system::{ConstraintSystem, Wire},
     frontend::gadgets::{
@@ -7,6 +9,8 @@ use spartan::{
     },
     poseidon::constants::secp256k1_w3,
 };
+
+use crate::utils::efficient_ecdsa;
 
 pub const TREE_DEPTH: usize = 15;
 
@@ -86,14 +90,66 @@ pub fn to_cs_field(x: ark_secp256k1::Fq) -> ark_secq256k1::Fr {
     ark_secq256k1::Fr::from(x.into_bigint())
 }
 
+// Build the private and public inputs for the eth_membership circuit
+// from the witness inputs in bytes
+pub fn build_input(
+    s: &[u8],
+    r: &[u8],
+    is_y_odd: bool,
+    msg_hash: &[u8],
+    merkle_siblings: &[u8],
+    merkle_indices: &[u8],
+    root: &[u8],
+) -> (Vec<Fr>, Vec<Fr>) {
+    // Deserialize the inputs
+    let s = ark_secp256k1::Fr::from(BigUint::from_bytes_be(s));
+    let r = ark_secp256k1::Fq::from(BigUint::from_bytes_be(r));
+    let msg_hash = BigUint::from_bytes_be(msg_hash);
+    let merkle_siblings = merkle_siblings
+        .to_vec()
+        .chunks(32)
+        .map(|sibling| Fr::from(BigUint::from_bytes_be(&sibling)))
+        .collect::<Vec<Fr>>();
+    let merkle_indices = merkle_indices
+        .to_vec()
+        .chunks(32)
+        .map(|index| Fr::from(BigUint::from_bytes_be(&index)))
+        .collect::<Vec<Fr>>();
+    let root = ark_secq256k1::Fr::from(BigUint::from_bytes_be(root));
+
+    // Compute the efficient ECDSA input
+    let (u, t) = efficient_ecdsa(msg_hash.clone(), r, is_y_odd);
+
+    // Construct the private input
+    let mut priv_input = vec![];
+
+    let s_bits = s
+        .into_bigint()
+        .to_bits_le()
+        .iter()
+        .map(|b| Fr::from(*b))
+        .collect::<Vec<Fr>>();
+
+    priv_input.extend_from_slice(&s_bits);
+    priv_input.extend_from_slice(&merkle_indices);
+    priv_input.extend_from_slice(&merkle_siblings);
+
+    // Construct the public input
+    let pub_input = vec![
+        to_cs_field(t.x),
+        to_cs_field(t.y),
+        to_cs_field(u.x),
+        to_cs_field(u.y),
+        root,
+    ];
+
+    (priv_input, pub_input)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::test_utils::mock_eff_ecdsa_input;
-    use ark_ec::AffineRepr;
-    use ark_ff::BigInteger;
-    use num_bigint::BigUint;
-    use spartan::merkle_tree::{MerkleProof, MerkleTree};
+    use crate::utils::test_utils::mock_witness_input;
 
     type F = ark_secq256k1::Fr;
 
@@ -106,56 +162,22 @@ mod tests {
         let mut cs = ConstraintSystem::<_>::new();
         cs.set_constraints(&synthesizer);
 
-        let eff_ecdsa_input = mock_eff_ecdsa_input(42);
-        let address = F::from(BigUint::from_bytes_be(
-            &eff_ecdsa_input.address.to_fixed_bytes(),
-        ));
+        let mock_witness_input = mock_witness_input::<ark_secq256k1::Fr>();
 
-        // Construct a mock tree
-        let mut leaves = vec![address];
-        for i in 0..(2usize.pow(TREE_DEPTH as u32) - 1) {
-            leaves.push(F::from(i as u32));
-        }
-
-        let mut tree: MerkleTree<_, 3> = MerkleTree::<F, 3>::new(secp256k1_w3());
-        for leaf in &leaves {
-            tree.insert(*leaf);
-        }
-
-        tree.finish();
-
-        let merkle_proof: MerkleProof<F> = tree.create_proof(address);
-
-        let mut priv_input = vec![];
-
-        let s_bits = eff_ecdsa_input
-            .s
-            .into_bigint()
-            .to_bits_le()
-            .iter()
-            .map(|b| F::from(*b))
-            .collect::<Vec<F>>();
-
-        let merkle_indices = merkle_proof
-            .path_indices
-            .iter()
-            .map(|i| F::from(*i as u32))
-            .collect::<Vec<F>>();
-
-        priv_input.extend_from_slice(&s_bits);
-        priv_input.extend_from_slice(&merkle_indices);
-        priv_input.extend_from_slice(&merkle_proof.siblings);
-
-        let pub_input = [
-            to_cs_field(*eff_ecdsa_input.t.x().unwrap()),
-            to_cs_field(*eff_ecdsa_input.t.y().unwrap()),
-            to_cs_field(*eff_ecdsa_input.u.x().unwrap()),
-            to_cs_field(*eff_ecdsa_input.u.y().unwrap()),
-            tree.root.unwrap(),
-        ];
+        let (priv_input, pub_input) = build_input(
+            &mock_witness_input.s,
+            &mock_witness_input.r,
+            mock_witness_input.is_y_odd,
+            &mock_witness_input.msg_hash,
+            &mock_witness_input.merkle_siblings,
+            &mock_witness_input.merkle_indices,
+            &mock_witness_input.root,
+        );
 
         let witness: Vec<F> = cs.gen_witness(&synthesizer, &pub_input, &priv_input);
 
         assert!(cs.is_sat(&witness, &pub_input));
     }
 }
+
+pub mod utils;

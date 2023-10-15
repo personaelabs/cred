@@ -1,23 +1,23 @@
-import { WitnessInput } from '@/types';
+import { FcAnonWitnessInput } from '@/types';
 import { Hex, bytesToHex, hexToBytes } from 'viem';
 
 let wasmPkg: any;
-export const CircuitV3 = {
+export const CircuitFcAnon = {
   async prepare() {
     // V3 verifier
     // We need to import the wasm package in run-time because
     // it only runs in browser environment.
     // @ts-ignore
-    wasmPkg = await import('twitter_anon');
+    wasmPkg = await import('fc_anon');
     // @ts-ignore
     wasmPkg.init_panic_hook();
 
-    // wasmPkg.client_prepare();
+    wasmPkg.client_prepare();
   },
 
-  async prove(input: WitnessInput): Promise<Uint8Array> {
-    console.log('start wasm');
+  async prove(input: FcAnonWitnessInput): Promise<Uint8Array> {
     const proof = await wasmPkg.prove_membership(
+      input.sFc,
       input.s,
       input.r,
       input.isYOdd,
@@ -50,4 +50,4 @@ export const CircuitV3 = {
   },
 };
 
-export const WrapperCircuit = CircuitV3;
+export const WrapperCircuit = CircuitFcAnon;

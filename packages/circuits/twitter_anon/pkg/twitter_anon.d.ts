@@ -33,10 +33,10 @@ export function client_verify(proof_ser: Uint8Array): boolean;
 */
 export function prove_membership(s: Uint8Array, r: Uint8Array, is_y_odd: boolean, msg_hash: Uint8Array, merkle_siblings: Uint8Array, merkle_indices: Uint8Array, root: Uint8Array): Uint8Array;
 /**
-* @param {Uint8Array} creddd_proof
+* @param {Uint8Array} full_proof
 * @returns {boolean}
 */
-export function verify_membership(creddd_proof: Uint8Array): boolean;
+export function verify_membership(full_proof: Uint8Array): boolean;
 /**
 * @param {Uint8Array} creddd_proof
 * @returns {Uint8Array}

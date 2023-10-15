@@ -1,0 +1,16 @@
+{
+  "name": "twitter_anon",
+  "version": "0.1.0",
+  "files": [
+    "twitter_anon_bg.wasm",
+    "twitter_anon.js",
+    "twitter_anon_bg.js",
+    "twitter_anon.d.ts"
+  ],
+  "module": "twitter_anon.js",
+  "types": "twitter_anon.d.ts",
+  "sideEffects": [
+    "./twitter_anon.js",
+    "./snippets/*"
+  ]
+}
