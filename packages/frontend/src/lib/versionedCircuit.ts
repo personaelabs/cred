@@ -63,7 +63,7 @@ export const VersionedCircuit = {
     const proofBytes = hexToBytes(proof.proof as Hex);
     const publicInputBytes = hexToBytes(proof.publicInput as Hex);
 
-    console.log('proof versoin', proof.proofVersion);
+    console.log('proof version', proof.proofVersion);
     await this.prepare();
 
     let verified: boolean;
