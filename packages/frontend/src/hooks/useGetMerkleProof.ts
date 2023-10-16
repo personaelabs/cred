@@ -1,8 +1,8 @@
 import { MerkleProof } from '@/types';
 import axios from 'axios';
 
-export const useGetMerkleProof = (jsonFileName: string) => {
-  const getMerkleProof = async (address: string): Promise<MerkleProof> => {
+export const useGetMerkleProof = () => {
+  const getMerkleProof = async (jsonFileName: string, address: string): Promise<MerkleProof> => {
     const res = await axios.get(`/${jsonFileName}.json`);
     const merkleProofs: {
       address: string;

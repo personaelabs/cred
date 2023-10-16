@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { MainButton } from '@/components/MainButton';
@@ -8,14 +9,28 @@ import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
 import { SubmitData } from '@/types';
 import { Hex } from 'viem';
+import axios from 'axios';
+
+// Get all addresses of the sets
+const getSets = async () => {
+  const addresses = await Promise.all(
+    SETS.map(async (set) => {
+      const { data }: { data: string[] } = await axios.get(`/${set}.addresses.json`);
+      return { set, addresses: data };
+    }),
+  );
+
+  return addresses;
+};
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [username, setUsername] = useState<string>('');
   // The set to prove membership
-  const [selectedSet, setSelectedSet] = useState(SETS[0]);
+  const [selectedSet, setSelectedSet] = useState<string | undefined>();
   const [proving, setProving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [eligibleSets, setEligibleSets] = useState<string[]>([]);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
@@ -24,19 +39,41 @@ export default function Home() {
 
   const { prove } = useCircuit();
   const submitProof = useSubmitProof();
-  const getMerkleProof = useGetMerkleProof(selectedSet);
+  const getMerkleProof = useGetMerkleProof();
+
+  // Update the eligible sets when the address changes
+  useEffect(() => {
+    (async () => {
+      if (address) {
+        // Fetch all the addresses of the sets
+        const sets = await getSets();
+
+        // The addresses returned from the backend are in base 10 string format
+        const addressBI = BigInt(address).toString(10);
+
+        // Get the eligible sets
+        const _eligibleSets = sets
+          .filter((set) => set.addresses.includes(addressBI))
+          .map((set) => set.set);
+
+        setEligibleSets(_eligibleSets);
+        setSelectedSet(_eligibleSets[0]);
+      } else {
+        setEligibleSets([]);
+        setSelectedSet(undefined);
+      }
+    })();
+  }, [address]);
 
   const handleProveClick = useCallback(async () => {
-    if (address) {
-      setProving(true);
-
+    if (selectedSet && address) {
       // TODO: Add a timestamp to the message being signed?
       const message = username;
       const sig = await signMessageAsync({ message });
 
       setProving(true);
       // Get the merkle proof from the backend
-      const merkleProof = await getMerkleProof(address);
+      const merkleProof = await getMerkleProof(selectedSet, address);
 
       // Prove!
       let proof: Hex;
@@ -64,7 +101,7 @@ export default function Home() {
       setSubmitting(false);
       setProofHash(proofHash);
     }
-  }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
+  }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
 
   return (
     // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
@@ -95,12 +132,25 @@ export default function Home() {
               setSelectedSet(e.target.value);
             }}
             value={selectedSet}
+            placeholder="Select a set"
           >
-            {SETS.map((set) => (
+            <option value="" disabled selected={!selectedSet}>
+              Select a set
+            </option>
+            {eligibleSets.map((set) => (
+              // Render the eligible sets
               <option key={set} value={set}>
-                {set}
+                {set} (eligible)
               </option>
             ))}
+            {
+              // Render the ineligible sets as disabled options
+              SETS.filter((set) => !eligibleSets.includes(set)).map((set) => (
+                <option key={set} value={set} disabled>
+                  {set} (ineligible)
+                </option>
+              ))
+            }
           </select>
         </div>
         <div className="mb-2 flex justify-center">
