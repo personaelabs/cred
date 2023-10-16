@@ -15,6 +15,7 @@ export default function Home() {
   // The set to prove membership
   const [selectedSet, setSelectedSet] = useState(SETS[0]);
   const [proving, setProving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
@@ -48,6 +49,7 @@ export default function Home() {
         // Prove!
         proof = await prove(sig, username, merkleProof);
       }
+      setProving(false);
 
       // Submit the proof to the backend
 
@@ -56,9 +58,11 @@ export default function Home() {
         message,
       };
 
+      setSubmitting(true);
+
       const proofHash = await submitProof(data);
+      setSubmitting(false);
       setProofHash(proofHash);
-      setProving(false);
     }
   }, [username, signMessageAsync, prove, submitProof, getMerkleProof, address]);
 
@@ -107,6 +111,16 @@ export default function Home() {
             loading={proving}
           ></MainButton>
         </div>
+        {submitting && (
+          <div className="flex  justify-center">
+            Submitting proof
+            <>
+              <span className="dot1">.</span>
+              <span className="dot2">.</span>
+              <span className="dot3">.</span>
+            </>
+          </div>
+        )}
         <div className="flex  justify-center">
           {proofHash && (
             <div>
