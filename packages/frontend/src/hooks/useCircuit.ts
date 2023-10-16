@@ -99,7 +99,6 @@ export const useCircuit = () => {
     const root = bigIntToBytes(merkleProof.root);
 
     console.time('prove');
-    let start = Date.now();
 
     const input: WitnessInput = {
       s: sBytes,
@@ -112,9 +111,7 @@ export const useCircuit = () => {
     };
 
     const proof = await circuit.prove(input);
-    let end = Date.now();
     console.timeEnd('prove');
-    window.alert('Proving took ' + (end - start) + 'ms');
 
     return bytesToHex(proof);
   };
