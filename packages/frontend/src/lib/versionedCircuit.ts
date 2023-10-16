@@ -40,7 +40,7 @@ export const VersionedCircuit = {
     v3Circuit.init_panic_hook();
 
     if (!initialized) {
-      v3Circuit.client_prepare();
+      v3Circuit.prepare();
       initialized = true;
     }
   },

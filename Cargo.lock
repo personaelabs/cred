@@ -1934,7 +1934,7 @@ dependencies = [
  "csv",
  "hex",
  "num-bigint",
- "poseidon",
+ "poseidon 0.1.0 (git+https://github.com/DanTehrani/poseidon.git)",
  "rayon",
  "serde",
  "serde_json",
@@ -2326,6 +2326,15 @@ source = "git+https://github.com/DanTehrani/poseidon.git#56279d22006be8b81de2a28
 dependencies = [
  "ark-ff",
  "ark-secp256k1",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "poseidon"
+version = "0.1.0"
+source = "git+https://github.com/personaelabs/poseidon.git#b798817998d0f54687a2ab0f6158fea962f3703c"
+dependencies = [
+ "ark-ff",
  "tiny-keccak",
 ]
 
@@ -2973,7 +2982,6 @@ dependencies = [
 [[package]]
 name = "spartan"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/spartan-evm.git#83202388c0911d33e39fe7ee242ab9fc328caff5"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -2987,7 +2995,7 @@ dependencies = [
  "merkle-tree",
  "merlin",
  "num-bigint",
- "poseidon",
+ "poseidon 0.1.0 (git+https://github.com/personaelabs/poseidon.git)",
  "rand",
  "tiny-keccak",
  "wasm-bindgen",

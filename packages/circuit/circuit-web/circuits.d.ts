@@ -4,23 +4,19 @@
 */
 export function init_panic_hook(): void;
 /**
-* @returns {Uint8Array}
 */
-export function circuit(): Uint8Array;
-/**
-*/
-export function client_prepare(): void;
+export function prepare(): void;
 /**
 * @param {Uint8Array} pub_input
 * @param {Uint8Array} priv_input
 * @returns {Uint8Array}
 */
-export function client_prove(pub_input: Uint8Array, priv_input: Uint8Array): Uint8Array;
+export function prove(pub_input: Uint8Array, priv_input: Uint8Array): Uint8Array;
 /**
 * @param {Uint8Array} proof_ser
 * @returns {boolean}
 */
-export function client_verify(proof_ser: Uint8Array): boolean;
+export function verify(proof_ser: Uint8Array): boolean;
 /**
 * @param {Uint8Array} s
 * @param {Uint8Array} r

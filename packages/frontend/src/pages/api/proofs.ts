@@ -37,7 +37,7 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
 
   if (!verifiedInitialized) {
     // Initialize the verifier's wasm
-    circuit.client_prepare();
+    circuit.prepare();
     circuit.init_panic_hook();
     verifiedInitialized = true;
   }

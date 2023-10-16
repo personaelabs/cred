@@ -27,7 +27,7 @@ circuit!(
 // This proof is serialized and passed around in the JavaScript runtime.
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 pub struct MembershipProof {
-    pub proof: SpartanProof<Curve>,
+    pub proof: Vec<u8>,
     r: Fq,
     is_y_odd: bool,
     msg_hash: BigUint,
@@ -76,6 +76,12 @@ pub fn prove_membership(
     priv_input.extend_from_slice(&merkle_indices);
     priv_input.extend_from_slice(&merkle_siblings);
 
+    // Convert the private input to bytes
+    let priv_input = priv_input
+        .iter()
+        .flat_map(|x| x.into_bigint().to_bytes_be())
+        .collect::<Vec<u8>>();
+
     // Construct the public input
     let pub_input = [
         to_cs_field(t.x),
@@ -83,7 +89,10 @@ pub fn prove_membership(
         to_cs_field(u.x),
         to_cs_field(u.y),
         root,
-    ];
+    ]
+    .iter()
+    .flat_map(|x| x.into_bigint().to_bytes_be())
+    .collect::<Vec<u8>>();
 
     // Generate the proof
     let proof = prove(&pub_input, &priv_input);
@@ -108,7 +117,9 @@ pub fn prove_membership(
 pub fn verify_membership(creddd_proof: &[u8]) -> bool {
     // Get the public inputs from the proof
     let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
-    let pub_inputs = creddd_proof.proof.pub_input.clone();
+    let spartan_proof =
+        SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
+    let pub_inputs = spartan_proof.pub_input.clone();
 
     let tx = pub_inputs[0];
     let ty = pub_inputs[1];
@@ -123,7 +134,7 @@ pub fn verify_membership(creddd_proof: &[u8]) -> bool {
     let msg_hash = creddd_proof.msg_hash;
 
     // Verify the proof
-    let is_proof_valid = verify(creddd_proof.proof);
+    let is_proof_valid = verify(&creddd_proof.proof);
 
     // Verify the efficient ECDSA input
     let is_efficient_ecdsa_valid = verify_efficient_ecdsa(msg_hash, r, is_y_odd, t, u);
@@ -139,7 +150,9 @@ pub fn verify_membership(creddd_proof: &[u8]) -> bool {
 #[wasm_bindgen]
 pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
     let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
-    let pub_inputs = creddd_proof.proof.pub_input.clone();
+    let spartan_proof =
+        SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
+    let pub_inputs = spartan_proof.pub_input.clone();
     let root = pub_inputs[4];
 
     root.into_bigint().to_bytes_be()
@@ -167,7 +180,7 @@ mod tests {
 
     #[test]
     fn bench_eth_membership() {
-        client_prepare();
+        prepare();
 
         let (s, r, is_y_odd, msg_hash, _, address) = mock_sig(42);
         let address = F::from(BigUint::from_bytes_be(&address.to_fixed_bytes()));
