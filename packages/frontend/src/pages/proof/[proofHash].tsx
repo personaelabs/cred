@@ -74,15 +74,19 @@ export default function ProofPage() {
       try {
         // Verify the proof
         setVerifying(true);
-        const proofVerified = await verify(proof);
+        let proofVerified = await verify(proof);
 
-        const msgHash = await getMsgHash(proof.proof as Hex);
+        if (proof.proofVersion === 'v3') {
+          // We need to check that the message hashes to the msgHash in the public input
+          // for the v3 proofs
+          const msgHash = await getMsgHash(proof);
 
-        // Check that the message hashes to the msgHash in the public input
-        const msgVerified = hashMessage(proof.message, 'hex') === msgHash;
+          // Check that the message hashes to the msgHash in the public input
+          proofVerified = hashMessage(proof.message, 'hex') === msgHash;
+        }
 
         setVerifying(false);
-        setVerified(msgVerified && proofVerified);
+        setVerified(proofVerified);
       } catch (_err) {
         console.error(_err);
         setVerified(false);

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
-import { WrapperCircuit } from '../lib/circuit/circuit_v3';
+import { WrappedCircuit } from '../lib/versionedCircuit';
 import * as Comlink from 'comlink';
 import { toPrefixedHex } from '@/lib/utils';
 import { MerkleProof, WitnessInput } from '@/types';
 import { MembershipProof } from '@prisma/client';
 
 // Web worker to run proving and verification
-let worker: Comlink.Remote<typeof WrapperCircuit>;
+let circuit: Comlink.Remote<typeof WrappedCircuit>;
 
 // Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46
 // Returns if y is odd or not
@@ -62,9 +62,9 @@ export const useCircuit = () => {
   useEffect(() => {
     (async () => {
       // Initialize the web worker
-      worker = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
+      circuit = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
       console.log('Preparing circuit');
-      await worker.prepare();
+      await circuit.prepare();
     })();
   }, []);
 
@@ -73,7 +73,7 @@ export const useCircuit = () => {
 
     const { r, s, v } = hexToSignature(sig);
 
-    if (!worker) {
+    if (!circuit) {
       throw new Error('Circuit not initialized');
     }
 
@@ -111,7 +111,7 @@ export const useCircuit = () => {
       root,
     };
 
-    const proof = await worker.prove(input);
+    const proof = await circuit.prove(input);
     let end = Date.now();
     console.timeEnd('prove');
     window.alert('Proving took ' + (end - start) + 'ms');
@@ -120,19 +120,19 @@ export const useCircuit = () => {
   };
 
   const verify = async (proof: MembershipProof): Promise<boolean> => {
-    if (!worker) {
+    if (!circuit) {
       throw new Error('Circuit not initialized');
     }
-    const isVerified = await worker.verify(proof.proof as Hex);
+    const isVerified = await circuit.verify(proof);
     return isVerified;
   };
 
   // Get the message hash from the proof's public inputs
-  const getMsgHash = async (proof: Hex) => {
-    if (!worker) {
+  const getMsgHash = async (proof: MembershipProof) => {
+    if (!circuit) {
       throw new Error('Circuit not initialized');
     }
-    const msgHash = await worker.getMsgHash(proof);
+    const msgHash = await circuit.getMsgHash(proof);
     return msgHash;
   };
 

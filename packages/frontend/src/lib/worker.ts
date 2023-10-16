@@ -3,6 +3,6 @@
 // prevent the UI from freezing.
 
 import * as Comlink from 'comlink';
-import { WrapperCircuit } from './circuit/circuit_v3';
+import { WrappedCircuit } from './versionedCircuit';
 
-Comlink.expose(WrapperCircuit);
+Comlink.expose(WrappedCircuit);
