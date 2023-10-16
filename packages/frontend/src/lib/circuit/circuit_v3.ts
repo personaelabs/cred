@@ -8,7 +8,7 @@ export const CircuitV3 = {
     // We need to import the wasm package in run-time because
     // it only runs in browser environment.
     // @ts-ignore
-    wasmPkg = await import('circuits');
+    wasmPkg = await import('circuit-web');
     // @ts-ignore
     wasmPkg.init_panic_hook();
 

@@ -2,8 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Hex, bytesToHex, hashMessage, hexToBytes, keccak256 } from 'viem';
 import prisma from '@/lib/prisma';
-// import { CircuitV3 } from '../../lib/circuit/circuit_v3';
-import * as circuit from 'pkgnode';
+// @ts-ignore
+import * as circuit from 'circuit-node/circuits_embedded';
 
 import { ROOT_TO_SET } from '@/lib/sets';
 import { toPrefixedHex } from '@/lib/utils';
@@ -37,9 +37,8 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
 
   if (!verifiedInitialized) {
     // Initialize the verifier's wasm
-    // await CircuitV3.prepare();
-    await circuit.client_prepare();
-    await circuit.init_panic_hook();
+    circuit.client_prepare();
+    circuit.init_panic_hook();
     verifiedInitialized = true;
   }
 

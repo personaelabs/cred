@@ -13,7 +13,6 @@ ark-ff = "0.4.2"
 ark-secp256k1 = "0.4.0"
 ark-secq256k1 = "0.4.0"
 ark-serialize = "0.4.2"
-ark-std = "0.4.0"
 num-bigint = "0.4.4"
 spartan = { git = "https://github.com/personaelabs/spartan-evm.git", features = [
     "profiler",
@@ -22,6 +21,7 @@ wasm-bindgen = "0.2.87"
 
 [dev-dependencies]
 ethers = "2.0.10"
+ark-std = "0.4.0"
 
 [profile.release]
 lto = true

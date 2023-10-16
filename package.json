@@ -14,8 +14,7 @@
     "prepare": "pnpm -F db run build",
     "studio": "pnpm -F db run studio",
     "test": "pnpm -r test",
-    "compile-circuit": "cd ./packages/circuit && wasm-pack build --release --target bundler && rm ./pkg/.gitignore && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next",
-    "compile-node": "cd ./packages/circuit && wasm-pack build --release --target nodejs --out-dir pkgnode && rm ./pkgnode/.gitignore && pnpm -F frontend i --no-cache && rm -rf packages/frontend/.next"
+    "compile-circuit": "sh ./scripts/compile-web.sh && sh ./scripts/compile-node.sh"
   },
   "devDependencies": {
     "prettier": "^3.0.3"

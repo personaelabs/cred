@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && cp ./node_modules/pkgnode/circuits_bg.wasm ./.next/server/pages/api/circuits_bg.wasm",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -16,7 +16,8 @@
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "axios": "^1.5.0",
-    "circuits": "../circuit/pkg",
+    "circuit-web": "../circuit/circuit-web",
+    "circuit-node": "../circuit/circuit-node",
     "comlink": "^4.4.1",
     "dotenv": "^16.3.1",
     "eslint": "8.49.0",
@@ -28,8 +29,7 @@
     "tailwindcss": "^3.3.2",
     "typescript": "5.2.2",
     "viem": "^1.10.14",
-    "wagmi": "^1.4.1",
-    "pkgnode": "../circuit/pkgnode"
+    "wagmi": "^1.4.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.15",
