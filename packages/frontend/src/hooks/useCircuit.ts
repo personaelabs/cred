@@ -90,12 +90,16 @@ export const useCircuit = () => {
     );
 
     const indices = concatUint8Arrays(
-      merkleProof.pathIndices.map((index) =>
-        hexToBytes(toPrefixedHex(index.toString(16)), {
-          size: 32,
-        }),
-      ),
+      merkleProof.pathIndices.map((index) => {
+        if (index === 1) {
+          let bytes = new Uint8Array(32);
+          bytes[31] = 1;
+          return bytes;
+        }
+        return new Uint8Array(32);
+      }),
     );
+
     const root = bigIntToBytes(merkleProof.root);
 
     console.time('prove');
