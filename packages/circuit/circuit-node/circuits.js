@@ -281,7 +281,7 @@ module.exports.__wbindgen_number_new = function(arg0) {
     return addHeapObject(ret);
 };
 
-module.exports.__wbg_now_1dfe92535ec53370 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
+module.exports.__wbg_now_077e852c2458b4d1 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
 
 module.exports.__wbg_new_abda76e883ba8a5f = function() {
     const ret = new Error();

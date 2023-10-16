@@ -1,5 +1,5 @@
 use ark_ff::PrimeField;
-use spartan::{
+use sapir::{
     constraint_system::{ConstraintSystem, Wire},
     frontend::gadgets::{
         ec_add_complete, ec_mul, poseidon::poseidon::PoseidonChip, to_addr, to_le_bits,
@@ -93,7 +93,7 @@ mod tests {
     use ark_ec::AffineRepr;
     use ark_ff::BigInteger;
     use num_bigint::BigUint;
-    use spartan::merkle_tree::{MerkleProof, MerkleTree};
+    use sapir::merkle_tree::{MerkleProof, MerkleTree};
 
     type F = ark_secq256k1::Fr;
 

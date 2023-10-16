@@ -7,10 +7,10 @@ use ark_secp256k1::{Affine, Fq, Fr};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use eth_membership::{eth_membership, to_cs_field};
 use num_bigint::BigUint;
-use spartan::constraint_system::ConstraintSystem;
-use spartan::{circuit, wasm::prelude::*};
+use sapir::constraint_system::ConstraintSystem;
+use sapir::{circuit, wasm::prelude::*};
 
-type Curve = spartan::ark_secq256k1::Projective;
+type Curve = sapir::ark_secq256k1::Projective;
 type F = ark_secq256k1::Fr;
 
 // Produce the code to generate and verify the proof of the `eth_membership` circuit.
@@ -173,7 +173,7 @@ mod tests {
     use ark_std::{end_timer, start_timer};
     use eth_membership::TREE_DEPTH;
     use num_bigint::BigUint;
-    use spartan::{
+    use sapir::{
         merkle_tree::{MerkleProof, MerkleTree},
         poseidon::constants::secp256k1_w3,
     };

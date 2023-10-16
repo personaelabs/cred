@@ -474,7 +474,7 @@ dependencies = [
  "ark-std",
  "ethers",
  "num-bigint",
- "spartan",
+ "sapir",
  "wasm-bindgen",
 ]
 
@@ -2732,6 +2732,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "sapir"
+version = "0.1.0"
+source = "git+https://github.com/personaelabs/sapir.git#939ebf38feafde93462470e8f96040ad2bb4786e"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-secp256k1",
+ "ark-secq256k1",
+ "ark-serialize",
+ "ark-std",
+ "console_error_panic_hook",
+ "getrandom",
+ "hex",
+ "merkle-tree",
+ "merlin",
+ "num-bigint",
+ "poseidon 0.1.0 (git+https://github.com/personaelabs/poseidon.git)",
+ "rand",
+ "tiny-keccak",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
 name = "scale-info"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2977,29 +3001,6 @@ dependencies = [
  "phf",
  "thiserror",
  "unicode-xid",
-]
-
-[[package]]
-name = "spartan"
-version = "0.1.0"
-dependencies = [
- "ark-ec",
- "ark-ff",
- "ark-secp256k1",
- "ark-secq256k1",
- "ark-serialize",
- "ark-std",
- "console_error_panic_hook",
- "getrandom",
- "hex",
- "merkle-tree",
- "merlin",
- "num-bigint",
- "poseidon 0.1.0 (git+https://github.com/personaelabs/poseidon.git)",
- "rand",
- "tiny-keccak",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]

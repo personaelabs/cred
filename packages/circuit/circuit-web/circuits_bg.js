@@ -286,7 +286,7 @@ export function __wbindgen_number_new(arg0) {
     return addHeapObject(ret);
 };
 
-export const __wbg_now_1dfe92535ec53370 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
+export const __wbg_now_077e852c2458b4d1 = typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
 
 export function __wbg_new_abda76e883ba8a5f() {
     const ret = new Error();
