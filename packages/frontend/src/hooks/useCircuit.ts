@@ -6,6 +6,7 @@ import { toPrefixedHex } from '@/lib/utils';
 import { MerkleProof, WitnessInput } from '@/types';
 import { MembershipProof } from '@prisma/client';
 
+// Web worker to run proving and verification
 let worker: Comlink.Remote<typeof WrapperCircuit>;
 
 // Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46
@@ -29,6 +30,7 @@ function calculateSigRecovery(v: bigint, chainId?: bigint): boolean {
   }
 }
 
+// Concatenates Uint8Arrays into a single Uint8Array
 function concatUint8Arrays(arrays: Uint8Array[]) {
   // Calculate combined length
   let totalLength = 32 * arrays.length;
@@ -58,12 +60,12 @@ const bigIntToBytes = (x: bigint): Uint8Array => {
 
 export const useCircuit = () => {
   useEffect(() => {
-    // Initialize the web worker
-    worker = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
-    console.log('Preparing prover');
-    worker.prepare().then(() => {
-      console.log('Prover ready');
-    });
+    (async () => {
+      // Initialize the web worker
+      worker = Comlink.wrap(new Worker(new URL('../lib/worker.ts', import.meta.url)));
+      console.log('Preparing circuit');
+      await worker.prepare();
+    })();
   }, []);
 
   const prove = async (sig: Hex, message: string, merkleProof: MerkleProof): Promise<Hex> => {
@@ -72,7 +74,7 @@ export const useCircuit = () => {
     const { r, s, v } = hexToSignature(sig);
 
     if (!worker) {
-      throw new Error('Prover not initialized');
+      throw new Error('Circuit not initialized');
     }
 
     const sBytes = hexToBytes(s, {
@@ -110,7 +112,6 @@ export const useCircuit = () => {
     };
 
     const proof = await worker.prove(input);
-    console.log('Proof size in prove', proof.length);
     let end = Date.now();
     console.timeEnd('prove');
     window.alert('Proving took ' + (end - start) + 'ms');
@@ -120,15 +121,16 @@ export const useCircuit = () => {
 
   const verify = async (proof: MembershipProof): Promise<boolean> => {
     if (!worker) {
-      throw new Error('Prover not initialized');
+      throw new Error('Circuit not initialized');
     }
     const isVerified = await worker.verify(proof.proof as Hex);
     return isVerified;
   };
 
+  // Get the message hash from the proof's public inputs
   const getMsgHash = async (proof: Hex) => {
     if (!worker) {
-      throw new Error('Prover not initialized');
+      throw new Error('Circuit not initialized');
     }
     const msgHash = await worker.getMsgHash(proof);
     return msgHash;
