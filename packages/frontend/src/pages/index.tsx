@@ -4,7 +4,7 @@ import { useProve } from '@/hooks/useProve';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
-import SETS from '@/lib/sets';
+import SETS, { ROOT_TO_SET } from '@/lib/sets';
 import { Hex } from 'viem';
 import axios from 'axios';
 import {
@@ -22,6 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useGetUserProofs } from '@/hooks/useGetUserProofs';
+import { PublicInput } from '@personaelabs/spartan-ecdsa';
 
 // Get all addresses of the sets
 const getSets = async () => {
@@ -38,10 +40,14 @@ const getSets = async () => {
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [username, setUsername] = useState<string>('');
+
   // The set to prove membership
+  // TODO: multi-set proving
   const [selectedSet, setSelectedSet] = useState<string | undefined>();
   const [proving, setProving] = useState(false);
+
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
+  const [addedSets, setAddedSets] = useState<string[]>([]);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
@@ -51,6 +57,7 @@ export default function Home() {
   const { prove } = useProve();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
+  const getUserProofs = useGetUserProofs();
 
   // Update the eligible sets when the address changes
   useEffect(() => {
@@ -76,6 +83,39 @@ export default function Home() {
     })();
   }, [address]);
 
+  // Update the added creddd when the username changes
+  useEffect(() => {
+    (async () => {
+      // Retrieve sets associated with username from server
+      const getAddedSets = async () => {
+        if (!username) {
+          setAddedSets([]);
+          return;
+        }
+
+        console.log(username);
+        const data = await getUserProofs(username);
+
+        const _addedSets = data.map((proof: any) => {
+          const publicInput = PublicInput.deserialize(
+            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
+          );
+          const groupRoot = publicInput.circuitPubInput.merkleRoot;
+
+          return ROOT_TO_SET[groupRoot.toString()];
+        });
+
+        setAddedSets(_addedSets);
+      };
+
+      // Use a timer to debounce (500ms) the effect
+      const timer = setTimeout(() => {
+        getAddedSets();
+      }, 500);
+    })();
+  }, [username, getUserProofs]);
+
+  // TODO: do multi-prove
   const handleProveClick = useCallback(async () => {
     if (selectedSet && address) {
       // TODO: Add a timestamp to the message being signed?
@@ -122,48 +162,61 @@ export default function Home() {
           <CardDescription>Connect your addresses and add creddd to your name</CardDescription>
           {/* TODO: do a better job here of telling a user how to access all of their addresses. */}
         </CardHeader>
+
         <CardContent>
-          <form>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="name" />
+          <div className="grid w-full items-center gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                value={username}
+                id="name"
+                placeholder="name"
+              />
+              <p className="text-muted-foreground text-sm">
+                i.e. Twitter, Farcaster, Lens username
+              </p>
+            </div>
+
+            <div className="flex flex-col space-y-1.5">
+              {addedSets.length === 0 ? (
+                <Label>No added creddd for {username}</Label>
+              ) : (
+                <div>
+                  <Label>Added creddd</Label>
+                  <div className="">
+                    {addedSets.map((set) => (
+                      // TODO: display based on long name in set metadata
+                      <Badge key={set}>{set}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="framework">Eligible creddd</Label>
+
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="large-nft-trader" disabled />
+                  <Badge variant="outline">Large NFT Trader</Badge>
+                </div>
                 <p className="text-muted-foreground text-sm">
-                  i.e. Twitter, Farcaster, Lens username
+                  Connect account <code>0x321...321</code>
                 </p>
               </div>
 
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="framework">Added creddd</Label>
-                <div className="">
-                  <Badge>Large contract developer</Badge>
-                  <Badge>Genesis Staker</Badge>
-                  <Badge>Early validator</Badge>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="framework">Eligible creddd</Label>
-
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <Switch id="large-nft-trader" disabled />
-                    <Badge variant="outline">Large NFT Trader</Badge>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    Connect account <code>0x321...321</code>
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch id="nouns-forker" />
-                  <Badge variant="outline">Nouns Fork 0</Badge>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Switch id="nouns-forker" />
+                <Badge variant="outline">Nouns Fork 0</Badge>
               </div>
             </div>
-          </form>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button>Add</Button>
