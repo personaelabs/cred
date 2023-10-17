@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { MainButton } from '@/components/MainButton';
-import { useProve } from '@/hooks/useProve';
+import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
+import { SubmitData } from '@/types';
 import { Hex } from 'viem';
 import axios from 'axios';
 
@@ -28,6 +29,7 @@ export default function Home() {
   // The set to prove membership
   const [selectedSet, setSelectedSet] = useState<string | undefined>();
   const [proving, setProving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
 
   // Hash of the generate proof
@@ -35,7 +37,7 @@ export default function Home() {
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove } = useProve();
+  const { prove } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
 
@@ -73,25 +75,31 @@ export default function Home() {
       // Get the merkle proof from the backend
       const merkleProof = await getMerkleProof(selectedSet, address);
 
+      // Prove!
       let proof: Hex;
-      let publicInput: Hex;
       // When NEXT_PUBLIC_USE_TEST_PROOF is true, we skip the proving step and use dummy proof.
       // The backend is aware of this dummy proof and will accept it.
       // This is useful for testing the UI.
       if (process.env.NEXT_PUBLIC_USE_TEST_PROOF === 'true') {
         proof = '0x';
-        publicInput = '0x';
       } else {
         // Prove!
-        const result = await prove(sig, username, merkleProof);
-        proof = result.proof;
-        publicInput = result.publicInput;
+        proof = await prove(sig, username, merkleProof);
       }
+      setProving(false);
 
       // Submit the proof to the backend
-      const proofHash = await submitProof({ proof, publicInput, message, proofVersion: 'v2' });
+
+      const data: SubmitData = {
+        proof,
+        message,
+      };
+
+      setSubmitting(true);
+
+      const proofHash = await submitProof(data);
+      setSubmitting(false);
       setProofHash(proofHash);
-      setProving(false);
     }
   }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
 
@@ -153,6 +161,16 @@ export default function Home() {
             loading={proving}
           ></MainButton>
         </div>
+        {submitting && (
+          <div className="flex  justify-center">
+            Submitting proof
+            <>
+              <span className="dot1">.</span>
+              <span className="dot2">.</span>
+              <span className="dot3">.</span>
+            </>
+          </div>
+        )}
         <div className="flex  justify-center">
           {proofHash && (
             <div>

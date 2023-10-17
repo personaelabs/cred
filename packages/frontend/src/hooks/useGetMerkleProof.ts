@@ -1,4 +1,4 @@
-import { MerkleProof } from '@personaelabs/spartan-ecdsa';
+import { MerkleProof } from '@/types';
 import axios from 'axios';
 
 export const useGetMerkleProof = () => {

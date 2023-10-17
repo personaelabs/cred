@@ -15,14 +15,14 @@ const nextConfig = {
     'react-syntax-highlighter',
     'react-native',
   ],
-  webpack: (config) => {
+  webpack(config) {
     config.resolve.fallback = { fs: false, net: false, tls: false };
-    config.experiments = { asyncWebAssembly: true, layers: true };
-    config.plugins.push(
-      new FilterWarningsPlugin({
-        exclude: [/Critical dependency: the request of a dependency is an expression/],
-      }),
-    );
+    config.experiments = {
+      asyncWebAssembly: true,
+      layers: true,
+    };
+
+
     return config;
   },
 

@@ -16,6 +16,8 @@
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "axios": "^1.5.0",
+    "circuit-web": "../circuit/circuit-web",
+    "circuit-node": "../circuit/circuit-node",
     "comlink": "^4.4.1",
     "dotenv": "^16.3.1",
     "eslint": "8.49.0",
@@ -34,6 +36,7 @@
     "postcss": "^8.4.29",
     "prettier-plugin-tailwindcss": "^0.5.4",
     "prisma": "^5.3.1",
+    "wasm-pack": "^0.12.1",
     "webpack-filter-warnings-plugin": "^1.2.1"
   }
 }
