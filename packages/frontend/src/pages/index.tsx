@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 // Get all addresses of the sets
 const getSets = async () => {
@@ -108,58 +109,67 @@ export default function Home() {
   }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
 
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>Add creddd</CardTitle>
-        <CardDescription>Select a name and add personae</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="name" />
-              <p className="text-muted-foreground text-sm">
-                i.e. Twitter, Farcaster, Lens username
-              </p>
-            </div>
+    <main>
+      <nav className="flex justify-end">
+        <ConnectButton chainStatus={'none'} accountStatus={'address'} showBalance={false} />
+      </nav>
 
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Added personae</Label>
-              <div className="">
-                <Badge>Large contract developer</Badge>
-                <Badge>Genesis Staker</Badge>
-                <Badge>Early validator</Badge>
-              </div>
-            </div>
+      <br />
 
-            <Separator />
-
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Eligible personae</Label>
-
-              <div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="large-nft-trader" disabled />
-                  <Badge variant="outline">Large NFT Trader</Badge>
-                </div>
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Creddd</CardTitle>
+          <CardDescription>Connect your addresses and add creddd to your name</CardDescription>
+          {/* TODO: do a better job here of telling a user how to access all of their addresses. */}
+        </CardHeader>
+        <CardContent>
+          <form>
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" placeholder="name" />
                 <p className="text-muted-foreground text-sm">
-                  Connect account <code>0x321...321</code>
+                  i.e. Twitter, Farcaster, Lens username
                 </p>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch id="nouns-forker" />
-                <Badge variant="outline">Nouns Fork 0</Badge>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="framework">Added creddd</Label>
+                <div className="">
+                  <Badge>Large contract developer</Badge>
+                  <Badge>Genesis Staker</Badge>
+                  <Badge>Early validator</Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="framework">Eligible creddd</Label>
+
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="large-nft-trader" disabled />
+                    <Badge variant="outline">Large NFT Trader</Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Connect account <code>0x321...321</code>
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch id="nouns-forker" />
+                  <Badge variant="outline">Nouns Fork 0</Badge>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button>Add</Button>
-      </CardFooter>
-    </Card>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button>Add</Button>
+        </CardFooter>
+      </Card>
+    </main>
     // // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
     // <main className="flex min-h-screen w-full justify-center bg-gray-50">
     //   <div className="flex h-full w-full max-w-3xl flex-col gap-4 px-4 py-3 md:px-0 md:py-6 ">
