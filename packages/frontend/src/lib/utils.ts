@@ -1,6 +1,6 @@
-import { Hex } from 'viem';
-
-// Append the "0x" prefix to the string if it doesn't have it
-export const toPrefixedHex = (str: String): Hex => {
-  return (str.startsWith('0x') ? str : '0x' + str) as Hex;
-};
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+ 
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}

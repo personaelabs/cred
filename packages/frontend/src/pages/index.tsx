@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { MainButton } from '@/components/MainButton';
 import { useProve } from '@/hooks/useProve';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
@@ -9,6 +7,20 @@ import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
 import SETS from '@/lib/sets';
 import { Hex } from 'viem';
 import axios from 'axios';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 
 // Get all addresses of the sets
 const getSets = async () => {
@@ -96,71 +108,123 @@ export default function Home() {
   }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
 
   return (
-    // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
-    <main className="flex min-h-screen w-full justify-center bg-gray-50">
-      <div className="flex h-full w-full max-w-3xl flex-col gap-4 px-4 py-3 md:px-0 md:py-6 ">
-        <div className="mb-16 flex justify-end">
-          <ConnectButton
-            chainStatus={'none'}
-            accountStatus={'address'}
-            showBalance={false}
-          ></ConnectButton>
-        </div>
-        <div className="mb-2 flex justify-center">
-          <input
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
-            value={username}
-            className="border-b-2 bg-transparent"
-            type="text"
-            placeholder="username"
-          ></input>
-        </div>
-        <div className="mb-2 flex justify-center">
-          <select
-            className="border-2 bg-transparent"
-            onChange={(e) => {
-              setSelectedSet(e.target.value);
-            }}
-            value={selectedSet}
-            placeholder="Select a set"
-          >
-            <option value="" disabled selected={!selectedSet}>
-              Select a set
-            </option>
-            {eligibleSets.map((set) => (
-              // Render the eligible sets
-              <option key={set} value={set}>
-                {set} (eligible)
-              </option>
-            ))}
-            {
-              // Render the ineligible sets as disabled options
-              SETS.filter((set) => !eligibleSets.includes(set)).map((set) => (
-                <option key={set} value={set} disabled>
-                  {set} (ineligible)
-                </option>
-              ))
-            }
-          </select>
-        </div>
-        <div className="mb-2 flex justify-center">
-          <MainButton
-            message={proving ? 'Proving' : 'Prove'}
-            handler={handleProveClick}
-            disabled={!isConnected}
-            loading={proving}
-          ></MainButton>
-        </div>
-        <div className="flex  justify-center">
-          {proofHash && (
-            <div>
-              <p>Done! Proof hash: {proofHash}</p>
+    <Card className="w-[350px]">
+      <CardHeader>
+        <CardTitle>Add creddd</CardTitle>
+        <CardDescription>Select a name and add personae</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form>
+          <div className="grid w-full items-center gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" placeholder="name" />
+              <p className="text-muted-foreground text-sm">
+                i.e. Twitter, Farcaster, Lens username
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-    </main>
+
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="framework">Added personae</Label>
+              <div className="">
+                <Badge>Large contract developer</Badge>
+                <Badge>Genesis Staker</Badge>
+                <Badge>Early validator</Badge>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="framework">Eligible personae</Label>
+
+              <div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="large-nft-trader" disabled />
+                  <Badge variant="outline">Large NFT Trader</Badge>
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  Connect account <code>0x321...321</code>
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch id="nouns-forker" />
+                <Badge variant="outline">Nouns Fork 0</Badge>
+              </div>
+            </div>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button>Add</Button>
+      </CardFooter>
+    </Card>
+    // // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
+    // <main className="flex min-h-screen w-full justify-center bg-gray-50">
+    //   <div className="flex h-full w-full max-w-3xl flex-col gap-4 px-4 py-3 md:px-0 md:py-6 ">
+    //     <div className="mb-16 flex justify-end">
+    //       <ConnectButton
+    //         chainStatus={'none'}
+    //         accountStatus={'address'}
+    //         showBalance={false}
+    //       ></ConnectButton>
+    //     </div>
+    //     <div className="mb-2 flex justify-center">
+    //       <input
+    //         onChange={(e) => {
+    //           setUsername(e.target.value);
+    //         }}
+    //         value={username}
+    //         className="border-b-2 bg-transparent"
+    //         type="text"
+    //         placeholder="username"
+    //       ></input>
+    //     </div>
+    //     <div className="mb-2 flex justify-center">
+    //       <select
+    //         className="border-2 bg-transparent"
+    //         onChange={(e) => {
+    //           setSelectedSet(e.target.value);
+    //         }}
+    //         value={selectedSet}
+    //         placeholder="Select a set"
+    //       >
+    //         <option value="" disabled selected={!selectedSet}>
+    //           Select a set
+    //         </option>
+    //         {eligibleSets.map((set) => (
+    //           // Render the eligible sets
+    //           <option key={set} value={set}>
+    //             {set} (eligible)
+    //           </option>
+    //         ))}
+    //         {
+    //           // Render the ineligible sets as disabled options
+    //           SETS.filter((set) => !eligibleSets.includes(set)).map((set) => (
+    //             <option key={set} value={set} disabled>
+    //               {set} (ineligible)
+    //             </option>
+    //           ))
+    //         }
+    //       </select>
+    //     </div>
+    //     <div className="mb-2 flex justify-center">
+    //       <MainButton
+    //         message={proving ? 'Proving' : 'Prove'}
+    //         handler={handleProveClick}
+    //         disabled={!isConnected}
+    //         loading={proving}
+    //       ></MainButton>
+    //     </div>
+    //     <div className="flex  justify-center">
+    //       {proofHash && (
+    //         <div>
+    //           <p>Done! Proof hash: {proofHash}</p>
+    //         </div>
+    //       )}
+    //     </div>
+    //   </div>
+    // </main>
   );
 }
