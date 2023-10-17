@@ -33,8 +33,6 @@ export default function UserPage() {
 
       const data = await getUserProofs(handle);
 
-      // TODO: dedupe sets across data
-
       const addedSets = new Set<string>();
       data.forEach((proof: MembershipProof) => {
         const groupRoot = BigInt(proof.merkleRoot || 0).toString(10);
