@@ -32,29 +32,23 @@ export default function UserPage() {
       });
 
       const data = await getUserProofs(handle);
-      const sets = data.map((proof: MembershipProof) => {
-        const groupRoot = BigInt(proof.merkleRoot || 0).toString(10);
-        return ROOT_TO_SET[groupRoot];
-      });
 
-      // NOTE temporarily remove this indicator as 'union' isn't quite accurate
-      // const intersectionCount = await getCombinedAnonSet(sets);
-      // _cardAttributes.push({
-      //   label: 'anonymity set size',
-      //   type: 'text',
-      //   value: intersectionCount,
-      // });
+      // TODO: dedupe sets across data
 
+      const addedSets = new Set<string>();
       data.forEach((proof: MembershipProof) => {
-        // TODO: we're computing sets twice... above and here
         const groupRoot = BigInt(proof.merkleRoot || 0).toString(10);
         const set = ROOT_TO_SET[groupRoot];
 
-        _cardAttributes.push({
-          label: SET_METADATA[set].displayName,
-          type: 'url',
-          value: `${window.location.origin}/proof/${proof.proofHash}`,
-        });
+        if (!addedSets.has(set)) {
+          addedSets.add(set);
+
+          _cardAttributes.push({
+            label: SET_METADATA[set].displayName,
+            type: 'url',
+            value: `${window.location.origin}/proof/${proof.proofHash}`,
+          });
+        }
       });
 
       setCardAttributes(_cardAttributes);
