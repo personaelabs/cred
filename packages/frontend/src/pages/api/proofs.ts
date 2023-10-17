@@ -71,8 +71,19 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
   let proofHash: Hex = keccak256(proof);
 
   // Save the proof to the database. We save the proof the public input in hex format.
-  await prisma.membershipProof.create({
-    data: {
+  await prisma.membershipProof.upsert({
+    where: {
+      merkleRoot,
+      message,
+      proofHash,
+    },
+    update: {
+      proof,
+      publicInput: '',
+      proofHash,
+      proofVersion: 'v3', // We expect the submitted proof to be a V2 proof
+    },
+    create: {
       message,
       proof,
       merkleRoot,
