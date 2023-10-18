@@ -83,7 +83,7 @@ export const useCircuit = () => {
     const rBytes = hexToBytes(r, {
       size: 32,
     });
-    const isYOdd = !calculateSigRecovery(v);
+    const isYOdd = calculateSigRecovery(v);
     const msgHash = hashMessage(message, 'bytes');
     const siblings = concatUint8Arrays(
       merkleProof.siblings.map((sibling) => bigIntToBytes(sibling[0])),
