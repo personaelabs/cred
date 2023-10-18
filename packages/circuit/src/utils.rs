@@ -1,21 +1,28 @@
 use ark_ec::{AffineRepr, CurveGroup};
-use ark_ff::{Field, PrimeField};
+use ark_ff::{BigInteger, Field, PrimeField};
 use ark_secp256k1::Affine;
 use ark_secp256k1::Fq;
 use ark_secp256k1::Fr;
 use num_bigint::BigUint;
+
+// Recover the point from the x coordinate and the parity bit
+// following the SEC 1 spec https://www.secg.org/sec1-v2.pdf
+pub fn from_x(x: Fq, is_y_odd: bool) -> Affine {
+    let y_squared = x * x * x + Fq::from(7u32);
+    let y = y_squared.sqrt().unwrap();
+    if y.into_bigint().to_bits_le()[0] == !is_y_odd {
+        Affine::new(x, y)
+    } else {
+        Affine::new(x, -y)
+    }
+}
 
 // Compute `T` and `U` for efficient ECDSA verification
 pub fn efficient_ecdsa(msg_hash: BigUint, r: Fq, is_y_odd: bool) -> (Affine, Affine) {
     let g = Affine::generator();
 
     // Recover the `R` point
-    let r_ys = Affine::get_ys_from_x_unchecked(r);
-    let r_point = if is_y_odd {
-        Affine::new(r, r_ys.unwrap().0)
-    } else {
-        Affine::new(r, r_ys.unwrap().1)
-    };
+    let r_point = from_x(r, is_y_odd);
 
     let one = BigUint::from(1u32);
     let modulus = BigUint::from(Fr::MODULUS);
