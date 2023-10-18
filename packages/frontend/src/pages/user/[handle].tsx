@@ -14,40 +14,23 @@ import { MembershipProof } from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
+import { useGetUserSets } from '@/hooks/useGetUserSets';
 
 export default function UserPage() {
   const router = useRouter();
 
   const getUserProofs = useGetUserProofs();
-
-  const [sets, setSets] = useState<string[]>([]);
-  // const [proofs, setProofs] = useState<string[]>([]);
+  const { userSets, getUserSets } = useGetUserSets();
 
   const handle = router.query.handle as string;
 
   useEffect(() => {
-    const populateSetsAndProofs = async (handle: string) => {
-      const data = await getUserProofs(handle, true);
-
-      console.log(data);
-
-      const sets = data.map((proof: any) => {
-        const publicInput = PublicInput.deserialize(
-          Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-        );
-        const groupRoot = publicInput.circuitPubInput.merkleRoot;
-        return ROOT_TO_SET[groupRoot.toString()];
-      });
-
-      // TODO: set proofs for verification too
-
-      setSets(sets);
-    };
-
-    if (handle && sets.length === 0) {
-      populateSetsAndProofs(handle).catch(console.error);
+    if (handle) {
+      getUserSets(handle);
     }
-  }, [handle, getUserProofs, sets.length]);
+  }, [getUserSets, handle]);
+
+  // TODO: Verify the proofs
 
   return (
     <>
@@ -61,11 +44,11 @@ export default function UserPage() {
           <CardContent>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
-                {sets.length === 0 ? (
+                {userSets.length === 0 ? (
                   <Label>No creddd added for {handle}</Label>
                 ) : (
                   <div>
-                    {sets.map((set) => (
+                    {userSets.map((set) => (
                       <Badge key={set}>{SET_METADATA[set].displayName}</Badge>
                     ))}
                   </div>

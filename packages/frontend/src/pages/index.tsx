@@ -1,13 +1,10 @@
 import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
-import SETS, { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
-import { MainButton } from '@/components/MainButton';
+import SETS, { SET_METADATA } from '@/lib/sets';
 import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
-import { SubmitData } from '@/types';
-import { Hex } from 'viem';
 import axios from 'axios';
 import {
   Card,
@@ -25,7 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useGetUserProofs } from '@/hooks/useGetUserProofs';
-import { PublicInput } from '@personaelabs/spartan-ecdsa';
+import { useGetUserSets } from '@/hooks/useGetUserSets';
 
 // Get all addresses of the sets
 const getSets = async () => {
@@ -60,6 +57,7 @@ export default function Home() {
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
   const getUserProofs = useGetUserProofs();
+  const { userSets, getUserSets } = useGetUserSets();
 
   // Update the eligible sets when the address changes
   useEffect(() => {
@@ -95,32 +93,7 @@ export default function Home() {
           return;
         }
 
-        const data = await getUserProofs(username);
-
-        const _addedSets: string[] = [];
-
-        data.forEach((proof) => {
-          console.log(proof);
-          // We use the `PublicInput` class to extract the merkle root from
-          // v1 and v2 proofs.
-          if (proof.proofVersion === 'v1' || proof.proofVersion === 'v2') {
-            const publicInput = PublicInput.deserialize(
-              Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-            );
-            const groupRoot = publicInput.circuitPubInput.merkleRoot;
-
-            _addedSets.push(ROOT_TO_SET[groupRoot.toString()]);
-
-            // The `merkleRoot` field is available for v3 and v4 proofs
-          } else if (proof.proofVersion === 'v3' || proof.proofVersion === 'v4') {
-            const merkleRoot = BigInt(proof.merkleRoot as Hex).toString(10);
-            _addedSets.push(ROOT_TO_SET[merkleRoot]);
-          } else {
-            throw new Error(`Unknown proof version: ${proof.proofVersion}`);
-          }
-        });
-
-        setAddedSets(_addedSets);
+        getUserSets(username);
       };
 
       // Use a timer to debounce (500ms) the effect
@@ -128,7 +101,13 @@ export default function Home() {
         getAddedSets();
       }, 500);
     })();
-  }, [username, getUserProofs]);
+  }, [username, getUserProofs, getUserSets]);
+
+  useEffect(() => {
+    setAddedSets((sets) => {
+      return [...sets, ...userSets];
+    });
+  }, [userSets]);
 
   // TODO: do multi-prove if multiple cred at once
   const handleProveClick = useCallback(async () => {
