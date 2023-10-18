@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
-import { useProve } from '@/hooks/useProve';
+import SETS, { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
+import { MainButton } from '@/components/MainButton';
+import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
-import SETS, { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
+import { SubmitData } from '@/types';
 import { Hex } from 'viem';
 import axios from 'axios';
 import {
@@ -45,7 +47,7 @@ export default function Home() {
   // TODO: multi-set proving will change what we store here
   const [selectedSet, setSelectedSet] = useState<string | undefined>();
   const [proving, setProving] = useState(false);
-
+  const [submitting, setSubmitting] = useState(false);
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
   const [addedSets, setAddedSets] = useState<string[]>([]);
 
@@ -54,7 +56,7 @@ export default function Home() {
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove } = useProve();
+  const { prove } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
   const getUserProofs = useGetUserProofs();

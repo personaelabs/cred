@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex } from 'viem';
+import { Hex, bytesToHex } from 'viem';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

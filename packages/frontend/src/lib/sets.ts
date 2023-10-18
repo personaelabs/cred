@@ -4,6 +4,9 @@ const SETS = [
   'medium-nft-trader',
   'beacon-genesis-staker',
   'stateful-book-funder',
+  'first-10-genesis-beacon-staker',
+  'first-100-genesis-beacon-staker',
+  'first-500-genesis-beacon-staker',
 ];
 
 if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
@@ -64,6 +67,23 @@ export const ROOT_TO_SET: { [key: string]: string } = {
     'medium-nft-trader',
   '32893626359166759374764640345024293163603595235417547827182497770539418036871':
     'medium-nft-trader.dev',
+
+  // ############################
+  // V3 Merkle trees
+  // ############################
+
+  '46511958787527026809691315958526536035594790556580133454120287418098334534016':
+    'first-500-genesis-beacon-staker',
+  '23539758511038336202556418406686702247440357394619350490940634770077042433327':
+    'first-500-genesis-beacon-staker.dev',
+  '84500727442612315815480506634685401204695413691273914982770548734867756787409':
+    'first-10-genesis-beacon-staker',
+  '92105352822300594233992228132010526105997583551908812353326058468697041277101':
+    'first-10-genesis-beacon-staker.dev',
+  '61075398542718646949202689890645464710296897915397837451616485999642869428359':
+    'first-100-genesis-beacon-staker',
+  '52914449144721707502445942710891358968236203418271893003077179864723232694461':
+    'first-100-genesis-beacon-staker.dev',
 };
 export type SetMetadata = {
   count: number;
@@ -102,6 +122,25 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
     duneURL: 'https://dune.com/queries/3074856',
     description: 'Purchased a Stateful works Beacon Book Genesis Edition',
     displayName: 'Stateful Book Genesis Funder',
+  },
+
+  'first-10-genesis-beacon-staker': {
+    count: 10,
+    duneURL: 'https://dune.com/queries/3115358',
+    description: 'Was one of the first 10 beacon chain genesis stakers',
+    displayName: 'First 10 Beacon Chain Genesis Staker',
+  },
+  'first-100-genesis-beacon-staker': {
+    count: 100,
+    duneURL: 'https://dune.com/queries/3115461',
+    description: 'Was one of the first 100 beacon chain genesis stakers',
+    displayName: 'First 100 Beacon Chain Genesis Staker',
+  },
+  'first-500-genesis-beacon-staker': {
+    count: 500,
+    duneURL: 'https://dune.com/queries/3115466',
+    description: 'Was one of the first 500 beacon chain genesis stakers',
+    displayName: 'First 500 Beacon Chain Genesis Staker',
   },
 };
 
