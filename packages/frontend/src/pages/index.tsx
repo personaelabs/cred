@@ -102,7 +102,7 @@ export default function Home() {
       setSubmitting(false);
       setProofHash(proofHash);
     }
-  }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
+  }, [selectedSet, address, signMessageAsync, getMerkleProof, submitProof, prove]);
 
   return (
     // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx

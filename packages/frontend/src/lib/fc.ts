@@ -1,4 +1,4 @@
-import { publicClient } from '../pages/opClient';
+import { publicClient } from './opClient';
 import { fetchQuery, init } from '@airstack/node';
 import { FcProfile } from '@/types';
 
