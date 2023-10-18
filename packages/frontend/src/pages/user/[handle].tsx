@@ -1,26 +1,22 @@
 import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useGetUserProofs } from '@/hooks/useGetUserProofs';
-import { ROOT_TO_SET, SET_METADATA } from '@/lib/sets';
-import { MembershipProof } from '@prisma/client';
+import { SET_METADATA } from '@/lib/sets';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { PublicInput } from '@personaelabs/spartan-ecdsa';
+import { use, useEffect, useState } from 'react';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
+import { useCircuit } from '@/hooks/useCircuit';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function UserPage() {
   const router = useRouter();
 
-  const getUserProofs = useGetUserProofs();
+  const { userProofs, getUserProofs } = useGetUserProofs();
   const { userSets, getUserSets } = useGetUserSets();
+  const [verifyingProofs, setVerifyingProofs] = useState<boolean>(true);
+  const [verificationFailed, setVerificationFailed] = useState<boolean>(false);
+  const { verify } = useCircuit();
 
   const handle = router.query.handle as string;
 
@@ -28,9 +24,36 @@ export default function UserPage() {
     if (handle) {
       getUserSets(handle);
     }
-  }, [getUserSets, handle]);
+  }, [getUserProofs, getUserSets, handle]);
 
-  // TODO: Verify the proofs
+  useEffect(() => {
+    if (handle) {
+      getUserProofs(handle);
+    }
+  }, [handle, getUserProofs]);
+
+  // Verify proofs
+  useEffect(() => {
+    (async () => {
+      if (userProofs) {
+        let failed = false;
+        for (let i = 0; i < userProofs.length; i++) {
+          const proof = userProofs[i];
+          const verified = await verify(proof);
+          if (!verified) {
+            failed = true;
+            break;
+          }
+        }
+
+        if (failed) {
+          setVerificationFailed(true);
+        }
+
+        setVerifyingProofs(false);
+      }
+    })();
+  }, [userProofs, verify]);
 
   return (
     <>
@@ -38,7 +61,6 @@ export default function UserPage() {
         <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>{handle}</CardTitle>
-            {/* TODO: do a better job here of telling a user how to access all of their addresses. */}
           </CardHeader>
 
           <CardContent>
@@ -54,6 +76,21 @@ export default function UserPage() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="mt-4 flex items-center justify-center">
+              {verifyingProofs && (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Verifying</span>
+                </>
+              )}
+              {!verifyingProofs && !verificationFailed && (
+                <>
+                  <span>Verified!</span>
+                  <CheckCircle2 className="mr-2" color="green"></CheckCircle2>
+                </>
+              )}
+              {!verifyingProofs && verificationFailed && <p>Verification failed</p>}
             </div>
           </CardContent>
 

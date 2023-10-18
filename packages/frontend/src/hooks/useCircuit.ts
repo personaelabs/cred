@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
 import { WrappedCircuit } from '../lib/versionedCircuit';
 import * as Comlink from 'comlink';
@@ -120,13 +120,13 @@ export const useCircuit = () => {
     return bytesToHex(proof);
   };
 
-  const verify = async (proof: MembershipProof): Promise<boolean> => {
+  const verify = useCallback(async (proof: MembershipProof): Promise<boolean> => {
     if (!circuit) {
       throw new Error('Circuit not initialized');
     }
     const isVerified = await circuit.verify(proof);
     return isVerified;
-  };
+  }, []);
 
   // Get the message hash from the proof's public inputs
   const getMsgHash = async (proof: MembershipProof) => {

@@ -21,7 +21,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useGetUserProofs } from '@/hooks/useGetUserProofs';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
 
 // Get all addresses of the sets
@@ -56,7 +55,6 @@ export default function Home() {
   const { prove } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
-  const getUserProofs = useGetUserProofs();
   const { userSets, getUserSets } = useGetUserSets();
 
   // Update the eligible sets when the address changes
@@ -101,7 +99,7 @@ export default function Home() {
         getAddedSets();
       }, 500);
     })();
-  }, [username, getUserProofs, getUserSets]);
+  }, [username, getUserSets]);
 
   useEffect(() => {
     setAddedSets((sets) => {
