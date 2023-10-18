@@ -6,6 +6,7 @@ use sapir::{
         verify_merkle_proof, AffinePoint,
     },
     poseidon::constants::secp256k1_w3,
+    wasm::prelude::*,
 };
 
 pub const TREE_DEPTH: usize = 15;
@@ -14,6 +15,14 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
     // #############################################
     // Private inputs
     // #############################################
+
+    // `s` part of the fc account signature.
+    let s_fc = cs.alloc_pub_input();
+
+    // We bound the Farcaster account signature to this proof.
+    let s_fc_squared = s_fc * s_fc;
+
+    cs.expose_public(s_fc_squared);
 
     // `s` part of the signature
     let s_bits = cs.alloc_priv_inputs(256);
@@ -106,6 +115,8 @@ mod tests {
         let mut cs = ConstraintSystem::<_>::new();
         cs.set_constraints(&synthesizer);
 
+        let s_fc = F::from(333u32);
+        let s_fc_squared = s_fc * s_fc;
         let eff_ecdsa_input = mock_eff_ecdsa_input(42);
         let address = F::from(BigUint::from_bytes_be(
             &eff_ecdsa_input.address.to_fixed_bytes(),
@@ -147,6 +158,8 @@ mod tests {
         priv_input.extend_from_slice(&merkle_proof.siblings);
 
         let pub_input = [
+            to_cs_field(s_fc),
+            to_cs_field(s_fc_squared),
             to_cs_field(*eff_ecdsa_input.t.x().unwrap()),
             to_cs_field(*eff_ecdsa_input.t.y().unwrap()),
             to_cs_field(*eff_ecdsa_input.u.x().unwrap()),

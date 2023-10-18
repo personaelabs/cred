@@ -121,6 +121,7 @@ export function verify(proof_ser) {
 }
 
 /**
+* @param {Uint8Array} s_fc
 * @param {Uint8Array} s
 * @param {Uint8Array} r
 * @param {boolean} is_y_odd
@@ -130,27 +131,29 @@ export function verify(proof_ser) {
 * @param {Uint8Array} root
 * @returns {Uint8Array}
 */
-export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
+export function prove_membership(s_fc, s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        const ptr0 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
+        const ptr0 = passArray8ToWasm0(s_fc, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passArray8ToWasm0(r, wasm.__wbindgen_malloc);
+        const ptr1 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
-        const ptr2 = passArray8ToWasm0(msg_hash, wasm.__wbindgen_malloc);
+        const ptr2 = passArray8ToWasm0(r, wasm.__wbindgen_malloc);
         const len2 = WASM_VECTOR_LEN;
-        const ptr3 = passArray8ToWasm0(merkle_siblings, wasm.__wbindgen_malloc);
+        const ptr3 = passArray8ToWasm0(msg_hash, wasm.__wbindgen_malloc);
         const len3 = WASM_VECTOR_LEN;
-        const ptr4 = passArray8ToWasm0(merkle_indices, wasm.__wbindgen_malloc);
+        const ptr4 = passArray8ToWasm0(merkle_siblings, wasm.__wbindgen_malloc);
         const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
+        const ptr5 = passArray8ToWasm0(merkle_indices, wasm.__wbindgen_malloc);
         const len5 = WASM_VECTOR_LEN;
-        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        const ptr6 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
+        const len6 = WASM_VECTOR_LEN;
+        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, ptr2, len2, is_y_odd, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        var v7 = getArrayU8FromWasm0(r0, r1).slice();
+        var v8 = getArrayU8FromWasm0(r0, r1).slice();
         wasm.__wbindgen_free(r0, r1 * 1);
-        return v7;
+        return v8;
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
@@ -197,6 +200,26 @@ export function get_msg_hash(creddd_proof) {
         const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.get_msg_hash(retptr, ptr0, len0);
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var v2 = getArrayU8FromWasm0(r0, r1).slice();
+        wasm.__wbindgen_free(r0, r1 * 1);
+        return v2;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
+* @param {Uint8Array} creddd_proof
+* @returns {Uint8Array}
+*/
+export function get_fc_account_sig(creddd_proof) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.get_fc_account_sig(retptr, ptr0, len0);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         var v2 = getArrayU8FromWasm0(r0, r1).slice();

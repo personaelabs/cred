@@ -35,6 +35,7 @@ pub struct MembershipProof {
 
 #[wasm_bindgen]
 pub fn prove_membership(
+    s_fc: &[u8],
     s: &[u8],
     r: &[u8],
     is_y_odd: bool,
@@ -44,6 +45,8 @@ pub fn prove_membership(
     root: &[u8],
 ) -> Vec<u8> {
     // Deserialize the inputs
+    let s_fc = Fq::from(BigUint::from_bytes_be(s_fc));
+    let s_fc_squared = s_fc * s_fc;
     let s = Fr::from(BigUint::from_bytes_be(s));
     let r = Fq::from(BigUint::from_bytes_be(r));
     let msg_hash = BigUint::from_bytes_be(msg_hash);
@@ -84,6 +87,8 @@ pub fn prove_membership(
 
     // Construct the public input
     let pub_input = [
+        to_cs_field(s_fc),
+        to_cs_field(s_fc_squared),
         to_cs_field(t.x),
         to_cs_field(t.y),
         to_cs_field(u.x),
@@ -121,10 +126,10 @@ pub fn verify_membership(creddd_proof: &[u8]) -> bool {
         SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
     let pub_inputs = spartan_proof.pub_input.clone();
 
-    let tx = pub_inputs[0];
-    let ty = pub_inputs[1];
-    let ux = pub_inputs[2];
-    let uy = pub_inputs[3];
+    let tx = pub_inputs[2];
+    let ty = pub_inputs[3];
+    let ux = pub_inputs[4];
+    let uy = pub_inputs[5];
 
     let t = Affine::new(tx, ty);
     let u = Affine::new(ux, uy);
@@ -153,7 +158,7 @@ pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
     let spartan_proof =
         SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
     let pub_inputs = spartan_proof.pub_input.clone();
-    let root = pub_inputs[4];
+    let root = pub_inputs[6];
 
     root.into_bigint().to_bytes_be()
 }
@@ -163,6 +168,18 @@ pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
 pub fn get_msg_hash(creddd_proof: &[u8]) -> Vec<u8> {
     let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
     creddd_proof.msg_hash.to_bytes_be()
+}
+
+// Get the  message hash from the proof's public input
+#[wasm_bindgen]
+pub fn get_fc_account_sig(creddd_proof: &[u8]) -> Vec<u8> {
+    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
+    let spartan_proof =
+        SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
+    let pub_inputs = spartan_proof.pub_input.clone();
+    let fc_account_sig = pub_inputs[0];
+
+    fc_account_sig.into_bigint().to_bytes_be()
 }
 
 #[cfg(test)]
@@ -182,6 +199,7 @@ mod tests {
     fn bench_eth_membership() {
         prepare();
 
+        let s_fc = Fr::from(333u32);
         let (s, r, is_y_odd, msg_hash, _, address) = mock_sig(42);
         let address = F::from(BigUint::from_bytes_be(&address.to_fixed_bytes()));
 
@@ -200,6 +218,7 @@ mod tests {
 
         let merkle_proof: MerkleProof<F> = tree.create_proof(address);
 
+        let s_fc_bytes = s_fc.into_bigint().to_bytes_be();
         let s_bytes = s.into_bigint().to_bytes_be();
         let r_bytes = r.into_bigint().to_bytes_be();
         let msg_hash = msg_hash.to_bytes_be();
@@ -220,6 +239,7 @@ mod tests {
 
         let prover_timer = start_timer!(|| "prove");
         let proof = prove_membership(
+            &s_fc_bytes,
             &s_bytes,
             &r_bytes,
             is_y_odd,
