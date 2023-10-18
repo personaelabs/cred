@@ -70,8 +70,8 @@ export default function UserPage() {
                   <Label>No creddd added for {handle}</Label>
                 ) : (
                   <div>
-                    {userSets.map((set) => (
-                      <Badge key={set}>{SET_METADATA[set].displayName}</Badge>
+                    {userSets.map((set, i) => (
+                      <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
                     ))}
                   </div>
                 )}

@@ -183,8 +183,8 @@ export default function Home() {
                 <div>
                   <Label>Added creddd</Label>
                   <div className="">
-                    {addedSets.map((set) => (
-                      <Badge key={set}>{SET_METADATA[set].displayName}</Badge>
+                    {addedSets.map((set, i) => (
+                      <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
                     ))}
                   </div>
                 </div>
@@ -203,8 +203,8 @@ export default function Home() {
                   <div>
                     {eligibleSets
                       .filter((set) => !addedSets.includes(set))
-                      .map((set) => (
-                        <div key={set}>
+                      .map((set, i) => (
+                        <div key={i}>
                           <div className="flex items-center space-x-2">
                             <Switch id={set} />
                             <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
