@@ -12,6 +12,7 @@
     "@airstack/node": "^0.0.5",
     "@personaelabs/spartan-ecdsa": "^2.3.0",
     "@prisma/client": "^5.3.1",
+    "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-slot": "^1.0.2",
     "@rainbow-me/rainbowkit": "1.1.2",

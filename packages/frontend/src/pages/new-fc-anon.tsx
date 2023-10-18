@@ -13,6 +13,12 @@ import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { SubmitData } from '@/types';
 import { useFcProfile } from '@/hooks/useFcProfile';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 const CheckableButton = (props?: any) => (
   <Button color="#7c65c1" disabled={props?.check || props?.disabled}>
@@ -144,7 +150,32 @@ export default function FcAnon() {
             showBalance={false}
           ></ConnectButton>
         </div>
-        <div className="flex justify-center">
+        <div>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger> What’s this?</AccordionTrigger>
+              <AccordionContent>
+                <p>
+                  By linking an Ethereum address that satisfies a condition to your Farcaster
+                  account, you add credibility to your Farcaster account.
+                </p>
+                <br></br>
+                The zero-knowledge proof created on this pages demonstrates the following:
+                <br></br> &nbsp; 1. You own an Ethereum address that satisfies a condition (e.g.
+                first 100 Beacon depositors)
+                <br></br>
+                &nbsp;2. You own a Farcaster account with a designated recovery address/FID.
+                <br></br>
+                <br></br>
+                <p>
+                  This implies “linking” your Ethereum address that has certain credibility to your
+                  Farcaster account, without revealing the Ethereum address.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+        <div className="mt-8 flex justify-center">
           <select
             className="border-2 bg-transparent"
             onChange={(e) => {
@@ -159,16 +190,61 @@ export default function FcAnon() {
             ))}
           </select>
         </div>
+
         <Card>
           <CardHeader className="flex-row justify-between">
             <div>
-              <CardTitle className="text-xl">1. Verify source address</CardTitle>
+              <CardTitle className="text-xl">1. Create a Farcaster account</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p>
+              You can create a Farcaster account via{' '}
+              <a href="https://warpcast.com/" className="text-blue-500 underline">
+                Warpcast{' '}
+              </a>
+              or
+              <a href="https://flink.fyi/" className="text-blue-500 underline">
+                {' '}
+                flink
+              </a>
+              .
+            </p>
+            <p>Skip this step if you already have a Farcaster account.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex-row justify-between">
+            <div>
+              <CardTitle className="text-xl">2. Set a recovery address</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p>
+              By default, accounts created through Warpcast will haven an address controlled by
+              Warpcast as its recovery address.
+            </p>
+            <br></br>
+            <p>
+              Update the recovery address to an address that you control. This address should be
+              different from the <b>source address</b> that you use in Step 3.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex-row justify-between">
+            <div>
+              <CardTitle className="text-xl">3. Verify source address</CardTitle>
             </div>
             <CheckableButton onClick={signWithSourceAddress} check={sourceAccountSig !== null}>
               Sign
             </CheckableButton>
           </CardHeader>
           <CardContent>
+            <p>
+              Connect and sign with an Ethereum address to link to your Farcaster account. The
+              address will be kept private by zero-knowledge proof.
+            </p>
             {sourceAddress && (
               <div className="flex-col justify-center">
                 <div className="flex">
@@ -185,10 +261,7 @@ export default function FcAnon() {
         <Card>
           <CardHeader className="flex-row justify-between">
             <div>
-              <CardTitle className="text-xl">2. Verify Farcaster recovery address</CardTitle>
-              <CardDescription>
-                Please select a different address from the source account
-              </CardDescription>
+              <CardTitle className="text-xl">4. Verify Farcaster recovery address</CardTitle>
             </div>
             <div>
               <CheckableButton onClick={signWithRecoveryAddress} check={fid != null}>
@@ -197,6 +270,10 @@ export default function FcAnon() {
             </div>
           </CardHeader>
           <CardContent className="mt-4 flex-col justify-center">
+            <p>
+              Connect and sign with the recovery address from Step 2. This verifies that you control
+              the Farcaster account.
+            </p>
             <div>
               {fid && (
                 <div className="flex-col space-y-4">
