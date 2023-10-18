@@ -15,7 +15,7 @@ import { SubmitData } from '@/types';
 import { useFcProfile } from '@/hooks/useFcProfile';
 
 const CheckableButton = (props?: any) => (
-  <Button color="#7c65c1" {...props} disabled={props?.check || props?.disabled}>
+  <Button color="#7c65c1" disabled={props?.check || props?.disabled}>
     {props?.check && <Check className="mr-2 h-4 w-4"></Check>}
     {props.children}
   </Button>
@@ -191,7 +191,7 @@ export default function FcAnon() {
               </CardDescription>
             </div>
             <div>
-              <CheckableButton onClick={signWithRecoveryAddress} check={fid}>
+              <CheckableButton onClick={signWithRecoveryAddress} check={fid != null}>
                 Sign
               </CheckableButton>
             </div>
