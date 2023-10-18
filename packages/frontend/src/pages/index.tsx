@@ -68,7 +68,8 @@ export default function Home() {
   const handleProveClick = useCallback(async () => {
     if (selectedSet && address) {
       // TODO: Add a timestamp to the message being signed?
-      const message = username;
+      // const message = "I'm linking my Farcaster account to the set ";
+      const message = 'test';
       const sig = await signMessageAsync({ message });
 
       setProving(true);
@@ -84,7 +85,7 @@ export default function Home() {
         proof = '0x';
       } else {
         // Prove!
-        proof = await prove(sig, username, merkleProof);
+        proof = await prove(null, sig, message, merkleProof);
       }
       setProving(false);
 

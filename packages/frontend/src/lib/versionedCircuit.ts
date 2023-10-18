@@ -47,6 +47,7 @@ export const VersionedCircuit = {
 
   async prove(input: WitnessInput): Promise<Uint8Array> {
     const proof = await v3Circuit.prove_membership(
+      input.sFc,
       input.s,
       input.r,
       input.isYOdd,

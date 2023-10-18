@@ -68,15 +68,24 @@ export const useCircuit = () => {
     })();
   }, []);
 
-  const prove = async (sig: Hex, message: string, merkleProof: MerkleProof): Promise<Hex> => {
+  const prove = async (
+    fcAccountSig: Hex | null,
+    sig: Hex,
+    message: string,
+    merkleProof: MerkleProof,
+  ): Promise<Hex> => {
     console.log('Proving');
 
     const { r, s, v } = hexToSignature(sig);
+    const sFc = fcAccountSig ? hexToSignature(fcAccountSig).s : '0x0';
 
     if (!circuit) {
       throw new Error('Circuit not initialized');
     }
 
+    const sFcBytes = hexToBytes(sFc, {
+      size: 32,
+    });
     const sBytes = hexToBytes(s, {
       size: 32,
     });
@@ -105,6 +114,7 @@ export const useCircuit = () => {
     console.time('prove');
 
     const input: WitnessInput = {
+      sFc: sFcBytes,
       s: sBytes,
       r: rBytes,
       isYOdd,

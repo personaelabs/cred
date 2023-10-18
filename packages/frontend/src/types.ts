@@ -1,11 +1,14 @@
+import { MembershipProof } from '@prisma/client';
 import { Hex } from 'viem';
 
 export interface SubmitData {
   proof: Hex;
   message: string;
+  fcAccountSig?: Hex;
 }
 
 export interface WitnessInput {
+  sFc: Uint8Array;
   s: Uint8Array;
   r: Uint8Array;
   isYOdd: boolean;
@@ -37,4 +40,21 @@ export interface FullProof {
   publicInput: Hex;
   message: string;
   proofVersion: ProofVersion;
+}
+
+export interface ParsedFcAnonProof {
+  proof: Hex;
+  merkleRoot: bigint;
+  fcAddress: Hex;
+  fid: number;
+}
+
+export interface FcProfile {
+  name: string;
+  image: string;
+}
+
+export interface FcAnon {
+  profile: FcProfile;
+  proofs: MembershipProof[];
 }
