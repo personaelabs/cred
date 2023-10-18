@@ -87,7 +87,7 @@ export default function UserPage() {
               {!verifyingProofs && !verificationFailed && (
                 <>
                   <span>Verified!</span>
-                  <CheckCircle2 className="mr-2" color="green"></CheckCircle2>
+                  <CheckCircle2 className="ml-2" color="green"></CheckCircle2>
                 </>
               )}
               {!verifyingProofs && verificationFailed && <p>Verification failed</p>}
