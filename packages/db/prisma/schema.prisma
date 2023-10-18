@@ -17,6 +17,8 @@ model MembershipProof {
   publicInput  String
   merkleRoot   String?
   message      String
+  fcAccountSig String?
+  fid          Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
