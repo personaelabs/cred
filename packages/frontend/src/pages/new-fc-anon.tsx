@@ -221,13 +221,19 @@ export default function FcAnon() {
           </CardHeader>
           <CardContent>
             <p>
-              By default, accounts created through Warpcast will haven an address controlled by
-              Warpcast as its recovery address.
+              Set the recovery address to an address that you control. This address should be
+              different from the <b>source address</b> that you use in Step 3.
             </p>
             <br></br>
-            <p>
-              Update the recovery address to an address that you control. This address should be
-              different from the <b>source address</b> that you use in Step 3.
+            <p className="text-sm">
+              *By default, accounts created through Warpcast will haven an address controlled by
+              Warpcast as its recovery address. Please change this to an address that you control.
+              Go to{' '}
+              <b>
+                {' '}
+                Setting {'>'} Advanced {'>'} Change recovery address
+              </b>{' '}
+              in the Warpcast app.
             </p>
           </CardContent>
         </Card>
