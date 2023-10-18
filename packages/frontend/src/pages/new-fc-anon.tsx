@@ -249,7 +249,7 @@ export default function FcAnon() {
           <CardContent>
             <p>
               Connect and sign with an Ethereum address to link to your Farcaster account. The
-              address will be kept private by zero-knowledge proof.
+              address will be kept private through a zero-knowledge proof.
             </p>
             {sourceAddress && (
               <div className="flex-col justify-center">
