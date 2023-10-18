@@ -210,20 +210,21 @@ export default function Home() {
                   <Label htmlFor="framework">Eligible creddd</Label>
 
                   <div>
-                    {eligibleSets.map((set) => (
-                      // TODO: set badge name based on set
-                      <div key={set}>
-                        <div className="flex items-center space-x-2">
-                          <Switch id={set} />
-                          <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
-                        </div>
+                    {eligibleSets
+                      .filter((set) => !addedSets.includes(set))
+                      .map((set) => (
+                        <div key={set}>
+                          <div className="flex items-center space-x-2">
+                            <Switch id={set} />
+                            <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
+                          </div>
 
-                        {/* TODO: message when set doesn't correspond to selected address */}
-                        {/* <p className="text-muted-foreground text-sm">
+                          {/* TODO: message when set doesn't correspond to selected address */}
+                          {/* <p className="text-muted-foreground text-sm">
                           Use account <code>0x321...321</code>
                         </p> */}
-                      </div>
-                    ))}
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
