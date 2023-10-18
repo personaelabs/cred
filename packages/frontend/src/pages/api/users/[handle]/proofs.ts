@@ -15,6 +15,7 @@ export default async function getUserProofs(req: NextApiRequest, res: NextApiRes
       proofHash: true,
       publicInput: true,
       merkleRoot: true,
+      proofVersion: true,
     },
     where: {
       message: handle,

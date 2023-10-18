@@ -95,17 +95,29 @@ export default function Home() {
           return;
         }
 
-        console.log(username);
         const data = await getUserProofs(username);
 
-        // TODO: cache added sets?
-        const _addedSets = data.map((proof: any) => {
-          const publicInput = PublicInput.deserialize(
-            Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
-          );
-          const groupRoot = publicInput.circuitPubInput.merkleRoot;
+        const _addedSets: string[] = [];
 
-          return ROOT_TO_SET[groupRoot.toString()];
+        data.forEach((proof) => {
+          console.log(proof);
+          // We use the `PublicInput` class to extract the merkle root from
+          // v1 and v2 proofs.
+          if (proof.proofVersion === 'v1' || proof.proofVersion === 'v2') {
+            const publicInput = PublicInput.deserialize(
+              Buffer.from(proof.publicInput.replace('0x', ''), 'hex'),
+            );
+            const groupRoot = publicInput.circuitPubInput.merkleRoot;
+
+            _addedSets.push(ROOT_TO_SET[groupRoot.toString()]);
+
+            // The `merkleRoot` field is available for v3 and v4 proofs
+          } else if (proof.proofVersion === 'v3' || proof.proofVersion === 'v4') {
+            const merkleRoot = BigInt(proof.merkleRoot as Hex).toString(10);
+            _addedSets.push(ROOT_TO_SET[merkleRoot]);
+          } else {
+            throw new Error(`Unknown proof version: ${proof.proofVersion}`);
+          }
         });
 
         setAddedSets(_addedSets);
