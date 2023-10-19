@@ -5,6 +5,8 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { publicProvider } from 'wagmi/providers/public';
 import Script from 'next/script';
+import Head from 'next/head';
+import { Header } from '@/components/Header';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -31,10 +33,12 @@ export default function App({ Component, pageProps }: AppProps) {
       ></Script>
       <WagmiConfig config={config}>
         <RainbowKitProvider chains={chains}>
-          <div className="md:px-0 md:py-6">
-            <div className="mb-4 flex justify-center">
-              <Component {...pageProps} />
-            </div>
+          <Header></Header>
+          <Head>
+            <link type="favicon" rel="icon" href="/personae.ico" />
+          </Head>
+          <div className="mb-4 flex justify-center">
+            <Component {...pageProps} />
           </div>
         </RainbowKitProvider>
       </WagmiConfig>
