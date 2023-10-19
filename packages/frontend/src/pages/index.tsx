@@ -229,7 +229,11 @@ export default function Home() {
                   ) : (
                     <div>
                       <Label htmlFor="framework">Eligible creddd</Label>
-
+                      {selectedSets.length >= NUM_MERKLE_PROOFS && (
+                        <p className="text-sm">
+                          You can only add {NUM_MERKLE_PROOFS} creddd at a time
+                        </p>
+                      )}
                       <div>
                         {eligibleSets
                           // Filter out sets that have already been added
