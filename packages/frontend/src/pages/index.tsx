@@ -165,8 +165,7 @@ export default function Home() {
       <Card className="w-[450px]">
         <CardHeader>
           <CardTitle>Creddd</CardTitle>
-          <CardDescription>Connect your addresses and add creddd to your name</CardDescription>
-          {/* TODO: do a better job here of telling a user how to access all of their addresses. */}
+          <CardDescription>add creddd to your name from any of your addresses</CardDescription>
         </CardHeader>
 
         <CardContent>
