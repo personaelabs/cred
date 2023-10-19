@@ -122,6 +122,9 @@ export default function Home() {
         action: <ToastAction altText="close">Close</ToastAction>,
       });
 
+      // Re-fetch the user sets
+      getUserSets(username);
+
       setProofHash(proofHash);
     }
   }, [
@@ -131,6 +134,7 @@ export default function Home() {
     signMessageAsync,
     submitProof,
     toast,
+    getUserSets,
     getMerkleProof,
     proveV4,
   ]);
