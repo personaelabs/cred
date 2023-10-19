@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { MainButton } from '@/components/MainButton';
 import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
@@ -107,13 +106,6 @@ export default function Home() {
     // Copied the <main> and the <div> tag under it from https://github.com/personaelabs/noun-nyms/blob/main/packages/frontend/src/pages/index.tsx
     <main className="flex min-h-screen w-full justify-center bg-gray-50">
       <div className="flex h-full w-full max-w-3xl flex-col gap-4 px-4 py-3 md:px-0 md:py-6 ">
-        <div className="mb-16 flex justify-end">
-          <ConnectButton
-            chainStatus={'none'}
-            accountStatus={'address'}
-            showBalance={false}
-          ></ConnectButton>
-        </div>
         <div className="mb-2 flex justify-center">
           <input
             onChange={(e) => {
