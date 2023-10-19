@@ -193,6 +193,12 @@ export default function Home() {
               )}
             </div>
             <p className="text-muted-foreground text-sm">i.e. Twitter, Farcaster, Lens username</p>
+            {fetchingUserSet && (
+              <div className="flex items-center justify-center space-x-2">
+                <p>Searching</p>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              </div>
+            )}
             {userSets && (
               <>
                 <div className="flex flex-col space-y-1.5">
