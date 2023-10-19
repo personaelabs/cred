@@ -63,7 +63,7 @@ export default function Home() {
   // Update the eligible sets when the address changes
   useEffect(() => {
     (async () => {
-      if (address && userSets) {
+      if (address) {
         // Fetch all the addresses of the sets
         const sets = await getSets();
 
@@ -74,7 +74,7 @@ export default function Home() {
         const _eligibleSets = sets
           .filter((set) => set.addresses.includes(addressBI))
           // Filter out sets that have already been added
-          .filter((set) => !userSets.includes(set.set))
+          .filter((set) => !userSets?.includes(set.set))
           .map((set) => set.set);
 
         setEligibleSets(_eligibleSets);
@@ -172,6 +172,7 @@ export default function Home() {
                   onClick={() => {
                     resetUserSets();
                     setUsername('');
+                    setSelectedSets([]);
                   }}
                 >
                   Clear
@@ -216,58 +217,56 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-
-                <Separator />
-
-                <div className="flex flex-col space-y-1.5">
-                  {eligibleSets.length === 0 ? (
-                    <Label>No eligible creddd for connected addresses</Label>
-                  ) : (
-                    <div>
-                      <Label htmlFor="framework">Eligible creddd</Label>
-                      {selectedSets.length >= NUM_MERKLE_PROOFS && (
-                        <p className="text-sm">
-                          You can only add {NUM_MERKLE_PROOFS} creddd at a time
-                        </p>
-                      )}
-                      <div>
-                        {eligibleSets
-                          // Filter out sets that have already been added
-                          .filter((set) => !userSets.includes(set))
-                          .map((set, i) => (
-                            <div key={i}>
-                              <div className="mt-1 flex items-center space-x-2">
-                                <Switch
-                                  disabled={
-                                    fetchingUserSet ||
-                                    (!selectedSets.includes(set) &&
-                                      selectedSets.length >= NUM_MERKLE_PROOFS)
-                                  }
-                                  id={set}
-                                  checked={selectedSets.includes(set)}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      setSelectedSets((sets) => [...sets, set]);
-                                    } else {
-                                      setSelectedSets((sets) => sets.filter((s) => s !== set));
-                                    }
-                                  }}
-                                />
-                                <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
-                              </div>
-
-                              {/* TODO: message when set doesn't correspond to selected address */}
-                              {/* <p className="text-muted-foreground text-sm">
-                          Use account <code>0x321...321</code>
-                        </p> */}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
               </>
             )}
+
+            <Separator />
+
+            <div className="flex flex-col space-y-1.5">
+              {eligibleSets.length === 0 ? (
+                <Label>No eligible creddd for connected addresses</Label>
+              ) : (
+                <div>
+                  <Label htmlFor="framework">Eligible creddd</Label>
+                  {selectedSets.length >= NUM_MERKLE_PROOFS && (
+                    <p className="text-sm">You can only add {NUM_MERKLE_PROOFS} creddd at a time</p>
+                  )}
+                  <div>
+                    {eligibleSets
+                      // Filter out sets that have already been added
+                      .filter((set) => !userSets?.includes(set))
+                      .map((set, i) => (
+                        <div key={i}>
+                          <div className="mt-1 flex items-center space-x-2">
+                            <Switch
+                              disabled={
+                                fetchingUserSet ||
+                                (!selectedSets.includes(set) &&
+                                  selectedSets.length >= NUM_MERKLE_PROOFS)
+                              }
+                              id={set}
+                              checked={selectedSets.includes(set)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedSets((sets) => [...sets, set]);
+                                } else {
+                                  setSelectedSets((sets) => sets.filter((s) => s !== set));
+                                }
+                              }}
+                            />
+                            <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
+                          </div>
+
+                          {/* TODO: message when set doesn't correspond to selected address */}
+                          {/* <p className="text-muted-foreground text-sm">
+                          Use account <code>0x321...321</code>
+                        </p> */}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
