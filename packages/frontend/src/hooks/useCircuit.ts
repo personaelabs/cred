@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Hex, bytesToHex, hashMessage, hexToBytes, hexToSignature } from 'viem';
 import { WrappedCircuit } from '../lib/versionedCircuit';
 import * as Comlink from 'comlink';
@@ -62,6 +62,8 @@ const bigIntToBytes = (x: bigint): Uint8Array => {
 };
 
 export const useCircuit = () => {
+  const [proving, setProving] = useState<boolean>(false);
+
   useEffect(() => {
     (async () => {
       // Initialize the web worker
@@ -72,8 +74,8 @@ export const useCircuit = () => {
   }, []);
 
   const proveV4 = async (sig: Hex, message: string, merkleProofs: MerkleProof[]): Promise<Hex> => {
+    setProving(true);
     console.log('Proving');
-    console.log('merkleProofs', merkleProofs);
     const { r, s, v } = hexToSignature(sig);
 
     if (!circuit) {
@@ -137,6 +139,8 @@ export const useCircuit = () => {
     const proof = await circuit.proveV4(input);
     console.timeEnd('prove');
 
+    setProving(false);
+
     return bytesToHex(proof);
   };
 
@@ -148,5 +152,5 @@ export const useCircuit = () => {
     return isVerified;
   }, []);
 
-  return { proveV4, verify };
+  return { proveV4, verify, proving };
 };

@@ -45,7 +45,6 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
 
   // The set to prove membership
-  const [proving, setProving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
   const [selectedSets, setSelectedSets] = useState<string[]>([]);
@@ -54,8 +53,8 @@ export default function Home() {
   const [proofHash, setProofHash] = useState<string | undefined>();
   const { signMessageAsync } = useSignMessage();
 
-  const { proveV4 } = useCircuit();
-  const submitProof = useSubmitProof();
+  const { proveV4, proving } = useCircuit();
+  const { submitProof, submittingProof } = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
   const { userSets, getUserSets, fetchingUserSet, resetUserSets } = useGetUserSets();
 
@@ -88,8 +87,6 @@ export default function Home() {
       const message = username;
       const sig = await signMessageAsync({ message });
 
-      setProving(true);
-
       // Get the merkle proof from the backend
       const merkleProofs = await Promise.all(
         selectedSets.map((set) => {
@@ -116,11 +113,10 @@ export default function Home() {
       //Submit the proof to the backend
       const proofHash = await submitProof({ proof, message });
       setProofHash(proofHash);
-      setProving(false);
     }
   }, [selectedSets, address, username, signMessageAsync, submitProof, getMerkleProof, proveV4]);
 
-  const readyToProve = selectedSets.length > 0 && isConnected && !proving;
+  const readyToProve = selectedSets.length > 0 && isConnected && !proving && !submittingProof;
   return (
     <main>
       <nav className="flex justify-end">
@@ -249,20 +245,19 @@ export default function Home() {
           {userSets && (
             <>
               <Button onClick={handleProveClick} disabled={!readyToProve}>
-                {proving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {proving ? 'Adding' : 'Add'}
+                {(proving || submittingProof) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {proving ? 'Proving' : submittingProof ? 'Submitting' : 'Add'}
               </Button>
+
               <div>
-                {!proofHash && (
-                  <a
-                    className="text-sm"
-                    href={`/user/${username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View profile
-                  </a>
-                )}
+                <a
+                  className="text-sm underline"
+                  href={`/user/${username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View profile
+                </a>
               </div>
             </>
           )}
