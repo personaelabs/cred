@@ -51,7 +51,6 @@ export default function Home() {
   const [selectedSets, setSelectedSets] = useState<string[]>([]);
 
   // Hash of the generate proof
-  const [proofHash, setProofHash] = useState<string | undefined>();
   const { signMessageAsync } = useSignMessage();
 
   const { proveV4, proving } = useCircuit();
@@ -114,7 +113,7 @@ export default function Home() {
       }
 
       //Submit the proof to the backend
-      const proofHash = await submitProof({ proof, message });
+      await submitProof({ proof, message });
       toast({
         title: 'Added creddd',
         duration: 60000, // 1 minute.
@@ -123,8 +122,6 @@ export default function Home() {
 
       // Re-fetch the user sets
       getUserSets(username);
-
-      setProofHash(proofHash);
     }
   }, [
     selectedSets,
