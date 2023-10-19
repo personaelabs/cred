@@ -155,8 +155,8 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
   'protocol-guild': {
     count: 152,
     duneURL: 'https://app.splits.org/accounts/0x84af3D5824F0390b9510440B6ABB5CC02BB68ea1/',
-    description: 'Protocol Guild',
-    displayName: 'Protocol Guild',
+    description: 'Protocol Guild ',
+    displayName: 'Protocol Guild (snapshot block: 18387780)',
   },
 };
 
