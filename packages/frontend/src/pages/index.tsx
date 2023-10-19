@@ -148,7 +148,7 @@ export default function Home() {
   return (
     <main>
       <nav className="flex justify-end">
-        <ConnectButton chainStatus={'none'} accountStatus={'address'} showBalance={false} />
+        <ConnectButton accountStatus={'address'} showBalance={false} />
       </nav>
 
       <br />
