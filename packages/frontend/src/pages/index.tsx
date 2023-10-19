@@ -275,7 +275,7 @@ export default function Home() {
             <>
               <Button onClick={handleProveClick} disabled={!readyToProve}>
                 {(proving || submittingProof) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {proving ? 'Proving' : submittingProof ? 'Submitting' : 'Add'}
+                {proving ? 'Proving' : submittingProof ? 'Submitting' : 'Save'}
               </Button>
 
               <div>
