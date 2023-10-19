@@ -10,3 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export const toPrefixedHex = (str: String): Hex => {
   return (str.includes('0x') ? str : '0x' + str) as Hex;
 };
+
+export const trimAddress = (address: Hex): Hex => {
+  return (address.slice(0, 6) + '...' + address.slice(-4)) as Hex;
+};

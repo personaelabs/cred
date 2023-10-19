@@ -5,6 +5,7 @@ import { useCircuit } from '@/hooks/useCircuit';
 import { useSubmitProof } from '@/hooks/useSubmitProof';
 import { useCallback, useState } from 'react';
 import { useGetMerkleProof } from '@/hooks/useGetMerkleProof';
+import { useConnectedAccounts } from '@/hooks/useAccounts';
 import axios from 'axios';
 import {
   Card,
@@ -21,11 +22,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
 import { Hex } from 'viem';
 import { Loader2 } from 'lucide-react';
 import { ToastAction } from '@radix-ui/react-toast';
+import { trimAddress } from '@/lib/utils';
 
 // Number of Merkle proofs that can be proven at once
 const NUM_MERKLE_PROOFS = 4;
@@ -46,8 +49,9 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const [username, setUsername] = useState<string>('');
 
+  // Mapping of set to the address that's in the set
+  const [eligibleSets, setEligibleSets] = useState<[string, Hex][]>([]);
   // The set to prove membership
-  const [eligibleSets, setEligibleSets] = useState<string[]>([]);
   const [selectedSets, setSelectedSets] = useState<string[]>([]);
 
   // Hash of the generate proof
@@ -60,6 +64,8 @@ export default function Home() {
 
   const { toast } = useToast();
 
+  const { connectedAccounts } = useConnectedAccounts(isConnected);
+
   // Update the eligible sets when the address changes
   useEffect(() => {
     (async () => {
@@ -67,22 +73,29 @@ export default function Home() {
         // Fetch all the addresses of the sets
         const sets = await getSets();
 
-        // The addresses returned from the backend are in base 10 string format
-        const addressBI = BigInt(address).toString(10);
-
         // Get the eligible sets
-        const _eligibleSets = sets
-          .filter((set) => set.addresses.includes(addressBI))
-          // Filter out sets that have already been added
-          .filter((set) => !userSets?.includes(set.set))
-          .map((set) => set.set);
+        const _eligibleSets: [string, Hex][] = [];
+
+        for (let i = 0; i < connectedAccounts.length; i++) {
+          const connectedAddress = connectedAccounts[i];
+          const connectedAddressBI = BigInt(connectedAddress).toString(10);
+          _eligibleSets.push(
+            ...(sets
+              .filter((set) => set.addresses.includes(connectedAddressBI))
+              // Filter out sets that have already been added
+              .filter((set) => !userSets?.includes(set.set))
+              .map((set) => [set.set, connectedAddress]) as [string, Hex][]),
+          );
+        }
 
         setEligibleSets(_eligibleSets);
+        setSelectedSets([]);
       } else {
         setEligibleSets([]);
+        setSelectedSets([]);
       }
     })();
-  }, [address, userSets]);
+  }, [address, connectedAccounts, userSets]);
 
   const handleProveClick = useCallback(async () => {
     if (selectedSets && address) {
@@ -144,7 +157,7 @@ export default function Home() {
 
       <br />
 
-      <Card className="w-[350px]">
+      <Card className="w-[450px]">
         <CardHeader>
           <CardTitle>Creddd</CardTitle>
           <CardDescription>Connect your addresses and add creddd to your name</CardDescription>
@@ -234,27 +247,43 @@ export default function Home() {
                   <div>
                     {eligibleSets
                       // Filter out sets that have already been added
-                      .filter((set) => !userSets?.includes(set))
-                      .map((set, i) => (
+                      .filter(([set, _]) => !userSets?.includes(set))
+                      .map(([set, eligibleAddr], i) => (
                         <div key={i}>
                           <div className="mt-1 flex items-center space-x-2">
-                            <Switch
-                              disabled={
-                                fetchingUserSet ||
-                                (!selectedSets.includes(set) &&
-                                  selectedSets.length >= NUM_MERKLE_PROOFS)
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Switch
+                                    disabled={
+                                      address !== eligibleAddr ||
+                                      fetchingUserSet ||
+                                      (!selectedSets.includes(set) &&
+                                        selectedSets.length >= NUM_MERKLE_PROOFS)
+                                    }
+                                    id={set}
+                                    checked={selectedSets.includes(set)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setSelectedSets((sets) => [...sets, set]);
+                                      } else {
+                                        setSelectedSets((sets) => sets.filter((s) => s !== set));
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              </TooltipTrigger>
+                              {
+                                // Only show tooltip for addresses that are not currently connected
+                                address !== eligibleAddr && (
+                                  <TooltipContent>
+                                    <p>Please switch account</p>
+                                  </TooltipContent>
+                                )
                               }
-                              id={set}
-                              checked={selectedSets.includes(set)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedSets((sets) => [...sets, set]);
-                                } else {
-                                  setSelectedSets((sets) => sets.filter((s) => s !== set));
-                                }
-                              }}
-                            />
+                            </Tooltip>
                             <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
+                            <p>{trimAddress(eligibleAddr)}</p>
                           </div>
 
                           {/* TODO: message when set doesn't correspond to selected address */}
