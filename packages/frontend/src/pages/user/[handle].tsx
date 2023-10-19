@@ -64,34 +64,43 @@ export default function UserPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                {userSets.length === 0 ? (
-                  <Label>No creddd added for {handle}</Label>
-                ) : (
-                  <div>
-                    {userSets.map((set, i) => (
-                      <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
-                    ))}
-                  </div>
-                )}
+            {!userSets ? (
+              <div className="flex w-full items-center justify-center">
+                Loading
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
               </div>
-            </div>
-            <div className="mt-4 flex items-center justify-center">
-              {verifyingProofs && (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Verifying</span>
-                </>
-              )}
-              {!verifyingProofs && !verificationFailed && (
-                <>
-                  <span>Verified!</span>
-                  <CheckCircle2 className="ml-2" color="green"></CheckCircle2>
-                </>
-              )}
-              {!verifyingProofs && verificationFailed && <p>Verification failed</p>}
-            </div>
+            ) : (
+              <>
+                <div className="grid w-full items-center gap-4">
+                  <div className="flex flex-col space-y-1.5">
+                    {userSets.length === 0 ? (
+                      <Label>No creddd added for {handle}</Label>
+                    ) : (
+                      <div>
+                        {userSets.map((set, i) => (
+                          <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-center">
+                  {verifyingProofs && (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Verifying</span>
+                    </>
+                  )}
+                  {!verifyingProofs && !verificationFailed && (
+                    <>
+                      <span>Verified!</span>
+                      <CheckCircle2 className="ml-2" color="green"></CheckCircle2>
+                    </>
+                  )}
+                  {!verifyingProofs && verificationFailed && <p>Verification failed</p>}
+                </div>
+              </>
+            )}
           </CardContent>
 
           <CardFooter>{/* TODO: verifying loader or verified message */}</CardFooter>
