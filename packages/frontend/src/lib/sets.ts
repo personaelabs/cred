@@ -1,5 +1,6 @@
 // NOTE: order in this array determines the order in the UI
 const SETS = [
+  'protocol-guild',
   'beacon-genesis-staker',
 
   'first-10-genesis-beacon-staker',
@@ -13,7 +14,6 @@ const SETS = [
   'medium-nft-trader',
 
   'nouns-forker',
-  'protocol-guild',
 ];
 
 if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {
