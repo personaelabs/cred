@@ -288,11 +288,6 @@ export default function Home() {
                               address !== eligibleAddr && <p>{trimAddress(eligibleAddr)}</p>
                             }
                           </div>
-
-                          {/* TODO: message when set doesn't correspond to selected address */}
-                          {/* <p className="text-muted-foreground text-sm">
-                          Use account <code>0x321...321</code>
-                        </p> */}
                         </div>
                       ))}
                   </div>
