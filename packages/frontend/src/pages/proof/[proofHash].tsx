@@ -96,7 +96,7 @@ export default function ProofPage() {
 
   return (
     <>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm bg-gray-50">
         <AttributeCard attributes={proofAttributes} />
         <div className="flex  justify-center">
           <MainButton

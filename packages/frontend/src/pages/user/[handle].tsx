@@ -67,7 +67,7 @@ export default function UserPage() {
 
   return (
     <>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm bg-gray-50">
         <AttributeCard attributes={cardAttributes} />
       </div>
     </>
