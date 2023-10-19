@@ -20,10 +20,12 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
 import { Hex } from 'viem';
 import { Loader2 } from 'lucide-react';
+import { ToastAction } from '@radix-ui/react-toast';
 
 // Number of Merkle proofs that can be proven at once
 const NUM_MERKLE_PROOFS = 4;
@@ -57,6 +59,8 @@ export default function Home() {
   const { submitProof, submittingProof } = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
   const { userSets, getUserSets, fetchingUserSet, resetUserSets } = useGetUserSets();
+
+  const { toast } = useToast();
 
   // Update the eligible sets when the address changes
   useEffect(() => {
@@ -112,9 +116,24 @@ export default function Home() {
 
       //Submit the proof to the backend
       const proofHash = await submitProof({ proof, message });
+      toast({
+        title: 'Added creddd',
+        duration: 60000, // 1 minute.
+        action: <ToastAction altText="close">Close</ToastAction>,
+      });
+
       setProofHash(proofHash);
     }
-  }, [selectedSets, address, username, signMessageAsync, submitProof, getMerkleProof, proveV4]);
+  }, [
+    selectedSets,
+    address,
+    username,
+    signMessageAsync,
+    submitProof,
+    toast,
+    getMerkleProof,
+    proveV4,
+  ]);
 
   const readyToProve = selectedSets.length > 0 && isConnected && !proving && !submittingProof;
   return (

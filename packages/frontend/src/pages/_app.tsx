@@ -5,6 +5,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { publicProvider } from 'wagmi/providers/public';
 import Script from 'next/script';
+import { Toaster } from '@/components/ui/toaster';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -34,6 +35,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <div className="md:px-0 md:py-6">
             <div className="mb-4 flex justify-center">
               <Component {...pageProps} />
+              <Toaster />
             </div>
           </div>
         </RainbowKitProvider>
