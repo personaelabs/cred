@@ -1,12 +1,18 @@
+// NOTE: order in this array determines the order in the UI
 const SETS = [
-  'nouns-forker',
-  'large-contract-deployer',
-  'medium-nft-trader',
   'beacon-genesis-staker',
-  'stateful-book-funder',
+
   'first-10-genesis-beacon-staker',
   'first-100-genesis-beacon-staker',
   'first-500-genesis-beacon-staker',
+
+  'stateful-book-funder',
+
+  'large-contract-deployer',
+
+  'medium-nft-trader',
+
+  'nouns-forker',
 ];
 
 if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production') {

@@ -88,6 +88,11 @@ export default function Home() {
           );
         }
 
+        // reorder eligible sets according to preset order
+        _eligibleSets.sort((a, b) => {
+          return SETS.indexOf(a[0]) - SETS.indexOf(b[0]);
+        });
+
         setEligibleSets(_eligibleSets);
         setSelectedSets([]);
       } else {
