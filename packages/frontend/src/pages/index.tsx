@@ -188,7 +188,9 @@ export default function Home() {
                   <Label>Added creddd</Label>
                   <div className="">
                     {selectedSets.map((set, i) => (
-                      <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
+                      <Badge className="mt-1" key={i}>
+                        {SET_METADATA[set].displayName}
+                      </Badge>
                     ))}
                   </div>
                 </div>
@@ -207,7 +209,7 @@ export default function Home() {
                   <div>
                     {eligibleSets.map((set, i) => (
                       <div key={i}>
-                        <div className="flex items-center space-x-2">
+                        <div className="mt-1 flex items-center space-x-2">
                           <Switch
                             disabled={
                               !selectedSets.includes(set) &&
