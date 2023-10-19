@@ -33,7 +33,10 @@ function calculateSigRecovery(v: bigint, chainId?: bigint): boolean {
 // Concatenates Uint8Arrays into a single Uint8Array
 function concatUint8Arrays(arrays: Uint8Array[]) {
   // Calculate combined length
-  let totalLength = 32 * arrays.length;
+  let totalLength = 0;
+  for (let array of arrays) {
+    totalLength += array.length;
+  }
 
   // Create a new array with the total length
   let result = new Uint8Array(totalLength);
@@ -42,7 +45,7 @@ function concatUint8Arrays(arrays: Uint8Array[]) {
   let offset = 0;
   for (let array of arrays) {
     result.set(array, offset);
-    offset += 32;
+    offset += array.length;
   }
 
   return result;
@@ -68,9 +71,9 @@ export const useCircuit = () => {
     })();
   }, []);
 
-  const prove = async (sig: Hex, message: string, merkleProof: MerkleProof): Promise<Hex> => {
+  const proveV4 = async (sig: Hex, message: string, merkleProofs: MerkleProof[]): Promise<Hex> => {
     console.log('Proving');
-
+    console.log('merkleProofs', merkleProofs);
     const { r, s, v } = hexToSignature(sig);
 
     if (!circuit) {
@@ -85,22 +88,39 @@ export const useCircuit = () => {
     });
     const isYOdd = calculateSigRecovery(v);
     const msgHash = hashMessage(message, 'bytes');
-    const siblings = concatUint8Arrays(
-      merkleProof.siblings.map((sibling) => bigIntToBytes(sibling[0])),
-    );
+    const siblings = [];
 
-    const indices = concatUint8Arrays(
-      merkleProof.pathIndices.map((index) => {
-        if (index === 1) {
-          let bytes = new Uint8Array(32);
-          bytes[31] = 1;
-          return bytes;
-        }
-        return new Uint8Array(32);
-      }),
-    );
+    for (let i = 0; i < merkleProofs.length; i++) {
+      const merkleProof = merkleProofs[i];
+      const siblings_i = concatUint8Arrays(
+        merkleProof.siblings.map((sibling) => bigIntToBytes(sibling[0])),
+      );
+      siblings.push(siblings_i);
+    }
 
-    const root = bigIntToBytes(merkleProof.root);
+    const indices = [];
+    for (let i = 0; i < merkleProofs.length; i++) {
+      const merkleProof = merkleProofs[i];
+      const pathIndices_i = concatUint8Arrays(
+        merkleProof.pathIndices.map((index) => {
+          if (index === 1) {
+            let bytes = new Uint8Array(32);
+            bytes[31] = 1;
+            return bytes;
+          }
+          return new Uint8Array(32);
+        }),
+      );
+
+      indices.push(pathIndices_i);
+    }
+
+    const roots = [];
+    for (let i = 0; i < merkleProofs.length; i++) {
+      const merkleProof = merkleProofs[i];
+      const root_i = bigIntToBytes(merkleProof.root);
+      roots.push(root_i);
+    }
 
     console.time('prove');
 
@@ -109,12 +129,12 @@ export const useCircuit = () => {
       r: rBytes,
       isYOdd,
       msgHash,
-      siblings,
-      indices,
-      root,
+      siblings: concatUint8Arrays(siblings),
+      indices: concatUint8Arrays(indices),
+      roots: concatUint8Arrays(roots),
     };
 
-    const proof = await circuit.prove(input);
+    const proof = await circuit.proveV4(input);
     console.timeEnd('prove');
 
     return bytesToHex(proof);
@@ -128,14 +148,5 @@ export const useCircuit = () => {
     return isVerified;
   }, []);
 
-  // Get the message hash from the proof's public inputs
-  const getMsgHash = async (proof: MembershipProof) => {
-    if (!circuit) {
-      throw new Error('Circuit not initialized');
-    }
-    const msgHash = await circuit.getMsgHash(proof);
-    return msgHash;
-  };
-
-  return { prove, verify, getMsgHash };
+  return { proveV4, verify };
 };

@@ -12,7 +12,7 @@ export interface WitnessInput {
   msgHash: Uint8Array;
   siblings: Uint8Array;
   indices: Uint8Array;
-  root: Uint8Array;
+  roots: Uint8Array;
 }
 
 export interface PublicInput {

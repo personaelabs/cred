@@ -22,6 +22,10 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
+import { Hex } from 'viem';
+
+// Number of Merkle proofs that can be proven at once
+const NUM_MERKLE_PROOFS = 4;
 
 // Get all addresses of the sets
 const getSets = async () => {
@@ -40,19 +44,17 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
 
   // The set to prove membership
-  // TODO: multi-set proving will change what we store here
-  const [selectedSet, setSelectedSet] = useState<string | undefined>();
   const [proving, setProving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
-  const [addedSets, setAddedSets] = useState<string[]>([]);
+  const [selectedSets, setSelectedSets] = useState<string[]>([]);
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
 
   const { signMessageAsync } = useSignMessage();
 
-  const { prove } = useCircuit();
+  const { proveV4 } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
   const { userSets, getUserSets } = useGetUserSets();
@@ -73,10 +75,8 @@ export default function Home() {
           .map((set) => set.set);
 
         setEligibleSets(_eligibleSets);
-        setSelectedSet(_eligibleSets[0]);
       } else {
         setEligibleSets([]);
-        setSelectedSet(undefined);
       }
     })();
   }, [address]);
@@ -85,9 +85,9 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       // Retrieve sets associated with username from server
-      const getAddedSets = async () => {
+      const _getUserSets = async () => {
         if (!username) {
-          setAddedSets([]);
+          setSelectedSets([]);
           return;
         }
 
@@ -96,51 +96,55 @@ export default function Home() {
 
       // Use a timer to debounce (500ms) the effect
       const timer = setTimeout(() => {
-        getAddedSets();
+        _getUserSets();
       }, 500);
     })();
   }, [username, getUserSets]);
 
   useEffect(() => {
-    setAddedSets((sets) => {
+    setSelectedSets((sets) => {
       return [...sets, ...userSets];
     });
   }, [userSets]);
 
-  // TODO: do multi-prove if multiple cred at once
   const handleProveClick = useCallback(async () => {
-    console.log('hi');
-    // if (selectedSet && address) {
-    //   // TODO: Add a timestamp to the message being signed?
-    //   const message = username;
-    //   const sig = await signMessageAsync({ message });
+    if (selectedSets && address) {
+      const message = username;
+      const sig = await signMessageAsync({ message });
 
-    //   setProving(true);
-    //   // Get the merkle proof from the backend
-    //   const merkleProof = await getMerkleProof(selectedSet, address);
+      setProving(true);
 
-    //   let proof: Hex;
-    //   let publicInput: Hex;
-    //   // When NEXT_PUBLIC_USE_TEST_PROOF is true, we skip the proving step and use dummy proof.
-    //   // The backend is aware of this dummy proof and will accept it.
-    //   // This is useful for testing the UI.
-    //   if (process.env.NEXT_PUBLIC_USE_TEST_PROOF === 'true') {
-    //     proof = '0x';
-    //     publicInput = '0x';
-    //   } else {
-    //     // Prove!
-    //     const result = await prove(sig, username, merkleProof);
-    //     proof = result.proof;
-    //     publicInput = result.publicInput;
-    //   }
+      // Get the merkle proof from the backend
+      const merkleProofs = await Promise.all(
+        selectedSets.map((set) => {
+          return getMerkleProof(set, address);
+        }),
+      );
 
-    //   // Submit the proof to the backend
-    //   const proofHash = await submitProof({ proof, publicInput, message, proofVersion: 'v2' });
-    //   setProofHash(proofHash);
-    //   setProving(false);
-    // }
-  }, [selectedSet, address, username, signMessageAsync, getMerkleProof, submitProof, prove]);
+      // Pad the merkle proofs to NUM_MERKLE_PROOFS
+      while (merkleProofs.length < NUM_MERKLE_PROOFS) {
+        merkleProofs.push(merkleProofs[0]);
+      }
 
+      let proof: Hex;
+      // When NEXT_PUBLIC_USE_TEST_PROOF is true, we skip the proving step and use dummy proof.
+      // The backend is aware of this dummy proof and will accept it.
+      // This is useful for testing the UI.
+      if (process.env.NEXT_PUBLIC_USE_TEST_PROOF === 'true') {
+        proof = '0x';
+      } else {
+        //  Prove!
+        proof = await proveV4(sig, username, merkleProofs);
+      }
+
+      //Submit the proof to the backend
+      const proofHash = await submitProof({ proof, message });
+      setProofHash(proofHash);
+      setProving(false);
+    }
+  }, [selectedSets, address, username, signMessageAsync, submitProof, getMerkleProof, proveV4]);
+
+  console.log({ isConnected });
   return (
     <main>
       <nav className="flex justify-end">
@@ -174,7 +178,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col space-y-1.5">
-              {addedSets.length === 0 ? (
+              {selectedSets.length === 0 ? (
                 <Label>
                   No added creddd
                   {username.length > 0 ? <span> for {username}</span> : <></>}
@@ -183,7 +187,7 @@ export default function Home() {
                 <div>
                   <Label>Added creddd</Label>
                   <div className="">
-                    {addedSets.map((set, i) => (
+                    {selectedSets.map((set, i) => (
                       <Badge key={i}>{SET_METADATA[set].displayName}</Badge>
                     ))}
                   </div>
@@ -201,21 +205,33 @@ export default function Home() {
                   <Label htmlFor="framework">Eligible creddd</Label>
 
                   <div>
-                    {eligibleSets
-                      .filter((set) => !addedSets.includes(set))
-                      .map((set, i) => (
-                        <div key={i}>
-                          <div className="flex items-center space-x-2">
-                            <Switch id={set} />
-                            <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
-                          </div>
+                    {eligibleSets.map((set, i) => (
+                      <div key={i}>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            disabled={
+                              !selectedSets.includes(set) &&
+                              selectedSets.length >= NUM_MERKLE_PROOFS
+                            }
+                            id={set}
+                            checked={selectedSets.includes(set)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedSets((sets) => [...sets, set]);
+                              } else {
+                                setSelectedSets((sets) => sets.filter((s) => s !== set));
+                              }
+                            }}
+                          />
+                          <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
+                        </div>
 
-                          {/* TODO: message when set doesn't correspond to selected address */}
-                          {/* <p className="text-muted-foreground text-sm">
+                        {/* TODO: message when set doesn't correspond to selected address */}
+                        {/* <p className="text-muted-foreground text-sm">
                           Use account <code>0x321...321</code>
                         </p> */}
-                        </div>
-                      ))}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -226,9 +242,7 @@ export default function Home() {
           {isConnected ? (
             <Button onClick={handleProveClick}>{proving ? 'Adding' : 'Add'}</Button>
           ) : (
-            <Button onClick={handleProveClick} disabled>
-              Add
-            </Button>
+            <Button onClick={handleProveClick}>Add</Button>
           )}
         </CardFooter>
       </Card>

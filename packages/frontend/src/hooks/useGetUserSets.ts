@@ -34,8 +34,14 @@ export const useGetUserSets = () => {
 
         // The `merkleRoot` field is available for v3 and v4 proofs
       } else if (proof.proofVersion === 'v3' || proof.proofVersion === 'v4') {
-        const merkleRoot = BigInt(proof.merkleRoot as Hex).toString(10);
-        sets.push(ROOT_TO_SET[merkleRoot]);
+        // `proof.merkleRoot` is a comma-separated list of merkle roots
+        const merkleRoots = (proof.merkleRoot as Hex)
+          .split(',')
+          .map((merkleRoot) => BigInt(merkleRoot as Hex).toString(10));
+
+        merkleRoots.forEach((merkleRoot) => {
+          sets.push(ROOT_TO_SET[merkleRoot]);
+        });
       } else {
         throw new Error(`Unknown proof version: ${proof.proofVersion}`);
       }

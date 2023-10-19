@@ -53,11 +53,25 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     return;
   }
 
-  const merkleRoot = bytesToHex(circuit.get_root(proofBytes));
+  const merkleRootsBytes = circuit.get_roots(proofBytes);
+  const merkleRoots: Hex[] = [];
+
+  // Parse the merkle roots
+  for (let i = 0; i < merkleRootsBytes.length / 32; i++) {
+    const rootBytes = merkleRootsBytes.slice(i * 32, (i + 1) * 32);
+    const merkleRoot = bytesToHex(rootBytes);
+    if (!merkleRoots.includes(merkleRoot)) {
+      merkleRoots.push(merkleRoot);
+    }
+  }
+
   // Check if the merkle root is valid
-  if (!VALID_ROOTS.includes(merkleRoot)) {
-    res.status(400).send({ error: 'Invalid merkle root' });
-    return;
+  for (let i = 0; i < merkleRoots.length; i++) {
+    const merkleRoot = merkleRoots[i];
+    if (!VALID_ROOTS.includes(merkleRoot)) {
+      res.status(400).send({ error: 'Invalid merkle root' });
+      return;
+    }
   }
 
   const msgHash = bytesToHex(circuit.get_msg_hash(proofBytes));
@@ -75,10 +89,10 @@ export default async function submitProof(req: NextApiRequest, res: NextApiRespo
     data: {
       message,
       proof,
-      merkleRoot,
+      merkleRoot: merkleRoots.join(','),
       publicInput: '',
       proofHash,
-      proofVersion: 'v3', // We expect the submitted proof to be a V2 proof
+      proofVersion: 'v4', // We expect the submitted proof to be a v4 proof
     },
   });
 
