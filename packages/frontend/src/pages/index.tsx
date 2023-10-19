@@ -283,7 +283,10 @@ export default function Home() {
                               }
                             </Tooltip>
                             <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
-                            <p>{trimAddress(eligibleAddr)}</p>
+                            {
+                              // Only show tooltip for addresses that are not currently connected
+                              address !== eligibleAddr && <p>{trimAddress(eligibleAddr)}</p>
+                            }
                           </div>
 
                           {/* TODO: message when set doesn't correspond to selected address */}
