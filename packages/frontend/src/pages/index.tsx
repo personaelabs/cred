@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useGetUserSets } from '@/hooks/useGetUserSets';
 import { Hex } from 'viem';
+import { Loader2 } from 'lucide-react';
 
 // Number of Merkle proofs that can be proven at once
 const NUM_MERKLE_PROOFS = 4;
@@ -51,18 +52,17 @@ export default function Home() {
 
   // Hash of the generate proof
   const [proofHash, setProofHash] = useState<string | undefined>();
-
   const { signMessageAsync } = useSignMessage();
 
   const { proveV4 } = useCircuit();
   const submitProof = useSubmitProof();
   const getMerkleProof = useGetMerkleProof();
-  const { userSets, getUserSets } = useGetUserSets();
+  const { userSets, getUserSets, fetchingUserSet, resetUserSets } = useGetUserSets();
 
   // Update the eligible sets when the address changes
   useEffect(() => {
     (async () => {
-      if (address) {
+      if (address && userSets) {
         // Fetch all the addresses of the sets
         const sets = await getSets();
 
@@ -72,6 +72,8 @@ export default function Home() {
         // Get the eligible sets
         const _eligibleSets = sets
           .filter((set) => set.addresses.includes(addressBI))
+          // Filter out sets that have already been added
+          .filter((set) => !userSets.includes(set.set))
           .map((set) => set.set);
 
         setEligibleSets(_eligibleSets);
@@ -79,33 +81,7 @@ export default function Home() {
         setEligibleSets([]);
       }
     })();
-  }, [address]);
-
-  // Update the added creddd when the username changes
-  useEffect(() => {
-    (async () => {
-      // Retrieve sets associated with username from server
-      const _getUserSets = async () => {
-        if (!username) {
-          setSelectedSets([]);
-          return;
-        }
-
-        getUserSets(username);
-      };
-
-      // Use a timer to debounce (500ms) the effect
-      const timer = setTimeout(() => {
-        _getUserSets();
-      }, 500);
-    })();
-  }, [username, getUserSets]);
-
-  useEffect(() => {
-    setSelectedSets((sets) => {
-      return [...sets, ...userSets];
-    });
-  }, [userSets]);
+  }, [address, userSets]);
 
   const handleProveClick = useCallback(async () => {
     if (selectedSets && address) {
@@ -144,7 +120,7 @@ export default function Home() {
     }
   }, [selectedSets, address, username, signMessageAsync, submitProof, getMerkleProof, proveV4]);
 
-  console.log({ isConnected });
+  const readyToProve = selectedSets.length > 0 && isConnected && !proving;
   return (
     <main>
       <nav className="flex justify-end">
@@ -162,89 +138,133 @@ export default function Home() {
 
         <CardContent>
           <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                }}
-                value={username}
-                id="name"
-                placeholder="name"
-              />
-              <p className="text-muted-foreground text-sm">
-                i.e. Twitter, Farcaster, Lens username
-              </p>
-            </div>
-
-            <div className="flex flex-col space-y-1.5">
-              {selectedSets.length === 0 ? (
-                <Label>
-                  No added creddd
-                  {username.length > 0 ? <span> for {username}</span> : <></>}
-                </Label>
+            <div className="flex flex-row items-end space-x-2">
+              <div className="flex w-3/4 flex-col space-y-1.5">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                  }}
+                  value={username}
+                  id="name"
+                  placeholder="name"
+                  disabled={userSets != null}
+                />
+              </div>
+              {userSets ? (
+                <Button
+                  className="w-1/4"
+                  onClick={() => {
+                    resetUserSets();
+                    setUsername('');
+                  }}
+                >
+                  Clear
+                </Button>
               ) : (
-                <div>
-                  <Label>Added creddd</Label>
-                  <div className="">
-                    {selectedSets.map((set, i) => (
-                      <Badge className="mt-1" key={i}>
-                        {SET_METADATA[set].displayName}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                <Button
+                  className="w-1/4"
+                  onClick={() => {
+                    getUserSets(username);
+                  }}
+                  disabled={!username}
+                >
+                  Search
+                </Button>
               )}
             </div>
+            <p className="text-muted-foreground text-sm">i.e. Twitter, Farcaster, Lens username</p>
+            {userSets && (
+              <>
+                <div className="flex flex-col space-y-1.5">
+                  {userSets.length === 0 ? (
+                    <Label>
+                      No added creddd
+                      {username.length > 0 ? <span> for {username}</span> : <></>}
+                    </Label>
+                  ) : (
+                    <div>
+                      <Label>Added creddd</Label>
+                      <div className="">
+                        {userSets.map((set, i) => (
+                          <Badge className="mt-1" key={i}>
+                            {SET_METADATA[set].displayName}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-            <Separator />
+                <Separator />
 
-            <div className="flex flex-col space-y-1.5">
-              {eligibleSets.length === 0 ? (
-                <Label>No eligible creddd for connected addresses</Label>
-              ) : (
-                <div>
-                  <Label htmlFor="framework">Eligible creddd</Label>
+                <div className="flex flex-col space-y-1.5">
+                  {eligibleSets.length === 0 ? (
+                    <Label>No eligible creddd for connected addresses</Label>
+                  ) : (
+                    <div>
+                      <Label htmlFor="framework">Eligible creddd</Label>
 
-                  <div>
-                    {eligibleSets.map((set, i) => (
-                      <div key={i}>
-                        <div className="mt-1 flex items-center space-x-2">
-                          <Switch
-                            disabled={
-                              !selectedSets.includes(set) &&
-                              selectedSets.length >= NUM_MERKLE_PROOFS
-                            }
-                            id={set}
-                            checked={selectedSets.includes(set)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedSets((sets) => [...sets, set]);
-                              } else {
-                                setSelectedSets((sets) => sets.filter((s) => s !== set));
-                              }
-                            }}
-                          />
-                          <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
-                        </div>
+                      <div>
+                        {eligibleSets
+                          // Filter out sets that have already been added
+                          .filter((set) => !userSets.includes(set))
+                          .map((set, i) => (
+                            <div key={i}>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <Switch
+                                  disabled={
+                                    fetchingUserSet ||
+                                    (!selectedSets.includes(set) &&
+                                      selectedSets.length >= NUM_MERKLE_PROOFS)
+                                  }
+                                  id={set}
+                                  checked={selectedSets.includes(set)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedSets((sets) => [...sets, set]);
+                                    } else {
+                                      setSelectedSets((sets) => sets.filter((s) => s !== set));
+                                    }
+                                  }}
+                                />
+                                <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
+                              </div>
 
-                        {/* TODO: message when set doesn't correspond to selected address */}
-                        {/* <p className="text-muted-foreground text-sm">
+                              {/* TODO: message when set doesn't correspond to selected address */}
+                              {/* <p className="text-muted-foreground text-sm">
                           Use account <code>0x321...321</code>
                         </p> */}
+                            </div>
+                          ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          {isConnected ? (
-            <Button onClick={handleProveClick}>{proving ? 'Adding' : 'Add'}</Button>
-          ) : (
-            <Button onClick={handleProveClick}>Add</Button>
+          {userSets && (
+            <>
+              <Button onClick={handleProveClick} disabled={!readyToProve}>
+                {proving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {proving ? 'Adding' : 'Add'}
+              </Button>
+              <div>
+                {!proofHash && (
+                  <a
+                    className="text-sm"
+                    href={`/user/${username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View profile
+                  </a>
+                )}
+              </div>
+            </>
           )}
         </CardFooter>
       </Card>

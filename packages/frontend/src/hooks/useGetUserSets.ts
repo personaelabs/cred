@@ -6,9 +6,11 @@ import { ROOT_TO_SET } from '@/lib/sets';
 import { Hex } from 'viem';
 
 export const useGetUserSets = () => {
-  const [userSets, setUserSets] = useState<string[]>([]);
+  const [userSets, setUserSets] = useState<string[] | null>(null);
+  const [fetchingUserSet, setFetchingUserSet] = useState<boolean>(false);
 
   const getUserSets = useCallback(async (username: string) => {
+    setFetchingUserSet(true);
     const {
       data,
     }: {
@@ -48,9 +50,16 @@ export const useGetUserSets = () => {
     });
 
     setUserSets(sets);
+    setFetchingUserSet(false);
+  }, []);
+
+  const resetUserSets = useCallback(() => {
+    setUserSets(null);
   }, []);
 
   return {
+    fetchingUserSet,
+    resetUserSets,
     userSets,
     getUserSets,
   };
