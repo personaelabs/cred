@@ -47,7 +47,6 @@ export default function Home() {
   const [username, setUsername] = useState<string>('');
 
   // The set to prove membership
-  const [submitting, setSubmitting] = useState(false);
   const [eligibleSets, setEligibleSets] = useState<string[]>([]);
   const [selectedSets, setSelectedSets] = useState<string[]>([]);
 
