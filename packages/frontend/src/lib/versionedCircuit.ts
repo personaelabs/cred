@@ -6,7 +6,6 @@ import {
 } from '@personaelabs/spartan-ecdsa';
 import { Hex, bytesToHex, hashMessage, hexToBytes } from 'viem';
 import { MembershipProof } from '@prisma/client';
-import { Console } from 'console';
 
 let v1Circuit: MembershipVerifier;
 let v2Circuit: MembershipVerifier;
@@ -89,8 +88,6 @@ export const VersionedCircuit = {
     }
 
     const claimedRoots = (proof.merkleRoot as Hex).split(',');
-    console.log('claimed roots', claimedRoots);
-    console.log('rootsInProof', rootsInProof);
 
     const unprovenRoots = claimedRoots.filter((claimedRoot) => {
       return !rootsInProof.includes(claimedRoot as Hex);
@@ -106,11 +103,11 @@ export const VersionedCircuit = {
   },
 
   verifyMsgHash(proof: MembershipProof): boolean {
-    let msgHash;
+    let msgHash: Hex = '0x0';
     const proofBytes = hexToBytes(proof.proof as Hex);
-    if (proof.proofVersion === 'v1' || proof.proofHash === 'v2') {
+    if (proof.proofVersion === 'v1' || proof.proofVersion === 'v2') {
       const pubInput = PublicInput.deserialize(hexToBytes(proof.publicInput as Hex));
-      msgHash = bytesToHex(pubInput.msgHash);
+      msgHash = `0x${pubInput.msgHash.toString('hex')}`;
     } else if (proof.proofVersion === 'v3') {
       msgHash = bytesToHex(v3Circuit.get_msg_hash(proofBytes));
     } else if (proof.proofVersion === 'v4') {
@@ -126,24 +123,35 @@ export const VersionedCircuit = {
 
     await this.prepare();
 
-    let verified: boolean;
-    verified = this.verifyMsgHash(proof) && this.verifyMerkleRoot(proof);
-
+    let proofVerified: boolean;
     if (proof.proofVersion === 'v1') {
-      verified = await v1Circuit.verify(proofBytes, publicInputBytes);
+      proofVerified = await v1Circuit.verify(proofBytes, publicInputBytes);
     } else if (proof.proofVersion === 'v2') {
-      verified = await v2Circuit.verify(proofBytes, publicInputBytes);
+      proofVerified = await v2Circuit.verify(proofBytes, publicInputBytes);
     } else if (proof.proofVersion === 'v3') {
-      verified = await v3Circuit.verify_membership(proofBytes);
+      proofVerified = await v3Circuit.verify_membership(proofBytes);
     } else if (proof.proofVersion === 'v4') {
-      verified = await v4Circuit.verify_membership(proofBytes);
+      proofVerified = await v4Circuit.verify_membership(proofBytes);
     } else {
       throw new Error(`Unknown proof version`);
     }
 
-    console.log('verified', verified);
+    const msgHashVerified = this.verifyMsgHash(proof);
+    const merkleRootVerified = this.verifyMerkleRoot(proof);
 
-    return verified;
+    if (!proofVerified) {
+      console.log('invalid proof');
+    }
+
+    if (!msgHashVerified) {
+      console.log(`invalid msg hash. proof version: ${proof.proofVersion}`);
+    }
+
+    if (!merkleRootVerified) {
+      console.log('invalid merkle root');
+    }
+
+    return proofVerified && msgHashVerified && merkleRootVerified;
   },
 };
 
