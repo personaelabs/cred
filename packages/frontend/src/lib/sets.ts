@@ -1,5 +1,7 @@
 // NOTE: order in this array determines the order in the UI
 const SETS = [
+  'eth-presale',
+
   'beacon-genesis-staker',
 
   'first-10-genesis-beacon-staker',
@@ -90,6 +92,8 @@ export const ROOT_TO_SET: { [key: string]: string } = {
     'first-100-genesis-beacon-staker',
   '52914449144721707502445942710891358968236203418271893003077179864723232694461':
     'first-100-genesis-beacon-staker.dev',
+  '23577684586089399363998477432346253770138000927065578706850770035957797946606': 'eth-presale',
+  '2989897443148389002177745528001837665877671142208100240235194837874368903298': 'eth-presale.dev',
 };
 export type SetMetadata = {
   count: number;
@@ -147,6 +151,13 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
     duneURL: 'https://dune.com/queries/3115466',
     description: 'Was one of the first 500 beacon chain genesis stakers',
     displayName: 'First 500 Beacon Chain Genesis Staker',
+  },
+
+  'eth-presale': {
+    count: 8893,
+    duneURL: 'https://dune.com/queries/3124962',
+    description: 'Participated in the Ethereum Pre-sale',
+    displayName: 'Ethereum Pre-sale',
   },
 };
 
