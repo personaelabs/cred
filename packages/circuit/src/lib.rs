@@ -5,7 +5,7 @@ use crate::utils::{efficient_ecdsa, verify_efficient_ecdsa};
 use ark_ff::BigInteger;
 use ark_secp256k1::{Affine, Fq, Fr};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use eth_membership::{eth_membership, to_cs_field};
+use eth_membership::{eth_membership, to_cs_field, NUM_MERKLE_PROOFS, TREE_DEPTH};
 use num_bigint::BigUint;
 use sapir::constraint_system::ConstraintSystem;
 use sapir::{circuit, wasm::prelude::*};
@@ -41,23 +41,34 @@ pub fn prove_membership(
     msg_hash: &[u8],
     merkle_siblings: &[u8],
     merkle_indices: &[u8],
-    root: &[u8],
+    roots: &[u8],
 ) -> Vec<u8> {
+    assert!(merkle_siblings.len() == NUM_MERKLE_PROOFS * TREE_DEPTH * 32);
+    assert!(merkle_indices.len() == NUM_MERKLE_PROOFS * TREE_DEPTH * 32);
+    assert!(roots.len() == NUM_MERKLE_PROOFS * 32);
+
     // Deserialize the inputs
     let s = Fr::from(BigUint::from_bytes_be(s));
     let r = Fq::from(BigUint::from_bytes_be(r));
     let msg_hash = BigUint::from_bytes_be(msg_hash);
+
     let merkle_siblings = merkle_siblings
         .to_vec()
         .chunks(32)
         .map(|sibling| F::from(BigUint::from_bytes_be(&sibling)))
         .collect::<Vec<F>>();
+
     let merkle_indices = merkle_indices
         .to_vec()
         .chunks(32)
         .map(|index| F::from(BigUint::from_bytes_be(&index)))
         .collect::<Vec<F>>();
-    let root = F::from(BigUint::from_bytes_be(root));
+
+    let roots = roots
+        .to_vec()
+        .chunks(32)
+        .map(|root| F::from(BigUint::from_bytes_be(root)))
+        .collect::<Vec<F>>();
 
     // Compute the efficient ECDSA input
     let (u, t) = efficient_ecdsa(msg_hash.clone(), r, is_y_odd);
@@ -73,8 +84,12 @@ pub fn prove_membership(
         .collect::<Vec<F>>();
 
     priv_input.extend_from_slice(&s_bits);
-    priv_input.extend_from_slice(&merkle_indices);
-    priv_input.extend_from_slice(&merkle_siblings);
+
+    // Append the Merkle indices and siblings to the private input
+    for i in 0..NUM_MERKLE_PROOFS {
+        priv_input.extend_from_slice(&merkle_indices[i * TREE_DEPTH..((i + 1) * TREE_DEPTH)]);
+        priv_input.extend_from_slice(&merkle_siblings[i * TREE_DEPTH..((i + 1) * TREE_DEPTH)]);
+    }
 
     // Convert the private input to bytes
     let priv_input = priv_input
@@ -83,16 +98,22 @@ pub fn prove_membership(
         .collect::<Vec<u8>>();
 
     // Construct the public input
-    let pub_input = [
+    let mut pub_input = vec![
         to_cs_field(t.x),
         to_cs_field(t.y),
         to_cs_field(u.x),
         to_cs_field(u.y),
-        root,
-    ]
-    .iter()
-    .flat_map(|x| x.into_bigint().to_bytes_be())
-    .collect::<Vec<u8>>();
+    ];
+
+    // Append the Merkle roots to the public input
+    for root in roots {
+        pub_input.push(to_cs_field(root));
+    }
+
+    let pub_input = pub_input
+        .iter()
+        .flat_map(|x| x.into_bigint().to_bytes_be())
+        .collect::<Vec<u8>>();
 
     // Generate the proof
     let proof = prove(&pub_input, &priv_input);
@@ -148,14 +169,18 @@ pub fn verify_membership(creddd_proof: &[u8]) -> bool {
 
 // Get the Merkle root from the proof's public input
 #[wasm_bindgen]
-pub fn get_root(creddd_proof: &[u8]) -> Vec<u8> {
+pub fn get_roots(creddd_proof: &[u8]) -> Vec<u8> {
     let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
     let spartan_proof =
         SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
     let pub_inputs = spartan_proof.pub_input.clone();
-    let root = pub_inputs[4];
+    // The first 4 elements of the public input are the efficient ECDSA inputs
+    let roots = &pub_inputs[4..];
 
-    root.into_bigint().to_bytes_be()
+    roots
+        .iter()
+        .flat_map(|x| x.into_bigint().to_bytes_be())
+        .collect()
 }
 
 // Get the  message hash from the proof's public input
@@ -198,25 +223,44 @@ mod tests {
 
         tree.finish();
 
-        let merkle_proof: MerkleProof<F> = tree.create_proof(address);
+        let mut merkle_proofs = Vec::<MerkleProof<F>>::with_capacity(NUM_MERKLE_PROOFS);
+
+        for _ in 0..NUM_MERKLE_PROOFS {
+            merkle_proofs.push(tree.create_proof(address));
+        }
 
         let s_bytes = s.into_bigint().to_bytes_be();
         let r_bytes = r.into_bigint().to_bytes_be();
         let msg_hash = msg_hash.to_bytes_be();
-        let merkle_siblings = merkle_proof
-            .siblings
-            .iter()
-            .flat_map(|sibling| sibling.into_bigint().to_bytes_be())
-            .collect::<Vec<u8>>();
 
-        let merkle_indices = merkle_proof
-            .path_indices
-            .iter()
-            .map(|i| F::from(*i as u32).into_bigint().to_bytes_be())
-            .flatten()
-            .collect::<Vec<u8>>();
+        let mut merkle_siblings = Vec::with_capacity(NUM_MERKLE_PROOFS * TREE_DEPTH);
+        let mut merkle_indices = Vec::with_capacity(NUM_MERKLE_PROOFS * TREE_DEPTH);
+        for merkle_proof in merkle_proofs {
+            let siblings_bytes = merkle_proof
+                .siblings
+                .iter()
+                .flat_map(|sibling| sibling.into_bigint().to_bytes_be())
+                .collect::<Vec<u8>>();
+
+            merkle_siblings.extend_from_slice(&siblings_bytes);
+
+            let indices_bytes = merkle_proof
+                .path_indices
+                .iter()
+                .map(|i| F::from(*i as u32).into_bigint().to_bytes_be())
+                .flatten()
+                .collect::<Vec<u8>>();
+
+            merkle_indices.extend_from_slice(&indices_bytes);
+        }
 
         let root = tree.root.unwrap().into_bigint().to_bytes_be();
+
+        let mut roots = vec![];
+
+        for _ in 0..NUM_MERKLE_PROOFS {
+            roots.extend_from_slice(&root);
+        }
 
         let prover_timer = start_timer!(|| "prove");
         let proof = prove_membership(
@@ -226,7 +270,7 @@ mod tests {
             &msg_hash,
             &merkle_siblings,
             &merkle_indices,
-            &root,
+            &roots,
         );
         end_timer!(prover_timer);
 

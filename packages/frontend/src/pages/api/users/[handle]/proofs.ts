@@ -11,10 +11,12 @@ export default async function getUserProofs(req: NextApiRequest, res: NextApiRes
 
   const proofs = await prisma.membershipProof.findMany({
     select: {
+      message: true,
       proof: includeProofs,
       proofHash: true,
       publicInput: true,
       merkleRoot: true,
+      proofVersion: true,
     },
     where: {
       message: handle,

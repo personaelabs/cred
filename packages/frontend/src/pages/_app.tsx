@@ -7,6 +7,8 @@ import { publicProvider } from 'wagmi/providers/public';
 import Script from 'next/script';
 import Head from 'next/head';
 import { Header } from '@/components/Header';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -37,9 +39,14 @@ export default function App({ Component, pageProps }: AppProps) {
           <Head>
             <link type="favicon" rel="icon" href="/personae.ico" />
           </Head>
-          <div className="mb-4 flex justify-center">
-            <Component {...pageProps} />
-          </div>
+          <TooltipProvider delayDuration={50}>
+            <div className="md:px-0 md:py-6">
+              <div className="mb-4 flex justify-center">
+                <Component {...pageProps} />
+                <Toaster />
+              </div>
+            </div>
+          </TooltipProvider>
         </RainbowKitProvider>
       </WagmiConfig>
     </>
