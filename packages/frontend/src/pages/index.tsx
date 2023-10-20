@@ -162,7 +162,7 @@ export default function Home() {
 
       <br />
 
-      <Card className="w-[450px]">
+      <Card className="w-[350px] md:w-[450px]">
         <CardHeader>
           <CardTitle>Creddd</CardTitle>
           <CardDescription>add creddd to your name from any of your addresses</CardDescription>
