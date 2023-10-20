@@ -37,6 +37,7 @@ export default function UserPage() {
     (async () => {
       if (userProofs) {
         let failed = false;
+        console.log('Verifying proofs', userProofs);
         for (let i = 0; i < userProofs.length; i++) {
           const proof = userProofs[i];
           const verified = await verify(proof);
