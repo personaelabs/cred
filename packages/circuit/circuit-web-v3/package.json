@@ -1,0 +1,16 @@
+{
+  "name": "circuits",
+  "version": "0.1.0",
+  "files": [
+    "circuits_bg.wasm",
+    "circuits.js",
+    "circuits_bg.js",
+    "circuits.d.ts"
+  ],
+  "module": "circuits.js",
+  "types": "circuits.d.ts",
+  "sideEffects": [
+    "./circuits.js",
+    "./snippets/*"
+  ]
+}

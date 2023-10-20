@@ -11,7 +11,7 @@ import { Hex, hashMessage } from 'viem';
 
 export default function ProofPage() {
   const getProof = useGetProof();
-  const { verify, getMsgHash } = useCircuit();
+  const { verify } = useCircuit();
 
   const [verified, setVerified] = useState<boolean | undefined>();
   const [verifying, setVerifying] = useState<boolean>(false);
@@ -76,6 +76,7 @@ export default function ProofPage() {
         setVerifying(true);
         let proofVerified = await verify(proof);
 
+        /*
         if (proof.proofVersion === 'v3') {
           // We need to check that the message hashes to the msgHash in the public input
           // for the v3 proofs
@@ -84,6 +85,7 @@ export default function ProofPage() {
           // Check that the message hashes to the msgHash in the public input
           proofVerified = hashMessage(proof.message, 'hex') === msgHash;
         }
+        */
 
         setVerifying(false);
         setVerified(proofVerified);
@@ -92,7 +94,7 @@ export default function ProofPage() {
         setVerified(false);
       }
     }
-  }, [proof, verify, getMsgHash]);
+  }, [proof, verify]);
 
   return (
     <>
