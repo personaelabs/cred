@@ -156,13 +156,7 @@ export default function Home() {
   const readyToProve = selectedSets.length > 0 && isConnected && !proving && !submittingProof;
   return (
     <main>
-      <nav className="flex justify-end">
-        <ConnectButton accountStatus={'address'} showBalance={false} />
-      </nav>
-
-      <br />
-
-      <Card className="w-[350px] md:w-[450px]">
+      <Card className="mt-4 w-[350px] md:w-[450px]">
         <CardHeader>
           <CardTitle>Creddd</CardTitle>
           <CardDescription>add creddd to your name from any of your addresses</CardDescription>

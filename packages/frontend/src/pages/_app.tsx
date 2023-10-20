@@ -40,11 +40,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <link type="favicon" rel="icon" href="/personae.ico" />
           </Head>
           <TooltipProvider delayDuration={50}>
-            <div className="md:px-0 md:py-6">
-              <div className="mb-4 flex justify-center">
-                <Component {...pageProps} />
-                <Toaster />
-              </div>
+            <div className="mb-4 flex min-h-screen w-full justify-center bg-gray-50">
+              <Component {...pageProps} />
+              <Toaster />
             </div>
           </TooltipProvider>
         </RainbowKitProvider>
