@@ -1,6 +1,8 @@
 // NOTE: order in this array determines the order in the UI
 const SETS = [
+  'eth-presale',
   'protocol-guild',
+
   'beacon-genesis-staker',
 
   'first-10-genesis-beacon-staker',
@@ -94,6 +96,8 @@ export const ROOT_TO_SET: { [key: string]: string } = {
   '74547077818465677033847577172878602395301941031621541296928894966219464354211': 'protocol-guild',
   '29494026329167880195801557530082022039809986472720972864532196928935745595245':
     'protocol-guild.dev',
+  '23577684586089399363998477432346253770138000927065578706850770035957797946606': 'eth-presale',
+  '2989897443148389002177745528001837665877671142208100240235194837874368903298': 'eth-presale.dev',
 };
 export type SetMetadata = {
   count: number;
@@ -157,6 +161,13 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
     duneURL: 'https://app.splits.org/accounts/0x84af3D5824F0390b9510440B6ABB5CC02BB68ea1/',
     description: 'Protocol Guild ',
     displayName: 'Protocol Guild (snapshot block: 18387780)',
+  },
+
+  'eth-presale': {
+    count: 8893,
+    duneURL: 'https://dune.com/queries/3124962',
+    description: 'Participated in the Ethereum Pre-sale',
+    displayName: 'Ethereum Pre-sale',
   },
 };
 
