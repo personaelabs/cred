@@ -156,17 +156,10 @@ export default function Home() {
   const readyToProve = selectedSets.length > 0 && isConnected && !proving && !submittingProof;
   return (
     <main>
-      <nav className="flex justify-end">
-        <ConnectButton accountStatus={'address'} showBalance={false} />
-      </nav>
-
-      <br />
-
-      <Card className="w-[450px]">
+      <Card className="mt-4 w-[350px] md:w-[450px]">
         <CardHeader>
           <CardTitle>Creddd</CardTitle>
-          <CardDescription>Connect your addresses and add creddd to your name</CardDescription>
-          {/* TODO: do a better job here of telling a user how to access all of their addresses. */}
+          <CardDescription>add creddd to your name from any of your addresses</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -282,7 +275,7 @@ export default function Home() {
                                 // Only show tooltip for addresses that are not currently connected
                                 address !== eligibleAddr && (
                                   <TooltipContent>
-                                    <p>Please switch account</p>
+                                    <p>Switch to account {eligibleAddr}</p>
                                   </TooltipContent>
                                 )
                               }
@@ -290,7 +283,9 @@ export default function Home() {
                             <Badge variant="outline">{SET_METADATA[set].displayName}</Badge>
                             {
                               // Only show tooltip for addresses that are not currently connected
-                              address !== eligibleAddr && <p>{trimAddress(eligibleAddr)}</p>
+                              address !== eligibleAddr && (
+                                <p className="text-xs">use {trimAddress(eligibleAddr)}</p>
+                              )
                             }
                           </div>
                         </div>
