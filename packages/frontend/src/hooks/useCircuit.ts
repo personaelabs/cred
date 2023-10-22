@@ -51,16 +51,6 @@ function concatUint8Arrays(arrays: Uint8Array[]) {
   return result;
 }
 
-const bigIntToBytes = (x: bigint): Uint8Array => {
-  let hex = x.toString(16);
-  // Pad hex to be 32 bytes
-  hex = hex.padStart(64, '0');
-
-  return hexToBytes(toPrefixedHex(hex), {
-    size: 32,
-  });
-};
-
 export const useCircuit = () => {
   const [proving, setProving] = useState<boolean>(false);
 
@@ -95,7 +85,7 @@ export const useCircuit = () => {
     for (let i = 0; i < merkleProofs.length; i++) {
       const merkleProof = merkleProofs[i];
       const siblings_i = concatUint8Arrays(
-        merkleProof.siblings.map((sibling) => bigIntToBytes(sibling[0])),
+        merkleProof.siblings.map((sibling) => hexToBytes(sibling)),
       );
       siblings.push(siblings_i);
     }
@@ -120,7 +110,7 @@ export const useCircuit = () => {
     const roots = [];
     for (let i = 0; i < merkleProofs.length; i++) {
       const merkleProof = merkleProofs[i];
-      const root_i = bigIntToBytes(merkleProof.root);
+      const root_i = hexToBytes(merkleProof.root);
       roots.push(root_i);
     }
 

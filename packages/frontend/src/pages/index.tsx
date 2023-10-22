@@ -37,7 +37,7 @@ const NUM_MERKLE_PROOFS = 4;
 const getSets = async () => {
   const addresses = await Promise.all(
     SETS.map(async (set) => {
-      const { data }: { data: string[] } = await axios.get(`/${set}.addresses.json`);
+      const { data }: { data: Hex[] } = await axios.get(`/${set}.addresses.json`);
       return { set, addresses: data };
     }),
   );
@@ -78,10 +78,9 @@ export default function Home() {
 
         for (let i = 0; i < connectedAccounts.length; i++) {
           const connectedAddress = connectedAccounts[i];
-          const connectedAddressBI = BigInt(connectedAddress).toString(10);
           _eligibleSets.push(
             ...(sets
-              .filter((set) => set.addresses.includes(connectedAddressBI))
+              .filter((set) => set.addresses.includes(connectedAddress.toLowerCase() as Hex))
               // Filter out sets that have already been added
               .filter((set) => !userSets?.includes(set.set))
               .map((set) => [set.set, connectedAddress]) as [string, Hex][]),

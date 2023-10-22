@@ -37,9 +37,7 @@ export const useGetUserSets = () => {
         // The `merkleRoot` field is available for v3 and v4 proofs
       } else if (proof.proofVersion === 'v3' || proof.proofVersion === 'v4') {
         // `proof.merkleRoot` is a comma-separated list of merkle roots
-        const merkleRoots = (proof.merkleRoot as Hex)
-          .split(',')
-          .map((merkleRoot) => BigInt(merkleRoot as Hex).toString(10));
+        const merkleRoots = (proof.merkleRoot as Hex).split(',') as Hex[];
 
         merkleRoots.forEach((merkleRoot) => {
           sets.push(ROOT_TO_SET[merkleRoot]);

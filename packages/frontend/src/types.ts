@@ -25,9 +25,9 @@ export interface PublicInput {
 }
 
 export interface MerkleProof {
-  root: bigint;
+  root: Hex;
   pathIndices: number[];
-  siblings: [bigint][];
+  siblings: Hex[];
 }
 
 type ProofVersion = 'v1' | 'v2' | 'v3';
