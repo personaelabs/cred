@@ -95,7 +95,7 @@ export const useCircuit = () => {
       const merkleProof = merkleProofs[i];
       const pathIndices_i = concatUint8Arrays(
         merkleProof.pathIndices.map((index) => {
-          if (index === 1) {
+          if (index == 1) {
             let bytes = new Uint8Array(32);
             bytes[31] = 1;
             return bytes;

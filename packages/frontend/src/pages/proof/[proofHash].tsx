@@ -31,9 +31,7 @@ export default function ProofPage() {
           setProof(proof);
           // We use the `PublicInput` class from spartan-ecdsa to deserialize the public input.
 
-          // Convert Merkle root in hex to BigInt
-          const root = BigInt(proof.merkleRoot || 0).toString(10);
-          const metadata = SET_METADATA[ROOT_TO_SET[root]];
+          const metadata = SET_METADATA[ROOT_TO_SET[proof.merkleRoot as Hex]];
 
           // NOTE: order matters
           setProofAttributes([

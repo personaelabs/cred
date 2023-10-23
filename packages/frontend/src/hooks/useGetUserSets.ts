@@ -4,6 +4,7 @@ import { MembershipProof } from '@prisma/client';
 import { PublicInput } from '@personaelabs/spartan-ecdsa';
 import { ROOT_TO_SET } from '@/lib/sets';
 import { Hex } from 'viem';
+import { toPrefixedHex } from '@/lib/utils';
 
 export const useGetUserSets = () => {
   const [userSets, setUserSets] = useState<string[] | null>(null);
@@ -32,7 +33,7 @@ export const useGetUserSets = () => {
         );
         const groupRoot = publicInput.circuitPubInput.merkleRoot;
 
-        sets.push(ROOT_TO_SET[groupRoot.toString()]);
+        sets.push(ROOT_TO_SET[toPrefixedHex(groupRoot.toString(16))]);
 
         // The `merkleRoot` field is available for v3 and v4 proofs
       } else if (proof.proofVersion === 'v3' || proof.proofVersion === 'v4') {

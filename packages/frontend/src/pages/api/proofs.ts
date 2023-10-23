@@ -6,14 +6,11 @@ import prisma from '@/lib/prisma';
 import * as circuit from 'circuit-node/circuits_embedded';
 
 import { ROOT_TO_SET } from '@/lib/sets';
-import { toPrefixedHex } from '@/lib/utils';
 
 let verifiedInitialized = false;
 
 // Merkle roots copied from json files
-const VALID_ROOTS: Hex[] = Object.keys(ROOT_TO_SET).map((root) =>
-  toPrefixedHex(BigInt(root).toString(16)),
-);
+const VALID_ROOTS: Hex[] = Object.keys(ROOT_TO_SET) as Hex[];
 
 const TEST_PROOF: Hex = '0x';
 
