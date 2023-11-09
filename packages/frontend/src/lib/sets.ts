@@ -1,5 +1,7 @@
 // NOTE: order in this array determines the order in the UI
 const SETS = [
+  'superrare',
+  'artblocks',
   'eth-presale',
   'protocol-guild',
 
@@ -98,6 +100,12 @@ export const ROOT_TO_SET: { [key: string]: string } = {
     'protocol-guild.dev',
   '23577684586089399363998477432346253770138000927065578706850770035957797946606': 'eth-presale',
   '2989897443148389002177745528001837665877671142208100240235194837874368903298': 'eth-presale.dev',
+
+  '18852479118637750315180916753529124361724368428688675967116333018677750515129': 'artblocks',
+  '99045783124777781935358494400688989141465125829803290885171100889249524742818': 'artblocks.dev',
+
+  '14810647629358450688873796350656518489780142331094775288817964165118960545532': 'superrare',
+  '27363175015617347075888816356383315367677032774989556818779207245149635248596': 'superrare.dev',
 };
 export type SetMetadata = {
   count: number;
@@ -168,6 +176,20 @@ export const SET_METADATA: { [key: string]: SetMetadata } = {
     duneURL: 'https://dune.com/queries/3124962',
     description: 'Participated in the Ethereum Pre-sale',
     displayName: 'Ethereum Pre-sale',
+  },
+
+  superrare: {
+    count: 1000,
+    duneURL: 'https://etherscan.io/address/0xb932a70a57673d89f4acffbe830e8ed7f75fb9e0',
+    description: 'Purchased one of the first 1000 SuperRare tokens',
+    displayName: 'SuperRare',
+  },
+
+  artblocks: {
+    count: 1000,
+    duneURL: 'https://etherscan.io/address/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a',
+    description: 'Purchased one of the first 1000 Art Blocks tokens',
+    displayName: 'Art Blocks',
   },
 };
 
