@@ -9,6 +9,9 @@ import Head from 'next/head';
 import { Header } from '@/components/Header';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useRouter } from 'next/router';
+import { getSignedInAddress } from '@/lib/utils';
+import { useEffect } from 'react';
 
 const { chains, publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -26,6 +29,14 @@ const config = createConfig({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!getSignedInAddress()) {
+      router.push('/signin');
+    }
+  });
+
   return (
     <>
       <Script
