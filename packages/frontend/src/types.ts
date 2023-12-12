@@ -38,3 +38,10 @@ export interface FullProof {
   message: string;
   proofVersion: ProofVersion;
 }
+
+export enum AuthStatus {
+  Verified,
+  Pending,
+  Idle,
+  Failed,
+}

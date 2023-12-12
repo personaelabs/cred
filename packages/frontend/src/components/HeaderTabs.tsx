@@ -6,17 +6,18 @@ const HeaderTabs = () => {
   const router = useRouter();
 
   return (
-    <Tabs defaultValue="account" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="account" onClick={() => router.push('/')}>
+    <Tabs defaultValue="my_cred" className="w-[500px]">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="my_cred" onClick={() => router.push('/')}>
           My cred
         </TabsTrigger>
-        <TabsTrigger value="password" onClick={() => router.push('addresses')}>
+        <TabsTrigger value="my_addresses" onClick={() => router.push('addresses')}>
           My addresses
         </TabsTrigger>
+        <TabsTrigger value="settings" onClick={() => router.push('settings')}>
+          Settings
+        </TabsTrigger>
       </TabsList>
-      <TabsContent value="account"></TabsContent>
-      <TabsContent value="password"></TabsContent>
     </Tabs>
   );
 };

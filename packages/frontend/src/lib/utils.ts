@@ -44,20 +44,43 @@ export const saveVerifiedAddress = (address: Hex, sig: Hex) => {
   localStorage.setItem('verifiedAddresses', JSON.stringify(verifiedAddresses));
 };
 
+const CRED_EIP712_DOMAIN = {
+  name: 'creddd',
+  version: '1',
+  chainId: 1,
+  verifyingContract: '0x0000000000000000000000000000000000000000',
+  salt: '0x3c8f67e5796abf1d99aa34c63d9c5bea7d6c5a4803dd22774db7d840683d9ca4',
+};
+
 // Create a EIP-712 message for verifying address ownership
 export const createVerificationMessage = (accountAddress: string) => {
   return {
     primaryType: 'Message',
-    domain: {
-      name: 'creddd',
-      version: '1',
-      chainId: 1,
-      verifyingContract: '0x0000000000000000000000000000000000000000',
-      salt: '0x3c8f67e5796abf1d99aa34c63d9c5bea7d6c5a4803dd22774db7d840683d9ca4',
-    },
+    domain: CRED_EIP712_DOMAIN,
     types: {
       Message: [{ name: 'statement', type: 'string' }],
     },
     message: { statement: `I am creating a private link to ${accountAddress}` },
   };
+};
+
+// Create a EIP-712 message to authenticate an address to an X account
+export const createXAuthMessage = (address: string, username: string) => {
+  return {
+    primaryType: 'Message',
+    domain: CRED_EIP712_DOMAIN,
+    types: {
+      Message: [{ name: 'statement', type: 'string' }],
+    },
+    message: { statement: `I authenticate my address ${address} to my X account @${username}` },
+  };
+};
+
+export const createXVerificationTweetMessage = (
+  address: string,
+  username: string,
+  signature: Hex,
+) => {
+  return `I'm authenticating my address ${address} to my X account @${username}%0A%0ASignature: ${signature}%0A%0Ahttps://creddd.xyz
+  `;
 };
