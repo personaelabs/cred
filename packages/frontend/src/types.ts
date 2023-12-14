@@ -45,3 +45,8 @@ export enum AuthStatus {
   Idle,
   Failed,
 }
+
+export interface UserCred {
+  data: FullProof | string;
+  name: string;
+}
