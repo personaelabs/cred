@@ -26,8 +26,8 @@ model AnonSetMerkleTree {
   metadata String // NOTE: i.e. versioning info, block num, etc.
 
   addressesWithMerkleProof AddressWithMerkleProof[]
-  AnonSet                  AnonSet?                 @relation(fields: [anonSetId], references: [id])
-  anonSetId                String?
+  AnonSet                  AnonSet                  @relation(fields: [anonSetId], references: [id])
+  anonSetId                String
 }
 
 model AddressWithMerkleProof {
@@ -39,6 +39,6 @@ model AddressWithMerkleProof {
   path        String[]
   pathIndices Int[]
 
-  AnonSetMerkleTree           AnonSetMerkleTree? @relation(fields: [anonSetMerkleTreeMerkleRoot], references: [merkleRoot])
-  anonSetMerkleTreeMerkleRoot String?
+  AnonSetMerkleTree           AnonSetMerkleTree @relation(fields: [anonSetMerkleTreeMerkleRoot], references: [merkleRoot])
+  anonSetMerkleTreeMerkleRoot String
 }
