@@ -1,48 +1,35 @@
 /** @type {import('next').NextConfig} */
-const FilterWarningsPlugin = require('webpack-filter-warnings-plugin');
+
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  scope: '/app',
+  disable: process.env.NODE_ENV === 'development',
+})
 
 const nextConfig = {
-  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*',
+        hostname: 'storage.googleapis.com',
+        port: '',
       },
     ],
   },
-  transpilePackages: [
-    'react-syntax-highlighter',
-    'react-native',
-  ],
-  webpack(config) {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    config.experiments = {
-      asyncWebAssembly: true,
-      layers: true,
-    };
+    webpack: (config) => {
+      config.externals.push("pino-pretty", "lokijs", "encoding");
+      config.experiments = {
+        asyncWebAssembly: true,
+        layers: true,
+      };
+
+      return config;
+    }
+}
+
+module.exports = withPWA(nextConfig)
 
 
-    return config;
-  },
+// Injected content via Sentry wizard below
 
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-        ],
-      },
-    ];
-  },
-};
-
-module.exports = nextConfig;
+module.exports = module.exports;
