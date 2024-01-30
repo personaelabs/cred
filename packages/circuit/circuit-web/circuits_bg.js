@@ -127,10 +127,10 @@ export function verify(proof_ser) {
 * @param {Uint8Array} msg_hash
 * @param {Uint8Array} merkle_siblings
 * @param {Uint8Array} merkle_indices
-* @param {Uint8Array} roots
+* @param {Uint8Array} root
 * @returns {Uint8Array}
 */
-export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, roots) {
+export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
@@ -143,7 +143,7 @@ export function prove_membership(s, r, is_y_odd, msg_hash, merkle_siblings, merk
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passArray8ToWasm0(merkle_indices, wasm.__wbindgen_malloc);
         const len4 = WASM_VECTOR_LEN;
-        const ptr5 = passArray8ToWasm0(roots, wasm.__wbindgen_malloc);
+        const ptr5 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
         const len5 = WASM_VECTOR_LEN;
         wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
@@ -171,12 +171,12 @@ export function verify_membership(creddd_proof) {
 * @param {Uint8Array} creddd_proof
 * @returns {Uint8Array}
 */
-export function get_roots(creddd_proof) {
+export function get_merkle_root(creddd_proof) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        wasm.get_roots(retptr, ptr0, len0);
+        wasm.get_merkle_root(retptr, ptr0, len0);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         var v2 = getArrayU8FromWasm0(r0, r1).slice();
@@ -317,14 +317,6 @@ export function __wbg_log_1d3ae0273d8f4f8a(arg0) {
     console.log(getObject(arg0));
 };
 
-export function __wbg_getRandomValues_37fa2ca9e4e07fab() { return handleError(function (arg0, arg1) {
-    getObject(arg0).getRandomValues(getObject(arg1));
-}, arguments) };
-
-export function __wbg_randomFillSync_dc1e9a60c158336d() { return handleError(function (arg0, arg1) {
-    getObject(arg0).randomFillSync(takeObject(arg1));
-}, arguments) };
-
 export function __wbg_crypto_c48a774b022d20ac(arg0) {
     const ret = getObject(arg0).crypto;
     return addHeapObject(ret);
@@ -370,6 +362,14 @@ export function __wbindgen_is_function(arg0) {
     const ret = typeof(getObject(arg0)) === 'function';
     return ret;
 };
+
+export function __wbg_randomFillSync_dc1e9a60c158336d() { return handleError(function (arg0, arg1) {
+    getObject(arg0).randomFillSync(takeObject(arg1));
+}, arguments) };
+
+export function __wbg_getRandomValues_37fa2ca9e4e07fab() { return handleError(function (arg0, arg1) {
+    getObject(arg0).getRandomValues(getObject(arg1));
+}, arguments) };
 
 export function __wbg_newnoargs_581967eacc0e2604(arg0, arg1) {
     const ret = new Function(getStringFromWasm0(arg0, arg1));
