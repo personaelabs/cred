@@ -12,6 +12,16 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
 
+  packages/anon-set-db:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.7.0
+        version: 5.7.0(prisma@5.3.1)
+    devDependencies:
+      prisma:
+        specifier: ^5.3.1
+        version: 5.3.1
+
   packages/circuit:
     dependencies:
       pako:
