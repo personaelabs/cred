@@ -10,13 +10,131 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model MembershipProof {
-  proofHash    String   @id
-  proof        String
-  proofVersion String   @default("v1")
-  publicInput  String
-  merkleRoot   String?
-  message      String
+model ERC721TransferEvent {
+  blockNumber      BigInt
+  from             String
+  to               String
+  tokenId          BigInt
+  contractId       Int    @default(0)
+  transactionIndex Int
+  logIndex         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@unique([blockNumber, transactionIndex])
+  @@index([to])
+  @@index([from])
+  @@index([contractId])
+}
+
+model ERC20TransferEvent {
+  transactionIndex Int
+  logIndex         Int
+  blockNumber      BigInt
+  from             String
+  to               String
+  value            String
+  contractId       Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@unique([blockNumber, transactionIndex])
+  @@index([to])
+  @@index([from])
+  @@index([contractId])
+  @@index([blockNumber])
+}
+
+model MerkleTree {
+  merkleRoot    String         @id
+  Group         Group          @relation(fields: [groupId], references: [id])
+  groupId       Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  merkleProofs  MerkleProof[]
+  verifications Verification[]
+}
+
+model MerkleProof {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  address     String
+  path        String[]
+  pathIndices Int[]
+
+  MerkleTree MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+  merkleRoot String
+
+  @@id([merkleRoot, address])
+}
+
+model Group {
+  id           Int      @id @default(autoincrement())
+  handle       String   @unique
+  displayName  String
+  requirements String[]
+  logo         String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  merkleTrees MerkleTree[]
+  OAuth       OAuth[]
+}
+
+model Verification {
+  User       User       @relation(fields: [username], references: [username])
+  username   String
+  publicKey  String
+  merkleRoot String
+  proof      Bytes
+  MerkleTree MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([username, publicKey])
+}
+
+enum ContractType {
+  ERC20
+  ERC721
+  Other
+}
+
+model Contract {
+  id            Int          @id @default(autoincrement())
+  address       String       @unique
+  name          String
+  type          ContractType
+  deployedBlock BigInt
+  chain         String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  ERC20TransferEvents  ERC20TransferEvent[]
+  ERC721TransferEvents ERC721TransferEvent[]
+}
+
+model User {
+  username          String   @id
+  accessToken       String   @unique
+  accessTokenSecret String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  verifications Verification[]
+}
+
+model OAuth {
+  Group       Group    @relation(fields: [groupId], references: [id])
+  groupId     Int // We need to save the group ID so we can redirect to the correct group page
+  oAuthToken  String   @id
+  oAuthSecret String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

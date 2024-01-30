@@ -1,0 +1,28 @@
+import { Hex } from 'viem';
+
+const getQualifiedAddresses = async (): Promise<Hex[]> => {
+  return [
+    '0x400ea6522867456e988235675b9cb5b1cf5b79c8',
+    '0xcb46219ba114245c3a18761e4f7891f9c4bef8c0',
+    '0x141b63d93daf55bfb7f396eee6114f3a5d4a90b2',
+    '0xf91fe75d70903ed264c8ae49a682e6dbb70b6cee',
+    '0xa2ddfc8a6c1f8868b80f2747d04532a6cde9804d',
+    '0x988e6ee6f1678220aa5d5464a3f5e2571529df4b',
+    '0x185af802be36b3f4347c5127cef25d0870720513',
+    '0x6a8046bd2f3ad3ef9e1ea60faddb668fd3837375',
+    '0xaa3193fd29ac40f45d99546a16427a1cee958256',
+    '0xf6598ca199dc739848d342aef8bb16578382a2f6',
+    '0xbd020867cebdad3bf9f31480e4b01e9bbeff7552',
+    '0x06b6a58966386cb9e6dec35b1f14e5e3512779be',
+    '0x4dde4c4063ed79a7a67919bbb68b2c20fb67a186',
+    '0xef4d00eff106727524453a48680ea968498aff4c',
+    '0x738f268aa2d339787ccc403d2b8ce3ae3bcad09e',
+    '0xab48f9d0d78039e3aa76b6b7aaa15e955d895f0b',
+    '0xad343355a5326bd86c5852edb4e3272a7467a343',
+    '0x2442e131ce4dc4cd57704e394b83703d2035e381',
+    '0xfa398d672936dcf428116f687244034961545d91',
+    '0x2de14db256db2597fe3c8eed46ef5b20ba390823',
+  ];
+};
+
+export default getQualifiedAddresses;
