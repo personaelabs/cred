@@ -1,4 +1,3 @@
-import { User } from '@prisma/client';
 import { Hex } from 'viem';
 
 export interface WitnessInput {
@@ -37,7 +36,6 @@ export interface VerifyRequestBody {
   targetPubKey: Hex;
   targetPubKeySig: Hex;
   sourcePubKeySigHash: Hex;
-  username: string;
   proof: Hex;
 }
 
@@ -45,5 +43,3 @@ export interface UserAccount {
   pubKey: CryptoKey;
   privKey: CryptoKey;
 }
-
-export type TwitterAccount = Pick<User, 'username'>;

@@ -12,16 +12,16 @@ export default function Home() {
     null
   );
   const router = useRouter();
-  const { address, isConnected, isConnecting } = useAccount();
-  console.log({ isConnecting, isConnected });
+  const { isConnected, isConnecting } = useAccount();
+
   if (isConnecting === false && isConnected === false) {
     router.push('/onboarding');
   }
 
-  const { verifications } = useUserAccount();
+  const { signer } = useUserAccount();
 
   // Redirect to /verify if user is not verified
-  if (verifications?.length === 0) {
+  if (signer?.attestations.length === 0) {
     router.push('/groups/dev/verify');
   }
 

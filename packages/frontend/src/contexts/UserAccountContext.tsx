@@ -1,25 +1,22 @@
 'use client';
-import { TwitterAccount, UserAccount } from '@/app/types';
+import { UserAccount } from '@/app/types';
 import useIdb, { STORE_NAME } from '@/hooks/useIdb';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SIGNER_ID } from '@/hooks/useSigner';
 import { useRouter } from 'next/navigation';
 import { IDBPDatabase } from 'idb';
-import { getPubKey, toHexString } from '@/lib/utils';
+import { getPubKey } from '@/lib/utils';
 import { Hex } from 'viem';
-import { VerificationSelect } from '@/app/api/users/[pubKey]/verifications/route';
-import { User } from '@prisma/client';
+import { SignerSelect } from '@/app/api/users/[pubKey]/route';
 
 const UserAccountContext = createContext<{
   account: UserAccount | null;
   pubKey: Hex | null;
-  verifications: VerificationSelect[] | null;
-  twitterAccount: TwitterAccount | null;
+  signer: SignerSelect | null;
 }>({
   account: null,
   pubKey: null,
-  verifications: null,
-  twitterAccount: null,
+  signer: null,
 });
 
 export const useUserAccount = () => {
@@ -70,12 +67,7 @@ export function UserAccountProvider({
   const [account, setAccount] = useState<UserAccount | null>(null);
   const [pubKey, setPubKey] = useState<Hex | null>(null);
   const router = useRouter();
-  const [verifications, setVerifications] = useState<
-    null | VerificationSelect[]
-  >(null);
-  const [twitterAccount, setTwitterAccount] = useState<TwitterAccount | null>(
-    null
-  );
+  const [signer, setSigner] = useState<null | SignerSelect>(null);
 
   const db = useIdb();
 
@@ -92,17 +84,11 @@ export function UserAccountProvider({
   useEffect(() => {
     if (pubKey) {
       (async () => {
-        const res = await fetch(`/api/users/${pubKey}/verifications`);
+        const res = await fetch(`/api/users/${pubKey}`);
 
         if (res.status === 200) {
-          const _verifications = (await res.json()) as VerificationSelect[];
-          setVerifications(_verifications);
-
-          // Set the first verification as the twitter account for now.
-          // TODO: Allow user to select which account to use.
-          if (_verifications.length > 0) {
-            setTwitterAccount(_verifications[0].User);
-          }
+          const _signer = (await res.json()) as SignerSelect;
+          setSigner(_signer);
         }
       })();
     }
@@ -113,8 +99,7 @@ export function UserAccountProvider({
       value={{
         account,
         pubKey,
-        verifications,
-        twitterAccount,
+        signer,
       }}
     >
       {children}

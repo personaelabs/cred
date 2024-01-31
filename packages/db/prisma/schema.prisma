@@ -50,13 +50,13 @@ model ERC20TransferEvent {
 }
 
 model MerkleTree {
-  merkleRoot    String         @id
-  Group         Group          @relation(fields: [groupId], references: [id])
-  groupId       Int
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  merkleProofs  MerkleProof[]
-  verifications Verification[]
+  merkleRoot   String        @id
+  Group        Group         @relation(fields: [groupId], references: [id])
+  groupId      Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  merkleProofs MerkleProof[]
+  Attestation  Attestation[]
 }
 
 model MerkleProof {
@@ -86,18 +86,36 @@ model Group {
   OAuth       OAuth[]
 }
 
-model Verification {
-  User       User       @relation(fields: [username], references: [username])
-  username   String
-  publicKey  String
-  merkleRoot String
-  proof      Bytes
-  MerkleTree MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+model Attestation {
+  id              Int        @id @default(autoincrement())
+  signer          Signer     @relation(fields: [signerPublicKey], references: [publicKey])
+  signerPublicKey String
+  MerkleTree      MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+  merkleRoot      String
+  proof           Bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Signer {
+  publicKey       String       @id
+  twitterUsername String?
+  TwitterUser     TwitterUser? @relation(fields: [twitterUsername], references: [username])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@id([username, publicKey])
+  attestations Attestation[]
+}
+
+model TwitterUser {
+  username          String   @id
+  accessToken       String   @unique
+  accessTokenSecret String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  signers           Signer[]
 }
 
 enum ContractType {
@@ -120,19 +138,10 @@ model Contract {
   ERC721TransferEvents ERC721TransferEvent[]
 }
 
-model User {
-  username          String   @id
-  accessToken       String   @unique
-  accessTokenSecret String   @unique
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  verifications Verification[]
-}
-
 model OAuth {
   Group       Group    @relation(fields: [groupId], references: [id])
   groupId     Int // We need to save the group ID so we can redirect to the correct group page
+  publicKey   String
   oAuthToken  String   @id
   oAuthSecret String   @unique
   createdAt   DateTime @default(now())

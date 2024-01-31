@@ -21,6 +21,7 @@ interface Prover {
   prove(witness: WitnessInput): Promise<Uint8Array>;
 }
 
+// Get the latest merkle tree for a group from the backend.
 const getMerkleTree = async (group: string): Promise<MerkleTreeSelect> => {
   const res = await fetch(`/api/groups/${group}/merkle-proofs`);
   const tree = (await res.json()) as MerkleTreeSelect;
@@ -28,18 +29,13 @@ const getMerkleTree = async (group: string): Promise<MerkleTreeSelect> => {
 };
 
 let prover: Comlink.Remote<Prover>;
-const useProver = ({
-  group,
-  username,
-}: {
-  group: string;
-  username: string;
-}) => {
+
+const useProver = ({ group }: { group: string }) => {
   const { address } = useAccount();
   const { sign } = useSigner();
   const { pubKey } = useUserAccount();
   const { signMessageAsync } = useSignMessage({
-    message: `\n${SIG_SALT}Personae attest:${pubKey}:${username}`,
+    message: `\n${SIG_SALT}Personae attest:${pubKey}`,
   });
   const [failed, setFailed] = useState(false);
 
@@ -114,7 +110,6 @@ const useProver = ({
         );
 
         return {
-          username,
           proof: toHexString(proof),
           targetPubKey: pubKey,
           targetPubKeySig: toHexString(targetPubKeySig),

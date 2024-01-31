@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
   // Get the OAuth secret from the database.
   const oAuth = await prisma.oAuth.findUnique({
     select: {
+      publicKey: true,
       oAuthToken: true,
       oAuthSecret: true,
       Group: {
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!oAuth) {
-    throw new Error('oAuth not found');
+    throw new Error('oAuth session not found');
   }
 
   // Create a new Twitter client using the OAuth token and secret.
@@ -45,7 +46,7 @@ export async function GET(req: NextRequest) {
   const accessToken = result.accessToken;
   const accessSecret = result.accessSecret;
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.twitterUser.findUnique({
     where: {
       username: result.screenName,
     },
@@ -53,16 +54,27 @@ export async function GET(req: NextRequest) {
 
   if (!user) {
     // Save the access token and access token secret to the database.
-    await prisma.user.create({
+    await prisma.twitterUser.create({
       data: {
         username: result.screenName,
         accessToken,
         accessTokenSecret: accessSecret,
       },
     });
+
+    // Connect the attested singer to the twitter user,
+    // so the attested signer can tweet as the twitter user.
+    await prisma.signer.update({
+      where: {
+        publicKey: oAuth.publicKey,
+      },
+      data: {
+        twitterUsername: result.screenName,
+      },
+    });
   }
 
   redirect(
-    `/groups/${oAuth.Group.handle}/verify?username=${result.screenName}`
+    `/groups/${oAuth.Group.handle}/verify?callback=${result.screenName}`
   );
 }

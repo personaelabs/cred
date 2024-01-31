@@ -11,8 +11,6 @@ const {
   API_KEY_SECRET,
   PERSONAE_ACCESS_TOKEN,
   PERSONAE_ACCESS_TOKEN_SECRET,
-  PERSONAE_API_KEY,
-  PERSONAE_API_KEY_SECRET,
 } = process.env;
 
 if (!ACCESS_TOKEN || !ACCESS_TOKEN_SECRET) {
@@ -27,10 +25,6 @@ if (!PERSONAE_ACCESS_TOKEN || !PERSONAE_ACCESS_TOKEN_SECRET) {
   throw new Error(
     'Missing PERSONAE_ACCESS_TOKEN or PERSONAE_ACCESS_TOKEN_SECRET'
   );
-}
-
-if (!PERSONAE_API_KEY || !PERSONAE_API_KEY_SECRET) {
-  throw new Error('Missing PERSONAE_API_KEY or PERSONAE_API_KEY_SECRET');
 }
 
 export const appClient = new TwitterApi({
@@ -55,6 +49,6 @@ export const getUserClient = (accessToken: string, accessSecret: string) => {
 export const personaeClient = new TwitterApi({
   accessToken: PERSONAE_ACCESS_TOKEN,
   accessSecret: PERSONAE_ACCESS_TOKEN_SECRET,
-  appKey: PERSONAE_API_KEY,
-  appSecret: PERSONAE_API_KEY_SECRET,
+  appKey: API_KEY,
+  appSecret: API_KEY_SECRET,
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useUserAccount } from '@/contexts/UserAccountContext';
 import useGetOAuthLink from '@/hooks/useGetOAuthLink';
 import useProver from '@/hooks/useProver';
 import { postJSON } from '@/lib/utils';
@@ -16,6 +17,7 @@ const VerificationPage = ({
 }) => {
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
+  const { pubKey } = useUserAccount();
 
   useEffect(() => {
     const currentURL = window.location.href;
@@ -30,7 +32,6 @@ const VerificationPage = ({
   const link = useGetOAuthLink(group);
   const { prove } = useProver({
     group,
-    username: username || '',
   });
 
   // After server receives a callback from Twitter,
@@ -67,7 +68,7 @@ const VerificationPage = ({
 
               if (verificationBody) {
                 const result = await postJSON({
-                  url: `/api/users/${username}/verifications`,
+                  url: `/api/users/${pubKey}/verifications`,
                   method: 'POST',
                   body: verificationBody,
                 });

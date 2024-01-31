@@ -39,27 +39,30 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const verification = await prisma.verification.findUnique({
+  const signer = await prisma.signer.findUnique({
     select: {
-      User: {
+      TwitterUser: {
         select: {
+          username: true,
           accessToken: true,
           accessTokenSecret: true,
         },
       },
+      attestations: {
+        select: {
+          merkleRoot: true,
+        },
+      },
     },
     where: {
-      username_publicKey: {
-        username,
-        publicKey: body.pubKey,
-      },
+      publicKey: body.pubKey,
     },
   });
 
-  if (!verification) {
+  if (!signer) {
     return Response.json(
       {
-        error: 'User and public key not verified',
+        error: 'Signer not found',
       },
       {
         status: 404,
@@ -67,7 +70,29 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const user = verification.User;
+  if (signer.attestations.length === 0) {
+    return Response.json(
+      {
+        error: 'Signer has no attestations',
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
+  const user = signer.TwitterUser;
+
+  if (!user) {
+    return Response.json(
+      {
+        error: 'Signer has no Twitter account',
+      },
+      {
+        status: 400,
+      }
+    );
+  }
 
   // Get a Twitter client for the space
   const userClient = getUserClient(user.accessToken, user.accessTokenSecret);
