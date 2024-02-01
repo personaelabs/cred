@@ -130,6 +130,8 @@ model Contract {
   name          String
   type          ContractType
   deployedBlock BigInt
+  coingeckoId   String?
+  decimals      Int          @default(18)
   chain         String
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt

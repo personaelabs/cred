@@ -36,13 +36,13 @@ export const processLogs = async <T extends Transport, C extends Chain>({
 }) => {
   // Get the latest block number
   const latestBlock = await client.getBlockNumber();
+  let adjustableBatchSize = batchSize;
 
   let batch: GetLogsReturnType = [];
   for (let batchFrom = fromBlock; batchFrom < latestBlock; ) {
     let start = Date.now();
     await retry(async () => {
-      let toBlock = batchFrom + batchSize;
-      let adjustedBatchSize = batchSize;
+      let toBlock = batchFrom + adjustableBatchSize;
 
       // Fetch event logs
       let logs: GetLogsReturnType | null = null;
@@ -55,11 +55,12 @@ export const processLogs = async <T extends Transport, C extends Chain>({
             toBlock,
             strict: true,
           });
+          adjustableBatchSize *= BigInt(2);
         } catch (err: any) {
           if (err.details.includes('Log response size exceeded')) {
             // Reduce the batch size and retry
-            adjustedBatchSize = adjustedBatchSize / BigInt(2);
-            toBlock = batchFrom + adjustedBatchSize;
+            adjustableBatchSize = adjustableBatchSize / BigInt(2);
+            toBlock = batchFrom + adjustableBatchSize;
           } else {
             throw err;
           }
@@ -96,7 +97,7 @@ export const processLogs = async <T extends Transport, C extends Chain>({
         Number(toBlock - batchFrom) / ((Date.now() - start) / 1000);
       console.log(`${blocksPerSec} bps`);
 
-      batchFrom += adjustedBatchSize;
+      batchFrom += adjustableBatchSize;
     });
   }
 };

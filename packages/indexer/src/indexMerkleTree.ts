@@ -5,7 +5,8 @@ import { MerkleProof } from '@prisma/client';
 import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
-import spaces from './spaces/spaces';
+import groups from './groups/groups';
+import { syncMemeTokens } from './providers/coingecko/coingecko';
 
 const toHex = (x: string): Hex => {
   return `0x${BigInt(x).toString(16)}`;
@@ -84,16 +85,15 @@ const saveTree = async (addresses: Hex[], spaceMeta: GroupMeta) => {
 };
 
 const indexMerkleTree = async () => {
-  await syncERC721();
+  await syncMemeTokens();
   await syncERC20();
 
-  for (const spaceSpc in spaces) {
-    const space = spaces[spaceSpc];
-    const addresses = await space.resolveMembers();
+  for (const group of groups) {
+    const addresses = await group.resolveMembers();
     console.log(
-      `Indexing ${addresses.length} addresses for ${space.space.handle}`
+      `Indexing ${addresses.length} addresses for ${group.group.handle}`
     );
-    await saveTree(addresses, space.space);
+    await saveTree(addresses, group.group);
   }
 };
 

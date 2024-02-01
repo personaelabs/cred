@@ -10,7 +10,7 @@ export type GroupMeta = Pick<
 export type GetQualifiedAddresses = () => Promise<Hex[]>;
 
 export type GroupSpec = {
-  space: GroupMeta;
+  group: GroupMeta;
   resolveMembers: GetQualifiedAddresses;
 };
 

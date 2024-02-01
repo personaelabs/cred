@@ -1,10 +1,10 @@
 import { GroupSpec } from '../types';
 import devResolver from './resolvers/devResolver';
-import zkForHumansResolver from './resolvers/zkForHumansResolver';
+import cred2Resolver from './resolvers/credResolver';
 
-const spaces: GroupSpec[] = [
+const groups: GroupSpec[] = [
   {
-    space: {
+    group: {
       handle: 'dev',
       displayName: 'Dev',
       logo: 'https://storage.googleapis.com/personae-images/anon.png',
@@ -13,14 +13,14 @@ const spaces: GroupSpec[] = [
     resolveMembers: devResolver,
   },
   {
-    space: {
-      displayName: 'the zkouncil',
-      handle: 'zkouncil',
-      logo: 'https://storage.googleapis.com/personae-images/zkouncil.jpeg',
+    group: {
+      displayName: 'cred 2.0',
+      handle: 'cred-2',
+      logo: 'https://storage.googleapis.com/personae-images/anon.png',
       requirements: ['you write circuits'],
     },
-    resolveMembers: zkForHumansResolver,
+    resolveMembers: cred2Resolver,
   },
 ];
 
-export default spaces;
+export default groups;
