@@ -1,5 +1,8 @@
 import { Hex } from 'viem';
 
+/**
+ * Witness to pass to the prover
+ */
 export interface WitnessInput {
   s: Uint8Array;
   r: Uint8Array;
@@ -17,29 +20,31 @@ export interface ActionSelector {
   action: ActionType;
 }
 
-export interface Action<T extends ActionSelector> {
+/**
+ * Action signed using the Web Crypto API
+ */
+export interface SignedAction<T extends ActionSelector> {
   sig: Hex;
   pubKey: Hex;
   body: T;
 }
 
-export type PostBody = {
+export type TweetBody = {
   text: string;
   replyTo?: string;
 } & ActionSelector;
 
-export type PostRequestBody = Action<PostBody> & {
-  username: string;
-};
+/** Private/Public key pair generated using the Web Crypto API  */
+export interface UserAccount {
+  pubKey: CryptoKey;
+  privKey: CryptoKey;
+}
 
-export interface VerifyRequestBody {
+export type NewTweetRequestBody = SignedAction<TweetBody>;
+
+export interface NewAttestationRequestBody {
   targetPubKey: Hex;
   targetPubKeySig: Hex;
   sourcePubKeySigHash: Hex;
   proof: Hex;
-}
-
-export interface UserAccount {
-  pubKey: CryptoKey;
-  privKey: CryptoKey;
 }

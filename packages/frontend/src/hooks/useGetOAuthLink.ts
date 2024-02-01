@@ -1,7 +1,9 @@
 import { useUserAccount } from '@/contexts/UserAccountContext';
 import { useEffect, useState } from 'react';
 
-// Get a Twitter OAuth link from the backend.
+/**
+ * Get a Twitter OAuth link from the backend.
+ */
 const useGetOAuthLink = (group: string) => {
   const [link, setLink] = useState<string | null>(null);
   const { pubKey } = useUserAccount();

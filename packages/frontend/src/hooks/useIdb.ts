@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 export const DB_NAME = 'creddd';
 export const STORE_NAME = 'account';
 
-// Returns an IndexedDB database object.
+/**
+ * Returns an IndexedDB database object.
+ */
 const useIdb = () => {
   const [db, setDb] = useState<IDBPDatabase | null>(null);
 

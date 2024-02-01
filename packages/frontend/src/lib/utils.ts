@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex } from 'viem';
-import { Action, ActionSelector, UserAccount } from '@/app/types';
+import { SignedAction, ActionSelector, UserAccount } from '@/app/types';
 import { webcrypto } from 'crypto';
 
 export const MAX_TWEET_CHARS = 280;
@@ -21,8 +21,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46
-// Returns if y is odd or not
+/**
+ * - Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46
+ * - Returns if y is odd or not
+ */
+//
 export const calculateSigRecovery = (v: bigint, chainId?: bigint): boolean => {
   if (v === BigInt(0) || v === BigInt(1)) {
     return v === BigInt(1) ? false : true;
@@ -42,17 +45,23 @@ export const calculateSigRecovery = (v: bigint, chainId?: bigint): boolean => {
   }
 };
 
-// Encodes a post body into a Buffer
+/**
+ * Encode a post body into a Buffer
+ */
 export const encodeActionBody = (postBody: Record<string, any>): Buffer => {
   return Buffer.from(JSON.stringify(postBody), 'utf-8');
 };
 
-// Convert a Buffer to a hex string
+/**
+ * Convert a Buffer to `Hex`
+ */
 export const toHexString = (bytes: Uint8Array | ArrayBuffer | Buffer): Hex => {
   return `0x${Buffer.from(bytes).toString('hex')}`;
 };
 
-// Convert a hex string to a Buffer
+/**
+ * Convert a `Hex` to a Buffer
+ */
 export const fromHexString = (hexString: Hex, size?: number): Buffer => {
   const padded = size
     ? hexString.slice(2).padStart(size * 2, '0')
@@ -61,7 +70,9 @@ export const fromHexString = (hexString: Hex, size?: number): Buffer => {
   return Buffer.from(padded, 'hex');
 };
 
-// Concatenates Uint8Arrays into a single Uint8Array
+/**
+ * Concatenate multiple Uint8Arrays into a single Uint8Array
+ */
 export const concatUint8Arrays = (arrays: Uint8Array[]) => {
   // Calculate combined length
   let totalLength = 0;
@@ -82,12 +93,9 @@ export const concatUint8Arrays = (arrays: Uint8Array[]) => {
   return result;
 };
 
-// Returns the first 6 characters of a public key as a username
-export const getUsername = (pubKey: string) => {
-  // TODO: Use a better username
-  return pubKey.slice(0, 6);
-};
-
+/**
+ * Send a POST request with a JSON body to the specified URL
+ */
 export const postJSON = async <T>({
   url,
   body,
@@ -106,8 +114,11 @@ export const postJSON = async <T>({
   });
 };
 
+/**
+ * Verify the signature of a signed action
+ */
 export const verifySignedAction = async <T extends ActionSelector>(
-  body: Action<T>
+  body: SignedAction<T>
 ) => {
   const pubKey = await webcrypto.subtle.importKey(
     'raw',
@@ -130,14 +141,9 @@ export const verifySignedAction = async <T extends ActionSelector>(
   return verified;
 };
 
-export const copyTextToClipboard = async (text: string) => {
-  if ('clipboard' in navigator) {
-    return await navigator.clipboard.writeText(text);
-  } else {
-    return document.execCommand('copy', true, text);
-  }
-};
-
+/**
+ * Get the tweet ID from a tweet URL
+ */
 export const getTweetIdFromUrl = (url: string): string | null => {
   const match = url.match(/https:\/\/twitter\.com\/.*\/status\/(\d+)/);
 
@@ -148,6 +154,9 @@ export const getTweetIdFromUrl = (url: string): string | null => {
   return null;
 };
 
+/**
+ * Get the tweet URL from a username and tweet ID
+ */
 export const getTweetUrl = ({
   username,
   tweetId,
@@ -158,7 +167,9 @@ export const getTweetUrl = ({
   return `https://twitter.com/${username}/status/${tweetId}`;
 };
 
-// Get the public key as a hex string from `UserAccount`
+/**
+ * Get the public key as a hex string from `UserAccount`
+ */
 export const getPubKey = async (userAccount: UserAccount) => {
   const pubKeyRaw = await window.crypto.subtle.exportKey(
     'raw',

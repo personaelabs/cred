@@ -1,49 +1,37 @@
 'use client';
-import PostWriter from '@/components/PostWriter';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import ReplyWriter from '@/components/ReplyWriter';
 import { useUserAccount } from '@/contexts/UserAccountContext';
 import { useAccount } from 'wagmi';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const [isPostWriterOpen, setIsPostWriterOpen] = useState<null | string>(null);
-  const [isReplyWriterOpen, setIsReplyWriterOpen] = useState<null | string>(
-    null
-  );
   const router = useRouter();
   const { isConnected, isConnecting } = useAccount();
 
+  // If the wallet is not connected, redirect to onboarding
   if (isConnecting === false && isConnected === false) {
     router.push('/onboarding');
   }
 
-  const { signer } = useUserAccount();
+  const { attestations } = useUserAccount();
 
-  // Redirect to /verify if user is not verified
-  if (signer?.attestations.length === 0) {
+  // Redirect to /verify if the user has no zero-knowledge attestations
+  // (i.e. hasn't proven their eligibility)
+  if (attestations && attestations.length === 0) {
     router.push('/groups/dev/verify');
   }
 
+  const isLoading = isConnecting || attestations === null;
+
   return (
     <>
-      <div className="h-[80vh] flex flex-col gap-10 justify-start items-center"></div>
-      <PostWriter
-        isOpen={isPostWriterOpen ? true : false}
-        space={isPostWriterOpen ? (isPostWriterOpen as string) : ''}
-        onClose={() => setIsPostWriterOpen(null)}
-        onSubmit={() => {
-          setIsPostWriterOpen(null);
-        }}
-      ></PostWriter>
-      <ReplyWriter
-        isOpen={isReplyWriterOpen ? true : false}
-        space={isReplyWriterOpen ? (isReplyWriterOpen as string) : ''}
-        onClose={() => setIsReplyWriterOpen(null)}
-        onSubmit={() => {
-          setIsReplyWriterOpen(null);
-        }}
-      ></ReplyWriter>
+      <div className="flex justify-center items-center">
+        {isLoading ? (
+          <Loader2 className="animate-spin w-4 h-4"></Loader2>
+        ) : (
+          <div>Tweet writer comes here</div>
+        )}
+      </div>
     </>
   );
 }

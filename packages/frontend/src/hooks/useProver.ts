@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink';
 import { useEffect, useState } from 'react';
-import { VerifyRequestBody, WitnessInput } from '@/app/types';
+import { NewAttestationRequestBody, WitnessInput } from '@/app/types';
 import useSigner from './useSigner';
 import { useAccount, useSignMessage } from 'wagmi';
 import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
@@ -21,7 +21,9 @@ interface Prover {
   prove(witness: WitnessInput): Promise<Uint8Array>;
 }
 
-// Get the latest merkle tree for a group from the backend.
+/**
+ * Get the latest merkle tree for a group from the backend.
+ */
 const getMerkleTree = async (group: string): Promise<MerkleTreeSelect> => {
   const res = await fetch(`/api/groups/${group}/merkle-proofs`);
   const tree = (await res.json()) as MerkleTreeSelect;
@@ -46,7 +48,7 @@ const useProver = ({ group }: { group: string }) => {
     prover.prepare();
   }, []);
 
-  const prove = async (): Promise<VerifyRequestBody | null> => {
+  const prove = async (): Promise<NewAttestationRequestBody | null> => {
     if (prover && address && pubKey) {
       // await prover.prepare();
       const message = `\n${SIG_SALT}Personae attest:${pubKey}`;

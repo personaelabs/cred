@@ -2,9 +2,14 @@ import { SIG_ALGO, SIG_SALT } from '@/lib/utils';
 import { useCallback } from 'react';
 import { useUserAccount } from '@/contexts/UserAccountContext';
 
-// We only have one account for now
-export const SIGNER_ID = 1;
+/**
+ * Key of the signer stored Indexed DB
+ */
+export const SIGNER_KEY = 1;
 
+/**
+ * Sign messages with the Web Crypto API
+ */
 const useSigner = () => {
   const { account } = useUserAccount();
 

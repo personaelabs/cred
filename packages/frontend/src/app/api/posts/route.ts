@@ -1,4 +1,4 @@
-import { ActionType, PostRequestBody } from '@/app/types';
+import { ActionType, NewTweetRequestBody } from '@/app/types';
 import prisma from '@/lib/prisma';
 import { getUserClient, personaeClient } from '@/lib/twitter';
 import { getTweetIdFromUrl, verifySignedAction } from '@/lib/utils';
@@ -9,10 +9,11 @@ export interface PostResponse {
   username: string;
 }
 
-// Create a new tweet
+/**
+ * Post a new tweet
+ */
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as PostRequestBody;
-  const username = body.username;
+  const body = (await request.json()) as NewTweetRequestBody;
 
   // Check if signed the action is actually a post action
   if (body.body.action !== ActionType.Post) {
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
   return Response.json(
     {
       tweetId: result.data.id,
-      username,
+      username: user.username,
     },
     {
       status: 200,

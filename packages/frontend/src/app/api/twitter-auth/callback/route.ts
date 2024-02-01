@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation';
 
 const { API_KEY, API_KEY_SECRET } = process.env;
 
+/**
+ * Handle the callback from Twitter after the user has authorized the app.
+ */
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
 
@@ -46,6 +49,26 @@ export async function GET(req: NextRequest) {
   const accessToken = result.accessToken;
   const accessSecret = result.accessSecret;
 
+  const signer = await prisma.signer.findUnique({
+    select: {
+      twitterUsername: true,
+    },
+    where: {
+      publicKey: oAuth.publicKey,
+    },
+  });
+
+  if (signer?.twitterUsername) {
+    return Response.json(
+      {
+        error: 'Twitter account already linked',
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
   const user = await prisma.twitterUser.findUnique({
     where: {
       username: result.screenName,
@@ -62,8 +85,8 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Connect the attested singer to the twitter user,
-    // so the attested signer can tweet as the twitter user.
+    // Connect the singer to the twitter user,
+    // so the signer can tweet as the twitter user.
     await prisma.signer.update({
       where: {
         publicKey: oAuth.publicKey,
@@ -75,6 +98,6 @@ export async function GET(req: NextRequest) {
   }
 
   redirect(
-    `/groups/${oAuth.Group.handle}/verify?callback=${result.screenName}`
+    `/groups/${oAuth.Group.handle}/verify?username=${result.screenName}`
   );
 }

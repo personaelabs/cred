@@ -18,6 +18,7 @@ const VerificationPage = ({
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
   const { pubKey } = useUserAccount();
+  // Connect to Twitter
 
   useEffect(() => {
     const currentURL = window.location.href;
@@ -46,7 +47,7 @@ const VerificationPage = ({
         <Button
           onClick={() => {
             if (link) {
-              window.open(link, '_blank');
+              router.push(link);
             }
           }}
           disabled={isTwitterConnected}
@@ -68,7 +69,7 @@ const VerificationPage = ({
 
               if (verificationBody) {
                 const result = await postJSON({
-                  url: `/api/users/${pubKey}/verifications`,
+                  url: `/api/users/${pubKey}/attestations`,
                   method: 'POST',
                   body: verificationBody,
                 });

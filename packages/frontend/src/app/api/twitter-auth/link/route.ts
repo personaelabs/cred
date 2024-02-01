@@ -7,6 +7,9 @@ const OAUTH_CALLBACK =
     ? process.env.VERCEL_URL + '/api/twitter-auth/callback'
     : 'https://personae-dev-1.ngrok.app/api/twitter-auth/callback';
 
+/**
+ * Generate and return a Twitter OAuth link
+ */
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
 
@@ -26,10 +29,24 @@ export async function GET(req: NextRequest) {
   const authLink = await appClient.generateAuthLink(`${OAUTH_CALLBACK}`);
 
   const signer = await prisma.signer.findUnique({
+    select: {
+      twitterUsername: true,
+    },
     where: {
       publicKey,
     },
   });
+
+  if (signer?.twitterUsername) {
+    return Response.json(
+      {
+        error: 'Twitter account already linked',
+      },
+      {
+        status: 400,
+      }
+    );
+  }
 
   if (!signer) {
     // Create the signer if it doesn't exist

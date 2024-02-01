@@ -1,30 +1,28 @@
-import { PostBody, PostRequestBody } from '@/app/types';
+import { TweetBody, NewTweetRequestBody } from '@/app/types';
 import useSigner from './useSigner';
 import { encodeActionBody, postJSON, toHexString } from '@/lib/utils';
 import { useState } from 'react';
 import { PostResponse } from '@/app/api/posts/route';
 import { useUserAccount } from '@/contexts/UserAccountContext';
 
-// Post a new post to the backend.
+/**
+ * Sign and submit actions to the backend.
+ * (e.g. tweet)
+ */
 const useWriter = () => {
   const { sign } = useSigner();
-  const { pubKey, signer } = useUserAccount();
+  const { pubKey } = useUserAccount();
   const [submittingPost, setSubmittingPost] = useState(false);
 
-  const post = async (postBody: PostBody): Promise<PostResponse> => {
+  const post = async (tweetBody: TweetBody): Promise<PostResponse> => {
     if (pubKey) {
-      if (!signer?.TwitterUser?.username) {
-        throw new Error('No Twitter account found for signer');
-      }
-
       setSubmittingPost(true);
       // Sign the message with the singer
-      const postBodyBuffer = encodeActionBody(postBody);
-      const sig = await sign(postBodyBuffer);
+      const tweetBodyBuffer = encodeActionBody(tweetBody);
+      const sig = await sign(tweetBodyBuffer);
 
-      const body: PostRequestBody = {
-        username: signer.TwitterUser.username,
-        body: postBody,
+      const body: NewTweetRequestBody = {
+        body: tweetBody,
         sig: toHexString(sig),
         pubKey,
       };

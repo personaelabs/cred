@@ -1,11 +1,16 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
-import { VerifyRequestBody } from '@/app/types';
+import { NewAttestationRequestBody } from '@/app/types';
 import { fromHexString, toHexString } from '@/lib/utils';
+import { Prisma } from '@prisma/client';
+// @ts-ignore
+import * as circuit from 'circuit-node/circuits_embedded';
 
-let circuit: any;
 let circuitInitialized = false;
-// Verify creddd proof
+
+/**
+ * Verify and save a zero-knowledge attestation
+ */
 export const POST = async (
   request: NextRequest,
   {
@@ -16,7 +21,7 @@ export const POST = async (
     };
   }
 ) => {
-  const body = (await request.json()) as VerifyRequestBody;
+  const body = (await request.json()) as NewAttestationRequestBody;
   const proof = fromHexString(body.proof);
   const pubKey = params.pubKey;
 
@@ -33,8 +38,6 @@ export const POST = async (
   }
 
   if (!circuitInitialized) {
-    // @ts-ignore
-    circuit = await import('circuit-node/circuits_embedded');
     await circuit.prepare();
     await circuit.init_panic_hook();
     circuitInitialized = true;
@@ -58,7 +61,7 @@ export const POST = async (
 
   // TODO: Verify the message hash
 
-  // Save the verification to the database
+  // Save the attestation to the database
   await prisma.attestation.create({
     data: {
       signerPublicKey: body.targetPubKey,
@@ -68,4 +71,33 @@ export const POST = async (
   });
 
   return Response.json({}, { status: 200 });
+};
+
+const selectAttestations = {
+  merkleRoot: true,
+} satisfies Prisma.AttestationSelect;
+
+export type AttestationSelect = Prisma.AttestationGetPayload<{
+  select: typeof selectAttestations;
+}>;
+
+export const GET = async (
+  _req: NextRequest,
+  {
+    params,
+  }: {
+    params: {
+      pubKey: string;
+    };
+  }
+) => {
+  const pubKey = params.pubKey;
+  const signerAttestations = await prisma.attestation.findMany({
+    where: {
+      signerPublicKey: pubKey,
+    },
+    select: selectAttestations,
+  });
+
+  return Response.json(signerAttestations);
 };
