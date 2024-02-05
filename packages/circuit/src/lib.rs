@@ -8,15 +8,15 @@ use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use eth_membership::{eth_membership, to_cs_field, TREE_DEPTH};
 use num_bigint::BigUint;
 use sapir::constraint_system::ConstraintSystem;
-use sapir::{circuit, wasm::prelude::*};
+use sapir::{embed_to_wasm, wasm::prelude::*};
 
-type Curve = sapir::ark_secq256k1::Projective;
+type Curve = ark_secq256k1::Projective;
 type F = ark_secq256k1::Fr;
 
 // Produce the code to generate and verify the proof of the `eth_membership` circuit.
 // We wrap the `prove` and `verify` functions with additional logic
 // and expose them to the JavaScript runtime.
-circuit!(
+embed_to_wasm!(
     |cs: &mut ConstraintSystem<F>| { eth_membership(cs) },
     Curve,
     b"creddd"

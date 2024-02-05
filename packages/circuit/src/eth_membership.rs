@@ -2,8 +2,10 @@ use ark_ff::PrimeField;
 use sapir::{
     constraint_system::{ConstraintSystem, Wire},
     frontend::gadgets::{
-        ec_add_complete, ec_mul, poseidon::poseidon::PoseidonChip, to_addr, to_le_bits,
-        verify_merkle_proof, AffinePoint,
+        poseidon::poseidon::PoseidonChip,
+        to_addr, to_le_bits, verify_merkle_proof,
+        weierstrass::{ec_add_complete, ec_mul},
+        AffinePoint,
     },
     poseidon::constants::secp256k1_w3,
 };
