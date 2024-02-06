@@ -1,3 +1,5 @@
+import { Hex } from 'viem';
+
 /**
  * Witness to pass to the prover
  */
@@ -9,4 +11,9 @@ export interface WitnessInput {
   siblings: Uint8Array;
   indices: Uint8Array;
   root: Uint8Array;
+}
+
+export interface VerifyRequestBody {
+  sourcePubKeySigHash: Hex;
+  proof: Hex;
 }
