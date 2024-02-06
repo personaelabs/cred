@@ -5,7 +5,7 @@ import { MerkleProof } from '@prisma/client';
 import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
-import groups from './groups/groups';
+import groupsResolver from './groups/groupsResolver';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 
 const toHex = (x: string): Hex => {
@@ -90,6 +90,8 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
 const indexMerkleTree = async () => {
   await syncMemeTokensMeta();
   await syncERC20();
+
+  const groups = await groupsResolver();
 
   for (const group of groups) {
     const addresses = await group.resolveMembers();
