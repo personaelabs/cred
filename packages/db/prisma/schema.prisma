@@ -20,3 +20,99 @@ model MembershipProof {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model ERC721TransferEvent {
+  blockNumber      BigInt
+  from             String
+  to               String
+  tokenId          BigInt
+  contractId       Int    @default(0)
+  transactionIndex Int
+  logIndex         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@unique([blockNumber, transactionIndex])
+  @@index([to])
+  @@index([from])
+  @@index([contractId])
+}
+
+model ERC20TransferEvent {
+  transactionIndex Int
+  logIndex         Int
+  blockNumber      BigInt
+  from             String
+  to               String
+  value            String
+  contractId       Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@unique([blockNumber, transactionIndex])
+  @@index([to])
+  @@index([from])
+  @@index([contractId])
+  @@index([blockNumber])
+}
+
+model MerkleTree {
+  merkleRoot   String        @id
+  Group        Group         @relation(fields: [groupId], references: [id])
+  groupId      Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  merkleProofs MerkleProof[]
+}
+
+model MerkleProof {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  address     String
+  path        String[]
+  pathIndices Int[]
+
+  MerkleTree MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+  merkleRoot String
+
+  @@id([merkleRoot, address])
+}
+
+model Group {
+  id           Int      @id @default(autoincrement())
+  handle       String   @unique
+  displayName  String
+  requirements String[]
+  logo         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  merkleTrees MerkleTree[]
+}
+
+enum ContractType {
+  ERC20
+  ERC721
+  Other
+}
+
+model Contract {
+  id            Int          @id @default(autoincrement())
+  address       String       @unique
+  name          String
+  type          ContractType
+  deployedBlock BigInt
+  coingeckoId   String?
+  decimals      Int          @default(18)
+  chain         String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  ERC20TransferEvents  ERC20TransferEvent[]
+  ERC721TransferEvents ERC721TransferEvent[]
+}
