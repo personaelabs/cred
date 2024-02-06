@@ -3,7 +3,7 @@ import devResolver from './resolvers/devResolver';
 import earlyHoldersResolver from './resolvers/earlyHoldersResolver';
 
 /**
- * Resolver that returns all groups
+ * Combine and return all group resolvers
  */
 const groupsResolver = async (): Promise<GroupSpec[]> => {
   const devGroup = await devResolver();

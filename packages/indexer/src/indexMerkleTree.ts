@@ -1,4 +1,4 @@
-import { get_merkle_proofs } from '@personaelabs/merkle-tree';
+const merkleTree = require('@personaelabs/merkle-tree');
 import { Hex } from 'viem';
 import prisma from './prisma';
 import { MerkleProof } from '@prisma/client';
@@ -12,11 +12,16 @@ const toHex = (x: string): Hex => {
   return `0x${BigInt(x).toString(16)}`;
 };
 
+const toAddress = (x: string): Hex => {
+  return `0x${BigInt(x).toString(16).padStart(40, '0')}`;
+};
+
 const parseMerkleProof = (
   merkleProof: string
 ): Omit<MerkleProof, 'createdAt' | 'updatedAt' | 'id'> => {
   const merkleProofJSON = JSON.parse(merkleProof);
-  const address = toHex(merkleProofJSON['leaf']);
+  const address = toAddress(toHex(merkleProofJSON['leaf']));
+
   const merkleRoot = toHex(merkleProofJSON['root']);
   const path = merkleProofJSON['siblings'].map((sibling: string[]) =>
     toHex(sibling[0])
@@ -45,13 +50,18 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     return;
   }
 
-  const addressesBytes = new Uint8Array(addresses.length * 20);
+  const addressesBytes = new Uint8Array(addresses.length * 32);
 
   for (const [i, address] of addresses.entries()) {
-    addressesBytes.set(Buffer.from(address.slice(2), 'hex'), i * 20);
+    const paddedAddress = address.slice(2).padStart(64, '0');
+    addressesBytes.set(Buffer.from(paddedAddress, 'hex'), i * 32);
   }
 
-  const merkleProofs = await get_merkle_proofs(addressesBytes, TREE_DEPTH);
+  const merkleProofs = await merkleTree.secp256k1_get_proofs(
+    addressesBytes,
+    TREE_DEPTH
+  );
+
   const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
   const merkleRoot = parsedMerkleProofs[0].merkleRoot;
 
@@ -88,6 +98,8 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
 };
 
 const indexMerkleTree = async () => {
+  merkleTree.init_panic_hook();
+
   await syncMemeTokensMeta();
   await syncERC20();
 
