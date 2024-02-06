@@ -7,7 +7,6 @@ import { GroupSpec } from '../../types';
  */
 const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
   console.log(`Getting early holders for contract ${contractId}`);
-  const holders = new Set<Hex>();
 
   // Get the total number of holders for the token
   const result = await prisma.$queryRaw<{ numHolders: bigint }[]>`
@@ -42,13 +41,8 @@ const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
     ],
     take: earlinessThreshold,
   });
-  console.log(transfers[0]);
 
-  for (const transfer of transfers) {
-    holders.add(transfer.to as Hex);
-  }
-
-  return [...holders];
+  return transfers.map(transfer => transfer.to as Hex);
 };
 
 /**

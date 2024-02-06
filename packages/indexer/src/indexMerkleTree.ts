@@ -57,10 +57,13 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     addressesBytes.set(Buffer.from(paddedAddress, 'hex'), i * 32);
   }
 
+  const timerLabel = `Create merkle tree for ${groupMeta.displayName}`;
+  console.time(timerLabel);
   const merkleProofs = await merkleTree.secp256k1_get_proofs(
     addressesBytes,
     TREE_DEPTH
   );
+  console.timeEnd(timerLabel);
 
   const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
   const merkleRoot = parsedMerkleProofs[0].merkleRoot;
