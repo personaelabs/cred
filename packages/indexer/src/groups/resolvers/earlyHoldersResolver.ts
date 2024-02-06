@@ -3,13 +3,12 @@ import prisma from '../../prisma';
 import { GroupSpec } from '../../types';
 
 /**
- * Get the first 5% of addresses to receive a transfer for each token
+ * Get the first 5% of addresses to receive a transfer for the given token
  */
 const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
   console.log(`Getting early holders for contract ${contractId}`);
   const holders = new Set<Hex>();
 
-  // For each token, get the first 5% of holders
   // Get the total number of holders for the token
   const result = await prisma.$queryRaw<{ numHolders: bigint }[]>`
       SELECT COUNT(DISTINCT "to") as "numHolders" FROM "ERC20TransferEvent"

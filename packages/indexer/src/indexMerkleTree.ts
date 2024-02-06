@@ -33,7 +33,7 @@ const parseMerkleProof = (
   };
 };
 
-const TREE_DEPTH = 15; // We use a depth of 15 for all trees
+const TREE_DEPTH = 18; // We use a depth of 18 for all trees
 
 /**
  *  Create a new merkle tree and save the merkle proofs for the given addresses
