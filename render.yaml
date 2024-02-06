@@ -1,9 +1,4 @@
-databases:
-  - name: cred
-    databaseName: cred
-    region: oregon
-    plan: pro
-    postgresMajorVersion: 15
+services:
   - type: cron
     name: cred-indexer
     plan: standard
@@ -29,3 +24,10 @@ databases:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
+
+databases:
+  - name: cred
+    databaseName: cred
+    region: oregon
+    plan: pro
+    postgresMajorVersion: 15    
