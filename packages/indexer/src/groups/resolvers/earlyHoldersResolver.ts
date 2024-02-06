@@ -22,6 +22,9 @@ const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
 
   // Get the first 5% of holders
   const transfers = await prisma.eRC20TransferEvent.findMany({
+    select: {
+      to: true,
+    },
     where: {
       contractId,
     },
@@ -39,6 +42,7 @@ const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
     ],
     take: earlinessThreshold,
   });
+  console.log(transfers[0]);
 
   for (const transfer of transfers) {
     holders.add(transfer.to as Hex);
