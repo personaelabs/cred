@@ -13,7 +13,9 @@ import { runInParallel } from '../../utils';
 import chalk from 'chalk';
 import * as chains from 'viem/chains';
 
-// Sync `Transfer` events from ERC20 contracts
+/**
+ * Sync `Transfer` events from ERC20 contracts
+ */
 const indexTransferEvents = async (
   client: PublicClient<HttpTransport, Chain>,
   contract: Contract
@@ -80,6 +82,9 @@ const indexTransferEvents = async (
   });
 };
 
+/**
+ * Sync Transfer logs of ERC20 contracts stored in the database
+ */
 export const syncERC20 = async () => {
   // Get all ERC20 contracts to index from the database
   const contracts = await prisma.contract.findMany({

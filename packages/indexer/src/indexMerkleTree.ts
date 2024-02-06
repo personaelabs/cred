@@ -6,7 +6,7 @@ import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
 import groups from './groups/groups';
-import { syncMemeTokens } from './providers/coingecko/coingecko';
+import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 
 const toHex = (x: string): Hex => {
   return `0x${BigInt(x).toString(16)}`;
@@ -35,10 +35,13 @@ const parseMerkleProof = (
 
 const TREE_DEPTH = 15; // We use a depth of 15 for all trees
 
-const saveTree = async (addresses: Hex[], spaceMeta: GroupMeta) => {
+/**
+ *  Create a new merkle tree and save the merkle proofs for the given addresses
+ */
+const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
   // Skip if there are no addresses
   if (addresses.length === 0) {
-    console.log(`Skipping ${spaceMeta.handle} as there are no addresses`);
+    console.log(`Skipping ${groupMeta.handle} as there are no addresses`);
     return;
   }
 
@@ -63,10 +66,10 @@ const saveTree = async (addresses: Hex[], spaceMeta: GroupMeta) => {
     // Create the space if it doesn't exist yet
     const group = await prisma.group.upsert({
       where: {
-        handle: spaceMeta.handle,
+        handle: groupMeta.handle,
       },
-      create: spaceMeta,
-      update: spaceMeta,
+      create: groupMeta,
+      update: groupMeta,
     });
 
     // Create a new merkle tree
@@ -85,7 +88,7 @@ const saveTree = async (addresses: Hex[], spaceMeta: GroupMeta) => {
 };
 
 const indexMerkleTree = async () => {
-  await syncMemeTokens();
+  await syncMemeTokensMeta();
   await syncERC20();
 
   for (const group of groups) {

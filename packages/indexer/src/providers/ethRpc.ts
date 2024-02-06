@@ -73,10 +73,15 @@ const getClient = (
   });
 };
 
-// Manage a list of occupied Ethereum RPC clients as a global variable
+/**
+ * Manage a list of occupied Ethereum RPC clients as a global variable
+ */
 let activeClients: number[] = [];
 
-// List of active clients
+
+/**
+ * List of active clients
+ */
 const allClientIds = new Array(NUM_MAINNET_CLIENTS).fill(0).map((_, i) => i);
 
 export const getNextAvailableClient = (chain: Chain): ManagedClient | null => {

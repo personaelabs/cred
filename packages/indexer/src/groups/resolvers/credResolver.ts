@@ -1,7 +1,9 @@
 import { Hex } from 'viem';
 import prisma from '../../prisma';
 
-// Get the first 5% of addresses to receive a transfer for each token
+/**
+ * Get the first 5% of addresses to receive a transfer for each token
+ */
 const getEarlyHolders = async (): Promise<Hex[]> => {
   // Get all contracts with a coingecko id
   const contracts = await prisma.contract.findMany({
@@ -57,7 +59,9 @@ const getEarlyHolders = async (): Promise<Hex[]> => {
   return [...holders];
 };
 
-// Get addresses that have ever held over 0.1% of the total supply for each token
+/**
+ * Get addresses that have ever held over 0.1% of the total supply for each token
+ */
 const getTopHoldersAcrossTime = async (): Promise<Hex[]> => {
   const contracts = await prisma.contract.findMany({
     where: {

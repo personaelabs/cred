@@ -35,8 +35,10 @@ export const retry = async <T>(
   throw error;
 };
 
-// Run a function concurrently which uses an Ethereum RPC client.
-// We use a pool of clients to run the function concurrently.
+/**
+ * Run a function concurrently which uses an Ethereum RPC client.
+ * We use a pool of clients to run the function concurrently.
+ */
 export const runInParallel = async <T>(
   fn: (
     client: PublicClient<HttpTransport, chains.Chain>,
@@ -116,7 +118,7 @@ export const runInParallel = async <T>(
   }
 };
 
-export const DUMMY_ADDRESSES: Hex[] = [
+export const DEV_ADDRESSES: Hex[] = [
   // Dev addresses
   '0x400ea6522867456e988235675b9cb5b1cf5b79c8', // dantehrani.eth
   '0xcb46219ba114245c3a18761e4f7891f9c4bef8c0', // lsankar.eth

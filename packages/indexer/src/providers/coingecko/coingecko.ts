@@ -20,7 +20,9 @@ interface CoingeckoTokenResponse {
   name: string;
 }
 
-// Get token information from CoinGecko by token id
+/**
+ * Get token information from CoinGecko by token id
+ */
 export const getTokenById = async (
   tokenId: string
 ): Promise<CoingeckoTokenResponse> => {
@@ -43,7 +45,9 @@ export const getTokenById = async (
   return data as CoingeckoTokenResponse;
 };
 
-// Get all meme token IDs from CoinGecko
+/**
+ * Get all meme token IDs from CoinGecko
+ */
 const getMemeTokens = async (): Promise<string[]> => {
   const queryParams = {
     category: 'meme-token',
@@ -64,8 +68,10 @@ const getMemeTokens = async (): Promise<string[]> => {
   return tokensIds;
 };
 
-// Sync meme tokens from CoinGecko
-export const syncMemeTokens = async () => {
+/**
+ * Sync metadata of meme tokes from CoinGecko
+ */
+export const syncMemeTokensMeta = async () => {
   // Get all meme tokens ids
   const tokenIds = await getMemeTokens();
 
