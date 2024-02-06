@@ -2,14 +2,15 @@ use ark_ff::PrimeField;
 use sapir::{
     constraint_system::{ConstraintSystem, Wire},
     frontend::gadgets::{
-        ec_add_complete, ec_mul, poseidon::poseidon::PoseidonChip, to_addr, to_le_bits,
-        verify_merkle_proof, AffinePoint,
+        poseidon::poseidon::PoseidonChip,
+        to_addr, to_le_bits, verify_merkle_proof,
+        weierstrass::{ec_add_complete, ec_mul},
+        AffinePoint,
     },
     poseidon::constants::secp256k1_w3,
 };
 
 pub const TREE_DEPTH: usize = 15;
-pub const NUM_MERKLE_PROOFS: usize = 4;
 
 pub struct AssignedMerkleProof<F: PrimeField> {
     pub siblings: Vec<Wire<F>>,
@@ -30,14 +31,10 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
     // `s` part of the signature
     let s_bits = cs.alloc_priv_inputs(256);
 
-    let mut merkle_proofs = Vec::with_capacity(NUM_MERKLE_PROOFS);
+    let merkle_indices = cs.alloc_priv_inputs(TREE_DEPTH);
+    let merkle_siblings = cs.alloc_priv_inputs(TREE_DEPTH);
 
-    for _ in 0..NUM_MERKLE_PROOFS {
-        let merkle_indices = cs.alloc_priv_inputs(TREE_DEPTH);
-        let merkle_siblings = cs.alloc_priv_inputs(TREE_DEPTH);
-
-        merkle_proofs.push(AssignedMerkleProof::new(merkle_siblings, merkle_indices));
-    }
+    let merkle_proof = AssignedMerkleProof::new(merkle_siblings, merkle_indices);
 
     // #############################################
     // Public inputs
@@ -88,18 +85,16 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
 
     let poseidon_chip = PoseidonChip::new(cs, secp256k1_w3());
 
-    // Verify the Merkle proofs
-    for merkle_proof in merkle_proofs {
-        let root = verify_merkle_proof(
-            address,
-            &merkle_proof.siblings,
-            &merkle_proof.indices,
-            poseidon_chip.clone(),
-            cs,
-        );
+    // Verify the Merkle proof
+    let root = verify_merkle_proof(
+        address,
+        &merkle_proof.siblings,
+        &merkle_proof.indices,
+        poseidon_chip.clone(),
+        cs,
+    );
 
-        cs.expose_public(root);
-    }
+    cs.expose_public(root);
 }
 
 pub fn to_cs_field(x: ark_secp256k1::Fq) -> ark_secq256k1::Fr {
@@ -165,10 +160,8 @@ mod tests {
         priv_input.extend_from_slice(&s_bits);
 
         // Just pass duplicate indices and siblings
-        for _ in 0..NUM_MERKLE_PROOFS {
-            priv_input.extend_from_slice(&merkle_indices);
-            priv_input.extend_from_slice(&merkle_proof.siblings);
-        }
+        priv_input.extend_from_slice(&merkle_indices);
+        priv_input.extend_from_slice(&merkle_proof.siblings);
 
         let mut pub_input = vec![
             to_cs_field(*eff_ecdsa_input.t.x().unwrap()),
@@ -177,9 +170,7 @@ mod tests {
             to_cs_field(*eff_ecdsa_input.u.y().unwrap()),
         ];
 
-        for _ in 0..NUM_MERKLE_PROOFS {
-            pub_input.push(to_cs_field(merkle_proof.root));
-        }
+        pub_input.push(to_cs_field(merkle_proof.root));
 
         let witness: Vec<F> = cs.gen_witness(&synthesizer, &pub_input, &priv_input);
 
