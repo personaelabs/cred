@@ -2,6 +2,8 @@ import { Hex } from 'viem';
 import prisma from '../../prisma';
 import { GroupSpec } from '../../types';
 
+const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 /**
  * Get addresses that have ever held over 0.1% of the total supply for the given token
  */
@@ -46,7 +48,7 @@ const getTopHoldersAcrossTime = async (contractId: number): Promise<Hex[]> => {
     transfers = transfers.slice(0, batchSize);
 
     for (const transfer of transfers) {
-      if (transfer.from === '0x0000000000000000000000000000000000000000') {
+      if (transfer.from === MINTER_ADDRESS) {
         totalSupply += BigInt(transfer.value);
       }
 
@@ -64,6 +66,14 @@ const getTopHoldersAcrossTime = async (contractId: number): Promise<Hex[]> => {
       // Push to `largeHolders` if the holder has ever held more than 0.1% of the total supply
       if (balances[transfer.to] > totalSupply / BigInt(1000)) {
         largeHolders.add(transfer.to as Hex);
+      }
+
+      // Sanity check for negative balances
+      if (
+        transfer.from !== MINTER_ADDRESS &&
+        balances[transfer.from] < BigInt(0)
+      ) {
+        throw new Error(`Negative balance for ${transfer.from}`);
       }
     }
 
