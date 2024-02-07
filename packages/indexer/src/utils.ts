@@ -38,21 +38,22 @@ export const retry = async <T>(
 /**
  * Run a function concurrently which uses an Ethereum RPC client.
  * We use a pool of clients to run the function concurrently.
+ * @param fn Function to run in parallel
+ * @param args List of arguments to pass to fn in parallel
  */
 export const runInParallel = async <T>(
   fn: (
     client: PublicClient<HttpTransport, chains.Chain>,
     args: T
-  ) => Promise<void>, // Function to run in parallel
-  args: T[], // List of arguments to pass to fn,
-  chain: chains.Chain
+  ) => Promise<void>,
+  jobs: { chain: chains.Chain; args: T }[]
 ) => {
-  const numJobs = args.length;
+  const numJobs = jobs.length;
 
   // Assign each argument an index
-  let queuedArgs = args.map((arg, i) => {
+  let queuedJobs = jobs.map((job, i) => {
     return {
-      arg,
+      job,
       index: i,
     };
   });
@@ -61,19 +62,19 @@ export const runInParallel = async <T>(
   const completedJobs = new Set<number>();
 
   while (true) {
-    while (queuedArgs.length > 0) {
-      const managedClient = getNextAvailableClient(chain);
+    while (queuedJobs.length > 0) {
+      const queuedJob = queuedJobs[0];
+      const managedClient = getNextAvailableClient(queuedJob.job.chain);
 
       if (managedClient) {
-        const queuedArg = queuedArgs[0];
-        const arg = queuedArg.arg;
+        const arg = queuedJob.job.args;
 
         const _promise = fn(managedClient.client, arg)
           .then(() => {
-            completedJobs.add(queuedArg.index);
+            completedJobs.add(queuedJob.index);
             console.log(
               chalk.green(
-                `Completed job ${queuedArg.index}/${args.length} with client ${managedClient.id}`
+                `Completed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}`
               )
             );
 
@@ -84,11 +85,11 @@ export const runInParallel = async <T>(
             console.error(err);
 
             // TODO: Retry the job
-            completedJobs.add(queuedArg.index);
+            completedJobs.add(queuedJob.index);
 
             console.log(
               chalk.red(
-                `Failed job ${queuedArg.index}/${args.length} with client ${managedClient.id}`
+                `Failed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}`
               )
             );
             // Free the client
@@ -97,12 +98,12 @@ export const runInParallel = async <T>(
 
         console.log(
           chalk.blue(
-            `Started job ${queuedArg.index}/${args.length} with client ${managedClient.id}`
+            `Started job ${queuedJob.index}/${jobs.length} with client ${managedClient.id} on chain ${queuedJob.job.chain.name}`
           )
         );
 
         // Remove the job from the queue
-        queuedArgs.shift();
+        queuedJobs.shift();
       } else {
         // When there are no available clients, wait 3 seconds and try again
         await sleep(3000);

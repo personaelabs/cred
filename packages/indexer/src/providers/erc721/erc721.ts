@@ -102,5 +102,22 @@ export const syncERC721 = async () => {
     },
   });
 
-  await runInParallel(indexTransferEvents, contracts, chains.mainnet);
+  const jobs = contracts.map(contract => {
+    // Get the `Chain` object that corresponds `contract.chain`
+    const chain = Object.values(chains).find(
+      chain => chain.name === contract.chain
+    );
+
+    if (!chain) {
+      throw new Error(`Chain ${contract.chain} not found`);
+    }
+
+    return {
+      chain,
+      args: contract,
+    };
+  });
+
+  // Sync the `Transfer` events for each contract in parallel
+  await runInParallel(indexTransferEvents, jobs);
 };
