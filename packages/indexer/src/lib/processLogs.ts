@@ -55,7 +55,6 @@ export const processLogs = async <T extends Transport, C extends Chain>({
             toBlock,
             strict: true,
           });
-          adjustableBatchSize *= BigInt(2);
         } catch (err: any) {
           if (err.details.includes('Log response size exceeded')) {
             // Reduce the batch size and retry
@@ -78,19 +77,13 @@ export const processLogs = async <T extends Transport, C extends Chain>({
       if (accumulateLogs) {
         if (batch.length >= accumulateLogs) {
           // If we've accumulated enough logs, process them
-          await processor(batch, {
-            fromBlock: batchFrom,
-            toBlock,
-          });
+          await processor(batch);
 
           batch = [];
         }
       } else {
         // If we're not accumulating logs, process them immediately
-        await processor(logs, {
-          fromBlock: batchFrom,
-          toBlock,
-        });
+        await processor(logs);
       }
 
       const blocksPerSec =
@@ -98,6 +91,7 @@ export const processLogs = async <T extends Transport, C extends Chain>({
       console.log(`${blocksPerSec} bps`);
 
       batchFrom += adjustableBatchSize;
+      adjustableBatchSize *= BigInt(2);
     });
   }
 };
