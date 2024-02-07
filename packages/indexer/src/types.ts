@@ -2,10 +2,7 @@ import { Group } from '@prisma/client';
 import { Hex, HttpTransport, PublicClient } from 'viem';
 import * as chains from 'viem/chains';
 
-export type GroupMeta = Pick<
-  Group,
-  'handle' | 'displayName' | 'logo' | 'requirements'
->;
+export type GroupMeta = Pick<Group, 'handle' | 'displayName'>;
 
 export type GetQualifiedAddresses = () => Promise<Hex[]>;
 

@@ -84,13 +84,11 @@ model MerkleProof {
 }
 
 model Group {
-  id           Int      @id @default(autoincrement())
-  handle       String   @unique
-  displayName  String
-  requirements String[]
-  logo         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  handle      String   @unique
+  displayName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   merkleTrees MerkleTree[]
 }
@@ -110,6 +108,7 @@ model Contract {
   coingeckoId   String?
   decimals      Int          @default(18)
   chain         String
+  targetGroups  String[] // Groups to create from the contract
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 

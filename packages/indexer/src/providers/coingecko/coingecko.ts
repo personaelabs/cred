@@ -179,6 +179,8 @@ export const syncMemeTokensMeta = async () => {
         name: token.name,
         deployedBlock: token.deployedBlock,
         type: ContractType.ERC20,
+        // We create `whale` and `earlyHolder` groups for each meme token
+        targetGroups: ['whale', 'earlyHolder'],
       };
     }),
     skipDuplicates: true,

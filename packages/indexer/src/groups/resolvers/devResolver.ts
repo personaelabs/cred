@@ -11,8 +11,6 @@ const groupResolver = async (): Promise<GroupSpec> => {
     group: {
       handle: 'dev',
       displayName: 'Dev',
-      logo: 'https://storage.googleapis.com/personae-images/anon.png',
-      requirements: ['Requirement 1', 'Requirement 2'],
     },
     resolveMembers: membersResolver,
   };
