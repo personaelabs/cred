@@ -34,7 +34,7 @@ model ERC721TransferEvent {
   updatedAt DateTime @default(now()) @updatedAt
   Contract  Contract @relation(fields: [contractId], references: [id])
 
-  @@unique([blockNumber, transactionIndex])
+  @@unique([blockNumber, transactionIndex, logIndex])
   @@index([to])
   @@index([from])
   @@index([contractId])
@@ -53,7 +53,7 @@ model ERC20TransferEvent {
   updatedAt DateTime @default(now()) @updatedAt
   Contract  Contract @relation(fields: [contractId], references: [id])
 
-  @@unique([blockNumber, transactionIndex])
+  @@unique([blockNumber, transactionIndex, logIndex])
   @@index([to])
   @@index([from])
   @@index([contractId])
