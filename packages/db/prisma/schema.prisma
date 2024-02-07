@@ -60,6 +60,31 @@ model ERC20TransferEvent {
   @@index([blockNumber])
 }
 
+model ERC20TotalSupply {
+  contractId  Int
+  totalSupply String
+  blockNumber BigInt
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@id([contractId])
+}
+
+model ERC20Balance {
+  contractId  Int
+  address     String
+  balance     String
+  blockNumber BigInt
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Contract  Contract @relation(fields: [contractId], references: [id])
+
+  @@id([contractId, address])
+}
+
 model MerkleTree {
   merkleRoot   String        @id
   Group        Group         @relation(fields: [groupId], references: [id])
@@ -114,4 +139,6 @@ model Contract {
 
   ERC20TransferEvents  ERC20TransferEvent[]
   ERC721TransferEvents ERC721TransferEvent[]
+  ERC20Balance         ERC20Balance[]
+  ERC20TotalSupply     ERC20TotalSupply[]
 }
