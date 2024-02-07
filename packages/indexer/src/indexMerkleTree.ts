@@ -38,7 +38,8 @@ const parseMerkleProof = (
   };
 };
 
-const TREE_DEPTH = 18; // We use a depth of 18 for all trees
+const TREE_DEPTH = 16;
+const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
 
 /**
  *  Create a new merkle tree and save the merkle proofs for the given addresses
@@ -47,6 +48,13 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
   // Skip if there are no addresses
   if (addresses.length === 0) {
     console.log(`Skipping ${groupMeta.handle} as there are no addresses`);
+    return;
+  }
+
+  if (addresses.length > MAX_NUM_LEAVES) {
+    console.error(
+      `Skipping ${groupMeta.handle} as there are more than ${MAX_NUM_LEAVES} addresses`
+    );
     return;
   }
 
