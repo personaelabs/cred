@@ -42,7 +42,8 @@ const TREE_DEPTH = 16;
 const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
 
 /**
- *  Create a new merkle tree and save the merkle proofs for the given addresses
+ *  Create a new merkle tree and save the merkle proofs for the given addresses.
+ *  Delete the Merkle proofs of the old tree if it exists to clear up space.
  */
 const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
   // Skip if there are no addresses
@@ -104,6 +105,25 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     // Save the merkle proofs
     await prisma.merkleProof.createMany({
       data: parsedMerkleProofs,
+    });
+
+    // Get the old merkle trees of the group
+    const oldTrees = await prisma.merkleTree.findMany({
+      where: {
+        groupId: group.id,
+        NOT: {
+          merkleRoot,
+        },
+      },
+    });
+
+    // Delete the old merkle proofs
+    await prisma.merkleProof.deleteMany({
+      where: {
+        merkleRoot: {
+          in: oldTrees.map(tree => tree.merkleRoot),
+        },
+      },
     });
   }
 };
