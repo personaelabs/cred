@@ -10,7 +10,7 @@ use sapir::{
     poseidon::constants::secp256k1_w3,
 };
 
-pub const TREE_DEPTH: usize = 18;
+pub const TREE_DEPTH: usize = 16;
 
 pub struct AssignedMerkleProof<F: PrimeField> {
     pub siblings: Vec<Wire<F>>,
