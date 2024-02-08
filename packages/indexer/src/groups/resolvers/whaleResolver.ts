@@ -214,6 +214,8 @@ const getTopHoldersAcrossTime = async ({
         balances[transfer.from].balance < BigInt(0)
       ) {
         console.error(`Negative balance for ${transfer.from}`);
+        // Return an empty array if there is a negative balance
+        return [];
       }
     }
 
