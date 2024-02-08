@@ -213,7 +213,7 @@ const getTopHoldersAcrossTime = async ({
         transfer.from !== MINTER_ADDRESS &&
         balances[transfer.from].balance < BigInt(0)
       ) {
-        throw new Error(`Negative balance for ${transfer.from}`);
+        console.error(`Negative balance for ${transfer.from}`);
       }
     }
 
