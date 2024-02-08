@@ -1,21 +1,39 @@
 const merkleTree = require('@personaelabs/merkle-tree');
 import { Hex } from 'viem';
 import prisma from './prisma';
-import { Group, MerkleProof } from '@prisma/client';
+import { MerkleProof } from '@prisma/client';
 import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
 import groupsResolver from './groups/groupsResolver';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 
+/**
+ * Minimum number of members required to create a group
+ */
+const MIN_NUM_MEMBERS = 100;
+
+const TREE_DEPTH = 16;
+const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
+
+/**
+ * Convert a string (base 10) to a hex string
+ */
 const toHex = (x: string): Hex => {
   return `0x${BigInt(x).toString(16)}`;
 };
 
+/**
+ * Convert a string (base 10) to an address
+ */
 const toAddress = (x: string): Hex => {
   return `0x${BigInt(x).toString(16).padStart(40, '0')}`;
 };
 
+/**
+ * Parse a merkle proof in JSON format
+ * @param merkleProof merkle proof in JSON format
+ */
 const parseMerkleProof = (
   merkleProof: string
 ): Omit<MerkleProof, 'createdAt' | 'updatedAt' | 'id'> => {
@@ -38,17 +56,15 @@ const parseMerkleProof = (
   };
 };
 
-const TREE_DEPTH = 16;
-const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
-
 /**
  *  Create a new merkle tree and save the merkle proofs for the given addresses.
  *  Delete the Merkle proofs of the old tree if it exists to clear up space.
  */
 const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
-  // Skip if there are no addresses
-  if (addresses.length === 0) {
-    console.log(`Skipping ${groupMeta.handle} as there are no addresses`);
+  if (addresses.length < MIN_NUM_MEMBERS) {
+    console.log(
+      `Skipping ${groupMeta.handle} as there are not enough addresses ${MIN_NUM_MEMBERS} > ${addresses.length}`
+    );
     return;
   }
 
@@ -81,17 +97,17 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     },
   });
 
+  // Create or update the group
+  const group = await prisma.group.upsert({
+    where: {
+      handle: groupMeta.handle,
+    },
+    create: groupMeta,
+    update: groupMeta,
+  });
+
   // Save the merkle tree if it doesn't exist yet
   if (!merkleRootExists) {
-    // Create the space if it doesn't exist yet
-    const group = await prisma.group.upsert({
-      where: {
-        handle: groupMeta.handle,
-      },
-      create: groupMeta,
-      update: groupMeta,
-    });
-
     // Create a new merkle tree
     await prisma.merkleTree.create({
       data: {
