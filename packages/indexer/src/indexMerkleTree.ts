@@ -6,6 +6,7 @@ import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
 import groupsResolver from './groups/groupsResolver';
+import devResolver from './groups/resolvers/devResolver';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 
 /**
@@ -161,18 +162,27 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
 
 const indexMerkleTree = async () => {
   merkleTree.init_panic_hook();
+  if (process.env.NODE_ENV === 'production') {
+    await syncMemeTokensMeta();
+    await syncERC20();
 
-  await syncMemeTokensMeta();
-  await syncERC20();
+    const groups = await groupsResolver();
 
-  const groups = await groupsResolver();
-
-  for (const group of groups) {
-    const addresses = await group.resolveMembers();
+    for (const group of groups) {
+      const addresses = await group.resolveMembers();
+      console.log(
+        `Indexing ${addresses.length} addresses for ${group.group.handle}`
+      );
+      await saveTree(addresses, group.group);
+    }
+  } else {
+    // In development, only index the dev group
+    const devGroup = await devResolver();
+    const addresses = await devGroup.resolveMembers();
     console.log(
-      `Indexing ${addresses.length} addresses for ${group.group.handle}`
+      `Indexing ${addresses.length} addresses for ${devGroup.group.handle}`
     );
-    await saveTree(addresses, group.group);
+    await saveTree(addresses, devGroup.group);
   }
 };
 
