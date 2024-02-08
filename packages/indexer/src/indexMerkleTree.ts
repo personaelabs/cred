@@ -121,34 +121,26 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
         data: parsedMerkleProofs,
       });
     }
+
+    // Get the old merkle trees of the group
+    const oldTrees = await prisma.merkleTree.findMany({
+      where: {
+        groupId: group.id,
+        NOT: {
+          merkleRoot,
+        },
+      },
+    });
+
+    // Delete the old merkle proofs
+    await prisma.merkleProof.deleteMany({
+      where: {
+        merkleRoot: {
+          in: oldTrees.map(tree => tree.merkleRoot),
+        },
+      },
+    });
   }
-
-  // Get the group.
-  // At this point, the group should exist as we created it if it didn't exist yet
-  const group = (await prisma.group.findFirst({
-    where: {
-      handle: groupMeta.handle,
-    },
-  })) as Group;
-
-  // Get the old merkle trees of the group
-  const oldTrees = await prisma.merkleTree.findMany({
-    where: {
-      groupId: group.id,
-      NOT: {
-        merkleRoot,
-      },
-    },
-  });
-
-  // Delete the old merkle proofs
-  await prisma.merkleProof.deleteMany({
-    where: {
-      merkleRoot: {
-        in: oldTrees.map(tree => tree.merkleRoot),
-      },
-    },
-  });
 };
 
 const indexMerkleTree = async () => {
