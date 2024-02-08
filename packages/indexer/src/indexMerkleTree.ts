@@ -1,7 +1,7 @@
 const merkleTree = require('@personaelabs/merkle-tree');
 import { Hex } from 'viem';
 import prisma from './prisma';
-import { MerkleProof } from '@prisma/client';
+import { Group, MerkleProof } from '@prisma/client';
 import { syncERC721 } from './providers/erc721/erc721';
 import { syncERC20 } from './providers/erc20/erc20';
 import { GroupMeta } from './types';
@@ -66,16 +66,14 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     addressesBytes.set(Buffer.from(paddedAddress, 'hex'), i * 32);
   }
 
-  const timerLabel = `Create merkle tree for ${groupMeta.displayName}`;
-  console.time(timerLabel);
-  const merkleProofs = await merkleTree.secp256k1_get_proofs(
+  // Build the merkle tree
+  const rootString = await merkleTree.secp256k1_init_tree(
     addressesBytes,
     TREE_DEPTH
   );
-  console.timeEnd(timerLabel);
 
-  const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
-  const merkleRoot = parsedMerkleProofs[0].merkleRoot;
+  // Convert the root bytes to a hex string
+  const merkleRoot = toHex(rootString);
 
   const merkleRootExists = await prisma.merkleTree.findFirst({
     where: {
@@ -98,34 +96,59 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     await prisma.merkleTree.create({
       data: {
         groupId: group.id,
-        merkleRoot: parsedMerkleProofs[0].merkleRoot,
+        merkleRoot,
       },
     });
 
-    // Save the merkle proofs
-    await prisma.merkleProof.createMany({
-      data: parsedMerkleProofs,
-    });
+    // Get and save merkle proofs in chunks
+    const chunkSize = 1000;
+    for (let i = 0; i < addresses.length; i += chunkSize) {
+      const chunk = addresses.slice(i, i + chunkSize);
 
-    // Get the old merkle trees of the group
-    const oldTrees = await prisma.merkleTree.findMany({
-      where: {
-        groupId: group.id,
-        NOT: {
-          merkleRoot,
-        },
-      },
-    });
+      // Get the merkle proofs
+      const merkleProofs = chunk.map(address => {
+        const paddedAddress = address.slice(2).padStart(64, '0');
+        const proof = merkleTree.secp256k1_create_proof(
+          Buffer.from(paddedAddress, 'hex')
+        );
+        return proof as string;
+      });
 
-    // Delete the old merkle proofs
-    await prisma.merkleProof.deleteMany({
-      where: {
-        merkleRoot: {
-          in: oldTrees.map(tree => tree.merkleRoot),
-        },
-      },
-    });
+      const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
+
+      // Save the merkle proofs
+      await prisma.merkleProof.createMany({
+        data: parsedMerkleProofs,
+      });
+    }
   }
+
+  // Get the group.
+  // At this point, the group should exist as we created it if it didn't exist yet
+  const group = (await prisma.group.findFirst({
+    where: {
+      handle: groupMeta.handle,
+    },
+  })) as Group;
+
+  // Get the old merkle trees of the group
+  const oldTrees = await prisma.merkleTree.findMany({
+    where: {
+      groupId: group.id,
+      NOT: {
+        merkleRoot,
+      },
+    },
+  });
+
+  // Delete the old merkle proofs
+  await prisma.merkleProof.deleteMany({
+    where: {
+      merkleRoot: {
+        in: oldTrees.map(tree => tree.merkleRoot),
+      },
+    },
+  });
 };
 
 const indexMerkleTree = async () => {

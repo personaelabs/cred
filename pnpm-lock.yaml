@@ -159,8 +159,8 @@ importers:
   packages/indexer:
     dependencies:
       '@personaelabs/merkle-tree':
-        specifier: 0.2.3-alpha.1
-        version: 0.2.3-alpha.1
+        specifier: 0.2.3-alpha.2
+        version: 0.2.3-alpha.2
       '@prisma/client':
         specifier: 4.5.0
         version: 4.5.0(prisma@4.5.0)
@@ -1309,8 +1309,8 @@ packages:
       '@parcel/watcher-win32-x64': 2.4.0
     dev: false
 
-  /@personaelabs/merkle-tree@0.2.3-alpha.1:
-    resolution: {integrity: sha512-Nk3Pa4LB2EmrlQ59UOuzh8LGCjBtbFmCX9gl6OPWZNdagpyf+Mf+zv0hD0HKYg0cwpdQ/pGznJREzosekPy6nw==}
+  /@personaelabs/merkle-tree@0.2.3-alpha.2:
+    resolution: {integrity: sha512-7JMOang86mX5lU0iP9iRrVe6qV+oP6gd1vnx4xiR3/s9zCTqSXeL7viZs9c2p+tB0+1B1LHqEWAlDLwEvU5Edw==}
     dev: false
 
   /@pkgjs/parseargs@0.11.0:

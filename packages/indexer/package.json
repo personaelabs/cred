@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@personaelabs/merkle-tree": "0.2.3-alpha.1",
+    "@personaelabs/merkle-tree": "0.2.3-alpha.2",
     "@prisma/client": "4.5.0",
     "@types/node": "^20.8.10",
     "abitype": "0.9.8",
