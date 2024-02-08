@@ -303,10 +303,10 @@ const whaleGroupsResolver = async (): Promise<GroupSpec[]> => {
 
   // Assign metadata and the `resolveMembers` function for each token
   const groups = contracts.map(contract => {
-    const handle = `${contract.name}-whale`;
+    const handle = `${contract.name.toLowerCase()}-whale`;
     return {
       group: {
-        handle: `${contract.name}-whale`,
+        handle,
         displayName: `Whale ${contract.name} Holder`,
       },
       resolveMembers: () => {

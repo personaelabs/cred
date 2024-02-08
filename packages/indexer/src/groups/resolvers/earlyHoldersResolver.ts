@@ -66,7 +66,7 @@ const earlyHolderGroupsResolver = async (): Promise<GroupSpec[]> => {
   const groups = contracts.map(contract => {
     return {
       group: {
-        handle: `early-${contract.name}`,
+        handle: `early-${contract.name.toLowerCase()}`,
         displayName: `Early ${contract.name} Holder`,
       },
       resolveMembers: () => {
