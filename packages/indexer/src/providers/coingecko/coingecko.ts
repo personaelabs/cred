@@ -54,7 +54,7 @@ const getMemeTokens = async (): Promise<string[]> => {
     vs_currency: 'usd',
     x_cg_pro_api_key: process.env.COINGECKO_API_KEY as string,
     days: 'max',
-    per_page: '50',
+    per_page: '100',
     order: 'market_cap_desc',
   };
 
@@ -94,7 +94,7 @@ export const syncMemeTokensMeta = async () => {
     tokenId => !synchedTokenIds.includes(tokenId)
   );
 
-  console.log(`Syncing ${tokenIdsToSync.length} meme tokens`);
+  console.log(`Processing ${tokenIdsToSync.length} meme tokens`);
 
   // Get all meme token contract addresses
   const tokens = [];
@@ -121,8 +121,20 @@ export const syncMemeTokensMeta = async () => {
     chain: string;
   }[] = [];
 
+  const numTokens = 50;
+
+  const numSynchedTokens = synchedTokenIds.length;
+  if (numSynchedTokens + processableTokens.length < numTokens) {
+    throw new Error(
+      `Not enough meme tokens to process. Expected at least ${numTokens}, got ${numSynchedTokens + processableTokens.length}`
+    );
+  }
+
   // Get the deployed block for each token
-  for (const token of processableTokens) {
+  for (const token of processableTokens.slice(
+    0,
+    numTokens - numSynchedTokens
+  )) {
     for (const platform of Object.keys(token.detail_platforms)) {
       if (platform !== 'ethereum') {
         continue;
