@@ -125,9 +125,10 @@ module.exports.verify = function(proof_ser) {
 * @param {Uint8Array} merkle_siblings
 * @param {Uint8Array} merkle_indices
 * @param {Uint8Array} root
+* @param {Uint8Array} sign_in_sig
 * @returns {Uint8Array}
 */
-module.exports.prove_membership = function(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root) {
+module.exports.prove_membership = function(s, r, is_y_odd, msg_hash, merkle_siblings, merkle_indices, root, sign_in_sig) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passArray8ToWasm0(s, wasm.__wbindgen_malloc);
@@ -142,12 +143,14 @@ module.exports.prove_membership = function(s, r, is_y_odd, msg_hash, merkle_sibl
         const len4 = WASM_VECTOR_LEN;
         const ptr5 = passArray8ToWasm0(root, wasm.__wbindgen_malloc);
         const len5 = WASM_VECTOR_LEN;
-        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5);
+        const ptr6 = passArray8ToWasm0(sign_in_sig, wasm.__wbindgen_malloc);
+        const len6 = WASM_VECTOR_LEN;
+        wasm.prove_membership(retptr, ptr0, len0, ptr1, len1, is_y_odd, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
-        var v7 = getArrayU8FromWasm0(r0, r1).slice();
+        var v8 = getArrayU8FromWasm0(r0, r1).slice();
         wasm.__wbindgen_free(r0, r1 * 1, 1);
-        return v7;
+        return v8;
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
@@ -194,6 +197,26 @@ module.exports.get_msg_hash = function(creddd_proof) {
         const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.get_msg_hash(retptr, ptr0, len0);
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var v2 = getArrayU8FromWasm0(r0, r1).slice();
+        wasm.__wbindgen_free(r0, r1 * 1, 1);
+        return v2;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+};
+
+/**
+* @param {Uint8Array} creddd_proof
+* @returns {Uint8Array}
+*/
+module.exports.get_sign_in_sig = function(creddd_proof) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passArray8ToWasm0(creddd_proof, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.get_sign_in_sig(retptr, ptr0, len0);
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         var v2 = getArrayU8FromWasm0(r0, r1).slice();

@@ -31,6 +31,7 @@ pub struct MembershipProof {
     r: Fq,
     is_y_odd: bool,
     msg_hash: BigUint,
+    sign_in_sig: Fq,
 }
 
 #[wasm_bindgen]
@@ -42,6 +43,7 @@ pub fn prove_membership(
     merkle_siblings: &[u8],
     merkle_indices: &[u8],
     root: &[u8],
+    sign_in_sig: &[u8],
 ) -> Vec<u8> {
     assert!(merkle_siblings.len() == TREE_DEPTH * 32);
     assert!(merkle_indices.len() == TREE_DEPTH * 32);
@@ -51,6 +53,7 @@ pub fn prove_membership(
     let s = Fr::from(BigUint::from_bytes_be(s));
     let r = Fq::from(BigUint::from_bytes_be(r));
     let msg_hash = BigUint::from_bytes_be(msg_hash);
+    let sign_in_sig = Fq::from(BigUint::from_bytes_be(sign_in_sig));
 
     let merkle_siblings = merkle_siblings
         .to_vec()
@@ -97,6 +100,7 @@ pub fn prove_membership(
         to_cs_field(t.y),
         to_cs_field(u.x),
         to_cs_field(u.y),
+        to_cs_field(sign_in_sig),
     ];
 
     // Append the Merkle roots to the public input
@@ -115,6 +119,7 @@ pub fn prove_membership(
         r,
         is_y_odd,
         msg_hash,
+        sign_in_sig,
     };
 
     // Serialize the full proof
@@ -179,6 +184,12 @@ pub fn get_msg_hash(creddd_proof: &[u8]) -> Vec<u8> {
     creddd_proof.msg_hash.to_bytes_be()
 }
 
+#[wasm_bindgen]
+pub fn get_sign_in_sig(creddd_proof: &[u8]) -> Vec<u8> {
+    let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
+    creddd_proof.sign_in_sig.into_bigint().to_bytes_be()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,6 +241,9 @@ mod tests {
 
         let root = tree.root.unwrap().into_bigint().to_bytes_be();
 
+        // Dummy sign_in_sig
+        let sign_in_sig = F::from(42u32).into_bigint().to_bytes_be();
+
         let prover_timer = start_timer!(|| "prove");
         let proof = prove_membership(
             &s_bytes,
@@ -239,6 +253,7 @@ mod tests {
             &merkle_siblings,
             &merkle_indices,
             &root,
+            &sign_in_sig,
         );
         end_timer!(prover_timer);
 

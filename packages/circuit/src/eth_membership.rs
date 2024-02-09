@@ -46,9 +46,14 @@ pub fn eth_membership<F: PrimeField>(cs: &mut ConstraintSystem<F>) {
     let u_x = cs.alloc_pub_input();
     let u_y = cs.alloc_pub_input();
 
+    let sign_in_sig = cs.alloc_pub_input();
+
     // #############################################
     // Constraints
     // #############################################
+
+    // Bound the `sign_in_sig` to the proof
+    let _sign_in_sig_squared = sign_in_sig * sign_in_sig;
 
     // 1. Recover the public key from the signature
     // s_mul_t = s * T
@@ -163,11 +168,15 @@ mod tests {
         priv_input.extend_from_slice(&merkle_indices);
         priv_input.extend_from_slice(&merkle_proof.siblings);
 
+        // Dummy sign_in_sig
+        let sign_in_sig = F::from(42u32);
+
         let mut pub_input = vec![
             to_cs_field(*eff_ecdsa_input.t.x().unwrap()),
             to_cs_field(*eff_ecdsa_input.t.y().unwrap()),
             to_cs_field(*eff_ecdsa_input.u.x().unwrap()),
             to_cs_field(*eff_ecdsa_input.u.y().unwrap()),
+            to_cs_field(sign_in_sig),
         ];
 
         pub_input.push(to_cs_field(merkle_proof.root));
