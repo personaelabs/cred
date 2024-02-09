@@ -21,6 +21,18 @@ model MembershipProof {
   updatedAt    DateTime @updatedAt
 }
 
+model FidAttestation {
+  fid         Int
+  attestation Bytes
+  signInSig   Bytes
+  merkleRoot  String
+  MerkleTree  MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@id([fid, merkleRoot])
+}
+
 model ERC721TransferEvent {
   blockNumber      BigInt
   from             String
@@ -86,12 +98,13 @@ model ERC20Balance {
 }
 
 model MerkleTree {
-  merkleRoot   String        @id
-  Group        Group         @relation(fields: [groupId], references: [id])
-  groupId      Int
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  merkleProofs MerkleProof[]
+  merkleRoot     String           @id
+  Group          Group            @relation(fields: [groupId], references: [id])
+  groupId        Int
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  merkleProofs   MerkleProof[]
+  FidAttestation FidAttestation[]
 }
 
 model MerkleProof {
