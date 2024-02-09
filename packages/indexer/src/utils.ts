@@ -124,6 +124,7 @@ export const DEV_ADDRESSES: Hex[] = [
   '0x400ea6522867456e988235675b9cb5b1cf5b79c8', // dantehrani.eth
   '0xcb46219ba114245c3a18761e4f7891f9c4bef8c0', // lsankar.eth
   '0x141b63d93daf55bfb7f396eee6114f3a5d4a90b2', // personaelabs.eth
+  '0x4f7d469a5237bd5feae5a3d852eea4b65e06aad1', // pfeffunit.eth
 
   // Dummy addresses
   '0x783a084c4a945ac47653b87a15bb1aa4124b2d3f',
