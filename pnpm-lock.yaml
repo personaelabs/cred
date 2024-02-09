@@ -185,6 +185,9 @@ importers:
       graphql-tag:
         specifier: ^2.12.6
         version: 2.12.6(graphql@16.8.1)
+      merkle-tree:
+        specifier: ../merkle-tree
+        version: link:../merkle-tree
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@20.11.16)(typescript@5.2.2)
@@ -201,6 +204,12 @@ importers:
       csv-writer:
         specifier: ^1.6.0
         version: 1.6.0
+
+  packages/merkle-tree:
+    devDependencies:
+      cargo-cp-artifact:
+        specifier: ^0.1
+        version: 0.1.8
 
 packages:
 
@@ -3672,6 +3681,11 @@ packages:
 
   /caniuse-lite@1.0.30001584:
     resolution: {integrity: sha512-LOz7CCQ9M1G7OjJOF9/mzmqmj3jE/7VOmrfw6Mgs0E8cjOsbRXQJHsPBfmBOXDskXKrHLyyW3n7kpDW/4BsfpQ==}
+
+  /cargo-cp-artifact@0.1.8:
+    resolution: {integrity: sha512-3j4DaoTrsCD1MRkTF2Soacii0Nx7UHCce0EwUf4fHnggwiE4fbmF2AbnfzayR36DF8KGadfh7M/Yfy625kgPlA==}
+    hasBin: true
+    dev: true
 
   /chai@4.4.1:
     resolution: {integrity: sha512-13sOfMv2+DWduEU+/xbun3LScLoqN17nBeTLUsmDfKdoiC1fr0n9PU4guu4AhRcOVFk/sW8LyZWHuhWtQZiF+g==}

@@ -7,7 +7,7 @@ services:
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
-    buildCommand: pnpm i && pnpm -F db migrate:prod
+    buildCommand: sh ./scripts/setup-neon.sh && pnpm i && pnpm -F db migrate:prod
     startCommand: pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
     buildFilter:
       paths:
