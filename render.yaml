@@ -2,8 +2,9 @@ services:
   - type: cron
     name: cred-indexer
     plan: standard
-    env: node
+    runtime: docker
     region: oregon
+    dockerfilePath: ./packages/indexer/Dockerfile
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
