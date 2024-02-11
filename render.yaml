@@ -8,7 +8,7 @@ services:
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
-    dockerCommand: pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
+    dockerCommand: NODE_ENV=production pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
     buildFilter:
       paths:
         - packages/indexer/**
