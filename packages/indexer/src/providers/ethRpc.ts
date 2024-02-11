@@ -55,6 +55,8 @@ const getClient = (
       }
       subdomain = 'eth-mainnet';
       break;
+    // For non-mainnet chains,
+    // return the same API key for all client indices for now
     case chains.optimism:
       apiKey = process.env.ALCHEMY_OPT_API_KEY;
       subdomain = 'opt-mainnet';
@@ -80,32 +82,58 @@ const getClient = (
 /**
  * Manage a list of occupied Ethereum RPC clients as a global variable
  */
-let activeClients: number[] = [];
+let occupiedClients: {
+  [chainId: string]: number[];
+} = {
+  [chains.mainnet.id.toString()]: [],
+  [chains.optimism.id.toString()]: [],
+  [chains.base.id.toString()]: [],
+  [chains.arbitrum.id.toString()]: [],
+};
 
 /**
- * List of active clients
+ * List of all clients for each chain
  */
-const allClientIds = new Array(NUM_MAINNET_CLIENTS).fill(0).map((_, i) => i);
+const allClientIds = {
+  [chains.mainnet.id.toString()]: Array.from({ length: 10 }, (_, i) => i),
+  [chains.optimism.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
+  [chains.base.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
+  [chains.arbitrum.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
+};
 
 export const getNextAvailableClient = (chain: Chain): ManagedClient | null => {
-  const nonActiveClientId = allClientIds.find(
-    clientId => !activeClients.includes(clientId)
+  const chainId = chain.id.toString();
+
+  // Get all clients for the chain
+  const chainAllClients = allClientIds[chainId];
+
+  // Get the list of active clients for the chain
+  const chainOccupiedClients = occupiedClients[chainId];
+
+  const nextAvailableClientId = chainAllClients.find(
+    clientId => !chainOccupiedClients.includes(clientId)
   );
 
   // If there are no available clients, return null
-  if (nonActiveClientId === undefined) {
+  if (nextAvailableClientId === undefined) {
     return null;
   }
 
   // Add the client to the list of active clients
-  activeClients.push(nonActiveClientId);
+  occupiedClients[chainId].push(nextAvailableClientId);
 
   return {
-    client: getClient(chain, nonActiveClientId),
-    id: nonActiveClientId,
+    client: getClient(chain, nextAvailableClientId),
+    id: nextAvailableClientId,
   };
 };
 
 export const releaseClient = (client: ManagedClient) => {
-  activeClients = activeClients.filter(id => id !== client.id);
+  // Get the chain ID from the client
+  const chainId = client.client.chain.id.toString();
+
+  // Remove the client from the list of active clients
+  occupiedClients[chainId] = occupiedClients[chainId].filter(
+    clientId => clientId !== client.id
+  );
 };
