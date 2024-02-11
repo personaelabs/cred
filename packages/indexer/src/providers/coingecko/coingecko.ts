@@ -112,6 +112,7 @@ export const syncMemeTokensMeta = async () => {
     }
   });
 
+  // Store tokens with deployed block numbers
   const tokensWithDeployedBlock: {
     coinGeckoId: string;
     contractAddress: Hex;
@@ -121,6 +122,7 @@ export const syncMemeTokensMeta = async () => {
     chain: string;
   }[] = [];
 
+  // Number of tokens to sync
   const numTokens = 50;
 
   const numSynchedTokens = synchedTokenIds.length;
@@ -180,21 +182,77 @@ export const syncMemeTokensMeta = async () => {
     }
   }
 
-  // Store all meme token contract addresses in the database
+  // Save token contracts to the database
   await prisma.contract.createMany({
-    data: tokensWithDeployedBlock.map(token => {
-      return {
-        chain: token.chain,
-        coingeckoId: token.coinGeckoId,
-        decimals: token.decimals,
-        address: token.contractAddress,
-        name: token.name,
-        deployedBlock: token.deployedBlock,
-        type: ContractType.ERC20,
-        // We create `whale` and `earlyHolder` groups for each meme token
-        targetGroups: ['whale', 'earlyHolder'],
-      };
-    }),
+    data: tokensWithDeployedBlock.map(token => ({
+      chain: token.chain,
+      coingeckoId: token.coinGeckoId,
+      decimals: token.decimals,
+      address: token.contractAddress,
+      name: token.name,
+      deployedBlock: token.deployedBlock,
+      type: ContractType.ERC20,
+    })),
     skipDuplicates: true,
   });
+
+  // Get all contracts from the database.
+  // We need to get the auto-generated ids of the contracts.
+  const contracts = await prisma.contract.findMany({
+    where: {
+      coingeckoId: { not: null },
+    },
+  });
+
+  // Create a `Group` object for each contract
+  for (const contract of contracts) {
+    // Build groups with specs
+    const groupsWithSpecs = [
+      {
+        group: {
+          handle: `early-${contract.name.toLowerCase()}-holder`,
+          displayName: `Early ${contract.name} holder`,
+        },
+        groupContractSpecs: [
+          {
+            contractId: contract.id,
+            rules: ['earlyHolder'],
+          },
+        ],
+      },
+      {
+        group: {
+          handle: `whale-${contract.name.toLowerCase()}-holder`,
+          displayName: `Whale ${contract.name} holder`,
+        },
+        groupContractSpecs: [
+          {
+            contractId: contract.id,
+            rules: ['whale'],
+          },
+        ],
+      },
+    ];
+
+    for (const groupWithSpec of groupsWithSpecs) {
+      // Save the group to the database
+      const group = await prisma.group.upsert({
+        where: {
+          handle: groupWithSpec.group.handle,
+        },
+        create: groupWithSpec.group,
+        update: groupWithSpec.group,
+      });
+
+      // Save group contract specs to the database
+      await prisma.groupContractSpec.createMany({
+        data: groupWithSpec.groupContractSpecs.map(spec => ({
+          groupId: group.id,
+          contractId: contract.id,
+          rules: spec.rules,
+        })),
+        skipDuplicates: true,
+      });
+    }
+  }
 };

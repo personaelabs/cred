@@ -121,14 +121,30 @@ model MerkleProof {
   @@id([merkleRoot, address])
 }
 
-model Group {
-  id          Int      @id @default(autoincrement())
-  handle      String   @unique
-  displayName String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// Specifies how to create a group from a contract
+model GroupContractSpec {
+  contractId Int
+  groupId    Int
+  rules      String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  merkleTrees MerkleTree[]
+  Contract Contract @relation(fields: [contractId], references: [id])
+  Group    Group    @relation(fields: [groupId], references: [id])
+
+  @@id([contractId, groupId])
+}
+
+model Group {
+  id          Int    @id @default(autoincrement())
+  handle      String @unique
+  displayName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  merkleTrees        MerkleTree[]
+  groupContractSpecs GroupContractSpec[]
 }
 
 enum ContractType {
@@ -146,7 +162,6 @@ model Contract {
   coingeckoId   String?
   decimals      Int          @default(18)
   chain         String
-  targetGroups  String[] // Groups to create from the contract
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -154,4 +169,7 @@ model Contract {
   ERC721TransferEvents ERC721TransferEvent[]
   ERC20Balance         ERC20Balance[]
   ERC20TotalSupply     ERC20TotalSupply[]
+  GroupContractSpec    GroupContractSpec[]
+
+  @@unique([address, chain])
 }

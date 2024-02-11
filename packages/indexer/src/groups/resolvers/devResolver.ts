@@ -11,7 +11,7 @@ const DEV_ADDRESSES: Hex[] = [
 
 const DEV_GROUP_SIZE = 100000;
 
-const membersResolver = async (): Promise<Hex[]> => {
+const devResolver = async (): Promise<Hex[]> => {
   const members: Hex[] = [];
 
   for (const address of DEV_ADDRESSES) {
@@ -26,14 +26,4 @@ const membersResolver = async (): Promise<Hex[]> => {
   return members;
 };
 
-const groupResolver = async (): Promise<GroupSpec> => {
-  return {
-    group: {
-      handle: 'dev',
-      displayName: 'Dev',
-    },
-    resolveMembers: membersResolver,
-  };
-};
-
-export default groupResolver;
+export default devResolver;

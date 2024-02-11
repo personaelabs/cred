@@ -1,12 +1,11 @@
 import { Hex } from 'viem';
 import prisma from './prisma';
-import { MerkleProof } from '@prisma/client';
-import { syncERC721 } from './providers/erc721/erc721';
+import { GroupContractSpec, MerkleProof } from '@prisma/client';
 import { syncERC20 } from './providers/erc20/erc20';
-import { GroupMeta } from './types';
-import groupsResolver from './groups/groupsResolver';
 import devResolver from './groups/resolvers/devResolver';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
+import getEarlyHolders from './groups/resolvers/earlyHoldersResolver';
+import getTopHoldersAcrossTime from './groups/resolvers/whaleResolver';
 const merkleTree = require('merkle-tree');
 
 /**
@@ -61,17 +60,17 @@ const parseMerkleProof = (
  *  Create a new merkle tree and save the merkle proofs for the given addresses.
  *  Delete the Merkle proofs of the old tree if it exists to clear up space.
  */
-const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
+const saveTree = async (addresses: Hex[], groupId: number) => {
   if (addresses.length < MIN_NUM_MEMBERS) {
     console.log(
-      `Skipping ${groupMeta.handle} as there are not enough addresses ${MIN_NUM_MEMBERS} > ${addresses.length}`
+      `Skipping ${groupId} as there are not enough addresses ${MIN_NUM_MEMBERS} > ${addresses.length}`
     );
     return;
   }
 
   if (addresses.length > MAX_NUM_LEAVES) {
     console.error(
-      `Skipping ${groupMeta.handle} as there are more than ${MAX_NUM_LEAVES} addresses`
+      `Skipping ${groupId} as there are more than ${MAX_NUM_LEAVES} addresses`
     );
     return;
   }
@@ -97,21 +96,12 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     },
   });
 
-  // Create or update the group
-  const group = await prisma.group.upsert({
-    where: {
-      handle: groupMeta.handle,
-    },
-    create: groupMeta,
-    update: groupMeta,
-  });
-
   // Save the merkle tree if it doesn't exist yet
   if (!merkleRootExists) {
     // Create a new merkle tree
     await prisma.merkleTree.create({
       data: {
-        groupId: group.id,
+        groupId,
         merkleRoot,
       },
     });
@@ -141,7 +131,7 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
     // Get the old merkle trees of the group
     const oldTrees = await prisma.merkleTree.findMany({
       where: {
-        groupId: group.id,
+        groupId,
         NOT: {
           merkleRoot,
         },
@@ -159,28 +149,86 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
   }
 };
 
+// Get addresses from a contract as specified in `GroupContractSpec`
+const resolverMembersWithSpec = async (
+  groupSpec: Pick<GroupContractSpec, 'contractId' | 'rules' | 'groupId'>
+) => {
+  const addresses: Hex[] = [];
+  for (const rule of groupSpec.rules) {
+    if (rule === 'earlyHolder') {
+      const result = await getEarlyHolders(groupSpec.contractId);
+      addresses.push(...result);
+    } else if (rule === 'whale') {
+      const addresses = await getTopHoldersAcrossTime({
+        contractId: groupSpec.contractId,
+        groupId: groupSpec.groupId,
+      });
+      addresses.push(...addresses);
+    } else {
+      throw new Error(`Unknown rule ${rule}`);
+    }
+  }
+
+  return addresses;
+};
+
 const indexMerkleTree = async () => {
-  if (process.env.NODE_ENV === 'production') {
+  //  if (process.env.NODE_ENV === 'production') {
+  if (true) {
     await syncMemeTokensMeta();
     await syncERC20();
 
-    const groups = await groupsResolver();
+    // Get all groups and their contract specs
+    const groups = await prisma.group.findMany({
+      select: {
+        id: true,
+        displayName: true,
+        groupContractSpecs: {
+          select: {
+            groupId: true,
+            contractId: true,
+            rules: true,
+          },
+        },
+      },
+    });
 
+    // Index the merkle trees for each group according to their specs
     for (const group of groups) {
-      const addresses = await group.resolveMembers();
+      const addresses: Hex[] = [];
+      for (const spec of group.groupContractSpecs) {
+        const result = await resolverMembersWithSpec(spec);
+        addresses.push(...result);
+      }
+
       console.log(
-        `Indexing ${addresses.length} addresses for ${group.group.handle}`
+        `Indexing ${addresses.length} addresses for ${group.displayName}`
       );
-      await saveTree(addresses, group.group);
+
+      // Save the merkle tree to the database
+      await saveTree(addresses, group.id);
     }
   } else {
     // In development, only index the dev group
-    const devGroup = await devResolver();
-    const addresses = await devGroup.resolveMembers();
+
+    const devGroupData = {
+      handle: 'dev',
+      displayName: 'Dev',
+    };
+    const devGroup = await prisma.group.upsert({
+      create: devGroupData,
+      update: devGroupData,
+      where: {
+        handle: devGroupData.handle,
+      },
+    });
+
+    const addresses = await devResolver();
     console.log(
-      `Indexing ${addresses.length} addresses for ${devGroup.group.handle}`
+      `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
     );
-    await saveTree(addresses, devGroup.group);
+
+    await saveTree(addresses, devGroup.id);
   }
 };
 

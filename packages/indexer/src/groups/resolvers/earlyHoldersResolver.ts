@@ -59,37 +59,4 @@ const getEarlyHolders = async (contractId: number): Promise<Hex[]> => {
   return [...earlyHolders];
 };
 
-/**
- * Return all early holders groups
- */
-const earlyHolderGroupsResolver = async (): Promise<GroupSpec[]> => {
-  // Get all tokens that have targetGroup = 'earlyHolder'
-  const contracts = await prisma.contract.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    where: {
-      targetGroups: {
-        has: 'earlyHolder',
-      },
-    },
-  });
-
-  // Assign metadata and the `resolveMembers` function for each token
-  const groups = contracts.map(contract => {
-    return {
-      group: {
-        handle: `early-${contract.name.toLowerCase()}`,
-        displayName: `Early ${contract.name} Holder`,
-      },
-      resolveMembers: () => {
-        return getEarlyHolders(contract.id);
-      },
-    };
-  });
-
-  return groups;
-};
-
-export default earlyHolderGroupsResolver;
+export default getEarlyHolders;

@@ -1,6 +1,5 @@
 import { Hex } from 'viem';
 import prisma from '../../prisma';
-import { GroupSpec } from '../../types';
 
 const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -51,14 +50,15 @@ const getSynchedTotalSupply = async (
  */
 const getTopHoldersAcrossTime = async ({
   contractId,
-  groupHandle,
+  groupId,
 }: {
   contractId: number;
-  groupHandle: string;
+  groupId: number;
 }): Promise<Hex[]> => {
+  console.log(`Getting historical whale holders for ${contractId}`);
   const group = await prisma.group.findUnique({
     where: {
-      handle: groupHandle,
+      id: groupId,
     },
   });
 
@@ -286,41 +286,4 @@ const getTopHoldersAcrossTime = async ({
   return [...largeHolders];
 };
 
-/**
- * Return all whale groups
- */
-const whaleGroupsResolver = async (): Promise<GroupSpec[]> => {
-  // Get all tokens that have targetGroup = 'whale'
-  const contracts = await prisma.contract.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    where: {
-      targetGroups: {
-        has: 'whale',
-      },
-    },
-  });
-
-  // Assign metadata and the `resolveMembers` function for each token
-  const groups = contracts.map(contract => {
-    const handle = `${contract.name.toLowerCase()}-whale`;
-    return {
-      group: {
-        handle,
-        displayName: `Whale ${contract.name} Holder`,
-      },
-      resolveMembers: () => {
-        return getTopHoldersAcrossTime({
-          contractId: contract.id,
-          groupHandle: handle,
-        });
-      },
-    };
-  });
-
-  return groups;
-};
-
-export default whaleGroupsResolver;
+export default getTopHoldersAcrossTime;
