@@ -25,6 +25,9 @@ RUN pnpm -F merkle-tree exec pnpm install
 # Install dependencies
 RUN pnpm i
 
+# Run DB migrations
+RUN pnpm -F db migrate:prod
+
 # Verify installations
 RUN node --version
 RUN npm --version
