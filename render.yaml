@@ -4,11 +4,11 @@ services:
     plan: standard
     runtime: docker
     region: oregon
-    dockerfilePath: ./packages/indexer/Dockerfile
+    dockerfilePath: ./Dockerfile.indexer
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
-    dockerCommand: sh ./scripts/setup-docker-cron.sh
+    dockerCommand: pnpm -F db migrate:prod && pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
     buildFilter:
       paths:
         - packages/indexer/**
