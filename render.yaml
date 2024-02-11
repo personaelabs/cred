@@ -8,7 +8,7 @@ services:
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
-    dockerCommand: NODE_ENV=production pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
+    dockerCommand: pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
     buildFilter:
       paths:
         - packages/indexer/**
@@ -21,6 +21,8 @@ services:
         fromDatabase:
           name: cred
           property: connectionString
+      - key: NODE_ENV
+        value: production
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
