@@ -63,6 +63,9 @@ const getClient = (
       apiKey = process.env.ALCHEMY_BASE_API_KEY;
       subdomain = 'base-mainnet';
       break;
+    case chains.arbitrum:
+      apiKey = process.env.ALCHEMY_ARB_API_KEY;
+      subdomain = 'arb-mainnet';
     default:
       throw new Error('Invalid chain');
   }
@@ -77,7 +80,6 @@ const getClient = (
  * Manage a list of occupied Ethereum RPC clients as a global variable
  */
 let activeClients: number[] = [];
-
 
 /**
  * List of active clients
