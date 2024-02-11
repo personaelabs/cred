@@ -1,4 +1,3 @@
-const merkleTree = require('@personaelabs/merkle-tree');
 import { Hex } from 'viem';
 import prisma from './prisma';
 import { MerkleProof } from '@prisma/client';
@@ -8,13 +7,14 @@ import { GroupMeta } from './types';
 import groupsResolver from './groups/groupsResolver';
 import devResolver from './groups/resolvers/devResolver';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
+const merkleTree = require('merkle-tree');
 
 /**
  * Minimum number of members required to create a group
  */
 const MIN_NUM_MEMBERS = 100;
 
-const TREE_DEPTH = 16;
+const TREE_DEPTH = 18;
 const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
 
 /**
@@ -84,10 +84,9 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
   }
 
   // Build the merkle tree
-  const rootString = await merkleTree.secp256k1_init_tree(
-    addressesBytes,
-    TREE_DEPTH
-  );
+  console.time('init_tree');
+  const rootString = await merkleTree.init_tree(addressesBytes, TREE_DEPTH);
+  console.timeEnd('init_tree');
 
   // Convert the root bytes to a hex string
   const merkleRoot = toHex(rootString);
@@ -125,7 +124,7 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
       // Get the merkle proofs
       const merkleProofs = chunk.map(address => {
         const paddedAddress = address.slice(2).padStart(64, '0');
-        const proof = merkleTree.secp256k1_create_proof(
+        const proof = merkleTree.create_proof(
           Buffer.from(paddedAddress, 'hex')
         );
         return proof as string;
@@ -161,7 +160,6 @@ const saveTree = async (addresses: Hex[], groupMeta: GroupMeta) => {
 };
 
 const indexMerkleTree = async () => {
-  merkleTree.init_panic_hook();
   if (process.env.NODE_ENV === 'production') {
     await syncMemeTokensMeta();
     await syncERC20();
