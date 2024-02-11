@@ -1,7 +1,7 @@
 services:
   - type: cron
     name: cred-indexer
-    plan: standard
+    plan: pro plus
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
