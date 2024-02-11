@@ -173,8 +173,7 @@ const resolverMembersWithSpec = async (
 };
 
 const indexMerkleTree = async () => {
-  //  if (process.env.NODE_ENV === 'production') {
-  if (true) {
+  if (process.env.NODE_ENV === 'production') {
     await syncMemeTokensMeta();
     await syncERC20();
 
