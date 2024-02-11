@@ -66,6 +66,7 @@ const getClient = (
     case chains.arbitrum:
       apiKey = process.env.ALCHEMY_ARB_API_KEY;
       subdomain = 'arb-mainnet';
+      break;
     default:
       throw new Error('Invalid chain');
   }
