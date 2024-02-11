@@ -8,8 +8,7 @@ services:
     rootDir: ./
     branch: main
     schedule: '0 * * * *'
-    buildCommand: sh ./scripts/setup-neon.sh && pnpm i && pnpm -F db migrate:prod
-    startCommand: pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
+    dockerCommand: sh ./scripts/setup-docker-cron.sh
     buildFilter:
       paths:
         - packages/indexer/**
