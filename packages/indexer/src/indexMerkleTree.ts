@@ -194,18 +194,20 @@ const indexMerkleTree = async () => {
 
     // Index the merkle trees for each group according to their specs
     for (const group of groups) {
-      const addresses: Hex[] = [];
+      const addresses: Set<Hex> = new Set();
       for (const spec of group.groupContractSpecs) {
         const result = await resolverMembersWithSpec(spec);
-        addresses.push(...result);
+        for (const address of result) {
+          addresses.add(address);
+        }
       }
 
       console.log(
-        `Indexing ${addresses.length} addresses for ${group.displayName}`
+        `Indexing ${addresses.size} addresses for ${group.displayName}`
       );
 
       // Save the merkle tree to the database
-      await saveTree(addresses, group.id);
+      await saveTree([...addresses], group.id);
     }
   } else {
     // In development, only index the dev group
