@@ -18,6 +18,7 @@ COPY pnpm-workspace.yaml .
 COPY packages/db packages/db
 COPY packages/indexer packages/indexer
 COPY packages/merkle-tree packages/merkle-tree
+COPY scripts scripts
 
 # Build the merkle-tree Neon module
 RUN pnpm -F merkle-tree exec pnpm install
@@ -25,10 +26,9 @@ RUN pnpm -F merkle-tree exec pnpm install
 # Install dependencies
 RUN pnpm i
 
-# Run DB migrations
-RUN pnpm -F db migrate:prod
-
 # Verify installations
 RUN node --version
 RUN npm --version
 RUN rustc --version
+
+CMD ["sh", "./scripts/start-indexer.sh"]
