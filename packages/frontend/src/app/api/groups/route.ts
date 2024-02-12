@@ -11,12 +11,11 @@ export type GroupSelect = Prisma.GroupGetPayload<{
   select: typeof groupSelect;
 }>;
 
-// Get merkle tree and its merkle proofs
+// Get all groups from the database
 export async function GET(_req: NextRequest) {
   const groups = await prisma.group.findMany({
     select: groupSelect,
   });
 
-  // Get the next userId from the database
   return Response.json(groups, { status: 200 });
 }
