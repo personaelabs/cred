@@ -1,0 +1,23 @@
+{
+  "name": "credbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "fetch-casts": "ts-node src/fetch-casts.ts",
+    "post-gm": "ts-node src/post-gm.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@neynar/nodejs-sdk": "1.9.5",
+    "@types/node": "^20.9.0",
+    "dotenv": "^16.3.1",
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11",
+    "ts-node": "^10.9.1"
+  }
+}
