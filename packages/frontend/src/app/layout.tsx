@@ -12,13 +12,11 @@ import DesktopFooter from '@/components/DesktopFooter';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 
-
 const config = {
-  // rpcUrl: 'https://mainnet.optimism.io',
-  // domain: 'localhost',
-  // siweUri: 'http://localhost:3000/login',
+  rpcUrl: 'https://mainnet.optimism.io',
+  domain: 'creddd.xyz',
+  siweUri: 'http://creddd.xyz/login',
 };
-
 
 export default function RootLayout({
   children,
