@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, FC } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, FC } from 'react';
 
 // This is pretty FC oriented, not sue if it needs to be generalized or not.
 interface User {
@@ -11,6 +11,7 @@ interface User {
 
 interface UserContextType {
   user: User | null;
+  userStateInitialized: boolean;
   loginWithFarcaster: (userData: User) => void;
   logout: () => void;
   isLoggedIn: () => boolean;
@@ -34,6 +35,18 @@ interface UserProviderProps {
 
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userStateInitialized, setUserStateInitialized] = useState(false);
+
+  // ALready got a user? Load it up!
+  useEffect(() => {
+    const storedUser = localStorage.getItem('fc');
+    console.log('stored user', storedUser);
+    if (storedUser) {
+      console.log('setting user', JSON.parse(storedUser));
+      setUser(JSON.parse(storedUser));
+    }
+    setUserStateInitialized(true); // Want to know when we're done with setup so we can renable the button in the UI.
+  }, []);
 
   const isLoggedIn = () => {
     return user !== null;
@@ -59,14 +72,17 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
 
   const loginWithFarcaster = (userData: User) => {
     setUser(userData);
+    // Only store this core FC info, don't keep the wallets here too:
+    localStorage.setItem('fc', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('fc');
   };
 
   return (
-    <UserContext.Provider value={{ user, loginWithFarcaster, logout, isLoggedIn, addWalletAddress, removeWalletAddress }}>
+    <UserContext.Provider value={{ user, loginWithFarcaster, logout, isLoggedIn, addWalletAddress, removeWalletAddress, userStateInitialized }}>
       {children}
     </UserContext.Provider>
   );
