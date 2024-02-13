@@ -113,11 +113,13 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-center items-center h-[80vh] gap-10">
 
+{ !!user && (
       <h2
         className="text-3xl font-bold"
       >
-        Hello {user?.displayName || "anon"} <span className="opacity-50">(FID {user?.fid})</span>
+        Hello {user?.displayName} <span className="opacity-50">(FID {user?.fid})</span>
       </h2>
+)}
 
       {!isLoading && accounts.length == 0 && (
         <div>
