@@ -1,5 +1,5 @@
 {
-  "name": "merkle-tree",
+  "name": "merkle-tree-rs",
   "version": "0.1.0",
   "description": "",
   "main": "index.node",

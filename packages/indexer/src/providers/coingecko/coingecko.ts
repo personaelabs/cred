@@ -192,67 +192,8 @@ export const syncMemeTokensMeta = async () => {
       name: token.name,
       deployedBlock: token.deployedBlock,
       type: ContractType.ERC20,
+      targetGroups: ['earlyHolder', 'whale'],
     })),
     skipDuplicates: true,
   });
-
-  // Get all contracts from the database.
-  // We need to get the auto-generated ids of the contracts.
-  const contracts = await prisma.contract.findMany({
-    where: {
-      coingeckoId: { not: null },
-    },
-  });
-
-  // Create a `Group` object for each contract
-  for (const contract of contracts) {
-    // Build groups with specs
-    const groupsWithSpecs = [
-      {
-        group: {
-          handle: `early-${contract.name.toLowerCase()}-holder`,
-          displayName: `Early ${contract.name} holder`,
-        },
-        groupContractSpecs: [
-          {
-            contractId: contract.id,
-            rules: ['earlyHolder'],
-          },
-        ],
-      },
-      {
-        group: {
-          handle: `whale-${contract.name.toLowerCase()}-holder`,
-          displayName: `Whale ${contract.name} holder`,
-        },
-        groupContractSpecs: [
-          {
-            contractId: contract.id,
-            rules: ['whale'],
-          },
-        ],
-      },
-    ];
-
-    for (const groupWithSpec of groupsWithSpecs) {
-      // Save the group to the database
-      const group = await prisma.group.upsert({
-        where: {
-          handle: groupWithSpec.group.handle,
-        },
-        create: groupWithSpec.group,
-        update: groupWithSpec.group,
-      });
-
-      // Save group contract specs to the database
-      await prisma.groupContractSpec.createMany({
-        data: groupWithSpec.groupContractSpecs.map(spec => ({
-          groupId: group.id,
-          contractId: contract.id,
-          rules: spec.rules,
-        })),
-        skipDuplicates: true,
-      });
-    }
-  }
 };

@@ -9,8 +9,6 @@ import {
 import * as chains from 'viem/chains';
 import { ManagedClient } from '../types';
 
-const NUM_MAINNET_CLIENTS = 10;
-
 const getClient = (
   chain: Chain,
   clientIndex: number = 0
@@ -95,7 +93,7 @@ let occupiedClients: {
  * List of all clients for each chain
  */
 const allClientIds = {
-  [chains.mainnet.id.toString()]: Array.from({ length: 10 }, (_, i) => i),
+  [chains.mainnet.id.toString()]: Array.from({ length: 100 }, (_, i) => i),
   [chains.optimism.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
   [chains.base.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
   [chains.arbitrum.id.toString()]: Array.from({ length: 5 }, (_, i) => i),
@@ -123,7 +121,7 @@ export const getNextAvailableClient = (chain: Chain): ManagedClient | null => {
   occupiedClients[chainId].push(nextAvailableClientId);
 
   return {
-    client: getClient(chain, nextAvailableClientId),
+    client: getClient(chain, nextAvailableClientId % 10),
     id: nextAvailableClientId,
   };
 };

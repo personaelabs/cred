@@ -8,7 +8,7 @@ import {
 } from 'viem';
 import { AbiEvent } from 'abitype';
 import { retry } from '../utils';
-import { Contract } from '@prisma/client';
+import chalk from 'chalk';
 
 // Sync logs for a specific event.
 export const processLogs = async <T extends Transport, C extends Chain>({
@@ -16,40 +16,33 @@ export const processLogs = async <T extends Transport, C extends Chain>({
   event,
   fromBlock,
   processor,
-  contract,
+  label,
+  contractAddress,
   batchSize = BigInt(2000),
-  accumulateLogs,
 }: {
   client: PublicClient<T, C>; // Ethereum RPC client to use
   event: AbiEvent; // Event to process
   fromBlock: bigint; // Block number to start from
-  processor: (
-    logs: GetFilterLogsReturnType,
-    args?: {
-      fromBlock: bigint;
-      toBlock: bigint;
-    }
-  ) => Promise<void>; // Function to process logs
-  contract: Contract;
+  processor: (logs: GetFilterLogsReturnType) => Promise<'terminate' | void>; // Function to process logs
+  label: string;
+  contractAddress: Hex;
   batchSize?: bigint; // How many blocks to process at a time
-  accumulateLogs?: number; // If set, will accumulate logs and process them in batches
-}) => {
+}): Promise<'terminate' | void> => {
   // Get the latest block number
   const latestBlock = await client.getBlockNumber();
+
   let adjustableBatchSize = batchSize;
 
-  let batch: GetLogsReturnType = [];
+  let exitCode;
   for (let batchFrom = fromBlock; batchFrom < latestBlock; ) {
-    let start = Date.now();
     await retry(async () => {
-      let toBlock = batchFrom + adjustableBatchSize;
+      let toBlock = batchFrom + adjustableBatchSize - BigInt(1);
 
-      // Fetch event logs
       let logs: GetLogsReturnType | null = null;
       while (logs === null) {
         try {
           logs = await client.getLogs({
-            address: contract.address as Hex,
+            address: contractAddress,
             event,
             fromBlock: batchFrom,
             toBlock,
@@ -69,29 +62,56 @@ export const processLogs = async <T extends Transport, C extends Chain>({
       // Now we know the logs are not null
       logs = logs as GetLogsReturnType;
 
-      // If we're accumulating logs, push them to the batch
-      if (accumulateLogs) {
-        batch.push(...logs);
-      }
+      /*
+      console.log(
+        chalk.gray(
+          `Fetched ${logs.length} logs for ${label} from ${batchFrom} to ${toBlock}`
+        )
+      );
+      */
 
-      if (accumulateLogs) {
-        if (batch.length >= accumulateLogs) {
-          // If we've accumulated enough logs, process them
-          await processor(batch);
+      exitCode = await processor(logs);
 
-          batch = [];
-        }
-      } else {
-        // If we're not accumulating logs, process them immediately
-        await processor(logs);
-      }
-
+      /*
       const blocksPerSec =
         Number(toBlock - batchFrom) / ((Date.now() - start) / 1000);
-      console.log(`${blocksPerSec} bps`);
-
-      batchFrom += adjustableBatchSize;
+      console.log(
+        `Processed ${toBlock}/${latestBlock} (${blocksPerSec} bps) (${label})`
+      );
+      */
+      batchFrom = toBlock + BigInt(1);
       adjustableBatchSize *= BigInt(2);
     });
+
+    if (exitCode === 'terminate') {
+      break;
+    }
   }
+
+  if (exitCode === 'terminate') {
+    return exitCode;
+  }
+};
+
+export const parseERC20TransferLogs = (logs: GetFilterLogsReturnType) => {
+  return logs.map(log => {
+    // @ts-ignore
+    const from = log.args.from;
+    // @ts-ignore
+    const to = log.args.to;
+    // @ts-ignore
+    const value = BigInt(log.args.value.toString());
+
+    const logIndex = log.logIndex;
+    const transactionIndex = log.transactionIndex;
+
+    return {
+      from: from.toLowerCase() as Hex,
+      to: to.toLowerCase() as Hex,
+      value,
+      blockNumber: log.blockNumber,
+      transactionIndex: transactionIndex,
+      logIndex: logIndex,
+    };
+  });
 };

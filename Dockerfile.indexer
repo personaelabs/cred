@@ -17,11 +17,11 @@ COPY pnpm-workspace.yaml .
 
 COPY packages/db packages/db
 COPY packages/indexer packages/indexer
-COPY packages/merkle-tree packages/merkle-tree
+COPY packages/merkle-tree-rs packages/merkle-tree-rs
 COPY scripts scripts
 
-# Build the merkle-tree Neon module
-RUN pnpm -F merkle-tree exec pnpm install
+# Build the merkle-tree-rs Neon module
+RUN pnpm -F merkle-tree-rs exec pnpm install
 
 # Install dependencies
 RUN pnpm i
