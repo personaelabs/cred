@@ -171,8 +171,10 @@ pub fn get_merkle_root(creddd_proof: &[u8]) -> Vec<u8> {
     let spartan_proof =
         SpartanProof::<Curve>::deserialize_compressed(creddd_proof.proof.as_slice()).unwrap();
     let pub_inputs = spartan_proof.pub_input.clone();
-    // The first 4 elements of the public input are the efficient ECDSA inputs
-    let root = &pub_inputs[4];
+    // The first 4 elements of the public input are the efficient ECDSA inputs,
+    // and the 5th element is the sign_in_sig.
+    // The 6th element is the Merkle root.
+    let root = &pub_inputs[5];
 
     root.into_bigint().to_bytes_be()
 }

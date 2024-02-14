@@ -6,13 +6,17 @@ import * as Comlink from 'comlink';
 import { WitnessInput } from '@/app/types';
 
 let circuit: any;
+let circuitInitialized = false;
 
 const Prover = {
   async prepare() {
     circuit = await import('circuit-web');
 
-    circuit.init_panic_hook();
-    circuit.prepare();
+    if (!circuitInitialized) {
+      circuit.init_panic_hook();
+      circuit.prepare();
+      circuitInitialized = true;
+    }
   },
 
   async prove(witness: WitnessInput) {

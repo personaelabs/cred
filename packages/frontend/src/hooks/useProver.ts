@@ -125,7 +125,7 @@ const useProver = () => {
         return {
           proof: toHexString(proof),
           sourcePubKeySigHash,
-          signInSig: user.signature,
+          signInSigS,
           signInSigNonce: user.nonce,
           fid: user.fid,
         };

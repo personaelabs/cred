@@ -2,9 +2,6 @@
 /* eslint-disable */
 /**
 */
-export function init_panic_hook(): void;
-/**
-*/
 export function prepare(): void;
 /**
 * @param {Uint8Array} pub_input
@@ -49,3 +46,23 @@ export function get_msg_hash(creddd_proof: Uint8Array): Uint8Array;
 * @returns {Uint8Array}
 */
 export function get_sign_in_sig(creddd_proof: Uint8Array): Uint8Array;
+/**
+*/
+export function init_panic_hook(): void;
+/**
+* @param {Uint8Array} leaf_bytes
+* @param {number} depth
+* @returns {string}
+*/
+export function secp256k1_init_tree(leaf_bytes: Uint8Array, depth: number): string;
+/**
+* @param {Uint8Array} leaf_bytes
+* @returns {string}
+*/
+export function secp256k1_create_proof(leaf_bytes: Uint8Array): string;
+/**
+* @param {Uint8Array} leaf_bytes
+* @param {number} depth
+* @returns {(string)[]}
+*/
+export function secp256k1_get_proofs(leaf_bytes: Uint8Array, depth: number): (string)[];

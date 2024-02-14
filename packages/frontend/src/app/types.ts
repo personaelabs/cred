@@ -17,7 +17,7 @@ export interface WitnessInput {
 export interface FidAttestationRequestBody {
   sourcePubKeySigHash: Hex;
   signInSigNonce: string;
-  signInSig: Hex;
+  signInSigS: Hex;
   proof: Hex;
   fid: number;
 }
