@@ -72,29 +72,17 @@ model ERC20TransferEvent {
   @@index([blockNumber])
 }
 
-model ERC20TotalSupply {
-  contractId  Int
-  totalSupply String
-  blockNumber BigInt
+model ERC20HolderPosition {
+  address    String
+  contractId Int
+  position   Int
 
-  updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   Contract  Contract @relation(fields: [contractId], references: [id])
 
-  @@id([contractId])
-}
-
-model ERC20Balance {
-  contractId  Int
-  address     String
-  balance     String
-  blockNumber BigInt
-
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-  Contract  Contract @relation(fields: [contractId], references: [id])
-
-  @@id([contractId, address])
+  @@id([address, contractId])
+  @@index([position])
 }
 
 model MerkleTree {
@@ -121,30 +109,18 @@ model MerkleProof {
   @@id([merkleRoot, address])
 }
 
-// Specifies how to create a group from a contract
-model GroupContractSpec {
-  contractId Int
-  groupId    Int
-  rules      String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  Contract Contract @relation(fields: [contractId], references: [id])
-  Group    Group    @relation(fields: [groupId], references: [id])
-
-  @@id([contractId, groupId])
-}
-
 model Group {
-  id          Int    @id @default(autoincrement())
-  handle      String @unique
-  displayName String
+  id               Int     @id @default(autoincrement())
+  handle           String  @unique
+  displayName      String
+  blockNumber      BigInt?
+  transactionIndex Int?
+  logIndex         Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  merkleTrees        MerkleTree[]
-  groupContractSpecs GroupContractSpec[]
+  merkleTrees MerkleTree[]
 }
 
 enum ContractType {
@@ -160,6 +136,7 @@ model Contract {
   type          ContractType
   deployedBlock BigInt
   coingeckoId   String?
+  targetGroups  String[]
   decimals      Int          @default(18)
   chain         String
   createdAt     DateTime     @default(now())
@@ -167,9 +144,7 @@ model Contract {
 
   ERC20TransferEvents  ERC20TransferEvent[]
   ERC721TransferEvents ERC721TransferEvent[]
-  ERC20Balance         ERC20Balance[]
-  ERC20TotalSupply     ERC20TotalSupply[]
-  GroupContractSpec    GroupContractSpec[]
+  ERC20HolderPosition  ERC20HolderPosition[]
 
   @@unique([address, chain])
 }

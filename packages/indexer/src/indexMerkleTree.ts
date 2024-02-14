@@ -1,214 +1,129 @@
-import { Hex } from 'viem';
+import { Chain, HttpTransport, PublicClient } from 'viem';
 import prisma from './prisma';
-import { GroupContractSpec, MerkleProof } from '@prisma/client';
-import { syncERC20 } from './providers/erc20/erc20';
-import devResolver from './groups/resolvers/devResolver';
+import { getDevAddresses, runInParallel } from './utils';
+import { Contract, Group } from '@prisma/client';
+import * as chains from 'viem/chains';
 import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
-import getEarlyHolders from './groups/resolvers/earlyHoldersResolver';
-import getTopHoldersAcrossTime from './groups/resolvers/whaleResolver';
-const merkleTree = require('merkle-tree');
+import indexWhales, { getWhaleHandle } from './processors/whales';
+import indexEarlyHolders, {
+  getEarlyHolderHandle,
+} from './processors/earlyHolders';
+import chalk from 'chalk';
+import { saveTree } from './lib/tree';
 
-/**
- * Minimum number of members required to create a group
- */
-const MIN_NUM_MEMBERS = 100;
-
-const TREE_DEPTH = 18;
-const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
-
-/**
- * Convert a string (base 10) to a hex string
- */
-const toHex = (x: string): Hex => {
-  return `0x${BigInt(x).toString(16)}`;
+// Run a sync job
+const runSyncJob = async (
+  client: PublicClient<HttpTransport, Chain>,
+  args: {
+    contract: Contract;
+    targetGroup: string;
+  }
+) => {
+  switch (args.targetGroup) {
+    case 'whale':
+      await indexWhales(client, args.contract);
+      break;
+    case 'earlyHolder':
+      console.log(
+        chalk.gray(`indexing early holders for ${args.contract.name}`)
+      );
+      await indexEarlyHolders(client, args.contract);
+      break;
+    default:
+      throw new Error(`Unknown target group ${args.targetGroup}`);
+  }
 };
 
-/**
- * Convert a string (base 10) to an address
- */
-const toAddress = (x: string): Hex => {
-  return `0x${BigInt(x).toString(16).padStart(40, '0')}`;
-};
+// Create or update a group for a contract based on `targetGroup`
+const upsertGroup = async (contract: Contract, targetGroup: string) => {
+  let upsertData: Pick<Group, 'blockNumber' | 'handle' | 'displayName'>;
+  console.log(`upserting group for ${contract.name} ${targetGroup}`);
 
-/**
- * Parse a merkle proof in JSON format
- * @param merkleProof merkle proof in JSON format
- */
-const parseMerkleProof = (
-  merkleProof: string
-): Omit<MerkleProof, 'createdAt' | 'updatedAt' | 'id'> => {
-  const merkleProofJSON = JSON.parse(merkleProof);
-  const address = toAddress(toHex(merkleProofJSON['leaf']));
+  if (targetGroup === 'whale') {
+    const handle = getWhaleHandle(contract.name);
+    // Get the synched block number from the group if it exists
+    const group = await prisma.group.findUnique({
+      select: {
+        blockNumber: true,
+      },
+      where: {
+        handle,
+      },
+    });
 
-  const merkleRoot = toHex(merkleProofJSON['root']);
-  const path = merkleProofJSON['siblings'].map((sibling: string[]) =>
-    toHex(sibling[0])
-  );
-  const pathIndices = merkleProofJSON['pathIndices'].map((x: string) =>
-    parseInt(x)
-  );
+    upsertData = {
+      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      handle,
+      displayName: `${contract.name} historical whale`,
+    };
+  } else if (targetGroup === 'earlyHolder') {
+    const handle = getEarlyHolderHandle(contract.name);
 
-  return {
-    address,
-    merkleRoot,
-    path,
-    pathIndices,
-  };
-};
+    // Get the synched block number from the group if it exists
+    const group = await prisma.group.findUnique({
+      select: {
+        blockNumber: true,
+      },
+      where: {
+        handle,
+      },
+    });
 
-/**
- *  Create a new merkle tree and save the merkle proofs for the given addresses.
- *  Delete the Merkle proofs of the old tree if it exists to clear up space.
- */
-const saveTree = async (addresses: Hex[], groupId: number) => {
-  if (addresses.length < MIN_NUM_MEMBERS) {
-    console.log(
-      `Skipping ${groupId} as there are not enough addresses ${MIN_NUM_MEMBERS} > ${addresses.length}`
-    );
-    return;
+    upsertData = {
+      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      handle,
+      displayName: `${contract.name} early holder`,
+    };
+  } else {
+    throw new Error(`Unknown target group ${targetGroup}`);
   }
 
-  if (addresses.length > MAX_NUM_LEAVES) {
-    console.error(
-      `Skipping ${groupId} as there are more than ${MAX_NUM_LEAVES} addresses`
-    );
-    return;
-  }
-
-  const addressesBytes = new Uint8Array(addresses.length * 32);
-
-  for (const [i, address] of addresses.entries()) {
-    const paddedAddress = address.slice(2).padStart(64, '0');
-    addressesBytes.set(Buffer.from(paddedAddress, 'hex'), i * 32);
-  }
-
-  // Build the merkle tree
-  console.time('init_tree');
-  const rootString = await merkleTree.init_tree(addressesBytes, TREE_DEPTH);
-  console.timeEnd('init_tree');
-
-  // Convert the root bytes to a hex string
-  const merkleRoot = toHex(rootString);
-
-  const merkleRootExists = await prisma.merkleTree.findFirst({
+  await prisma.group.upsert({
+    create: upsertData,
+    update: upsertData,
     where: {
-      merkleRoot,
+      handle: upsertData.handle,
     },
   });
-
-  // Save the merkle tree if it doesn't exist yet
-  if (!merkleRootExists) {
-    // Create a new merkle tree
-    await prisma.merkleTree.create({
-      data: {
-        groupId,
-        merkleRoot,
-      },
-    });
-
-    // Get and save merkle proofs in chunks
-    const chunkSize = 1000;
-    for (let i = 0; i < addresses.length; i += chunkSize) {
-      const chunk = addresses.slice(i, i + chunkSize);
-
-      // Get the merkle proofs
-      const merkleProofs = chunk.map(address => {
-        const paddedAddress = address.slice(2).padStart(64, '0');
-        const proof = merkleTree.create_proof(
-          Buffer.from(paddedAddress, 'hex')
-        );
-        return proof as string;
-      });
-
-      const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
-
-      // Save the merkle proofs
-      await prisma.merkleProof.createMany({
-        data: parsedMerkleProofs,
-      });
-    }
-
-    // Get the old merkle trees of the group
-    const oldTrees = await prisma.merkleTree.findMany({
-      where: {
-        groupId,
-        NOT: {
-          merkleRoot,
-        },
-      },
-    });
-
-    // Delete the old merkle proofs
-    await prisma.merkleProof.deleteMany({
-      where: {
-        merkleRoot: {
-          in: oldTrees.map(tree => tree.merkleRoot),
-        },
-      },
-    });
-  }
-};
-
-// Get addresses from a contract as specified in `GroupContractSpec`
-const resolverMembersWithSpec = async (
-  groupSpec: Pick<GroupContractSpec, 'contractId' | 'rules' | 'groupId'>
-) => {
-  const addresses: Hex[] = [];
-  for (const rule of groupSpec.rules) {
-    if (rule === 'earlyHolder') {
-      const result = await getEarlyHolders(groupSpec.contractId);
-      addresses.push(...result);
-    } else if (rule === 'whale') {
-      const addresses = await getTopHoldersAcrossTime({
-        contractId: groupSpec.contractId,
-        groupId: groupSpec.groupId,
-      });
-      addresses.push(...addresses);
-    } else {
-      throw new Error(`Unknown rule ${rule}`);
-    }
-  }
-
-  return addresses;
 };
 
 const indexMerkleTree = async () => {
   if (process.env.NODE_ENV === 'production') {
     await syncMemeTokensMeta();
-    await syncERC20();
 
-    // Get all groups and their contract specs
-    const groups = await prisma.group.findMany({
-      select: {
-        id: true,
-        displayName: true,
-        groupContractSpecs: {
-          select: {
-            groupId: true,
-            contractId: true,
-            rules: true,
-          },
-        },
-      },
-    });
+    // Get all contracts
+    const contracts = await prisma.contract.findMany();
 
-    // Index the merkle trees for each group according to their specs
-    for (const group of groups) {
-      const addresses: Set<Hex> = new Set();
-      for (const spec of group.groupContractSpecs) {
-        const result = await resolverMembersWithSpec(spec);
-        for (const address of result) {
-          addresses.add(address);
-        }
+    // Create or update groups based on the `targetGroups` field of contracts
+    for (const contract of contracts) {
+      const groups = contract.targetGroups;
+
+      for (const group of groups) {
+        await upsertGroup(contract, group);
       }
+    }
 
-      console.log(
-        `Indexing ${addresses.size} addresses for ${group.displayName}`
+    // Prepare a sync job for each group
+    const jobs = contracts.flatMap(contract => {
+      const chain = Object.values(chains).find(
+        chain => chain.name === contract.chain
       );
 
-      // Save the merkle tree to the database
-      await saveTree([...addresses], group.id);
-    }
+      if (!chain) {
+        throw new Error(`Chain ${contract.chain} not found`);
+      }
+
+      return contract.targetGroups.map(targetGroup => ({
+        chain,
+        args: {
+          contract,
+          targetGroup,
+        },
+      }));
+    });
+
+    // Run the sync jobs in parallel
+    await runInParallel(runSyncJob, jobs);
   } else {
     // In development, only index the dev group
 
@@ -224,12 +139,12 @@ const indexMerkleTree = async () => {
       },
     });
 
-    const addresses = await devResolver();
+    const addresses = getDevAddresses();
     console.log(
       `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
     );
 
-    await saveTree(addresses, devGroup.id);
+    await saveTree({ groupId: devGroup.id, addresses });
   }
 };
 
