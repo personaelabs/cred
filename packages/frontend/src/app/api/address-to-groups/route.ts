@@ -11,7 +11,15 @@ export interface AddressToGroupsResponse {
 }
 
 // Get a list of addresses and the groups they belong to
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  const addressPrefix = req.nextUrl.searchParams.get('addressPrefix');
+
+  if (!addressPrefix) {
+    return Response.json(
+      { error: 'addressPrefix is required' },
+      { status: 400 }
+    );
+  }
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
     SELECT
       "MerkleProof".address,
@@ -20,6 +28,8 @@ export async function GET(_req: NextRequest) {
       "MerkleProof"
       LEFT JOIN "MerkleTree" ON "MerkleProof"."merkleRoot" = "MerkleTree"."merkleRoot"
       LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
+    WHERE
+      LEFT("MerkleProof".address, 4) = ${addressPrefix}
     GROUP BY
       "MerkleProof".address
   `;

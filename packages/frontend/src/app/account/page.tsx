@@ -11,30 +11,8 @@ export default function Home() {
   const [addressesToGroups, setAddressesToGroups] =
     useState<AddressToGroupsResponse>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // Explicitly define the error state to be either string or null
-  const [error, setError] = useState<string | null>(null);
-
   const [groups, setGroups] = useState<GroupSelect[]>([]);
-
-  // An object like so: [{"handle":"dev","displayName":"Dev"}, ..{}], define an interface:
-  interface Group {
-    handle: string;
-    displayName: string;
-  }
-
-  // Now i want a groupsForAddress array interface:
-  interface GroupsForAddress {
-    address: string;
-    groups: Group[];
-  }
-
-  // Now a setter for the groupsForAddress state:
-  const [groupsForAddress, setGroupsForAddress] = useState<GroupsForAddress[]>(
-    []
-  );
-
   const [accounts, setAccounts] = useState<string[]>([]);
-
   const { user } = useUser();
 
   const listenForAccountChanges = () => {
@@ -61,39 +39,39 @@ export default function Home() {
   };
 
   useEffect(() => {
+    (async () => {
+      // Load in group config too.
+      const groupResponse = await fetch('/api/groups');
+
+      if (!groupResponse.ok) {
+        throw new Error('Group fetch failed');
+      }
+      const groupData = (await groupResponse.json()) as GroupSelect[];
+      setGroups(groupData);
+    })();
+  }, []);
+
+  useEffect(() => {
     const fetchGroups = async () => {
       setIsLoading(true);
-      try {
-        console.time('fetchGroups');
-        const response = await fetch('/api/address-to-groups'); // Assuming this URL is correct
+      for (const account of accounts) {
+        const searchParams = new URLSearchParams();
+        searchParams.set('addressPrefix', account.slice(0, 4));
+        const response = await fetch(
+          `/api/address-to-groups?${searchParams.toString()}`
+        );
         if (!response.ok) {
           throw new Error('Data fetch failed'); // This will be caught by the catch block
         }
-        console.timeEnd('fetchGroups');
 
-        console.time('parseResponse');
         const data = await response.json();
-        setAddressesToGroups(data);
-        console.timeEnd('parseResponse');
-
-        // Load in group config too. Probably could parallelize this.
-        const groupResponse = await fetch('/api/groups'); // Returns [{"handle":"dev","displayName":"Dev"}, {...]}]
-
-        if (!groupResponse.ok) {
-          throw new Error('Group fetch failed');
-        }
-        const groupData = (await groupResponse.json()) as GroupSelect[];
-        setGroups(groupData);
-      } catch (error: any) {
-        // Catching error as any to access message property
-        setError(error.message || 'An unknown error occurred');
-      } finally {
-        setIsLoading(false);
+        setAddressesToGroups(prev => ({ ...prev, ...data }));
       }
+      setIsLoading(false);
     };
 
     fetchGroups();
-  }, []);
+  }, [accounts]);
 
   const eligibleGroups = () => {
     const addressAndGroup: {
@@ -123,18 +101,6 @@ export default function Home() {
         address,
         group: groups.find(g => g.handle === group)!,
       };
-    });
-  };
-
-  // A function that, given a wallet, fetches the raw groups from groupsForAddresses and select the groups by matching handle
-  const getGroupsForWallet = (wallet: string) => {
-    // This will return an array of groups (strings) that the wallet is a member of
-    const groupsForWallet = addressesToGroups[wallet];
-    // Nithing? Retrun an empty array
-    if (!groupsForWallet) return [];
-    return addressesToGroups[wallet].map(groupHandle => {
-      // Now find the 'handle' in the groups array of objects `[{"handle":"dev","displayName":"Dev"}]` and return the displayName
-      return groups.find(group => group.handle === groupHandle)!;
     });
   };
 
