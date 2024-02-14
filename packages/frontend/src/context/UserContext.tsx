@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode, FC } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  FC,
+} from 'react';
+import { Hex } from 'viem';
 
 // This is pretty FC oriented, not sue if it needs to be generalized or not.
 interface User {
@@ -7,6 +15,8 @@ interface User {
   fid?: number;
   pfpUrl?: string;
   walletAddresses?: string[];
+  signature: Hex;
+  nonce: string;
 }
 
 interface UserContextType {
@@ -50,7 +60,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
 
   const isLoggedIn = () => {
     return user !== null;
-  }
+  };
 
   const addWalletAddress = (address: string) => {
     console.log('adding wallet address', address);
@@ -59,16 +69,22 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       return;
     }
     if (user) {
-      setUser({ ...user, walletAddresses: [...(user.walletAddresses || []), address] });
+      setUser({
+        ...user,
+        walletAddresses: [...(user.walletAddresses || []), address],
+      });
     }
-  }
+  };
 
   const removeWalletAddress = (address: string) => {
     console.log('removing wallet address', address);
     if (user) {
-      setUser({ ...user, walletAddresses: user.walletAddresses?.filter((a) => a !== address) });
+      setUser({
+        ...user,
+        walletAddresses: user.walletAddresses?.filter(a => a !== address),
+      });
     }
-  }
+  };
 
   const loginWithFarcaster = (userData: User) => {
     setUser(userData);
@@ -82,7 +98,17 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, loginWithFarcaster, logout, isLoggedIn, addWalletAddress, removeWalletAddress, userStateInitialized }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loginWithFarcaster,
+        logout,
+        isLoggedIn,
+        addWalletAddress,
+        removeWalletAddress,
+        userStateInitialized,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

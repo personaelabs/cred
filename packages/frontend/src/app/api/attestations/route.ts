@@ -1,14 +1,18 @@
 import { FidAttestationRequestBody } from '@/app/types';
-import { SIG_SALT } from '@/hooks/useProver';
+// import { SIG_SALT } from '@/hooks/useProver';
+const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+
 import prisma from '@/lib/prisma';
 import { createAppClient, viemConnector } from '@farcaster/auth-kit';
 import { NextRequest } from 'next/server';
-import { bytesToHex, hashMessage, hexToBytes } from 'viem';
+import { bytesToHex, hashMessage, hexToBytes, toHex } from 'viem';
 
+/*
 const appClient = createAppClient({
   relay: 'https://relay.farcaster.xyz',
   ethereum: viemConnector(),
 });
+*/
 
 // TODO: Adjust these to match the frontend implementation
 const SIWF_DOMAIN = 'creddd.xyz';
@@ -17,7 +21,10 @@ const SIWF_MESSAGE = `${SIWF_DOMAIN} wants you to sign in with your Ethereum acc
 // Verify and save a new FID attestation
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as FidAttestationRequestBody;
+  console.log('body', body);
+  const fid = body.fid;
 
+  /*
   // 1. Verify `signInSig`
   const { success, fid } = await appClient.verifySignInMessage({
     nonce: body.signInSigNonce,
@@ -29,6 +36,7 @@ export async function POST(req: NextRequest) {
   if (!success) {
     return Response.json({ error: 'Invalid SIFW signature' }, { status: 400 });
   }
+  */
 
   // 2. Verify the proof
   const circuit = await import('circuit-node');
@@ -42,7 +50,7 @@ export async function POST(req: NextRequest) {
 
   // 3. Verify that the `signInSig` in the POST body matches the `signInSig` in the proof
   const signInSig = await circuit.get_sign_in_sig(proofBytes);
-  if (signInSig !== body.signInSig) {
+  if (toHex(signInSig) !== body.signInSig) {
     return Response.json(
       { error: 'Invalid signInSig in proof' },
       { status: 400 }

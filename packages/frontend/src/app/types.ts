@@ -11,9 +11,13 @@ export interface WitnessInput {
   siblings: Uint8Array;
   indices: Uint8Array;
   root: Uint8Array;
+  signInSigS: Uint8Array;
 }
 
-export interface VerifyRequestBody {
+export interface FidAttestationRequestBody {
   sourcePubKeySigHash: Hex;
+  signInSigNonce: string;
+  signInSig: Hex;
   proof: Hex;
+  fid: number;
 }

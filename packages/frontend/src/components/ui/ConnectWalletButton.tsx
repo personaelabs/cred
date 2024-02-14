@@ -1,11 +1,8 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useUser } from '@/context/UserContext';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
-export const ConnectWalletButton = ({
-  label = 'Connect Wallet',
-}) => {
-
+export const ConnectWalletButton = ({ label = 'Connect Wallet' }) => {
   return (
     <ConnectButton.Custom>
       {({
@@ -24,14 +21,13 @@ export const ConnectWalletButton = ({
           ready &&
           account &&
           chain &&
-          (!authenticationStatus ||
-            authenticationStatus === 'authenticated');
+          (!authenticationStatus || authenticationStatus === 'authenticated');
         return (
           <div
             className="hover:underline"
             {...(!ready && {
               'aria-hidden': true,
-              'style': {
+              style: {
                 opacity: 0,
                 pointerEvents: 'none',
                 userSelect: 'none',
@@ -48,15 +44,14 @@ export const ConnectWalletButton = ({
               }
               if (chain.unsupported) {
                 return (
-                  <button onClick={openChainModal} type="button"
-                  >
+                  <button onClick={openChainModal} type="button">
                     Wrong network
                   </button>
                 );
               }
               return (
-                <button onClick={openAccountModal} type="button">                 
-                    Connected as {account.displayName}
+                <button onClick={openAccountModal} type="button">
+                  Connected as {account.displayName}
                 </button>
               );
             })()}

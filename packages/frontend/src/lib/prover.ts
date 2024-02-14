@@ -23,7 +23,8 @@ const Prover = {
       witness.msgHash,
       witness.siblings,
       witness.indices,
-      witness.root
+      witness.root,
+      witness.signInSigS
     );
     return proof;
   },

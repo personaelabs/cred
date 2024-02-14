@@ -9,7 +9,7 @@ const DEV_ADDRESSES: Hex[] = [
   '0x4f7d469a5237bd5feae5a3d852eea4b65e06aad1', // pfeffunit.eth
 ];
 
-const DEV_GROUP_SIZE = 100000;
+const DEV_GROUP_SIZE = 1000;
 
 const devResolver = async (): Promise<Hex[]> => {
   const members: Hex[] = [];
