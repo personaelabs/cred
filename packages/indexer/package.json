@@ -11,21 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "merkle-tree": "../merkle-tree",
     "@prisma/client": "4.5.0",
     "@types/node": "^20.8.10",
     "abitype": "0.9.8",
     "axios": "^1.6.0",
     "chalk": "4",
     "dotenv": "^16.3.1",
-    "graphql-request": "^6.1.0",
-    "graphql-tag": "^2.12.6",
+    "ioredis": "^5.3.2",
+    "merkle-tree-rs": "../merkle-tree-rs",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
     "viem": "^1.19.5"
-  },
-  "devDependencies": {
-    "csv-parser": "^3.0.0",
-    "csv-writer": "^1.6.0"
   }
 }

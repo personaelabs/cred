@@ -198,7 +198,7 @@ mod tests {
     use ark_std::{end_timer, start_timer};
     use eth_membership::TREE_DEPTH;
     use num_bigint::BigUint;
-    use sapir::{merkle_tree::MerkleTree, poseidon::constants::secp256k1_w3};
+    use sapir::{merkle_tree::tree::MerkleTree, poseidon::constants::secp256k1_w3};
 
     #[test]
     fn bench_eth_membership() {
