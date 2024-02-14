@@ -7,19 +7,22 @@ import { mainnet } from 'viem/chains';
 import useProver from '@/hooks/useProver';
 import { GroupSelect } from '@/app/api/groups/route';
 import { postJSON } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { group } from 'console';
 
 // Assuming demoSignMessage is defined elsewhere and imported
 // import { demoSignMessage } from 'wherever-this-function-is-defined';
 
 interface WalletViewProps {
   walletAddr: string;
-  groups: GroupSelect[];
+  group: GroupSelect;
 }
 
-const WalletView: React.FC<WalletViewProps> = ({ walletAddr, groups }) => {
+const WalletView: React.FC<WalletViewProps> = ({ walletAddr, group }) => {
   const [isAdding, setIsAdding] = useState(false);
   const prover = useProver();
+  const [added, setAdded] = useState(false);
 
   const addGroup = async (addr: string, groupHandle: string) => {
     // Viem!
@@ -39,37 +42,33 @@ const WalletView: React.FC<WalletViewProps> = ({ walletAddr, groups }) => {
         url: '/api/attestations',
         body: proof,
       });
+
+      toast.success(`Successfully added creddd!`);
+
+      setAdded(true);
     }
     setIsAdding(false);
   };
 
   return (
-    <div
-      className={`flex flex-col items-center ${groups.length > 0 ? 'bg-[#404040] text-white p-4 rounded-lg' : ''}`}
-    >
-      <h2 className="font-mono">{walletAddr}</h2>
-
-      {groups && groups.length > 0 && (
-        <section className="flex mt-2">
-          {groups.map((group, i) => (
-            <span key={i} className="">
-              <span className="font-bold text-lg">{group.displayName}</span>
-              <Button
-                onClick={() => addGroup(walletAddr, group.handle)}
-                disabled={isAdding}
-                className="rounded transition-all bg-white text-black ml-2 hover:bg-black hover:text-white px-4 py-1"
-              >
-                {isAdding ? (
-                  <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
-                ) : (
-                  <></>
-                )}
-                Add
-              </Button>
-            </span>
-          ))}
-        </section>
-      )}
+    <div className="flex flex-col items-center">
+      <div className="flex flex-row items-center justify-center gap-[20px] w-[300px]">
+        <div className="text-center w-[200px]">{group.displayName}</div>
+        <div className="w-[85px] text-center">
+          <Button
+            onClick={() => addGroup(walletAddr, group.handle)}
+            disabled={isAdding || added}
+          >
+            {isAdding ? (
+              <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
+            ) : (
+              <></>
+            )}
+            {added ? <Check className="w-4 h-4 mr-1" /> : <></>}
+            Add
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

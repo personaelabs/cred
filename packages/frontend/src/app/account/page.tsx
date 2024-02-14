@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,6 @@ import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
 import { GroupSelect } from '../api/groups/route';
 
 export default function Home() {
-  const router = useRouter();
-
   const [addressesToGroups, setAddressesToGroups] =
     useState<AddressToGroupsResponse>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -98,13 +95,34 @@ export default function Home() {
     fetchGroups();
   }, []);
 
-  // Returns any accounts that has a group in the addressToGroups object
-  // Return an array of strings.
-  const elibigleWallets = () => {
-    return accounts.filter(account => {
-      return (
-        addressesToGroups[account] && addressesToGroups[account].length > 0
-      );
+  const eligibleGroups = () => {
+    const addressAndGroup: {
+      address: string;
+      group: string;
+    }[] = [];
+
+    for (const account of accounts) {
+      if (addressesToGroups[account]) {
+        for (const group of addressesToGroups[account]) {
+          addressAndGroup.push({
+            address: account,
+            group,
+          });
+        }
+      }
+    }
+
+    // Filter out duplicate groups
+    const uniqueGroups = addressAndGroup.filter(
+      ({ group }, index) =>
+        index === addressAndGroup.findIndex(t => t.group === group)
+    );
+
+    return uniqueGroups.map(({ address, group }) => {
+      return {
+        address,
+        group: groups.find(g => g.handle === group)!,
+      };
     });
   };
 
@@ -121,17 +139,20 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center h-[80vh] gap-10">
+    <div className="flex flex-col gap-[30px] justify-center items-center h-[80vh]">
+      <div className="text-[24px]">Add creddd to your Farcaster account</div>
+
       {!!user && (
-        <h2 className="text-3xl font-bold">
-          Hello {user?.displayName}{' '}
+        <div>
+          {user?.displayName}{' '}
           <span className="opacity-50">(FID {user?.fid})</span>
-        </h2>
+        </div>
       )}
 
       {!isLoading && accounts.length == 0 && (
-        <div>
-          <Button onClick={connectAccounts} type="button">
+        <div className="flex flex-col gap-[14px]">
+          <div className="opacity-80">Connect your wallets to add creddd</div>
+          <Button onClick={connectAccounts}>
             Connect Wallets via Metamask
           </Button>
         </div>
@@ -139,42 +160,22 @@ export default function Home() {
 
       {isLoading && <div>Loading configuration...</div>}
 
-      <div>
-        {!isLoading && accounts && accounts.length > 0 && (
-          <div>
-            <div>
-              <h3 className="text-xl font-bold text-center mb-4">
-                Connected Wallets Eligible for Creddd{' '}
-              </h3>
-              <div className="flex flex-col gap-y-8">
-                {elibigleWallets().map(account => (
-                  <WalletView
-                    walletAddr={account}
-                    key={account}
-                    groups={getGroupsForWallet(account) || []}
-                  />
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-center mb-4 mt-10">
-                Wallets Not Eligible for Creddd{' '}
-              </h3>
-              <div className="flex flex-col gap-y-2 opacity-50">
-                {accounts
-                  .filter(account => !elibigleWallets().includes(account))
-                  .map(account => (
-                    <WalletView
-                      walletAddr={account}
-                      key={account}
-                      groups={getGroupsForWallet(account) || []}
-                    />
-                  ))}
-              </div>
-            </div>
+      {!isLoading && accounts && accounts.length > 0 && (
+        <div className="flex flex-col gap-[14px]">
+          <div className="opacity-80 text-center">
+            You are eligible to the following creddd
           </div>
-        )}
-      </div>
+          <div className="flex flex-col items-center gap-y-[20px]">
+            {eligibleGroups().map((group, i) => (
+              <WalletView
+                walletAddr={group.address}
+                group={group.group}
+                key={i}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
