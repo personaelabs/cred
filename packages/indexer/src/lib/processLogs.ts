@@ -8,7 +8,6 @@ import {
 } from 'viem';
 import { AbiEvent } from 'abitype';
 import { retry } from '../utils';
-import chalk from 'chalk';
 
 // Sync logs for a specific event.
 export const processLogs = async <T extends Transport, C extends Chain>({
@@ -18,7 +17,7 @@ export const processLogs = async <T extends Transport, C extends Chain>({
   processor,
   label,
   contractAddress,
-  batchSize = BigInt(2000),
+  batchSize = BigInt(200000),
 }: {
   client: PublicClient<T, C>; // Ethereum RPC client to use
   event: AbiEvent; // Event to process
@@ -62,25 +61,10 @@ export const processLogs = async <T extends Transport, C extends Chain>({
       // Now we know the logs are not null
       logs = logs as GetLogsReturnType;
 
-      /*
-      console.log(
-        chalk.gray(
-          `Fetched ${logs.length} logs for ${label} from ${batchFrom} to ${toBlock}`
-        )
-      );
-      */
-
       exitCode = await processor(logs);
 
-      /*
-      const blocksPerSec =
-        Number(toBlock - batchFrom) / ((Date.now() - start) / 1000);
-      console.log(
-        `Processed ${toBlock}/${latestBlock} (${blocksPerSec} bps) (${label})`
-      );
-      */
       batchFrom = toBlock + BigInt(1);
-      adjustableBatchSize *= BigInt(2);
+      adjustableBatchSize += adjustableBatchSize / BigInt(4);
     });
 
     if (exitCode === 'terminate') {

@@ -100,16 +100,19 @@ const indexWhalesFromLogs = async (
 
     if (log.from !== MINTER_ADDRESS && balances[log.from] < BigInt(0)) {
       await ioredis.set(`${contractId}_negative_balance`, 'true');
-      const keys = await ioredis.keys(`${contractId}_0x*`);
+      const keysToDelete = await ioredis.keys(`${contractId}_0x*`);
+
+      // Add the synched block key to the keys to delete
+      keysToDelete.push(getSynchedBlockKey(getWhaleHandle(contract.name)));
 
       console.error(
         `Negative balance for ${log.from} in ${contract.name} (${contract.id})`
       );
-      console.log(`Deleting ${keys.length} records from ${contractId}`);
+      console.log(`Deleting ${keysToDelete.length} records from ${contractId}`);
 
       // Delete all balances for this contract
-      if (keys.length > 0) {
-        await ioredis.del(keys);
+      if (keysToDelete.length > 0) {
+        await ioredis.del(keysToDelete);
       }
 
       return 'terminate';

@@ -106,7 +106,7 @@ export const saveTree = async ({
     });
 
     // Get and save merkle proofs in chunks
-    const chunkSize = 1000;
+    const chunkSize = 10000;
     for (let i = 0; i < addresses.length; i += chunkSize) {
       const chunk = addresses.slice(i, i + chunkSize);
 
