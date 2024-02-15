@@ -17,12 +17,17 @@ import { group } from 'console';
 interface WalletViewProps {
   walletAddr: string;
   group: GroupSelect;
+  added: boolean;
 }
 
-const WalletView: React.FC<WalletViewProps> = ({ walletAddr, group }) => {
+const WalletView: React.FC<WalletViewProps> = ({
+  walletAddr,
+  group,
+  ...props
+}) => {
   const [isAdding, setIsAdding] = useState(false);
   const prover = useProver();
-  const [added, setAdded] = useState(false);
+  const [added, setAdded] = useState(props.added);
 
   const addGroup = async (addr: string, groupHandle: string) => {
     // Viem!

@@ -42,21 +42,14 @@ const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 let prover: Comlink.Remote<Prover>;
 const useProver = () => {
-  const { user } = useUser();
+  const { user, siwfResponse } = useUser();
 
-  /*
-  const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
-  const { signMessageAsync } = useSignMessage({
-    message,
-  });
-  */
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
       new Worker(new URL('../lib/prover.ts', import.meta.url))
     );
-    // prover.prepare();
   }, []);
 
   const prove = async (
@@ -64,7 +57,7 @@ const useProver = () => {
     client: WalletClient,
     groupHandle: string
   ): Promise<FidAttestationRequestBody | null> => {
-    if (prover && user?.fid) {
+    if (prover && user?.fid && siwfResponse) {
       const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
 
       await prover.prepare();
@@ -95,7 +88,13 @@ const useProver = () => {
         throw new Error('Merkle proof not found');
       }
 
-      const { yParityAndS: signInSigS } = hexToCompactSignature(sig);
+      if (!siwfResponse.signature) {
+        throw new Error('SIWF response signature not found');
+      }
+
+      const { yParityAndS: signInSigS } = hexToCompactSignature(
+        siwfResponse.signature
+      );
 
       // Construct the witness
       const witness: WitnessInput = {
@@ -126,7 +125,7 @@ const useProver = () => {
           proof: toHexString(proof),
           sourcePubKeySigHash,
           signInSigS,
-          signInSigNonce: user.nonce,
+          signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
         };
       }

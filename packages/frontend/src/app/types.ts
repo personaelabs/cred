@@ -14,6 +14,9 @@ export interface WitnessInput {
   signInSigS: Uint8Array;
 }
 
+/**
+ * Request body of POST /api/attestations
+ */
 export interface FidAttestationRequestBody {
   sourcePubKeySigHash: Hex;
   signInSigNonce: string;
@@ -21,6 +24,7 @@ export interface FidAttestationRequestBody {
   proof: Hex;
   fid: number;
 }
+
 export interface NeynarUserResponse {
   fid: number;
   username: string;

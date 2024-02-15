@@ -7,7 +7,7 @@ import WalletView from '@/components/ui/WalletView'; // Fixed import statement
 import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
 import { GroupSelect } from '../api/groups/route';
 
-export default function Home() {
+export default function AccountPage() {
   const [addressesToGroups, setAddressesToGroups] =
     useState<AddressToGroupsResponse>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -40,7 +40,6 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      // Load in group config too.
       const groupResponse = await fetch('/api/groups');
 
       if (!groupResponse.ok) {
@@ -104,13 +103,18 @@ export default function Home() {
     });
   };
 
+  const addedGroups =
+    user?.fidAttestations.map(
+      attestation => attestation.MerkleTree.Group.handle
+    ) || [];
+
   return (
     <div className="flex flex-col gap-[30px] justify-center items-center h-[80vh]">
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
 
       {!!user && (
         <div>
-          {user?.displayName}{' '}
+          {user?.display_name}{' '}
           <span className="opacity-50">(FID {user?.fid})</span>
         </div>
       )}
@@ -124,7 +128,7 @@ export default function Home() {
         </div>
       )}
 
-      {isLoading && <div>Loading configuration...</div>}
+      {isLoading && <div>Loading...</div>}
 
       {!isLoading && accounts && accounts.length > 0 && (
         <div className="flex flex-col gap-[14px]">
@@ -136,6 +140,7 @@ export default function Home() {
               <WalletView
                 walletAddr={group.address}
                 group={group.group}
+                added={addedGroups.some(g => g === group.group.handle)}
                 key={i}
               />
             ))}

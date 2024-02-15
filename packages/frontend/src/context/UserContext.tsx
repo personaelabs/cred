@@ -1,3 +1,6 @@
+import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
+import { StatusAPIResponse } from '@farcaster/auth-kit';
+import { useRouter } from 'next/navigation';
 import {
   createContext,
   useContext,
@@ -6,34 +9,21 @@ import {
   ReactNode,
   FC,
 } from 'react';
-import { Hex } from 'viem';
-
-// This is pretty FC oriented, not sue if it needs to be generalized or not.
-interface User {
-  displayName?: string;
-  custody: string;
-  fid?: number;
-  pfpUrl?: string;
-  walletAddresses?: string[];
-  signature: Hex;
-  nonce: string;
-}
 
 interface UserContextType {
-  user: User | null;
-  userStateInitialized: boolean;
-  loginWithFarcaster: (userData: User) => void;
+  user: GetUserResponse | null;
+  loginWithFarcaster: (userData: StatusAPIResponse) => void;
+  // Response body from SIWF
+  siwfResponse: StatusAPIResponse | null;
   logout: () => void;
   isLoggedIn: () => boolean;
-  addWalletAddress: (address: string) => void;
-  removeWalletAddress: (address: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useUser must be used within a UserProvider');
   }
   return context;
@@ -44,52 +34,53 @@ interface UserProviderProps {
 }
 
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [userStateInitialized, setUserStateInitialized] = useState(false);
+  const [user, setUser] = useState<GetUserResponse | null>(null);
+  const [siwfResponse, setSiwfResponse] = useState<StatusAPIResponse | null>(
+    null
+  );
+  const router = useRouter();
+
+  const fetchUser = async (fid: number) => {
+    const result = await fetch(`/api/fc-accounts/${fid}`);
+    const data = (await result.json()) as GetUserResponse;
+
+    setUser(data);
+  };
 
   // ALready got a user? Load it up!
   useEffect(() => {
-    const storedUser = localStorage.getItem('fc');
-    console.log('stored user', storedUser);
-    if (storedUser) {
-      console.log('setting user', JSON.parse(storedUser));
-      setUser(JSON.parse(storedUser));
+    const fid = localStorage.getItem('fid');
+    if (fid) {
+      fetchUser(parseInt(fid));
+    } else {
+      console.log('No fid in local storage');
+      router.push('/');
     }
-    setUserStateInitialized(true); // Want to know when we're done with setup so we can renable the button in the UI.
-  }, []);
+
+    const siwfResponse = localStorage.getItem('siwfResponse');
+    if (siwfResponse) {
+      setSiwfResponse(JSON.parse(siwfResponse));
+    } else {
+      console.log('No SIWF response in local storage');
+      router.push('/');
+    }
+  }, [router]);
 
   const isLoggedIn = () => {
     return user !== null;
   };
 
-  const addWalletAddress = (address: string) => {
-    console.log('adding wallet address', address);
-    // Don't add if already in here:
-    if (user && user.walletAddresses?.includes(address)) {
-      return;
+  const loginWithFarcaster = (userData: StatusAPIResponse) => {
+    if (userData.fid) {
+      setSiwfResponse(userData);
+      localStorage.setItem('fid', userData.fid.toString());
+      localStorage.setItem('siwfResponse', JSON.stringify(userData));
+      fetchUser(userData.fid);
+    } else {
+      throw new Error(
+        'loginWithFarcaster called without an FID in `StatusAPIResponse`.'
+      );
     }
-    if (user) {
-      setUser({
-        ...user,
-        walletAddresses: [...(user.walletAddresses || []), address],
-      });
-    }
-  };
-
-  const removeWalletAddress = (address: string) => {
-    console.log('removing wallet address', address);
-    if (user) {
-      setUser({
-        ...user,
-        walletAddresses: user.walletAddresses?.filter(a => a !== address),
-      });
-    }
-  };
-
-  const loginWithFarcaster = (userData: User) => {
-    setUser(userData);
-    // Only store this core FC info, don't keep the wallets here too:
-    localStorage.setItem('fc', JSON.stringify(userData));
   };
 
   const logout = () => {
@@ -102,11 +93,9 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       value={{
         user,
         loginWithFarcaster,
+        siwfResponse,
         logout,
         isLoggedIn,
-        addWalletAddress,
-        removeWalletAddress,
-        userStateInitialized,
       }}
     >
       {children}
