@@ -11,9 +11,23 @@ export interface WitnessInput {
   siblings: Uint8Array;
   indices: Uint8Array;
   root: Uint8Array;
+  signInSigS: Uint8Array;
 }
 
-export interface VerifyRequestBody {
+/**
+ * Request body of POST /api/attestations
+ */
+export interface FidAttestationRequestBody {
   sourcePubKeySigHash: Hex;
+  signInSigNonce: string;
+  signInSigS: Hex;
   proof: Hex;
+  fid: number;
+}
+
+export interface NeynarUserResponse {
+  fid: number;
+  username: string;
+  display_name: string;
+  pfp_url: string;
 }

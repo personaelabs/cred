@@ -1,7 +1,9 @@
+'use client';
+
 import * as Comlink from 'comlink';
 import { useEffect, useState } from 'react';
-import { VerifyRequestBody, WitnessInput } from '@/app/types';
-import { useAccount, useSignMessage } from 'wagmi';
+import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
+import { WalletClient } from 'wagmi';
 import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
 import {
   calculateSigRecovery,
@@ -9,9 +11,19 @@ import {
   fromHexString,
   toHexString,
 } from '@/lib/utils';
-import { Hex, hashMessage, hexToBytes, hexToSignature, keccak256 } from 'viem';
+import {
+  Hex,
+  compactSignatureToHex,
+  hashMessage,
+  hexToBytes,
+  hexToCompactSignature,
+  hexToSignature,
+  keccak256,
+  signatureToCompactSignature,
+} from 'viem';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
+import { useUser } from '@/context/UserContext';
 
 interface Prover {
   prepare(): Promise<void>;
@@ -30,34 +42,33 @@ const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 let prover: Comlink.Remote<Prover>;
 const useProver = () => {
-  const { address } = useAccount();
+  const { user, siwfResponse } = useUser();
 
-  const fcAccountPubKey = ''; // TODO: get the user's Farcaster account public key
-
-  const message = `\n${SIG_SALT}Personae attest:${fcAccountPubKey}`;
-  const { signMessageAsync } = useSignMessage({
-    message,
-  });
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
       new Worker(new URL('../lib/prover.ts', import.meta.url))
     );
-    prover.prepare();
   }, []);
 
   const prove = async (
+    address: Hex,
+    client: WalletClient,
     groupHandle: string
-  ): Promise<VerifyRequestBody | null> => {
-    if (prover && address && fcAccountPubKey) {
+  ): Promise<FidAttestationRequestBody | null> => {
+    if (prover && user?.fid && siwfResponse) {
+      const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
+
       await prover.prepare();
 
       // Sign message with the source key
-      const sig = await signMessageAsync();
+      const sig = await client.signMessage({
+        message,
+      });
 
       toast('Adding creddd...', {
-        description: 'This may take few minutes...',
+        description: 'This may take a minute...',
       });
 
       const merkleTree = await getMerkleTree(groupHandle);
@@ -76,6 +87,14 @@ const useProver = () => {
       if (!merkleProof) {
         throw new Error('Merkle proof not found');
       }
+
+      if (!siwfResponse.signature) {
+        throw new Error('SIWF response signature not found');
+      }
+
+      const { yParityAndS: signInSigS } = hexToCompactSignature(
+        siwfResponse.signature
+      );
 
       // Construct the witness
       const witness: WitnessInput = {
@@ -96,24 +115,27 @@ const useProver = () => {
           })
         ),
         root: hexToBytes(merkleTree.merkleRoot as Hex),
+        signInSigS: hexToBytes(signInSigS),
       };
 
-      const proof = await prover.prove(witness).catch(err => {
-        setFailed(true);
-        Sentry.captureException(err);
-      });
+      const proof = await prover.prove(witness);
 
       if (proof) {
         return {
           proof: toHexString(proof),
           sourcePubKeySigHash,
+          signInSigS,
+          signInSigNonce: siwfResponse.nonce,
+          fid: user.fid,
         };
       }
 
       return null;
     } else {
-      throw new Error('Not ready to prove');
+      console.error('Not ready to prove');
     }
+
+    return null;
   };
 
   return { prove, failed };

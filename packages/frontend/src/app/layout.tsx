@@ -1,17 +1,37 @@
+'use client';
+
 import '@rainbow-me/rainbowkit/styles.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import WalletProvider from '@/components/WalletProvider';
 import MobileFooter from '@/components/MobileFooter';
 import { Toaster } from '@/components/ui/sonner';
-import Header from '@/components/Header';
+import { UserProvider } from '@/context/UserContext';
 import DesktopFooter from '@/components/DesktopFooter';
+
+import '@farcaster/auth-kit/styles.css';
+import { AuthKitProvider } from '@farcaster/auth-kit';
+import Header from '@/components/Header';
+import { usePathname } from 'next/navigation';
+
+const config = {
+  rpcUrl: 'https://mainnet.optimism.io',
+  domain: 'creddd.xyz',
+  siweUri: 'http://creddd.xyz/login',
+};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const isUserProfilePage = /\/user\//.test(pathname);
+
+  const showComingSoon =
+    process.env.NODE_ENV !== 'development' && !isUserProfilePage;
+
   return (
     <html lang="en">
       <head>
@@ -29,16 +49,28 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background overflow-y-hidden">
-        <WalletProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark">
-            <Header></Header>
-                  <div className="flex flex-row justify-center w-full">
-                    <div className="w-full flex flex-col">{children}</div>
+        <UserProvider>
+          <AuthKitProvider config={config}>
+            <WalletProvider>
+              <ThemeProvider attribute="class" defaultTheme="dark">
+                {showComingSoon ? (
+                  <div className="h-[100vh] flex flex-col justify-center items-center text-lg text-primary">
+                    Coming soon...
                   </div>
-            <MobileFooter></MobileFooter>
-            <DesktopFooter></DesktopFooter>
-          </ThemeProvider>
-        </WalletProvider>
+                ) : (
+                  <>
+                    <Header></Header>
+                    <div className="flex flex-row justify-center w-full">
+                      <div className="w-full flex flex-col">{children}</div>
+                    </div>
+                    <MobileFooter></MobileFooter>
+                    <DesktopFooter></DesktopFooter>
+                  </>
+                )}
+              </ThemeProvider>
+            </WalletProvider>
+          </AuthKitProvider>
+        </UserProvider>
         <Toaster richColors></Toaster>
       </body>
     </html>

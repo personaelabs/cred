@@ -2829,7 +2829,6 @@ dependencies = [
 [[package]]
 name = "sapir"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/sapir?branch=main#512a958c067b3114ad7b21c0d1d725e99e11dbc0"
 dependencies = [
  "ark-ec",
  "ark-ff",
