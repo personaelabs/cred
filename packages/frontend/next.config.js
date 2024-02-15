@@ -9,6 +9,11 @@ const nextConfig = {
         hostname: 'storage.googleapis.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
+        port: '',
+      },
     ],
   },
     webpack: (config) => {

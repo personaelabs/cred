@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
 import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
 import { GroupSelect } from '../api/groups/route';
+import Image from 'next/image';
 
 export default function AccountPage() {
   const [addressesToGroups, setAddressesToGroups] =
@@ -113,8 +114,15 @@ export default function AccountPage() {
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
 
       {!!user && (
-        <div>
-          {user?.display_name}{' '}
+        <div className="flex flex-col items-center gap-y-[30px]">
+          <Image
+            className="rounded-full object-cover w-[50px] h-[50px]"
+            src={user.pfp_url}
+            alt="User profile image"
+            width={40}
+            height={40}
+          ></Image>
+          {user.display_name}{' '}
           <span className="opacity-50">(FID {user?.fid})</span>
         </div>
       )}
