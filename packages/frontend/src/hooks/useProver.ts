@@ -1,7 +1,7 @@
 'use client';
 
 import * as Comlink from 'comlink';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
 import { WalletClient } from 'wagmi';
 import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
@@ -13,21 +13,18 @@ import {
 } from '@/lib/utils';
 import {
   Hex,
-  compactSignatureToHex,
   hashMessage,
   hexToBytes,
   hexToCompactSignature,
   hexToSignature,
   keccak256,
-  signatureToCompactSignature,
 } from 'viem';
 import { toast } from 'sonner';
-import * as Sentry from '@sentry/nextjs';
 import { useUser } from '@/context/UserContext';
 
 interface Prover {
   prepare(): Promise<void>;
-  prove(witness: WitnessInput): Promise<Uint8Array>;
+  prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
 const getMerkleTree = async (
@@ -43,8 +40,6 @@ const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 let prover: Comlink.Remote<Prover>;
 const useProver = () => {
   const { user, siwfResponse } = useUser();
-
-  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
@@ -138,7 +133,7 @@ const useProver = () => {
     return null;
   };
 
-  return { prove, failed };
+  return { prove };
 };
 
 export default useProver;

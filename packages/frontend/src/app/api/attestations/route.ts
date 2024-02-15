@@ -3,7 +3,7 @@ import { FidAttestationRequestBody } from '@/app/types';
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 import prisma from '@/lib/prisma';
-import { createAppClient, viemConnector } from '@farcaster/auth-kit';
+// import { createAppClient, viemConnector } from '@farcaster/auth-kit';
 import { NextRequest } from 'next/server';
 import { bytesToHex, hashMessage, hexToBytes, toHex } from 'viem';
 // @ts-ignore
@@ -17,8 +17,8 @@ const appClient = createAppClient({
 */
 
 // TODO: Adjust these to match the frontend implementation
-const SIWF_DOMAIN = 'creddd.xyz';
-const SIWF_MESSAGE = `${SIWF_DOMAIN} wants you to sign in with your Ethereum account`;
+// const SIWF_DOMAIN = 'creddd.xyz';
+// const SIWF_MESSAGE = `${SIWF_DOMAIN} wants you to sign in with your Ethereum account`;
 let circuitInitialized = false;
 
 // Verify and save a new FID attestation

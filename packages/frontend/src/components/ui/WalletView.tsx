@@ -9,7 +9,6 @@ import { GroupSelect } from '@/app/api/groups/route';
 import { postJSON } from '@/lib/utils';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { group } from 'console';
 
 // Assuming demoSignMessage is defined elsewhere and imported
 // import { demoSignMessage } from 'wherever-this-function-is-defined';

@@ -12,7 +12,7 @@ import {
 
 interface UserContextType {
   user: GetUserResponse | null;
-  loginWithFarcaster: (userData: StatusAPIResponse) => void;
+  loginWithFarcaster: (_userData: StatusAPIResponse) => void;
   // Response body from SIWF
   siwfResponse: StatusAPIResponse | null;
   logout: () => void;

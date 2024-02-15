@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import { SignInButton } from '@farcaster/auth-kit';
 import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
-import { Hex } from 'viem';
 
 export default function Home() {
   const router = useRouter();
