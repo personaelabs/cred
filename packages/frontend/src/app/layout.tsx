@@ -11,6 +11,7 @@ import DesktopFooter from '@/components/DesktopFooter';
 
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
+import Header from '@/components/Header';
 
 const config = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -44,6 +45,7 @@ export default function RootLayout({
           <AuthKitProvider config={config}>
             <WalletProvider>
               <ThemeProvider attribute="class" defaultTheme="dark">
+                <Header></Header>
                 <div className="flex flex-row justify-center w-full">
                   <div className="w-full flex flex-col">{children}</div>
                 </div>

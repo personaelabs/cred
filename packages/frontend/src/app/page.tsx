@@ -24,7 +24,7 @@ export default function Home() {
   }, [router, user]);
 
   return (
-    <div className="flex flex-col justify-center items-center h-[80vh] gap-10">
+    <div className="flex flex-col justify-start items-center h-[90vh] gap-10">
       <h2 className="text-3xl font-bold mb-2">Welcome</h2>
       <div>
         {!isLoggedIn && (

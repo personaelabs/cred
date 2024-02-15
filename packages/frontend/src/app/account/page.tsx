@@ -110,7 +110,7 @@ export default function AccountPage() {
     ) || [];
 
   return (
-    <div className="flex flex-col gap-y-[30px] justify-center items-center h-[80vh]">
+    <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
 
       {!!user && (
