@@ -1,18 +1,16 @@
 'use client';
-import { usePathname, useRouter } from 'next/navigation';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import Link from 'next/link';
 
 const Header = () => {
-  const pathname = usePathname();
-
-  const showHeader = pathname !== '/onboarding';
-
-  return showHeader ? (
-    <div className="flex flex-row justify-end gap-2 p-4">
-      <ConnectButton showBalance={false}></ConnectButton>
+  return (
+    <div className="h-[110px] w-[100vw] flex flex-row justify-end items-center gap-2 px-[100px]">
+      <Link
+        href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20"
+        target="_blank"
+      >
+        About
+      </Link>
     </div>
-  ) : (
-    <></>
   );
 };
 

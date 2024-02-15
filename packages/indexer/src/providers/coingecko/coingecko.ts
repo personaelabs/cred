@@ -18,6 +18,7 @@ interface CoingeckoTokenResponse {
     }
   >;
   name: string;
+  symbol: string;
 }
 
 /**
@@ -174,7 +175,7 @@ export const syncMemeTokensMeta = async () => {
       tokensWithDeployedBlock.push({
         coinGeckoId: token.id,
         contractAddress,
-        name: token.name,
+        name: `${token.name} ($${token.symbol.toUpperCase()})`,
         deployedBlock,
         decimals,
         chain: chain.name,
@@ -183,8 +184,8 @@ export const syncMemeTokensMeta = async () => {
   }
 
   // Save token contracts to the database
-  await prisma.contract.createMany({
-    data: tokensWithDeployedBlock.map(token => ({
+  for (const token of tokensWithDeployedBlock) {
+    const data = {
       chain: token.chain,
       coingeckoId: token.coinGeckoId,
       decimals: token.decimals,
@@ -193,7 +194,17 @@ export const syncMemeTokensMeta = async () => {
       deployedBlock: token.deployedBlock,
       type: ContractType.ERC20,
       targetGroups: ['earlyHolder', 'whale'],
-    })),
-    skipDuplicates: true,
-  });
+    };
+
+    await prisma.contract.upsert({
+      create: data,
+      update: data,
+      where: {
+        address_chain: {
+          address: token.contractAddress,
+          chain: 'Ethereum',
+        },
+      },
+    });
+  }
 };
