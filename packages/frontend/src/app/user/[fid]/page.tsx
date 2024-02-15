@@ -1,7 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import useUser from '@/hooks/useUser';
 import { Check } from 'lucide-react';
-import Image from 'next/image';
 import CREDDD_1_USERS from '@/lib/creddd1Users';
 
 const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
@@ -35,15 +35,13 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-y-[30px]">
-      <Image
-        className="rounded-full object-cover w-[60px] h-[60px]"
+    <div className="flex flex-col items-center gap-y-[20px]">
+      <img
         src={user.pfp_url}
-        alt="User profile image"
-        width={60}
-        height={60}
-      ></Image>
-      <div>
+        alt="profile image"
+        className="w-[60px] h-60x] rounded-full object-cover"
+      ></img>
+      <div className="flex flex-col items-center">
         <div>{user.display_name} </div>
         <div className="opacity-50">(FID {user?.fid})</div>
       </div>
@@ -54,6 +52,13 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
             <div>{attestation.MerkleTree.Group.displayName}</div>
           </div>
         ))}
+        {user.fidAttestations.length === 0 ? (
+          <div className="text-sm text-gray-500 opacity-80">
+            No creddd found
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

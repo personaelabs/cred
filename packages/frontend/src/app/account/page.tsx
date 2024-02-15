@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useUser } from '@/context/UserContext';
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
 import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
 import { GroupSelect } from '../api/groups/route';
-import Image from 'next/image';
 
 export default function AccountPage() {
   const [addressesToGroups, setAddressesToGroups] =
@@ -114,14 +114,12 @@ export default function AccountPage() {
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
 
       {!!user && (
-        <div className="flex flex-col items-center gap-y-[30px]">
-          <Image
-            className="rounded-full object-cover w-[50px] h-[50px]"
+        <div className="flex flex-col items-center gap-y-[20px]">
+          <img
             src={user.pfp_url}
-            alt="User profile image"
-            width={40}
-            height={40}
-          ></Image>
+            alt="profile image"
+            className="w-[60px] h-60x] rounded-full object-cover"
+          ></img>
           <div>
             <div>{user.display_name} </div>
             <div className="opacity-50">(FID {user?.fid})</div>
