@@ -11,12 +11,22 @@
     "format:check": "pnpm -r format:check",
     "frontend:dev": "pnpm db:start && sleep 1 && pnpm -F frontend run dev",
     "lint": "pnpm -r lint",
-    "prepare": "pnpm -F db run build",
+    "prepare": "pnpm -F db run build && husky",
     "studio": "pnpm -F db run studio",
     "test": "pnpm -r test",
     "compile-circuit": "sh ./scripts/compile-web.sh && sh ./scripts/compile-node.sh"
   },
   "devDependencies": {
+    "husky": "^9.0.11",
     "prettier": "^3.0.3"
+  },
+  "dependencies": {
+    "lint-staged": "^15.2.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "eslint --cache --fix"
+    ],
+    "*.{js,ts,tsx,json}": "prettier --write --ignore-unknown"
   }
 }

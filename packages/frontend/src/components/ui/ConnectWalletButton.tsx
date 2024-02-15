@@ -1,5 +1,4 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 
 export const ConnectWalletButton = ({ label = 'Connect Wallet' }) => {

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "indexTree": "pnpm ts-node ./src/indexMerkleTree.ts",
-    "check": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then cp -n .env.local .env || true; fi"
   },
   "keywords": [],
