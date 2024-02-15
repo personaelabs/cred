@@ -68,7 +68,7 @@ const useProver = () => {
       });
 
       toast('Adding creddd...', {
-        description: 'This may take few minutes...',
+        description: 'This may take a minute...',
       });
 
       const merkleTree = await getMerkleTree(groupHandle);
