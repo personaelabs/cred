@@ -73,6 +73,9 @@ importers:
       '@sentry/nextjs':
         specifier: ^7.92.0
         version: 7.99.0(next@14.0.4)(react@18.2.0)
+      axios:
+        specifier: ^1.6.0
+        version: 1.6.7
       circuit-node:
         specifier: ../circuit/circuit-node
         version: link:../circuit/circuit-node

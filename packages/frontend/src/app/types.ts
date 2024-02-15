@@ -21,3 +21,9 @@ export interface FidAttestationRequestBody {
   proof: Hex;
   fid: number;
 }
+export interface NeynarUserResponse {
+  fid: number;
+  username: string;
+  display_name: string;
+  pfp_url: string;
+}
