@@ -141,7 +141,7 @@ export default function AccountPage() {
       {!isLoading && accounts && accounts.length > 0 && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
-            You are eligible to the following creddd
+            Found the following creddd:
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
             {eligibleGroups().map((group, i) => (
