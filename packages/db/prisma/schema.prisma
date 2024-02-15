@@ -136,6 +136,7 @@ model Contract {
   type          ContractType
   deployedBlock BigInt
   coingeckoId   String?
+  symbol        String?
   targetGroups  String[]
   decimals      Int          @default(18)
   chain         String
