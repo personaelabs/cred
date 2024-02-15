@@ -145,7 +145,7 @@ export default function AccountPage() {
           <div className="opacity-80 text-center">
             You are eligible to the following creddd
           </div>
-          <div className="flex flex-col items-center gap-y-[20px]">
+          <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
             {eligibleGroups().map((group, i) => (
               <WalletView
                 walletAddr={group.address}
