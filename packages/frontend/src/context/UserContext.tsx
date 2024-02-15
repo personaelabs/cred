@@ -1,6 +1,6 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
 import { StatusAPIResponse } from '@farcaster/auth-kit';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   createContext,
   useContext,
@@ -39,6 +39,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     null
   );
   const router = useRouter();
+  const pathname = usePathname();
 
   const fetchUser = async (fid: number) => {
     const result = await fetch(`/api/fc-accounts/${fid}`);
@@ -47,24 +48,30 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     setUser(data);
   };
 
-  // ALready got a user? Load it up!
   useEffect(() => {
-    const fid = localStorage.getItem('fid');
-    if (fid) {
-      fetchUser(parseInt(fid));
-    } else {
-      console.log('No fid in local storage');
-      router.push('/');
-    }
+    const isUserProfilePage = /\/user\//.test(pathname);
 
-    const siwfResponse = localStorage.getItem('siwfResponse');
-    if (siwfResponse) {
-      setSiwfResponse(JSON.parse(siwfResponse));
-    } else {
-      console.log('No SIWF response in local storage');
-      router.push('/');
+    // Check login status if this is not a user profile page
+    if (!isUserProfilePage) {
+      const fid = localStorage.getItem('fid');
+      if (fid) {
+        fetchUser(parseInt(fid));
+      } else {
+        // If there's no FID in local storage, redirect to the login page
+        console.log('No fid in local storage');
+        router.push('/');
+      }
+
+      const siwfResponse = localStorage.getItem('siwfResponse');
+      if (siwfResponse) {
+        setSiwfResponse(JSON.parse(siwfResponse));
+      } else {
+        // If there's no SIWF response in local storage, redirect to the login page
+        console.log('No SIWF response in local storage');
+        router.push('/');
+      }
     }
-  }, [router]);
+  }, [pathname, router]);
 
   const isLoggedIn = () => {
     return user !== null;
