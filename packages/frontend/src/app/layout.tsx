@@ -29,8 +29,7 @@ export default function RootLayout({
 
   const isUserProfilePage = /\/user\//.test(pathname);
 
-  const showComingSoon =
-    process.env.NODE_ENV !== 'development' && !isUserProfilePage;
+  const showComingSoon = false;
 
   return (
     <html lang="en">
