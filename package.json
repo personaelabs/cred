@@ -18,7 +18,10 @@
   },
   "devDependencies": {
     "husky": "^9.0.11",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1"
   },
   "dependencies": {
     "lint-staged": "^15.2.2"

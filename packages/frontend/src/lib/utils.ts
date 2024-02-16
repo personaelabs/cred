@@ -30,8 +30,6 @@ export const calculateSigRecovery = (v: bigint, chainId?: bigint): boolean => {
   }
 };
 
-
-
 /**
  * Convert a Buffer to `Hex`
  */
@@ -56,16 +54,16 @@ export const fromHexString = (hexString: Hex, size?: number): Buffer => {
 export const concatUint8Arrays = (arrays: Uint8Array[]) => {
   // Calculate combined length
   let totalLength = 0;
-  for (let array of arrays) {
+  for (const array of arrays) {
     totalLength += array.length;
   }
 
   // Create a new array with the total length
-  let result = new Uint8Array(totalLength);
+  const result = new Uint8Array(totalLength);
 
   // Copy each array into the result array
   let offset = 0;
-  for (let array of arrays) {
+  for (const array of arrays) {
     result.set(array, offset);
     offset += array.length;
   }
