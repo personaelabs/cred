@@ -1,4 +1,4 @@
-import { Hex, toHex } from 'viem';
+import { Hex } from 'viem';
 import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
@@ -47,13 +47,21 @@ const indexEarlyHolders = async (contract: Contract) => {
     for (const log of logs) {
       const parsedLog = ERC20TransferEvent.deserializeBinary(log);
 
+      const from =
+        `0x${Buffer.from(parsedLog.getFrom_asU8()).toString('hex')}` as Hex;
+      const to =
+        `0x${Buffer.from(parsedLog.getTo_asU8()).toString('hex')}` as Hex;
+      const value = BigInt(
+        `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
+      );
+
       parsedLogs.push({
         blockNumber: parsedLog.getBlocknumber(),
         transactionIndex: parsedLog.getTransactionindex(),
         logIndex: parsedLog.getLogindex(),
-        from: toHex(parsedLog.getFrom_asU8()),
-        to: toHex(parsedLog.getTo_asU8()),
-        value: BigInt(toHex(parsedLog.getValue_asU8())),
+        from,
+        to,
+        value,
       });
     }
 

@@ -1,4 +1,4 @@
-import { Hex, toHex } from 'viem';
+import { Hex } from 'viem';
 import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
@@ -25,13 +25,14 @@ const indexWhales = async (contract: Contract) => {
   const maxBlock = Number(_maxBlock);
 
   let totalSupply = BigInt(0);
+  let whaleThreshold = BigInt(0);
 
   const balances: Record<Hex, bigint> = {};
 
   const whales = new Set<Hex>();
 
   // Update the balances based on the logs
-  const chunkSize = 20000;
+  const chunkSize = 200000;
   let from = Number(contract.deployedBlock);
   let to = from + chunkSize;
 
@@ -41,8 +42,6 @@ const indexWhales = async (contract: Contract) => {
       break;
     }
 
-    // Get logs for the range
-    // const batchTo = batchFrom + chunkSize;
     const logs = await ioredis.zrangebyscoreBuffer(
       `${contract.id}:logs`,
       from,
@@ -53,13 +52,21 @@ const indexWhales = async (contract: Contract) => {
     for (const log of logs) {
       const parsedLog = ERC20TransferEvent.deserializeBinary(log);
 
+      const from =
+        `0x${Buffer.from(parsedLog.getFrom_asU8()).toString('hex')}` as Hex;
+      const to =
+        `0x${Buffer.from(parsedLog.getTo_asU8()).toString('hex')}` as Hex;
+      const value = BigInt(
+        `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
+      );
+
       parsedLogs.push({
         blockNumber: parsedLog.getBlocknumber(),
         transactionIndex: parsedLog.getTransactionindex(),
         logIndex: parsedLog.getLogindex(),
-        from: toHex(parsedLog.getFrom_asU8()),
-        to: toHex(parsedLog.getTo_asU8()),
-        value: BigInt(toHex(parsedLog.getValue_asU8())),
+        from,
+        to,
+        value,
       });
     }
 
@@ -72,28 +79,32 @@ const indexWhales = async (contract: Contract) => {
 
     for (const log of sortedLogs) {
       if (!balances[log.to]) {
-        balances[log.to] = BigInt(0);
+        balances[log.to] = BigInt(log.value);
+      } else {
+        balances[log.to] += BigInt(log.value);
       }
-
-      balances[log.to] += BigInt(log.value);
 
       if (!balances[log.from]) {
         balances[log.from] = BigInt(0);
       }
 
-      balances[log.from] -= BigInt(log.value);
+      if (log.from !== MINTER_ADDRESS) {
+        balances[log.from] -= BigInt(log.value);
+      }
 
       // Update the total supply
       if (log.from === MINTER_ADDRESS) {
         totalSupply += BigInt(log.value);
+        whaleThreshold = totalSupply / BigInt(1000);
       }
 
       if (log.to === MINTER_ADDRESS) {
         totalSupply -= BigInt(log.value);
+        whaleThreshold = totalSupply / BigInt(1000);
       }
 
       // If the `to` address has more than 0.1% of the total supply, add it to the whales
-      if (balances[log.to] > totalSupply / BigInt(1000)) {
+      if (balances[log.to] > whaleThreshold) {
         // Add the whale to the group
         whales.add(log.to);
       }

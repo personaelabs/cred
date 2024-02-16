@@ -2368,7 +2368,7 @@ checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
 [[package]]
 name = "poseidon"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/poseidon.git?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
+source = "git+https://github.com/personaelabs/poseidon?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
 dependencies = [
  "ark-ff",
  "ark-serialize",
