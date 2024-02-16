@@ -44,8 +44,8 @@ export const retry = async <T>(
  */
 export const runInParallel = async <T>(
   fn: (
-    client: PublicClient<HttpTransport, chains.Chain>,
-    args: T
+    _client: PublicClient<HttpTransport, chains.Chain>,
+    _args: T
   ) => Promise<void>,
   jobs: { chain: chains.Chain; args: T }[]
 ) => {
@@ -75,11 +75,8 @@ export const runInParallel = async <T>(
             completedJobs.add(queuedJob.index);
             console.log(
               chalk.green(
-                `Completed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}`
+                `Completed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}(Completed ${completedJobs.size}/${numJobs})`
               )
-            );
-            console.log(
-              chalk.green(`(Completed ${completedJobs.size}/${numJobs})`)
             );
 
             // Free the client
