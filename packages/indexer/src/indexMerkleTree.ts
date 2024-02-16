@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import { getDevAddresses } from './utils';
+import { IGNORE_CONTRACTS, getDevAddresses } from './utils';
 import { Contract, Group } from '@prisma/client';
 import indexWhales, { getWhaleHandle } from './processors/whales';
 import indexEarlyHolders, {
@@ -79,10 +79,16 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
 
 const indexMerkleTree = async () => {
   if (process.env.NODE_ENV === 'production') {
-    //    await syncMemeTokensMeta();
+    // await syncMemeTokensMeta();
 
     // Get all contracts
-    const contracts = await prisma.contract.findMany();
+    const contracts = await prisma.contract.findMany({
+      where: {
+        symbol: {
+          notIn: IGNORE_CONTRACTS,
+        },
+      },
+    });
 
     // Create or update groups based on the `targetGroups` field of contracts
     for (const contract of contracts) {

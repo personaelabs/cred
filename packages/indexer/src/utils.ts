@@ -4,6 +4,8 @@ import { getNextAvailableClient, releaseClient } from './providers/ethRpc';
 import * as chains from 'viem/chains';
 import prisma from './prisma';
 
+export const IGNORE_CONTRACTS = ['op', 'arb', 'link'];
+
 export const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

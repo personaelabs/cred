@@ -6,7 +6,7 @@ import {
   PublicClient,
 } from 'viem';
 import prisma from './prisma';
-import { runInParallel } from './utils';
+import { IGNORE_CONTRACTS, runInParallel } from './utils';
 import { Contract } from '@prisma/client';
 import * as chains from 'viem/chains';
 import Redis from 'ioredis';
@@ -82,7 +82,13 @@ const runSyncJob = async (
 
 const syncTransfers = async () => {
   // Get all contracts
-  const contracts = await prisma.contract.findMany();
+  const contracts = await prisma.contract.findMany({
+    where: {
+      symbol: {
+        notIn: IGNORE_CONTRACTS,
+      },
+    },
+  });
 
   // Prepare a sync job for each group
   const jobs = contracts.flatMap(contract => {
