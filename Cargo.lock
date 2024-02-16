@@ -1913,28 +1913,7 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 [[package]]
 name = "merkle-tree"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/merkle-tree.git?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
-dependencies = [
- "ark-ff",
- "ark-secp256k1",
- "ark-serialize",
- "ark-std",
- "console_error_panic_hook",
- "csv",
- "hex",
- "num-bigint",
- "once_cell",
- "poseidon",
- "rayon",
- "serde",
- "serde_json",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "merkle-tree"
-version = "0.1.0"
-source = "git+https://github.com/personaelabs/merkle-tree#23e55dc239f33754ecaa72bf6e360be6d74da886"
+source = "git+https://github.com/personaelabs/merkle-tree?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
 dependencies = [
  "ark-ff",
  "ark-secp256k1",
@@ -1956,7 +1935,7 @@ dependencies = [
 name = "merkle-tree-rs"
 version = "0.1.0"
 dependencies = [
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree)",
+ "merkle-tree",
  "neon",
 ]
 
@@ -2838,7 +2817,7 @@ dependencies = [
  "console_error_panic_hook",
  "getrandom",
  "hex",
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree.git?branch=main)",
+ "merkle-tree",
  "merlin",
  "num-bigint",
  "num-traits",

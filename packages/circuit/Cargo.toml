@@ -22,7 +22,3 @@ wasm-bindgen = "0.2.87"
 [dev-dependencies]
 ethers = "2.0.10"
 ark-std = "0.4.0"
-
-[profile.release]
-lto = true
-opt-level = 3
