@@ -4,10 +4,10 @@
 
 ### Frontend
 
-1. Install dependencies.
+1. Run the setup script
 
 ```
-pnpm i
+sh ./scripts/setup.sh
 ```
 
 2. Run the following command to start the database and run migrations. Make sure you have a Docker daemon running.
