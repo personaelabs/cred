@@ -110,9 +110,10 @@ model MerkleProof {
 }
 
 model Group {
-  id          Int    @id @default(autoincrement())
-  handle      String @unique
+  id          Int     @id @default(autoincrement())
+  handle      String  @unique
   displayName String
+  type        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

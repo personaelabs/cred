@@ -26,41 +26,22 @@ const runSyncJob = async (args: {
 
 // Create or update a group for a contract based on `targetGroup`
 const upsertGroup = async (contract: Contract, targetGroup: string) => {
-  let upsertData: Pick<Group, 'blockNumber' | 'handle' | 'displayName'>;
-  console.log(`upserting group for ${contract.name} ${targetGroup}`);
+  let upsertData: Pick<Group, 'displayName' | 'handle' | 'type'>;
+  console.log(`Upserting group for ${contract.name} ${targetGroup}`);
 
   if (targetGroup === 'whale') {
     const handle = getWhaleHandle(contract.name);
-    // Get the synched block number from the group if it exists
-    const group = await prisma.group.findUnique({
-      select: {
-        blockNumber: true,
-      },
-      where: {
-        handle,
-      },
-    });
 
     upsertData = {
-      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      type: 'whale',
       handle,
       displayName: `$${contract.symbol?.toUpperCase()} whale`,
     };
   } else if (targetGroup === 'earlyHolder') {
     const handle = getEarlyHolderHandle(contract.name);
 
-    // Get the synched block number from the group if it exists
-    const group = await prisma.group.findUnique({
-      select: {
-        blockNumber: true,
-      },
-      where: {
-        handle,
-      },
-    });
-
     upsertData = {
-      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      type: 'earlyHolder',
       handle,
       displayName: `Early $${contract.symbol?.toUpperCase()} holder`,
     };

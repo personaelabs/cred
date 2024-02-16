@@ -81,7 +81,6 @@ const indexEarlyHolders = async (contract: Contract) => {
   const group = await prisma.group.findUnique({
     select: {
       id: true,
-      blockNumber: true,
     },
     where: {
       handle,
