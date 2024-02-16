@@ -4,7 +4,7 @@ import { Hex } from 'viem';
 import chalk from 'chalk';
 const merkleTree = require('merkle-tree-rs');
 
-const TREE_DEPTH = 16;
+const TREE_DEPTH = 18;
 const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
 
 /**
