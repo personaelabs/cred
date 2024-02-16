@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import { Hex, HttpTransport, PublicClient } from 'viem';
 import { getNextAvailableClient, releaseClient } from './providers/ethRpc';
 import * as chains from 'viem/chains';
-import prisma from './prisma';
 
 export const IGNORE_CONTRACTS = ['op', 'arb', 'link'];
 
@@ -120,23 +119,6 @@ export const runInParallel = async <T>(
 
     await sleep(3000);
   }
-};
-
-export const updateSyncStatus = ({
-  groupHandle,
-  blockNumber,
-}: {
-  groupHandle: string;
-  blockNumber: bigint;
-}) => {
-  return prisma.group.update({
-    where: {
-      handle: groupHandle,
-    },
-    data: {
-      blockNumber,
-    },
-  });
 };
 
 export const getDevAddresses = () => {
