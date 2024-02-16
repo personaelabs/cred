@@ -1,33 +1,23 @@
-import { Chain, HttpTransport, PublicClient } from 'viem';
 import prisma from './prisma';
-import { getDevAddresses, runInParallel } from './utils';
+import { getDevAddresses } from './utils';
 import { Contract, Group } from '@prisma/client';
-import * as chains from 'viem/chains';
-import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 import indexWhales, { getWhaleHandle } from './processors/whales';
 import indexEarlyHolders, {
   getEarlyHolderHandle,
 } from './processors/earlyHolders';
-import chalk from 'chalk';
 import { saveTree } from './lib/tree';
 
 // Run a sync job
-const runSyncJob = async (
-  client: PublicClient<HttpTransport, Chain>,
-  args: {
-    contract: Contract;
-    targetGroup: string;
-  }
-) => {
+const runSyncJob = async (args: {
+  contract: Contract;
+  targetGroup: string;
+}) => {
   switch (args.targetGroup) {
     case 'whale':
-      await indexWhales(client, args.contract);
+      await indexWhales(args.contract);
       break;
     case 'earlyHolder':
-      console.log(
-        chalk.gray(`indexing early holders for ${args.contract.name}`)
-      );
-      await indexEarlyHolders(client, args.contract);
+      await indexEarlyHolders(args.contract);
       break;
     default:
       throw new Error(`Unknown target group ${args.targetGroup}`);
@@ -54,7 +44,7 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
     upsertData = {
       blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
       handle,
-      displayName: `${contract.name} historical whale`,
+      displayName: `$${contract.symbol?.toUpperCase()} whale`,
     };
   } else if (targetGroup === 'earlyHolder') {
     const handle = getEarlyHolderHandle(contract.name);
@@ -72,7 +62,7 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
     upsertData = {
       blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
       handle,
-      displayName: `${contract.name} early holder`,
+      displayName: `Early $${contract.symbol?.toUpperCase()} holder`,
     };
   } else {
     throw new Error(`Unknown target group ${targetGroup}`);
@@ -89,7 +79,7 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
 
 const indexMerkleTree = async () => {
   if (process.env.NODE_ENV === 'production') {
-    await syncMemeTokensMeta();
+    //    await syncMemeTokensMeta();
 
     // Get all contracts
     const contracts = await prisma.contract.findMany();
@@ -103,27 +93,20 @@ const indexMerkleTree = async () => {
       }
     }
 
-    // Prepare a sync job for each group
-    const jobs = contracts.flatMap(contract => {
-      const chain = Object.values(chains).find(
-        chain => chain.name === contract.chain
-      );
+    const chunkSize = 30;
 
-      if (!chain) {
-        throw new Error(`Chain ${contract.chain} not found`);
+    for (let i = 0; i < contracts.length; i += chunkSize) {
+      const chunk = contracts.slice(i, i + chunkSize);
+
+      const promises = [];
+      for (const contract of chunk) {
+        for (const targetGroup of contract.targetGroups) {
+          promises.push(runSyncJob({ contract, targetGroup }));
+        }
       }
 
-      return contract.targetGroups.map(targetGroup => ({
-        chain,
-        args: {
-          contract,
-          targetGroup,
-        },
-      }));
-    });
-
-    // Run the sync jobs in parallel
-    await runInParallel(runSyncJob, jobs);
+      await Promise.all(promises);
+    }
   } else {
     // In development, only index the dev group
 
