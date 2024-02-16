@@ -33,58 +33,6 @@ model FidAttestation {
   @@id([fid, merkleRoot])
 }
 
-model ERC721TransferEvent {
-  blockNumber      BigInt
-  from             String
-  to               String
-  tokenId          BigInt
-  contractId       Int    @default(0)
-  transactionIndex Int
-  logIndex         Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  Contract  Contract @relation(fields: [contractId], references: [id])
-
-  @@unique([blockNumber, transactionIndex, logIndex])
-  @@index([to])
-  @@index([from])
-  @@index([contractId])
-}
-
-model ERC20TransferEvent {
-  transactionIndex Int
-  logIndex         Int
-  blockNumber      BigInt
-  from             String
-  to               String
-  value            String
-  contractId       Int    @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  Contract  Contract @relation(fields: [contractId], references: [id])
-
-  @@unique([blockNumber, transactionIndex, logIndex])
-  @@index([to])
-  @@index([from])
-  @@index([contractId])
-  @@index([blockNumber])
-}
-
-model ERC20HolderPosition {
-  address    String
-  contractId Int
-  position   Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  Contract  Contract @relation(fields: [contractId], references: [id])
-
-  @@id([address, contractId])
-  @@index([position])
-}
-
 model MerkleTree {
   merkleRoot     String           @id
   Group          Group            @relation(fields: [groupId], references: [id])
@@ -140,10 +88,6 @@ model Contract {
   chain         String
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-
-  ERC20TransferEvents  ERC20TransferEvent[]
-  ERC721TransferEvents ERC721TransferEvent[]
-  ERC20HolderPosition  ERC20HolderPosition[]
 
   @@unique([address, chain])
 }
