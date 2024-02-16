@@ -4,6 +4,7 @@ import {
   Hex,
   HttpTransport,
   PublicClient,
+  toBytes,
 } from 'viem';
 import prisma from './prisma';
 import { IGNORE_CONTRACTS, runInParallel } from './utils';
@@ -12,6 +13,7 @@ import * as chains from 'viem/chains';
 import Redis from 'ioredis';
 import { parseERC20TransferLogs, processLogs } from './lib/processLogs';
 import { TRANSFER_EVENT } from './providers/erc20/abi/abi';
+import { ERC20TransferEvent } from './proto/transfer_event_pb';
 
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
@@ -26,16 +28,18 @@ const saveLogs = async (logs: GetLogsReturnType, contract: Contract) => {
   const data = [];
   for (const log of parsedLogs) {
     const score = log.blockNumber.toString();
-    const value = JSON.stringify({
-      from: log.from,
-      to: log.to,
-      value: log.value.toString(),
-      logIndex: log.logIndex,
-      transactionIndex: log.transactionIndex,
-      blockNumber: log.blockNumber,
-    });
+    const transferEvent = new ERC20TransferEvent();
+
+    transferEvent.setFrom(toBytes(log.from));
+    transferEvent.setTo(toBytes(log.to));
+    transferEvent.setValue(toBytes(log.value));
+    transferEvent.setLogindex(log.logIndex);
+    transferEvent.setTransactionindex(log.transactionIndex);
+    transferEvent.setBlocknumber(Number(log.blockNumber));
+
     data.push(score);
-    data.push(value);
+    const bytes = Buffer.from(transferEvent.serializeBinary());
+    data.push(bytes);
   }
 
   if (data.length > 0) {

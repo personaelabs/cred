@@ -1,9 +1,10 @@
-import { Hex } from 'viem';
+import { Hex, toHex } from 'viem';
 import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
 import { saveTree } from '../lib/tree';
 import Redis from 'ioredis';
+import { ERC20TransferEvent } from '../proto/transfer_event_pb';
 
 const ioredis = new Redis();
 
@@ -30,26 +31,29 @@ const indexEarlyHolders = async (contract: Contract) => {
 
   const maxBlock = Number(_maxBlock);
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (to > maxBlock) {
       break;
     }
 
-    const logs = await ioredis.zrangebyscore(
+    const logs = await ioredis.zrangebyscoreBuffer(
       `${contract.id}:logs`,
       from,
-      to - 1,
-      'WITHSCORES'
+      to - 1
     );
 
     const parsedLogs = [];
-    for (let i = 0; i < logs.length; i += 2) {
-      const parsedLog = JSON.parse(logs[i]);
-      const blockNumber = Number(logs[i + 1]);
+    for (const log of logs) {
+      const parsedLog = ERC20TransferEvent.deserializeBinary(log);
 
       parsedLogs.push({
-        ...parsedLog,
-        blockNumber,
+        blockNumber: parsedLog.getBlocknumber(),
+        transactionIndex: parsedLog.getTransactionindex(),
+        logIndex: parsedLog.getLogindex(),
+        from: toHex(parsedLog.getFrom_asU8()),
+        to: toHex(parsedLog.getTo_asU8()),
+        value: BigInt(toHex(parsedLog.getValue_asU8())),
       });
     }
 
