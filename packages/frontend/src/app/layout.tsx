@@ -12,7 +12,6 @@ import DesktopFooter from '@/components/DesktopFooter';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import Header from '@/components/Header';
-import { usePathname } from 'next/navigation';
 
 const config = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -25,10 +24,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
-  const isUserProfilePage = /\/user\//.test(pathname);
-
   const showComingSoon = false;
 
   return (
