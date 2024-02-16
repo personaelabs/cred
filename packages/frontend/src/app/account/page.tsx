@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
 import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
 import { GroupSelect } from '../api/groups/route';
+import Link from 'next/link';
 
 export default function AccountPage() {
   const [addressesToGroups, setAddressesToGroups] =
@@ -152,6 +153,19 @@ export default function AccountPage() {
                 key={i}
               />
             ))}
+            {addedGroups.length > 0 ? (
+              <div className="text-sm opacity-80">
+                See what you can do with creddd{' '}
+                <Link
+                  href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20"
+                  target="_blank"
+                >
+                  here
+                </Link>
+              </div>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       )}
