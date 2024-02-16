@@ -110,6 +110,8 @@ export default function AccountPage() {
       attestation => attestation.MerkleTree.Group.handle
     ) || [];
 
+  const creddd = eligibleGroups();
+
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
@@ -142,10 +144,14 @@ export default function AccountPage() {
       {!isLoading && accounts && accounts.length > 0 && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
-            You are eligible for the following creddd:
+            {creddd.length === 0 ? (
+              <>No creddd found for connected wallets</>
+            ) : (
+              <>You are eligible for the following creddd:</>
+            )}
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
-            {eligibleGroups().map((group, i) => (
+            {creddd.map((group, i) => (
               <WalletView
                 walletAddr={group.address}
                 group={group.group}
