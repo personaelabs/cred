@@ -1,81 +1,98 @@
-import {
-  Chain,
-  GetFilterLogsReturnType,
-  Hex,
-  HttpTransport,
-  PublicClient,
-} from 'viem';
+import { Hex } from 'viem';
 import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
-import { processLogs } from '../lib/processLogs';
-import { TRANSFER_EVENT } from '../providers/erc20/abi/abi';
-import { updateSyncStatus } from '../utils';
 import { saveTree } from '../lib/tree';
+import Redis from 'ioredis';
+import { ERC20TransferEvent } from '../proto/transfer_event_pb';
+
+const ioredis = new Redis();
 
 export const getEarlyHolderHandle = (contractName: string): string => {
   return `early-holder-${contractName.toLowerCase()}`;
 };
 
-const updateEarlyHoldersFromLogs = async (
-  contract: Contract,
-  logs: GetFilterLogsReturnType
-) => {
-  const contractId = contract.id;
-  const latestHolderPositionRecord = await prisma.eRC20HolderPosition.findFirst(
-    {
-      select: {
-        position: true,
-      },
-      where: {
-        contractId,
-      },
-      orderBy: {
-        position: 'desc',
-      },
-    }
+const indexEarlyHolders = async (contract: Contract) => {
+  const handle = getEarlyHolderHandle(contract.name);
+
+  const uniqueHolders = new Set<Hex>();
+  const holders: Hex[] = [];
+
+  const chunkSize = 1000;
+  let from = Number(contract.deployedBlock);
+  let to = from + chunkSize;
+
+  const [, _maxBlock] = await ioredis.zrevrange(
+    `${contract.id}:logs`,
+    0,
+    0,
+    'WITHSCORES'
   );
 
-  const latestHolderPosition = latestHolderPositionRecord
-    ? latestHolderPositionRecord.position
-    : 0;
+  const maxBlock = Number(_maxBlock);
 
-  const newHolders = logs
-    // @ts-ignore
-    .map(log => log.args.to.toLowerCase() as Hex);
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (to > maxBlock) {
+      break;
+    }
 
-  // Add new holders to the database
-  await prisma.eRC20HolderPosition.createMany({
-    data: newHolders.map((address, i) => {
-      return {
-        contractId,
-        position: latestHolderPosition + (i + 1),
-        address,
-      };
-    }),
-    skipDuplicates: true,
-  });
+    const logs = await ioredis.zrangebyscoreBuffer(
+      `${contract.id}:logs`,
+      from,
+      to - 1
+    );
 
-  const handle = getEarlyHolderHandle(contract.name);
+    const parsedLogs = [];
+    for (const log of logs) {
+      const parsedLog = ERC20TransferEvent.deserializeBinary(log);
 
-  // Update the synched block number of the group
-  if (logs.length > 0) {
-    await updateSyncStatus({
-      groupHandle: handle,
-      blockNumber: logs[logs.length - 1].blockNumber,
-    });
+      const from =
+        `0x${Buffer.from(parsedLog.getFrom_asU8()).toString('hex')}` as Hex;
+      const to =
+        `0x${Buffer.from(parsedLog.getTo_asU8()).toString('hex')}` as Hex;
+      const value = BigInt(
+        `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
+      );
+
+      parsedLogs.push({
+        blockNumber: parsedLog.getBlocknumber(),
+        transactionIndex: parsedLog.getTransactionindex(),
+        logIndex: parsedLog.getLogindex(),
+        from,
+        to,
+        value,
+      });
+    }
+
+    const sortedLogs = parsedLogs.sort(
+      (a, b) =>
+        a.blockNumber - b.blockNumber ||
+        a.transactionIndex - b.transactionIndex ||
+        a.logIndex - b.logIndex
+    );
+
+    for (const log of sortedLogs) {
+      if (!uniqueHolders.has(log.to)) {
+        holders.push(log.to);
+      }
+
+      uniqueHolders.add(log.to);
+    }
+
+    from = to;
+    to += chunkSize;
   }
-};
 
-const indexEarlyHolders = async (
-  client: PublicClient<HttpTransport, Chain>,
-  contract: Contract
-) => {
-  const handle = getEarlyHolderHandle(contract.name);
+  const totalHolders = uniqueHolders.size;
+
+  const earlinessThreshold = Math.round(totalHolders * 0.05);
+
+  const earlyHolders = holders.slice(0, earlinessThreshold);
+
   const group = await prisma.group.findUnique({
     select: {
       id: true,
-      blockNumber: true,
     },
     where: {
       handle,
@@ -86,59 +103,14 @@ const indexEarlyHolders = async (
     throw new Error(`Group ${handle} not found`);
   }
 
-  const fromBlock = group.blockNumber || contract.deployedBlock;
-
-  await processLogs({
-    client,
-    event: TRANSFER_EVENT,
-    fromBlock,
-    contractAddress: contract.address as Hex,
-    label: handle,
-    processor: async (logs: GetFilterLogsReturnType) => {
-      await updateEarlyHoldersFromLogs(contract, logs);
-    },
+  console.log(
+    chalk.blue(
+      `Found ${earlyHolders.length} early $${contract.symbol?.toUpperCase()} (${contract.id}) holders`
+    )
+  );
+  await saveTree({
+    groupId: group.id,
+    addresses: earlyHolders,
   });
-
-  const lastPositionRecord = await prisma.eRC20HolderPosition.findFirst({
-    select: {
-      position: true,
-    },
-    where: {
-      contractId: contract.id,
-    },
-    orderBy: {
-      position: 'desc',
-    },
-  });
-
-  if (lastPositionRecord) {
-    const totalHolders = lastPositionRecord.position;
-    const earlinessThreshold = Math.round(totalHolders * 0.05);
-
-    const earlyHolders = await prisma.eRC20HolderPosition.findMany({
-      select: {
-        address: true,
-      },
-      where: {
-        contractId: contract.id,
-        position: {
-          lte: earlinessThreshold,
-        },
-      },
-    });
-
-    console.log(
-      chalk.green(
-        `Found ${earlyHolders.length} early holders for ${contract.name}`
-      )
-    );
-
-    await saveTree({
-      groupId: group.id,
-      addresses: earlyHolders.map(h => h.address as Hex),
-    });
-  } else {
-    console.log(chalk.gray(`No early holders found for ${contract.name}`));
-  }
 };
 export default indexEarlyHolders;

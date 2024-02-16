@@ -21,6 +21,16 @@ export async function GET(req: NextRequest) {
     );
   }
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
+    WITH large_enough_trees AS (
+      SELECT
+        "merkleRoot"
+      FROM
+        "MerkleProof"
+      GROUP BY
+        "merkleRoot"
+      HAVING
+        count(*) > 100
+    )
     SELECT
       "MerkleProof".address,
       STRING_AGG("Group".handle, ',') AS "groups"
@@ -30,6 +40,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
     WHERE
       LEFT("MerkleProof".address, 4) = ${addressPrefix}
+      AND "MerkleTree"."merkleRoot" IN ( SELECT "merkleRoot" FROM large_enough_trees)
     GROUP BY
       "MerkleProof".address
   `;

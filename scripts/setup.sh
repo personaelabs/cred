@@ -13,6 +13,8 @@ then
 else
     echo "Rust is already installed."
 fi && \
+# Install protobuf
+brew install protobuf@3 && brew link --overwrite protobuf@3 && \
 # Install dependencies
 pnpm i && \
 # Build the merkle-tree-rs module

@@ -76,30 +76,11 @@ export const syncMemeTokensMeta = async () => {
   // Get all meme tokens ids
   const tokenIds = await getMemeTokens();
 
-  // Get all meme tokens that are already synched
-  const synchedTokens = await prisma.contract.findMany({
-    select: {
-      coingeckoId: true,
-    },
-    where: {
-      coingeckoId: {
-        not: null,
-      },
-    },
-  });
-
-  const synchedTokenIds = synchedTokens.map(token => token.coingeckoId);
-
-  // Filter out meme tokens that are already synched
-  const tokenIdsToSync = tokenIds.filter(
-    tokenId => !synchedTokenIds.includes(tokenId)
-  );
-
-  console.log(`Processing ${tokenIdsToSync.length} meme tokens`);
+  console.log(`Processing ${tokenIds.length} meme tokens`);
 
   // Get all meme token contract addresses
   const tokens = [];
-  for (const tokenId of tokenIdsToSync) {
+  for (const tokenId of tokenIds) {
     const token = await getTokenById(tokenId);
     tokens.push(token);
   }
@@ -120,24 +101,15 @@ export const syncMemeTokensMeta = async () => {
     deployedBlock: bigint;
     name: string;
     decimals: number;
+    symbol: string;
     chain: string;
   }[] = [];
 
   // Number of tokens to sync
   const numTokens = 50;
 
-  const numSynchedTokens = synchedTokenIds.length;
-  if (numSynchedTokens + processableTokens.length < numTokens) {
-    throw new Error(
-      `Not enough meme tokens to process. Expected at least ${numTokens}, got ${numSynchedTokens + processableTokens.length}`
-    );
-  }
-
   // Get the deployed block for each token
-  for (const token of processableTokens.slice(
-    0,
-    numTokens - numSynchedTokens
-  )) {
+  for (const token of processableTokens.slice(0, numTokens)) {
     for (const platform of Object.keys(token.detail_platforms)) {
       if (platform !== 'ethereum') {
         continue;
@@ -175,7 +147,8 @@ export const syncMemeTokensMeta = async () => {
       tokensWithDeployedBlock.push({
         coinGeckoId: token.id,
         contractAddress,
-        name: `${token.name} ($${token.symbol.toUpperCase()})`,
+        name: token.name,
+        symbol: token.symbol,
         deployedBlock,
         decimals,
         chain: chain.name,
@@ -193,6 +166,7 @@ export const syncMemeTokensMeta = async () => {
       name: token.name,
       deployedBlock: token.deployedBlock,
       type: ContractType.ERC20,
+      symbol: token.symbol,
       targetGroups: ['earlyHolder', 'whale'],
     };
 
