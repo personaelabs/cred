@@ -3,12 +3,11 @@ services:
   - type: cron
     name: cred-indexer
     plan: pro plus
-    env: node
+    runtime: docker
     region: oregon
+    dockerfilePath: ./Dockerfile.indexer
     rootDir: ./
     branch: main
-    buildCommand: pnpm i && pnpm -F db migrate:prod
-    startCommand: sh ./scripts/start-indexer.sh
     schedule: '0 * * * *'
     buildFilter:
       paths:
