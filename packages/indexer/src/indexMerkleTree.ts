@@ -114,7 +114,7 @@ const indexMerkleTree = async () => {
       `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
     );
 
-    await saveTree({ groupId: devGroup.id, addresses });
+    await saveTree({ groupId: devGroup.id, addresses, blockNumber: BigInt(0) });
   }
 };
 

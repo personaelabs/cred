@@ -2,6 +2,7 @@ import { MerkleProof } from '@prisma/client';
 import prisma from '../prisma';
 import { Hex } from 'viem';
 import chalk from 'chalk';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const merkleTree = require('merkle-tree-rs');
 
 const TREE_DEPTH = 18;
@@ -50,9 +51,11 @@ const parseMerkleProof = (
 export const saveTree = async ({
   groupId,
   addresses,
+  blockNumber,
 }: {
   groupId: number;
   addresses: Hex[];
+  blockNumber: bigint;
 }) => {
   if (addresses.length > MAX_NUM_LEAVES) {
     console.error(
@@ -91,6 +94,7 @@ export const saveTree = async ({
       data: {
         groupId,
         merkleRoot,
+        blockNumber,
       },
     });
 

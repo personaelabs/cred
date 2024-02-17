@@ -15,12 +15,18 @@ export const getEarlyHolderHandle = (contractName: string): string => {
 const indexEarlyHolders = async (contract: Contract) => {
   const handle = getEarlyHolderHandle(contract.name);
 
-  const uniqueHolders = new Set<Hex>();
-  const holders: Hex[] = [];
+  const group = await prisma.group.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      handle,
+    },
+  });
 
-  const chunkSize = 1000;
-  let from = Number(contract.deployedBlock);
-  let to = from + chunkSize;
+  if (!group) {
+    throw new Error(`Group ${handle} not found`);
+  }
 
   const [, _maxBlock] = await ioredis.zrevrange(
     `${contract.id}:logs`,
@@ -30,6 +36,40 @@ const indexEarlyHolders = async (contract: Contract) => {
   );
 
   const maxBlock = Number(_maxBlock);
+
+  // Get the block number of the last tree
+  const lastTree = await prisma.merkleTree.findFirst({
+    where: {
+      groupId: group.id,
+    },
+    orderBy: {
+      blockNumber: 'desc',
+    },
+  });
+
+  if (lastTree?.blockNumber) {
+    if (lastTree.blockNumber === BigInt(maxBlock)) {
+      console.log(
+        chalk.blue(
+          `Early holders for ${contract.symbol?.toUpperCase()} (${contract.id}) already indexed`
+        )
+      );
+      return;
+    }
+
+    if (lastTree.blockNumber > BigInt(maxBlock)) {
+      throw new Error(
+        `Last tree block number ${lastTree.blockNumber} is greater than synched max block ${maxBlock}`
+      );
+    }
+  }
+
+  const uniqueHolders = new Set<Hex>();
+  const holders: Hex[] = [];
+
+  const chunkSize = 1000;
+  let from = Number(contract.deployedBlock);
+  let to = from + chunkSize;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -90,19 +130,6 @@ const indexEarlyHolders = async (contract: Contract) => {
 
   const earlyHolders = holders.slice(0, earlinessThreshold);
 
-  const group = await prisma.group.findUnique({
-    select: {
-      id: true,
-    },
-    where: {
-      handle,
-    },
-  });
-
-  if (!group) {
-    throw new Error(`Group ${handle} not found`);
-  }
-
   console.log(
     chalk.blue(
       `Found ${earlyHolders.length} early $${contract.symbol?.toUpperCase()} (${contract.id}) holders`
@@ -111,6 +138,7 @@ const indexEarlyHolders = async (contract: Contract) => {
   await saveTree({
     groupId: group.id,
     addresses: earlyHolders,
+    blockNumber: BigInt(maxBlock),
   });
 };
 export default indexEarlyHolders;
