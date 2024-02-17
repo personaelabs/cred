@@ -10,17 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model MembershipProof {
-  proofHash    String   @id
-  proof        String
-  proofVersion String   @default("v1")
-  publicInput  String
-  merkleRoot   String?
-  message      String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
 model FidAttestation {
   fid         Int
   attestation Bytes
