@@ -17,6 +17,7 @@ export const retry = async <T>(
 ): Promise<T> => {
   let retried = 0;
   let error: any;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       return await fn();
@@ -53,7 +54,7 @@ export const runInParallel = async <T>(
   const numJobs = jobs.length;
 
   // Assign each argument an index
-  let queuedJobs = jobs.map((job, i) => {
+  const queuedJobs = jobs.map((job, i) => {
     return {
       job,
       index: i,
@@ -63,6 +64,7 @@ export const runInParallel = async <T>(
   // Keep track of completed jobs
   const completedJobs = new Set<number>();
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     while (queuedJobs.length > 0) {
       const queuedJob = queuedJobs[0];

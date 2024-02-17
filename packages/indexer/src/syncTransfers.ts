@@ -76,7 +76,6 @@ const runSyncJob = async (
     processor: async (logs: GetLogsReturnType) => {
       await saveLogs(logs, contract);
     },
-    label: 'transfer',
     contractAddress: contract.address as Hex,
   });
   console.timeEnd(`Synched transfers for ${contract.symbol}`);

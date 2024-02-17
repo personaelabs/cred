@@ -1,5 +1,4 @@
-import { Group } from '@prisma/client';
-import { Hex, HttpTransport, PublicClient } from 'viem';
+import { HttpTransport, PublicClient } from 'viem';
 import * as chains from 'viem/chains';
 
 export type ManagedClient = {
