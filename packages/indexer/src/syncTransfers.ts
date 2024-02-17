@@ -110,6 +110,8 @@ const syncTransfers = async () => {
 
   // Run the sync jobs in parallel
   await runInParallel(runSyncJob, jobs);
+
+  await ioredis.quit();
 };
 
 syncTransfers();

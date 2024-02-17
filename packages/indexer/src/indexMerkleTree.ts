@@ -6,6 +6,7 @@ import indexEarlyHolders, {
   getEarlyHolderHandle,
 } from './processors/earlyHolders';
 import { saveTree } from './lib/tree';
+import ioredis from './redis';
 
 // Run a sync job
 const runSyncJob = async (args: {
@@ -122,6 +123,8 @@ const indexMerkleTree = async () => {
 
     await saveTree({ groupId: devGroup.id, addresses, blockNumber: BigInt(0) });
   }
+
+  await ioredis.quit();
 };
 
 indexMerkleTree();
