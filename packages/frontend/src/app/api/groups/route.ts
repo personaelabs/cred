@@ -1,3 +1,4 @@
+export const fetchCache = 'force-no-store';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
