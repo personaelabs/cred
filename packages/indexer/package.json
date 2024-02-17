@@ -5,6 +5,7 @@
   "scripts": {
     "build:proto": "sh ./scripts/build_proto.sh",
     "indexTree": "pnpm ts-node ./src/indexMerkleTree.ts",
+    "populate": "pnpm ts-node ./scripts/populate.ts",
     "lint": "tsc --noEmit",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then cp -n .env.local .env || true; fi"
   },
