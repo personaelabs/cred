@@ -102,6 +102,11 @@ const indexWhales = async (contract: Contract) => {
         `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
       );
 
+      // Ignore zero value transfers
+      if (value === BigInt(0)) {
+        continue;
+      }
+
       parsedLogs.push({
         blockNumber: parsedLog.getBlocknumber(),
         transactionIndex: parsedLog.getTransactionindex(),
