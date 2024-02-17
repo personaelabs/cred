@@ -5,6 +5,7 @@
   "scripts": {
     "build:proto": "sh ./scripts/build_proto.sh",
     "indexTree": "pnpm ts-node ./src/indexMerkleTree.ts",
+    "populate": "pnpm ts-node ./scripts/populate.ts",
     "lint": "tsc --noEmit",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then cp -n .env.local .env || true; fi"
   },
@@ -22,9 +23,7 @@
     "merkle-tree-rs": "../merkle-tree-rs",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
-    "viem": "^1.19.5"
-  },
-  "devDependencies": {
+    "viem": "^1.19.5",
     "ts-protoc-gen": "^0.15.0"
   }
 }

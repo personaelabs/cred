@@ -3,10 +3,8 @@ import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
 import { saveTree } from '../lib/tree';
-import Redis from 'ioredis';
 import { ERC20TransferEvent } from '../proto/transfer_event_pb';
-
-const ioredis = new Redis();
+import ioredis from '../redis';
 
 const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -15,6 +13,21 @@ export const getWhaleHandle = (contractName: string): string => {
 };
 
 const indexWhales = async (contract: Contract) => {
+  const handle = getWhaleHandle(contract.name);
+
+  const group = await prisma.group.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      handle,
+    },
+  });
+
+  if (!group) {
+    throw new Error(`Group ${handle} not found`);
+  }
+
   const [, _maxBlock] = await ioredis.zrevrange(
     `${contract.id}:logs`,
     0,
@@ -23,6 +36,33 @@ const indexWhales = async (contract: Contract) => {
   );
 
   const maxBlock = Number(_maxBlock);
+
+  // Get the block number of the last tree
+  const lastTree = await prisma.merkleTree.findFirst({
+    where: {
+      groupId: group.id,
+    },
+    orderBy: {
+      blockNumber: 'desc',
+    },
+  });
+
+  if (lastTree?.blockNumber) {
+    if (lastTree.blockNumber === BigInt(maxBlock)) {
+      console.log(
+        chalk.blue(
+          `Early holders for ${contract.symbol?.toUpperCase()} (${contract.id}) already indexed`
+        )
+      );
+      return;
+    }
+
+    if (lastTree.blockNumber > BigInt(maxBlock)) {
+      throw new Error(
+        `Last tree block number ${lastTree.blockNumber} is greater than synched max block ${maxBlock}`
+      );
+    }
+  }
 
   let totalSupply = BigInt(0);
   let whaleThreshold = BigInt(0);
@@ -59,6 +99,11 @@ const indexWhales = async (contract: Contract) => {
       const value = BigInt(
         `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
       );
+
+      // Ignore zero value transfers
+      if (value === BigInt(0)) {
+        continue;
+      }
 
       parsedLogs.push({
         blockNumber: parsedLog.getBlocknumber(),
@@ -128,17 +173,6 @@ const indexWhales = async (contract: Contract) => {
     to += chunkSize;
   }
 
-  const handle = getWhaleHandle(contract.name);
-
-  const group = await prisma.group.findFirst({
-    where: {
-      handle,
-    },
-  });
-
-  if (!group) {
-    throw new Error(`Group not found for ${contract.name}`);
-  }
   console.log(
     chalk.blue(
       `Found ${whales.size} $${contract.symbol?.toUpperCase()} (${contract.id}) whales`
@@ -147,6 +181,7 @@ const indexWhales = async (contract: Contract) => {
   await saveTree({
     groupId: group.id,
     addresses: [...whales] as Hex[],
+    blockNumber: BigInt(maxBlock),
   });
 };
 

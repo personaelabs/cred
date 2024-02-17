@@ -80,7 +80,7 @@ const getClient = (
 /**
  * Manage a list of occupied Ethereum RPC clients as a global variable
  */
-let occupiedClients: {
+const occupiedClients: {
   [chainId: string]: number[];
 } = {
   [chains.mainnet.id.toString()]: [],

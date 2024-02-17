@@ -1,4 +1,4 @@
-import { GetLogsReturnType, Hex, HttpTransport, PublicClient } from 'viem';
+import { Hex, HttpTransport, PublicClient } from 'viem';
 import { AbiEvent } from 'abitype';
 import * as chains from 'viem/chains';
 
@@ -19,6 +19,7 @@ export const getFirstLog = async ({
   let toBlock = batchFrom + batchSize;
 
   let logs = null;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       // Fetch event logs

@@ -6,6 +6,7 @@ import indexEarlyHolders, {
   getEarlyHolderHandle,
 } from './processors/earlyHolders';
 import { saveTree } from './lib/tree';
+import ioredis from './redis';
 
 // Run a sync job
 const runSyncJob = async (args: {
@@ -72,12 +73,18 @@ const indexMerkleTree = async () => {
     });
 
     // Create or update groups based on the `targetGroups` field of contracts
-    for (const contract of contracts) {
-      const groups = contract.targetGroups;
+    const upsertChunkSize = 30;
+    for (let i = 0; i < contracts.length; i += upsertChunkSize) {
+      const chunk = contracts.slice(i, i + upsertChunkSize);
 
-      for (const group of groups) {
-        await upsertGroup(contract, group);
+      const promises = [];
+      for (const contract of chunk) {
+        for (const targetGroup of contract.targetGroups) {
+          promises.push(upsertGroup(contract, targetGroup));
+        }
       }
+
+      await Promise.all(promises);
     }
 
     const chunkSize = 30;
@@ -114,8 +121,10 @@ const indexMerkleTree = async () => {
       `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
     );
 
-    await saveTree({ groupId: devGroup.id, addresses });
+    await saveTree({ groupId: devGroup.id, addresses, blockNumber: BigInt(0) });
   }
+
+  await ioredis.quit();
 };
 
 indexMerkleTree();

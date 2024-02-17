@@ -15,7 +15,6 @@ export const processLogs = async <T extends Transport, C extends Chain>({
   event,
   fromBlock,
   processor,
-  label,
   contractAddress,
   batchSize = BigInt(200000),
 }: {
@@ -23,7 +22,6 @@ export const processLogs = async <T extends Transport, C extends Chain>({
   event: AbiEvent; // Event to process
   fromBlock: bigint; // Block number to start from
   processor: (logs: GetFilterLogsReturnType) => Promise<'terminate' | void>; // Function to process logs
-  label: string;
   contractAddress: Hex;
   batchSize?: bigint; // How many blocks to process at a time
 }): Promise<'terminate' | void> => {

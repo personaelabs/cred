@@ -10,17 +10,15 @@ import prisma from './prisma';
 import { IGNORE_CONTRACTS, runInParallel } from './utils';
 import { Contract } from '@prisma/client';
 import * as chains from 'viem/chains';
-import Redis from 'ioredis';
 import { parseERC20TransferLogs, processLogs } from './lib/processLogs';
 import { TRANSFER_EVENT } from './providers/erc20/abi/abi';
 import { ERC20TransferEvent } from './proto/transfer_event_pb';
+import ioredis from './redis';
 
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
-
-const ioredis = new Redis();
 
 const saveLogs = async (logs: GetLogsReturnType, contract: Contract) => {
   const parsedLogs = parseERC20TransferLogs(logs);
@@ -78,7 +76,6 @@ const runSyncJob = async (
     processor: async (logs: GetLogsReturnType) => {
       await saveLogs(logs, contract);
     },
-    label: 'transfer',
     contractAddress: contract.address as Hex,
   });
   console.timeEnd(`Synched transfers for ${contract.symbol}`);
@@ -112,6 +109,8 @@ const syncTransfers = async () => {
 
   // Run the sync jobs in parallel
   await runInParallel(runSyncJob, jobs);
+
+  await ioredis.quit();
 };
 
 syncTransfers();
