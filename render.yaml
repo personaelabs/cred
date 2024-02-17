@@ -1,4 +1,4 @@
-previewsEnabled: true
+#previewsEnabled: true
 services:
   - type: cron
     name: cred-indexer
