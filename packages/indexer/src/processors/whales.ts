@@ -3,10 +3,8 @@ import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
 import { saveTree } from '../lib/tree';
-import Redis from 'ioredis';
 import { ERC20TransferEvent } from '../proto/transfer_event_pb';
-
-const ioredis = new Redis();
+import ioredis from '../redis';
 
 const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
