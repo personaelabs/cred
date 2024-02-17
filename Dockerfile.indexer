@@ -21,7 +21,8 @@ COPY packages/merkle-tree-rs packages/merkle-tree-rs
 COPY scripts scripts
 
 # Build the merkle-tree-rs Neon module
-RUN pnpm -F merkle-tree-rs exec pnpm install
+RUN pnpm -F merkle-tree-rs exec pnpm i
+RUN pnpm -F merkle-tree-rs exec pnpm build
 
 # Install dependencies
 RUN pnpm i
