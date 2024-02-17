@@ -31,5 +31,8 @@
       "eslint --cache --fix"
     ],
     "*.{js,ts,tsx,json}": "prettier --write --ignore-unknown"
+  },
+  "engines": {
+    "node": "v18.17.0"
   }
 }
