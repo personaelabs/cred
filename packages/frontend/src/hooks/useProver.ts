@@ -30,7 +30,9 @@ interface Prover {
 const getMerkleTree = async (
   groupHandle: string
 ): Promise<MerkleTreeSelect> => {
-  const res = await fetch(`/api/groups/${groupHandle}/merkle-proofs`);
+  const res = await fetch(`/api/groups/${groupHandle}/merkle-proofs`, {
+    cache: 'no-store',
+  });
   const tree = (await res.json()) as MerkleTreeSelect;
   return tree;
 };

@@ -42,7 +42,9 @@ export default function AccountPage() {
 
   useEffect(() => {
     (async () => {
-      const groupResponse = await fetch('/api/groups');
+      const groupResponse = await fetch('/api/groups', {
+        cache: 'no-store',
+      });
 
       if (!groupResponse.ok) {
         throw new Error('Group fetch failed');
@@ -59,7 +61,10 @@ export default function AccountPage() {
         const searchParams = new URLSearchParams();
         searchParams.set('addressPrefix', account.slice(0, 4));
         const response = await fetch(
-          `/api/address-to-groups?${searchParams.toString()}`
+          `/api/address-to-groups?${searchParams.toString()}`,
+          {
+            cache: 'no-store',
+          }
         );
         if (!response.ok) {
           throw new Error('Data fetch failed'); // This will be caught by the catch block

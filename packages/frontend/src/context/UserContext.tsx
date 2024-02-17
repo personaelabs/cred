@@ -44,7 +44,9 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const pathname = usePathname();
 
   const fetchUser = async (fid: number) => {
-    const result = await fetch(`/api/fc-accounts/${fid}`);
+    const result = await fetch(`/api/fc-accounts/${fid}`, {
+      cache: 'no-store',
+    });
     const data = (await result.json()) as GetUserResponse;
 
     setUser(data);
