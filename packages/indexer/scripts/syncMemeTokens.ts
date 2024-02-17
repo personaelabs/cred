@@ -1,10 +1,11 @@
+import 'dotenv/config';
 import { ContractType } from '@prisma/client';
-import prisma from '../../prisma';
+import prisma from '../src/prisma';
 import { Hex } from 'viem';
-import { getNextAvailableClient, releaseClient } from '../ethRpc';
+import { getNextAvailableClient, releaseClient } from '../src/providers/ethRpc';
 import * as chains from 'viem/chains';
-import { getFirstLog } from '../../lib/getFirstLog';
-import { TRANSFER_EVENT } from '../erc20/abi/abi';
+import { getFirstLog } from '../src/lib/getFirstLog';
+import { TRANSFER_EVENT } from '../src/providers/erc20/abi/abi';
 
 const COINGECKO_API_ENDPOINT = 'https://pro-api.coingecko.com/api/v3/';
 
@@ -72,7 +73,7 @@ const getMemeTokens = async (): Promise<string[]> => {
 /**
  * Sync metadata of meme tokes from CoinGecko
  */
-export const syncMemeTokensMeta = async () => {
+export const syncMemeTokens = async () => {
   // Get all meme tokens ids
   const tokenIds = await getMemeTokens();
 
@@ -96,7 +97,6 @@ export const syncMemeTokensMeta = async () => {
 
   // Store tokens with deployed block numbers
   const tokensWithDeployedBlock: {
-    coinGeckoId: string;
     contractAddress: Hex;
     deployedBlock: bigint;
     name: string;
@@ -145,7 +145,6 @@ export const syncMemeTokensMeta = async () => {
       releaseClient(client);
 
       tokensWithDeployedBlock.push({
-        coinGeckoId: token.id,
         contractAddress,
         name: token.name,
         symbol: token.symbol,
@@ -160,7 +159,6 @@ export const syncMemeTokensMeta = async () => {
   for (const token of tokensWithDeployedBlock) {
     const data = {
       chain: token.chain,
-      coingeckoId: token.coinGeckoId,
       decimals: token.decimals,
       address: token.contractAddress,
       name: token.name,
@@ -182,3 +180,5 @@ export const syncMemeTokensMeta = async () => {
     });
   }
 };
+
+syncMemeTokens();
