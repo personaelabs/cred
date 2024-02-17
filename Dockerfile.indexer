@@ -5,12 +5,6 @@ WORKDIR /usr/src/app
 # Install pnpm
 RUN npm install -g pnpm
 
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Make sure Rust is in the PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
-
 COPY package.json .
 COPY pnpm-lock.yaml .
 COPY pnpm-workspace.yaml .
@@ -20,16 +14,7 @@ COPY packages/indexer packages/indexer
 COPY packages/merkle-tree-rs packages/merkle-tree-rs
 COPY scripts scripts
 
-# Build the merkle-tree-rs Neon module
-RUN pnpm -F merkle-tree-rs exec pnpm i
-RUN pnpm -F merkle-tree-rs exec pnpm build
-
 # Install dependencies
 RUN pnpm i
-
-# Verify installations
-RUN node --version
-RUN npm --version
-RUN rustc --version
 
 CMD ["sh", "./scripts/start-indexer.sh"]
