@@ -1,12 +1,9 @@
 import { MerkleProof } from '@prisma/client';
 import prisma from '../prisma';
 import { Hex } from 'viem';
+import chalk from 'chalk';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const merkleTree = require('merkle-tree-rs');
-
-/**
- * Minimum number of members required to create a group
- */
-const MIN_NUM_MEMBERS = 100;
 
 const TREE_DEPTH = 18;
 const MAX_NUM_LEAVES = 2 ** TREE_DEPTH;
@@ -54,20 +51,17 @@ const parseMerkleProof = (
 export const saveTree = async ({
   groupId,
   addresses,
+  blockNumber,
 }: {
   groupId: number;
   addresses: Hex[];
+  blockNumber: bigint;
 }) => {
-  if (addresses.length < MIN_NUM_MEMBERS) {
-    console.log(
-      `Skipping ${groupId} as there are not enough addresses ${MIN_NUM_MEMBERS} > ${addresses.length}`
-    );
-    return;
-  }
-
   if (addresses.length > MAX_NUM_LEAVES) {
     console.error(
-      `Skipping ${groupId} as there are more than ${MAX_NUM_LEAVES} addresses`
+      chalk.yellow(
+        `Skipping ${groupId} as there are more than ${MAX_NUM_LEAVES} addresses`
+      )
     );
     return;
   }
@@ -80,9 +74,7 @@ export const saveTree = async ({
   }
 
   // Create new Merkle tree
-  console.time(`init_tree ${groupId}`);
   const tree = merkleTree.init_tree(addressesBytes, TREE_DEPTH);
-  console.timeEnd(`init_tree ${groupId}`);
 
   const rootString = merkleTree.get_root(Buffer.from(tree));
 
@@ -102,6 +94,7 @@ export const saveTree = async ({
       data: {
         groupId,
         merkleRoot,
+        blockNumber,
       },
     });
 
@@ -117,13 +110,10 @@ export const saveTree = async ({
         chunkBytes.set(Buffer.from(paddedAddress, 'hex'), i * 32);
       }
       // Get the merkle proofs
-      console.log('Creating proofs');
-      console.time(`create_proof ${groupId} ${i}`);
       const merkleProofs = merkleTree.create_proofs(
         Buffer.from(chunkBytes),
         Buffer.from(tree)
       );
-      console.timeEnd(`create_proof ${groupId} ${i}`);
 
       const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
 

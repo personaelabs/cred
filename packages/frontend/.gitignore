@@ -40,3 +40,6 @@ public/workbox-*.js*
 public/worker-*.js*
 # Sentry Config File
 .sentryclirc
+
+# Sentry Config File
+.sentryclirc

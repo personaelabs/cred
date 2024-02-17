@@ -2,7 +2,8 @@ import chalk from 'chalk';
 import { Hex, HttpTransport, PublicClient } from 'viem';
 import { getNextAvailableClient, releaseClient } from './providers/ethRpc';
 import * as chains from 'viem/chains';
-import prisma from './prisma';
+
+export const IGNORE_CONTRACTS = ['op', 'arb', 'link', 'mkr'];
 
 export const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -16,6 +17,7 @@ export const retry = async <T>(
 ): Promise<T> => {
   let retried = 0;
   let error: any;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       return await fn();
@@ -44,15 +46,15 @@ export const retry = async <T>(
  */
 export const runInParallel = async <T>(
   fn: (
-    client: PublicClient<HttpTransport, chains.Chain>,
-    args: T
+    _client: PublicClient<HttpTransport, chains.Chain>,
+    _args: T
   ) => Promise<void>,
   jobs: { chain: chains.Chain; args: T }[]
 ) => {
   const numJobs = jobs.length;
 
   // Assign each argument an index
-  let queuedJobs = jobs.map((job, i) => {
+  const queuedJobs = jobs.map((job, i) => {
     return {
       job,
       index: i,
@@ -62,6 +64,7 @@ export const runInParallel = async <T>(
   // Keep track of completed jobs
   const completedJobs = new Set<number>();
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     while (queuedJobs.length > 0) {
       const queuedJob = queuedJobs[0];
@@ -75,11 +78,8 @@ export const runInParallel = async <T>(
             completedJobs.add(queuedJob.index);
             console.log(
               chalk.green(
-                `Completed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}`
+                `Completed job ${queuedJob.index}/${jobs.length} with client ${managedClient.id}(Completed ${completedJobs.size}/${numJobs})`
               )
-            );
-            console.log(
-              chalk.green(`(Completed ${completedJobs.size}/${numJobs})`)
             );
 
             // Free the client
@@ -121,23 +121,6 @@ export const runInParallel = async <T>(
 
     await sleep(3000);
   }
-};
-
-export const updateSyncStatus = ({
-  groupHandle,
-  blockNumber,
-}: {
-  groupHandle: string;
-  blockNumber: bigint;
-}) => {
-  return prisma.group.update({
-    where: {
-      handle: groupHandle,
-    },
-    data: {
-      blockNumber,
-    },
-  });
 };
 
 export const getDevAddresses = () => {

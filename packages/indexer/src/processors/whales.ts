@@ -1,201 +1,188 @@
-import fs from 'fs';
-import {
-  Chain,
-  GetFilterLogsReturnType,
-  Hex,
-  HttpTransport,
-  PublicClient,
-} from 'viem';
+import { Hex } from 'viem';
 import prisma from '../prisma';
 import chalk from 'chalk';
 import { Contract } from '@prisma/client';
-import { parseERC20TransferLogs, processLogs } from '../lib/processLogs';
-import { TRANSFER_EVENT } from '../providers/erc20/abi/abi';
 import { saveTree } from '../lib/tree';
-import Redis from 'ioredis';
+import { ERC20TransferEvent } from '../proto/transfer_event_pb';
+import ioredis from '../redis';
 
-const ioredis = new Redis();
-
-// @ts-ignore
-BigInt.prototype.toJSON = function () {
-  return this.toString();
-};
+const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export const getWhaleHandle = (contractName: string): string => {
   return `whale-${contractName.toLowerCase()}`;
 };
 
-const getSynchedBlockKey = (handle: string) => {
-  return `synched_${handle}`;
-};
-
-const getTotalSupplyKey = (contractId: number) => {
-  return `${contractId}_total_supply`;
-};
-
-const MINTER_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-const indexWhalesFromLogs = async (
-  contract: Contract,
-  logs: GetFilterLogsReturnType
-): Promise<'terminate' | void> => {
-  const contractId = contract.id;
-  const parsedLogs = parseERC20TransferLogs(logs);
-
-  // Get the total supply of the token from Redis
-  let totalSupply = BigInt(
-    (await ioredis.get(getTotalSupplyKey(contract.id))) || '0'
-  );
-
-  // Get the addresses touched by the logs
-  const touchedAddressesSet = new Set<string>();
-  for (const log of parsedLogs) {
-    touchedAddressesSet.add(log.to);
-    touchedAddressesSet.add(log.from);
-  }
-  const touchedAddresses = [...touchedAddressesSet];
-
-  let balances: Record<Hex, bigint> = {};
-
-  // Get the balances for the touched addresses from Redis
-  const values =
-    touchedAddresses.length > 0
-      ? await ioredis.mget(
-          touchedAddresses.map(address => `${contractId}_${address}`)
-        )
-      : [];
-
-  // Set balances of touched addresses to the `balances` object
-  for (let i = 0; i < touchedAddresses.length; i++) {
-    const address = touchedAddresses[i];
-    balances[address as Hex] =
-      values[i] !== null ? BigInt(values[i] as string) : BigInt(0);
-  }
-
-  const newWhales = new Set<Hex>();
-  // Update the balances based on the logs
-  for (const log of parsedLogs) {
-    if (!balances[log.to]) {
-      balances[log.to] = BigInt(0);
-    }
-
-    balances[log.to] += BigInt(log.value);
-
-    if (!balances[log.from]) {
-      balances[log.from] = BigInt(0);
-    }
-
-    balances[log.from] -= BigInt(log.value);
-
-    // Update the total supply
-    if (log.from === MINTER_ADDRESS) {
-      totalSupply += BigInt(log.value);
-    }
-
-    // If the `to` address has more than 0.1% of the total supply, add it to the whales
-    if (balances[log.to] > totalSupply / BigInt(1000)) {
-      // Add the whale to the group
-      newWhales.add(log.to);
-    }
-
-    if (log.from !== MINTER_ADDRESS && balances[log.from] < BigInt(0)) {
-      await ioredis.set(`${contractId}_negative_balance`, 'true');
-      const keysToDelete = await ioredis.keys(`${contractId}_0x*`);
-
-      // Add the synched block key to the keys to delete
-      keysToDelete.push(getSynchedBlockKey(getWhaleHandle(contract.name)));
-
-      console.error(
-        `Negative balance for ${log.from} in ${contract.name} (${contract.id})`
-      );
-      console.log(`Deleting ${keysToDelete.length} records from ${contractId}`);
-
-      // Delete all balances for this contract
-      if (keysToDelete.length > 0) {
-        await ioredis.del(keysToDelete);
-      }
-
-      return 'terminate';
-    }
-  }
-
-  // Save the whales to Redis
-  for (const whale of [...newWhales]) {
-    await ioredis.sadd(`${contractId}_whales`, whale);
-  }
-
-  // Prepare the mapping(address -> balance) to mset
-  const data = new Map();
-  Object.entries(balances).map(([address, balance]) =>
-    data.set(`${contractId}_${address}`, balance.toString())
-  );
-
+const indexWhales = async (contract: Contract) => {
   const handle = getWhaleHandle(contract.name);
-  if (data.size > 0) {
-    // Set the synched block number
-    const syncStatusKey = getSynchedBlockKey(handle);
-    data.set(syncStatusKey, logs[logs.length - 1].blockNumber.toString());
 
-    // Save the total supply to Redis
-    data.set(getTotalSupplyKey(contract.id), totalSupply.toString());
-
-    // mset the balances, synched block number, and total supply atomically
-    await ioredis.mset(data);
-  }
-};
-
-const indexWhales = async (
-  client: PublicClient<HttpTransport, Chain>,
-  contract: Contract
-) => {
-  const handle = getWhaleHandle(contract.name);
-  const syncStatusKey = getSynchedBlockKey(handle);
-  const groupSynchedBlock = await ioredis.get(syncStatusKey);
-
-  const fromBlock = groupSynchedBlock
-    ? BigInt(groupSynchedBlock) + BigInt(1)
-    : contract.deployedBlock;
-
-  console.log(
-    chalk.gray(`Indexing whales for ${contract.name} from block ${fromBlock}`)
-  );
-
-  const exitCode = await processLogs({
-    client,
-    event: TRANSFER_EVENT,
-    contractAddress: contract.address as Hex,
-    label: handle,
-    fromBlock,
-    processor: async (logs: GetFilterLogsReturnType) => {
-      return await indexWhalesFromLogs(contract, logs);
+  const group = await prisma.group.findUnique({
+    select: {
+      id: true,
     },
-  });
-
-  if (exitCode === 'terminate') {
-    console.error(`Terminating indexing whales for ${contract.name} `);
-    return;
-  }
-
-  const group = await prisma.group.findFirst({
     where: {
       handle,
     },
   });
 
   if (!group) {
-    throw new Error(`Group not found for ${contract.name}`);
+    throw new Error(`Group ${handle} not found`);
   }
 
-  const whales = await ioredis.smembers(`${contract.id}_whales`);
+  const [, _maxBlock] = await ioredis.zrevrange(
+    `${contract.id}:logs`,
+    0,
+    0,
+    'WITHSCORES'
+  );
 
-  await saveTree({
-    groupId: group.id,
-    addresses: whales as Hex[],
+  const maxBlock = Number(_maxBlock);
+
+  // Get the block number of the last tree
+  const lastTree = await prisma.merkleTree.findFirst({
+    where: {
+      groupId: group.id,
+    },
+    orderBy: {
+      blockNumber: 'desc',
+    },
   });
 
+  if (lastTree?.blockNumber) {
+    if (lastTree.blockNumber === BigInt(maxBlock)) {
+      console.log(
+        chalk.blue(
+          `Early holders for ${contract.symbol?.toUpperCase()} (${contract.id}) already indexed`
+        )
+      );
+      return;
+    }
+
+    if (lastTree.blockNumber > BigInt(maxBlock)) {
+      throw new Error(
+        `Last tree block number ${lastTree.blockNumber} is greater than synched max block ${maxBlock}`
+      );
+    }
+  }
+
+  let totalSupply = BigInt(0);
+  let whaleThreshold = BigInt(0);
+
+  const balances: Record<Hex, bigint> = {};
+
+  const whales = new Set<Hex>();
+
+  // Update the balances based on the logs
+  const chunkSize = 200000;
+  let from = Number(contract.deployedBlock);
+  let to = from + chunkSize;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (to > maxBlock) {
+      break;
+    }
+
+    const logs = await ioredis.zrangebyscoreBuffer(
+      `${contract.id}:logs`,
+      from,
+      to - 1
+    );
+
+    const parsedLogs = [];
+    for (const log of logs) {
+      const parsedLog = ERC20TransferEvent.deserializeBinary(log);
+
+      const from =
+        `0x${Buffer.from(parsedLog.getFrom_asU8()).toString('hex')}` as Hex;
+      const to =
+        `0x${Buffer.from(parsedLog.getTo_asU8()).toString('hex')}` as Hex;
+      const value = BigInt(
+        `0x${Buffer.from(parsedLog.getValue_asU8()).toString('hex')}`
+      );
+
+      // Ignore zero value transfers
+      if (value === BigInt(0)) {
+        continue;
+      }
+
+      parsedLogs.push({
+        blockNumber: parsedLog.getBlocknumber(),
+        transactionIndex: parsedLog.getTransactionindex(),
+        logIndex: parsedLog.getLogindex(),
+        from,
+        to,
+        value,
+      });
+    }
+
+    const sortedLogs = parsedLogs.sort(
+      (a, b) =>
+        a.blockNumber - b.blockNumber ||
+        a.transactionIndex - b.transactionIndex ||
+        a.logIndex - b.logIndex
+    );
+
+    for (const log of sortedLogs) {
+      if (!balances[log.to]) {
+        balances[log.to] = BigInt(log.value);
+      } else {
+        balances[log.to] += BigInt(log.value);
+      }
+
+      if (!balances[log.from]) {
+        balances[log.from] = BigInt(0);
+      }
+
+      if (log.from !== MINTER_ADDRESS) {
+        balances[log.from] -= BigInt(log.value);
+      }
+
+      // Update the total supply
+      if (log.from === MINTER_ADDRESS) {
+        totalSupply += BigInt(log.value);
+        whaleThreshold = totalSupply / BigInt(1000);
+      }
+
+      if (log.to === MINTER_ADDRESS) {
+        totalSupply -= BigInt(log.value);
+        whaleThreshold = totalSupply / BigInt(1000);
+      }
+
+      // If the `to` address has more than 0.1% of the total supply, add it to the whales
+      if (balances[log.to] > whaleThreshold) {
+        // Add the whale to the group
+        whales.add(log.to);
+      }
+
+      if (log.from !== MINTER_ADDRESS && balances[log.from] < BigInt(0)) {
+        if (
+          log.from !== '0x731c6f8c754fa404cfcc2ed8035ef79262f65702' &&
+          log.from !== '0xf55037738604fddfc4043d12f25124e94d7d1780'
+        ) {
+          console.log(
+            chalk.red(
+              `Negative balance for ${log.from} in ${contract.name} (${contract.id})`
+            )
+          );
+          return;
+        }
+      }
+    }
+
+    from = to;
+    to += chunkSize;
+  }
+
   console.log(
-    chalk.gray(`Indexed ${whales.length} whales for ${contract.name}`)
+    chalk.blue(
+      `Found ${whales.size} $${contract.symbol?.toUpperCase()} (${contract.id}) whales`
+    )
   );
+  await saveTree({
+    groupId: group.id,
+    addresses: [...whales] as Hex[],
+    blockNumber: BigInt(maxBlock),
+  });
 };
 
 export default indexWhales;

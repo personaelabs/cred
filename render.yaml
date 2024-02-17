@@ -1,3 +1,4 @@
+previewsEnabled: true
 services:
   - type: cron
     name: cred-indexer
@@ -25,7 +26,18 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
-
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cred
+          property: connectionString
+  - type: redis
+    plan: pro plus
+    name: cred
+    ipAllowList: 
+      - source: 0.0.0.0/0
+        description: everywhere
+      
 databases:
   - name: cred
     databaseName: cred

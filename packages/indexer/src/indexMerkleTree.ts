@@ -1,33 +1,24 @@
-import { Chain, HttpTransport, PublicClient } from 'viem';
 import prisma from './prisma';
-import { getDevAddresses, runInParallel } from './utils';
+import { IGNORE_CONTRACTS, getDevAddresses } from './utils';
 import { Contract, Group } from '@prisma/client';
-import * as chains from 'viem/chains';
-import { syncMemeTokensMeta } from './providers/coingecko/coingecko';
 import indexWhales, { getWhaleHandle } from './processors/whales';
 import indexEarlyHolders, {
   getEarlyHolderHandle,
 } from './processors/earlyHolders';
-import chalk from 'chalk';
 import { saveTree } from './lib/tree';
+import ioredis from './redis';
 
 // Run a sync job
-const runSyncJob = async (
-  client: PublicClient<HttpTransport, Chain>,
-  args: {
-    contract: Contract;
-    targetGroup: string;
-  }
-) => {
+const runSyncJob = async (args: {
+  contract: Contract;
+  targetGroup: string;
+}) => {
   switch (args.targetGroup) {
     case 'whale':
-      await indexWhales(client, args.contract);
+      await indexWhales(args.contract);
       break;
     case 'earlyHolder':
-      console.log(
-        chalk.gray(`indexing early holders for ${args.contract.name}`)
-      );
-      await indexEarlyHolders(client, args.contract);
+      await indexEarlyHolders(args.contract);
       break;
     default:
       throw new Error(`Unknown target group ${args.targetGroup}`);
@@ -36,43 +27,24 @@ const runSyncJob = async (
 
 // Create or update a group for a contract based on `targetGroup`
 const upsertGroup = async (contract: Contract, targetGroup: string) => {
-  let upsertData: Pick<Group, 'blockNumber' | 'handle' | 'displayName'>;
-  console.log(`upserting group for ${contract.name} ${targetGroup}`);
+  let upsertData: Pick<Group, 'displayName' | 'handle' | 'type'>;
+  console.log(`Upserting group for ${contract.name} ${targetGroup}`);
 
   if (targetGroup === 'whale') {
     const handle = getWhaleHandle(contract.name);
-    // Get the synched block number from the group if it exists
-    const group = await prisma.group.findUnique({
-      select: {
-        blockNumber: true,
-      },
-      where: {
-        handle,
-      },
-    });
 
     upsertData = {
-      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      type: 'whale',
       handle,
-      displayName: `${contract.name} historical whale`,
+      displayName: `$${contract.symbol?.toUpperCase()} whale`,
     };
   } else if (targetGroup === 'earlyHolder') {
     const handle = getEarlyHolderHandle(contract.name);
 
-    // Get the synched block number from the group if it exists
-    const group = await prisma.group.findUnique({
-      select: {
-        blockNumber: true,
-      },
-      where: {
-        handle,
-      },
-    });
-
     upsertData = {
-      blockNumber: group?.blockNumber || contract.deployedBlock - BigInt(1),
+      type: 'earlyHolder',
       handle,
-      displayName: `${contract.name} early holder`,
+      displayName: `Early $${contract.symbol?.toUpperCase()} holder`,
     };
   } else {
     throw new Error(`Unknown target group ${targetGroup}`);
@@ -89,41 +61,46 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
 
 const indexMerkleTree = async () => {
   if (process.env.NODE_ENV === 'production') {
-    await syncMemeTokensMeta();
+    // await syncMemeTokensMeta();
 
     // Get all contracts
-    const contracts = await prisma.contract.findMany();
-
-    // Create or update groups based on the `targetGroups` field of contracts
-    for (const contract of contracts) {
-      const groups = contract.targetGroups;
-
-      for (const group of groups) {
-        await upsertGroup(contract, group);
-      }
-    }
-
-    // Prepare a sync job for each group
-    const jobs = contracts.flatMap(contract => {
-      const chain = Object.values(chains).find(
-        chain => chain.name === contract.chain
-      );
-
-      if (!chain) {
-        throw new Error(`Chain ${contract.chain} not found`);
-      }
-
-      return contract.targetGroups.map(targetGroup => ({
-        chain,
-        args: {
-          contract,
-          targetGroup,
+    const contracts = await prisma.contract.findMany({
+      where: {
+        symbol: {
+          notIn: IGNORE_CONTRACTS,
         },
-      }));
+      },
     });
 
-    // Run the sync jobs in parallel
-    await runInParallel(runSyncJob, jobs);
+    // Create or update groups based on the `targetGroups` field of contracts
+    const upsertChunkSize = 30;
+    for (let i = 0; i < contracts.length; i += upsertChunkSize) {
+      const chunk = contracts.slice(i, i + upsertChunkSize);
+
+      const promises = [];
+      for (const contract of chunk) {
+        for (const targetGroup of contract.targetGroups) {
+          promises.push(upsertGroup(contract, targetGroup));
+        }
+      }
+
+      await Promise.all(promises);
+    }
+
+    const chunkSize = 30;
+
+    for (let i = 0; i < contracts.length; i += chunkSize) {
+      const chunk = contracts.slice(i, i + chunkSize);
+
+      const promises = [];
+      for (const contract of chunk) {
+        for (const targetGroup of contract.targetGroups) {
+          promises.push(runSyncJob({ contract, targetGroup }));
+        }
+      }
+
+      await Promise.all(promises);
+    }
   } else {
     // In development, only index the dev group
 
@@ -144,8 +121,10 @@ const indexMerkleTree = async () => {
       `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
     );
 
-    await saveTree({ groupId: devGroup.id, addresses });
+    await saveTree({ groupId: devGroup.id, addresses, blockNumber: BigInt(0) });
   }
+
+  await ioredis.quit();
 };
 
 indexMerkleTree();

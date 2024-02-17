@@ -19,7 +19,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@rainbow-me/rainbowkit": "^1.3.2",
-    "@sentry/nextjs": "^7.92.0",
+    "@sentry/nextjs": "^7.99.0",
     "axios": "^1.6.0",
     "circuit-node": "../circuit/circuit-node",
     "circuit-web": "../circuit/circuit-web",
