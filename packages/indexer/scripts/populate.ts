@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Contract } from '@prisma/client';
 import prisma from '../src/prisma';
 
@@ -31,18 +32,24 @@ const CONTRACTS: Pick<
   },
 ];
 
+const { IS_PULL_REQUEST, NODE_ENV } = process.env;
+
 const populate = async () => {
-  for (const contract of CONTRACTS) {
-    await prisma.contract.upsert({
-      update: contract,
-      create: contract,
-      where: {
-        address_chain: {
-          address: contract.address,
-          chain: contract.chain,
+  // Run this script only in PRs (i.e. Render preview environments)
+  // and non-production environments
+  if (IS_PULL_REQUEST || NODE_ENV !== 'production') {
+    for (const contract of CONTRACTS) {
+      await prisma.contract.upsert({
+        update: contract,
+        create: contract,
+        where: {
+          address_chain: {
+            address: contract.address,
+            chain: contract.chain,
+          },
         },
-      },
-    });
+      });
+    }
   }
 };
 
