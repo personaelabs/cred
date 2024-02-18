@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
 const groupSelect = {
-  handle: true,
+  id: true,
   displayName: true,
 } satisfies Prisma.GroupSelect;
 

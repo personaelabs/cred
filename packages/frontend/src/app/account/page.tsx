@@ -5,13 +5,13 @@ import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
-import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
+import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
 import { GroupSelect } from '../api/groups/route';
 import Link from 'next/link';
 
 export default function AccountPage() {
   const [addressesToGroups, setAddressesToGroups] =
-    useState<AddressToGroupsResponse>({});
+    useState<AddressToGroupsMap | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groups, setGroups] = useState<GroupSelect[]>([]);
   const [accounts, setAccounts] = useState<string[]>([]);
@@ -55,19 +55,25 @@ export default function AccountPage() {
   useEffect(() => {
     const fetchGroups = async () => {
       setIsLoading(true);
-      for (const account of accounts) {
-        const searchParams = new URLSearchParams();
-        searchParams.set('addressPrefix', account.slice(0, 4));
-        const response = await fetch(
-          `/api/address-to-groups?${searchParams.toString()}`
-        );
-        if (!response.ok) {
-          throw new Error('Data fetch failed'); // This will be caught by the catch block
-        }
+      console.log('fetching');
+      const response = await fetch(`/api/address-to-groups`, {
+        headers: {
+          Accept: 'application/x-protobuf',
+        },
+      });
 
-        const data = await response.json();
-        setAddressesToGroups(prev => ({ ...prev, ...data }));
+      if (!response.ok) {
+        throw new Error('Data fetch failed'); // This will be caught by the catch block
       }
+
+      console.time('getting buffer');
+      const buffer = await response.arrayBuffer();
+      console.timeEnd('getting buffer');
+
+      console.time('deserializing');
+      const data = AddressToGroupsMap.deserializeBinary(new Uint8Array(buffer));
+      console.timeEnd('deserializing');
+      setAddressesToGroups(data);
       setIsLoading(false);
     };
 
@@ -77,16 +83,18 @@ export default function AccountPage() {
   const eligibleGroups = () => {
     const addressAndGroup: {
       address: string;
-      group: string;
+      group: number;
     }[] = [];
 
     for (const account of accounts) {
-      if (addressesToGroups[account]) {
-        for (const group of addressesToGroups[account]) {
-          addressAndGroup.push({
-            address: account,
-            group,
-          });
+      if (addressesToGroups) {
+        const map = addressesToGroups.getAddresstogroupsMap();
+        const record = map.get(account);
+        if (record) {
+          const groups = (record as Groups).getGroupsList();
+          for (const group of groups) {
+            addressAndGroup.push({ address: account, group });
+          }
         }
       }
     }
@@ -100,15 +108,14 @@ export default function AccountPage() {
     return uniqueGroups.map(({ address, group }) => {
       return {
         address,
-        group: groups.find(g => g.handle === group)!,
+        group: groups.find(g => g.id === group)!,
       };
     });
   };
 
   const addedGroups =
-    user?.fidAttestations.map(
-      attestation => attestation.MerkleTree.Group.handle
-    ) || [];
+    user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
+    [];
 
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
@@ -149,7 +156,7 @@ export default function AccountPage() {
               <WalletView
                 walletAddr={group.address}
                 group={group.group}
-                added={addedGroups.some(g => g === group.group.handle)}
+                added={addedGroups.some(g => g === group.group.id)}
                 key={i}
               />
             ))}

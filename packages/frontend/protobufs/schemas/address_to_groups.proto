@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+message Groups {
+    repeated uint32 groups = 1;
+}
+
+message AddressToGroupsMap {
+    map<string, Groups> addressToGroups = 1;
+}
+

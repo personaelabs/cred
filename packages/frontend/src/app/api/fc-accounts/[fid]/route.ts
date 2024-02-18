@@ -9,6 +9,7 @@ const selectAttestation = {
     select: {
       Group: {
         select: {
+          id: true,
           handle: true,
           displayName: true,
         },
