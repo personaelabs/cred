@@ -16,6 +16,7 @@ export default function AccountPage() {
   const [groups, setGroups] = useState<GroupSelect[]>([]);
   const [accounts, setAccounts] = useState<string[]>([]);
   const { user } = useUser();
+  const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
 
   const listenForAccountChanges = () => {
     if ((window as any).ethereum) {
@@ -79,6 +80,31 @@ export default function AccountPage() {
     fetchGroups();
   }, [accounts]);
 
+  const switchWallets = async () => {
+    if ((window as any).ethereum) {
+      setIsSwitchingWallets(true);
+      await (window as any).ethereum.request({
+        method: 'wallet_revokePermissions',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+
+      const accounts = await (window as any).ethereum.request({
+        method: 'eth_requestAccounts',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+      setAccounts(accounts);
+      setIsSwitchingWallets(false);
+    }
+  };
+
   const eligibleGroups = () => {
     const addressAndGroup: {
       address: string;
@@ -135,7 +161,7 @@ export default function AccountPage() {
         </div>
       )}
 
-      {!isLoading && accounts.length == 0 && (
+      {!isLoading && accounts.length == 0 && !isSwitchingWallets && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80">Connect your wallets to add creddd</div>
           <Button onClick={connectAccounts}>
@@ -177,6 +203,9 @@ export default function AccountPage() {
             ) : (
               <></>
             )}
+            <Button variant="link" onClick={switchWallets}>
+              Switch wallets
+            </Button>
           </div>
         </div>
       )}
