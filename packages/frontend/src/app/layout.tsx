@@ -30,7 +30,7 @@ export default function RootLayout({
   const isUserProfilePage = /\/user\//.test(pathname);
 
   const showComingSoon =
-    process.env.NODE_ENV !== 'development' && !isUserProfilePage;
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' && !isUserProfilePage;
 
   return (
     <html lang="en">

@@ -7,7 +7,6 @@ services:
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
     rootDir: ./
-    branch: main
     schedule: '0 * * * *'
     buildFilter:
       paths:
