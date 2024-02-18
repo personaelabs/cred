@@ -39,7 +39,7 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
       <img
         src={user.pfp_url}
         alt="profile image"
-        className="w-[60px] h-60x] rounded-full object-cover"
+        className="w-[60px] h-[60px] rounded-full object-cover"
       ></img>
       <div className="flex flex-col items-center">
         <div>{user.display_name} </div>

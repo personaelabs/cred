@@ -1,25 +1,18 @@
+export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
 
 interface AddressToGroupsQueryResult {
   address: string;
-  groups: string;
-}
-
-export interface AddressToGroupsResponse {
-  [address: string]: string[];
+  groups: number[];
 }
 
 // Get a list of addresses and the groups they belong to
 export async function GET(req: NextRequest) {
-  const addressPrefix = req.nextUrl.searchParams.get('addressPrefix');
+  const skip = parseInt(req.nextUrl.searchParams.get('skip') || '0');
+  const take = parseInt(req.nextUrl.searchParams.get('take') || '50000');
 
-  if (!addressPrefix) {
-    return Response.json(
-      { error: 'addressPrefix is required' },
-      { status: 400 }
-    );
-  }
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
     WITH large_enough_trees AS (
       SELECT
@@ -33,22 +26,37 @@ export async function GET(req: NextRequest) {
     )
     SELECT
       "MerkleProof".address,
-      STRING_AGG("Group".handle, ',') AS "groups"
+      ARRAY_AGG("Group".id) AS "groups"
     FROM
       "MerkleProof"
       LEFT JOIN "MerkleTree" ON "MerkleProof"."merkleRoot" = "MerkleTree"."merkleRoot"
       LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
-    WHERE
-      LEFT("MerkleProof".address, 4) = ${addressPrefix}
-      AND "MerkleTree"."merkleRoot" IN ( SELECT "merkleRoot" FROM large_enough_trees)
+    WHERE "MerkleTree"."merkleRoot" IN ( SELECT "merkleRoot" FROM large_enough_trees)
     GROUP BY
       "MerkleProof".address
+    OFFSET ${skip}
+    LIMIT ${take}
   `;
 
-  const addressToGroups: AddressToGroupsResponse = {};
-  for (const { address, groups } of result) {
-    addressToGroups[address] = groups.split(',');
+  if (result.length === 0) {
+    // Return a 204 No Content response if there are no results
+    return new NextResponse(null, {
+      status: 204,
+    });
   }
 
-  return Response.json(addressToGroups, { status: 200 });
+  const addressesToGroups = new AddressToGroupsMap();
+  const map = addressesToGroups.getAddresstogroupsMap();
+
+  for (const row of result) {
+    const groups = new Groups();
+    groups.setGroupsList(row.groups);
+    map.set(row.address, groups);
+  }
+
+  return new NextResponse(addressesToGroups.serializeBinary(), {
+    headers: {
+      'Content-Type': 'application/x-protobuf',
+    },
+  });
 }

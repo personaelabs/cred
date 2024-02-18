@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
@@ -28,14 +29,14 @@ export async function GET(
     };
   }
 ) {
-  const groupHandle = params.group;
+  const groupId = Number(params.group);
 
   const group = await prisma.group.findUnique({
     select: {
       id: true,
     },
     where: {
-      handle: groupHandle,
+      id: groupId,
     },
   });
 
@@ -57,7 +58,7 @@ export async function GET(
       groupId: group.id,
     },
     orderBy: {
-      createdAt: 'desc',
+      blockNumber: 'desc',
     },
   });
 

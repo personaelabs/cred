@@ -9,6 +9,7 @@ import { GroupSelect } from '@/app/api/groups/route';
 import { postJSON } from '@/lib/utils';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUser } from '@/context/UserContext';
 
 // Assuming demoSignMessage is defined elsewhere and imported
 // import { demoSignMessage } from 'wherever-this-function-is-defined';
@@ -24,11 +25,12 @@ const WalletView: React.FC<WalletViewProps> = ({
   group,
   ...props
 }) => {
+  const { refetchUser } = useUser();
   const [isAdding, setIsAdding] = useState(false);
   const prover = useProver();
   const [added, setAdded] = useState(props.added);
 
-  const addGroup = async (addr: string, groupHandle: string) => {
+  const addGroup = async (addr: string, groupId: number) => {
     // Viem!
     const client = createWalletClient({
       account: addr as Hex,
@@ -38,7 +40,7 @@ const WalletView: React.FC<WalletViewProps> = ({
     });
 
     setIsAdding(true);
-    const proof = await prover.prove(addr as Hex, client, groupHandle);
+    const proof = await prover.prove(addr as Hex, client, groupId);
 
     if (proof) {
       await postJSON({
@@ -50,17 +52,18 @@ const WalletView: React.FC<WalletViewProps> = ({
       toast.success(`Successfully added creddd!`);
 
       setAdded(true);
+      refetchUser();
     }
     setIsAdding(false);
   };
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-row items-center justify-center gap-[20px] w-[300px]">
+      <div className="flex flex-row items-center justify-center gap-[20px] w-[350px]">
         <div className="text-center w-[200px]">{group.displayName}</div>
         <div className="w-[85px] text-center">
           <Button
-            onClick={() => addGroup(walletAddr, group.handle)}
+            onClick={() => addGroup(walletAddr, group.id)}
             disabled={isAdding || added}
           >
             {isAdding ? (
