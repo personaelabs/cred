@@ -1,7 +1,7 @@
-import { MerkleProof } from '@prisma/client';
 import prisma from '../prisma';
 import { Hex } from 'viem';
 import chalk from 'chalk';
+import { ParsedMerkleProof } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const merkleTree = require('merkle-tree-rs');
 
@@ -26,13 +26,10 @@ const toAddress = (x: string): Hex => {
  * Parse a merkle proof in JSON format
  * @param merkleProof merkle proof in JSON format
  */
-const parseMerkleProof = (
-  merkleProof: string
-): Omit<MerkleProof, 'createdAt' | 'updatedAt' | 'id'> => {
+const parseMerkleProof = (merkleProof: string): ParsedMerkleProof => {
   const merkleProofJSON = JSON.parse(merkleProof);
   const address = toAddress(toHex(merkleProofJSON['leaf']));
 
-  const merkleRoot = toHex(merkleProofJSON['root']);
   const path = merkleProofJSON['siblings'].map((sibling: string[]) =>
     toHex(sibling[0])
   );
@@ -42,7 +39,6 @@ const parseMerkleProof = (
 
   return {
     address,
-    merkleRoot,
     path,
     pathIndices,
   };
@@ -90,7 +86,7 @@ export const saveTree = async ({
   // Save the merkle tree if it doesn't exist yet
   if (!merkleRootExists) {
     // Create a new merkle tree
-    await prisma.merkleTree.create({
+    const { id: treeId } = await prisma.merkleTree.create({
       data: {
         groupId,
         merkleRoot,
@@ -115,11 +111,16 @@ export const saveTree = async ({
         Buffer.from(tree)
       );
 
-      const parsedMerkleProofs = merkleProofs.map(parseMerkleProof);
+      const parsedMerkleProofs = merkleProofs.map(
+        parseMerkleProof
+      ) as ParsedMerkleProof[];
 
       // Save the merkle proofs
       await prisma.merkleProof.createMany({
-        data: parsedMerkleProofs,
+        data: parsedMerkleProofs.map(merkleProof => ({
+          ...merkleProof,
+          treeId,
+        })),
       });
     }
 
@@ -136,8 +137,8 @@ export const saveTree = async ({
     // Delete the old merkle proofs
     await prisma.merkleProof.deleteMany({
       where: {
-        merkleRoot: {
-          in: oldTrees.map(tree => tree.merkleRoot),
+        treeId: {
+          in: oldTrees.map(tree => tree.id),
         },
       },
     });
