@@ -27,10 +27,8 @@ interface Prover {
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const getMerkleTree = async (
-  groupHandle: string
-): Promise<MerkleTreeSelect> => {
-  const res = await fetch(`/api/groups/${groupHandle}/merkle-proofs`);
+const getMerkleTree = async (groupId: number): Promise<MerkleTreeSelect> => {
+  const res = await fetch(`/api/groups/${groupId}/merkle-proofs`);
   const tree = (await res.json()) as MerkleTreeSelect;
   return tree;
 };
@@ -50,7 +48,7 @@ const useProver = () => {
   const prove = async (
     address: Hex,
     client: WalletClient,
-    groupHandle: string
+    groupId: number
   ): Promise<FidAttestationRequestBody | null> => {
     if (prover && user?.fid && siwfResponse) {
       const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
@@ -66,7 +64,7 @@ const useProver = () => {
         description: 'This may take a minute...',
       });
 
-      const merkleTree = await getMerkleTree(groupHandle);
+      const merkleTree = await getMerkleTree(groupId);
 
       const sourcePubKeySigHash = keccak256(sig);
 
