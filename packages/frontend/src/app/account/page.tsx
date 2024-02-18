@@ -2,25 +2,24 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
-import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
-import { GroupSelect } from '../api/groups/route';
 import Link from 'next/link';
+import useEligibleGroups from '@/hooks/useEligibleGroups';
+import { Hex } from 'viem';
 
 export default function AccountPage() {
-  const [addressesToGroups, setAddressesToGroups] =
-    useState<AddressToGroupsMap | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groups, setGroups] = useState<GroupSelect[]>([]);
-  const [accounts, setAccounts] = useState<string[]>([]);
+  const [accounts, setAccounts] = useState<Hex[]>([]);
   const { user } = useUser();
   const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
+  const eligibleGroups = useEligibleGroups(accounts);
+
+  const isLoading = eligibleGroups === null;
 
   const listenForAccountChanges = () => {
     if ((window as any).ethereum) {
-      (window as any).ethereum.on('accountsChanged', (accounts: string[]) => {
+      (window as any).ethereum.on('accountsChanged', (accounts: Hex[]) => {
         setAccounts(accounts);
       });
     }
@@ -40,48 +39,6 @@ export default function AccountPage() {
       console.log('no ethereum provider');
     }
   };
-
-  useEffect(() => {
-    (async () => {
-      const groupResponse = await fetch('/api/groups', {
-        cache: 'no-store',
-      });
-
-      if (!groupResponse.ok) {
-        throw new Error('Group fetch failed');
-      }
-      const groupData = (await groupResponse.json()) as GroupSelect[];
-      setGroups(groupData);
-    })();
-  }, []);
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      setIsLoading(true);
-      console.log('fetching');
-      const response = await fetch(`/api/address-to-groups`, {
-        headers: {
-          Accept: 'application/x-protobuf',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Data fetch failed'); // This will be caught by the catch block
-      }
-
-      console.time('getting buffer');
-      const buffer = await response.arrayBuffer();
-      console.timeEnd('getting buffer');
-
-      console.time('deserializing');
-      const data = AddressToGroupsMap.deserializeBinary(new Uint8Array(buffer));
-      console.timeEnd('deserializing');
-      setAddressesToGroups(data);
-      setIsLoading(false);
-    };
-
-    fetchGroups();
-  }, [accounts]);
 
   const switchWallets = async () => {
     if ((window as any).ethereum) {
@@ -108,44 +65,9 @@ export default function AccountPage() {
     }
   };
 
-  const eligibleGroups = () => {
-    const addressAndGroup: {
-      address: string;
-      group: number;
-    }[] = [];
-
-    for (const account of accounts) {
-      if (addressesToGroups) {
-        const map = addressesToGroups.getAddresstogroupsMap();
-        const record = map.get(account);
-        if (record) {
-          const groups = (record as Groups).getGroupsList();
-          for (const group of groups) {
-            addressAndGroup.push({ address: account, group });
-          }
-        }
-      }
-    }
-
-    // Filter out duplicate groups
-    const uniqueGroups = addressAndGroup.filter(
-      ({ group }, index) =>
-        index === addressAndGroup.findIndex(t => t.group === group)
-    );
-
-    return uniqueGroups.map(({ address, group }) => {
-      return {
-        address,
-        group: groups.find(g => g.id === group)!,
-      };
-    });
-  };
-
   const addedGroups =
     user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
     [];
-
-  const creddd = eligibleGroups();
 
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
@@ -165,7 +87,7 @@ export default function AccountPage() {
         </div>
       )}
 
-      {!isLoading && accounts.length == 0 && !isSwitchingWallets && (
+      {accounts.length == 0 && !isSwitchingWallets && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80">Connect your wallets to add creddd</div>
           <Button onClick={connectAccounts}>
@@ -174,23 +96,21 @@ export default function AccountPage() {
         </div>
       )}
 
-      {isLoading && <div>Loading...</div>}
-
-      {!isLoading && accounts && accounts.length > 0 && (
+      {!isLoading && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
-            {creddd.length === 0 ? (
+            {eligibleGroups.length === 0 ? (
               <>No creddd found for connected wallets</>
             ) : (
               <>Found the following creddd:</>
             )}
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
-            {creddd.map((group, i) => (
+            {eligibleGroups.map((group, i) => (
               <WalletView
                 walletAddr={group.address}
-                group={group.group}
-                added={addedGroups.some(g => g === group.group.id)}
+                group={group}
+                added={addedGroups.some(g => g === group.id)}
                 key={i}
               />
             ))}

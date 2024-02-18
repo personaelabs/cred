@@ -9,7 +9,10 @@ interface AddressToGroupsQueryResult {
 }
 
 // Get a list of addresses and the groups they belong to
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  const skip = parseInt(req.nextUrl.searchParams.get('skip') || '0');
+  const take = parseInt(req.nextUrl.searchParams.get('take') || '50000');
+
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
     WITH large_enough_trees AS (
       SELECT
@@ -31,7 +34,16 @@ export async function GET(_req: NextRequest) {
     WHERE "MerkleTree"."merkleRoot" IN ( SELECT "merkleRoot" FROM large_enough_trees)
     GROUP BY
       "MerkleProof".address
+    OFFSET ${skip}
+    LIMIT ${take}
   `;
+
+  if (result.length === 0) {
+    // Return a 204 No Content response if there are no results
+    return new NextResponse(null, {
+      status: 204,
+    });
+  }
 
   const addressesToGroups = new AddressToGroupsMap();
   const map = addressesToGroups.getAddresstogroupsMap();
@@ -45,12 +57,6 @@ export async function GET(_req: NextRequest) {
   return new NextResponse(addressesToGroups.serializeBinary(), {
     headers: {
       'Content-Type': 'application/x-protobuf',
-    },
-  });
-
-  return new NextResponse(JSON.stringify(result), {
-    headers: {
-      'Content-Type': 'application/json',
     },
   });
 }
