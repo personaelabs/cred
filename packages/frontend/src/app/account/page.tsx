@@ -178,7 +178,7 @@ export default function AccountPage() {
             {creddd.length === 0 ? (
               <>No creddd found for connected wallets</>
             ) : (
-              <>You are eligible for the following creddd:</>
+              <>Found the following creddd:</>
             )}
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
