@@ -8,6 +8,7 @@ import WalletView from '@/components/ui/WalletView'; // Fixed import statement
 import Link from 'next/link';
 import useEligibleGroups from '@/hooks/useEligibleGroups';
 import { Hex } from 'viem';
+import { Loader2 } from 'lucide-react';
 
 export default function AccountPage() {
   const [accounts, setAccounts] = useState<Hex[]>([]);
@@ -96,9 +97,12 @@ export default function AccountPage() {
         </div>
       )}
 
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
+      {accounts.length > 0 && isLoading ? (
+        <div className="flex flex-row items-center">
+          <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
+          Searching for creddd
+        </div>
+      ) : accounts.length > 0 && !isLoading ? (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
             {eligibleGroups.length === 0 ? (
@@ -134,6 +138,8 @@ export default function AccountPage() {
             </Button>
           </div>
         </div>
+      ) : (
+        <></>
       )}
     </div>
   );
