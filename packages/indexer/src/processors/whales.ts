@@ -41,6 +41,9 @@ const indexWhales = async (contract: Contract) => {
   const lastTree = await prisma.merkleTree.findFirst({
     where: {
       groupId: group.id,
+      blockNumber: {
+        not: null,
+      },
     },
     orderBy: {
       blockNumber: 'desc',

@@ -30,7 +30,7 @@ const WalletView: React.FC<WalletViewProps> = ({
   const prover = useProver();
   const [added, setAdded] = useState(props.added);
 
-  const addGroup = async (addr: string, groupHandle: string) => {
+  const addGroup = async (addr: string, groupId: number) => {
     // Viem!
     const client = createWalletClient({
       account: addr as Hex,
@@ -40,7 +40,7 @@ const WalletView: React.FC<WalletViewProps> = ({
     });
 
     setIsAdding(true);
-    const proof = await prover.prove(addr as Hex, client, groupHandle);
+    const proof = await prover.prove(addr as Hex, client, groupId);
 
     if (proof) {
       await postJSON({
@@ -63,7 +63,7 @@ const WalletView: React.FC<WalletViewProps> = ({
         <div className="text-center w-[200px]">{group.displayName}</div>
         <div className="w-[85px] text-center">
           <Button
-            onClick={() => addGroup(walletAddr, group.handle)}
+            onClick={() => addGroup(walletAddr, group.id)}
             disabled={isAdding || added}
           >
             {isAdding ? (

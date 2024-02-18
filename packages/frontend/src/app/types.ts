@@ -1,4 +1,5 @@
 import { Hex } from 'viem';
+import { GroupSelect } from './api/groups/route';
 
 /**
  * Witness to pass to the prover
@@ -31,3 +32,7 @@ export interface NeynarUserResponse {
   display_name: string;
   pfp_url: string;
 }
+
+export type EligibleGroup = {
+  address: Hex;
+} & GroupSelect;
