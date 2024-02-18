@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { FidAttestationRequestBody } from '@/app/types';
 // import { SIG_SALT } from '@/hooks/useProver';
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');

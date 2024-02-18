@@ -16,6 +16,7 @@ export default function AccountPage() {
   const [groups, setGroups] = useState<GroupSelect[]>([]);
   const [accounts, setAccounts] = useState<string[]>([]);
   const { user } = useUser();
+  const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
 
   const listenForAccountChanges = () => {
     if ((window as any).ethereum) {
@@ -42,7 +43,9 @@ export default function AccountPage() {
 
   useEffect(() => {
     (async () => {
-      const groupResponse = await fetch('/api/groups');
+      const groupResponse = await fetch('/api/groups', {
+        cache: 'no-store',
+      });
 
       if (!groupResponse.ok) {
         throw new Error('Group fetch failed');
@@ -79,6 +82,31 @@ export default function AccountPage() {
 
     fetchGroups();
   }, [accounts]);
+
+  const switchWallets = async () => {
+    if ((window as any).ethereum) {
+      setIsSwitchingWallets(true);
+      await (window as any).ethereum.request({
+        method: 'wallet_revokePermissions',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+
+      const accounts = await (window as any).ethereum.request({
+        method: 'eth_requestAccounts',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+      setAccounts(accounts);
+      setIsSwitchingWallets(false);
+    }
+  };
 
   const eligibleGroups = () => {
     const addressAndGroup: {
@@ -117,6 +145,8 @@ export default function AccountPage() {
     user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
     [];
 
+  const creddd = eligibleGroups();
+
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
       <div className="text-[24px]">Add creddd to your Farcaster account</div>
@@ -126,7 +156,7 @@ export default function AccountPage() {
           <img
             src={user.pfp_url}
             alt="profile image"
-            className="w-[60px] h-60x] rounded-full object-cover"
+            className="w-[60px] h-[60px] rounded-full object-cover"
           ></img>
           <div>
             <div>{user.display_name} </div>
@@ -135,7 +165,7 @@ export default function AccountPage() {
         </div>
       )}
 
-      {!isLoading && accounts.length == 0 && (
+      {!isLoading && accounts.length == 0 && !isSwitchingWallets && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80">Connect your wallets to add creddd</div>
           <Button onClick={connectAccounts}>
@@ -149,10 +179,14 @@ export default function AccountPage() {
       {!isLoading && accounts && accounts.length > 0 && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
-            You are eligible for the following creddd:
+            {creddd.length === 0 ? (
+              <>No creddd found for connected wallets</>
+            ) : (
+              <>Found the following creddd:</>
+            )}
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
-            {eligibleGroups().map((group, i) => (
+            {creddd.map((group, i) => (
               <WalletView
                 walletAddr={group.address}
                 group={group.group}
@@ -173,6 +207,9 @@ export default function AccountPage() {
             ) : (
               <></>
             )}
+            <Button variant="link" onClick={switchWallets}>
+              Switch wallets
+            </Button>
           </div>
         </div>
       )}
