@@ -80,8 +80,24 @@ export const saveTree = async ({
   const merkleRootExists = await prisma.merkleTree.findFirst({
     where: {
       merkleRoot,
+      groupId,
+    },
+    orderBy: {
+      blockNumber: 'desc',
     },
   });
+
+  // Update the block number if the merkle root exists
+  if (merkleRootExists) {
+    await prisma.merkleTree.update({
+      where: {
+        id: merkleRootExists.id,
+      },
+      data: {
+        blockNumber,
+      },
+    });
+  }
 
   // Save the merkle tree if it doesn't exist yet
   if (!merkleRootExists) {
