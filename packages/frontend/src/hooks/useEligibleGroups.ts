@@ -5,10 +5,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Hex } from 'viem';
 
 const useEligibleGroups = (addresses: Hex[] | null) => {
-  const [responses, setResponses] = useState<Response[]>([]);
   const [addressToGroupsMaps, setAddressToGroupsMaps] = useState<
-    AddressToGroupsMap[]
-  >([]);
+    AddressToGroupsMap[] | null
+  >(null);
   const [eligibleGroups, setEligibleGroups] = useState<EligibleGroup[] | null>(
     null
   );
@@ -32,6 +31,8 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
     let skip = 0;
     const take = 100000;
 
+    const _addressToGroupsMap = [];
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const searchParams = new URLSearchParams();
@@ -54,17 +55,24 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
         break;
       }
 
-      setResponses(prev => [...prev, response]);
+      const buffer = await response.arrayBuffer();
+      const addressesToGroups = AddressToGroupsMap.deserializeBinary(
+        new Uint8Array(buffer)
+      );
+      _addressToGroupsMap.push(addressesToGroups);
       skip += take;
     }
+
+    setAddressToGroupsMaps(_addressToGroupsMap);
   }, []);
 
   const searchEligibleGroups = useCallback(async () => {
     // Mapping of eligible groups to the corresponding address of the group
 
-    const maps = addressToGroupsMaps.map(map => map.getAddresstogroupsMap());
     // Search for the eligible groups once the addresses and groups are available
-    if (addresses && groups) {
+    if (addresses && groups && addressToGroupsMaps) {
+      const _eligibleGroups = [];
+      const maps = addressToGroupsMaps.map(map => map.getAddresstogroupsMap());
       for (const address of addresses) {
         for (const map of maps) {
           const record = map.get(address);
@@ -81,41 +89,15 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
                 ...group,
               };
 
-              setEligibleGroups(prev =>
-                prev
-                  ? !prev.some(g => g.id === groupId)
-                    ? [...prev, groupWithAddress]
-                    : []
-                  : [groupWithAddress]
-              );
+              _eligibleGroups.push(groupWithAddress);
             }
           }
         }
       }
+
+      setEligibleGroups(_eligibleGroups);
     }
   }, [addressToGroupsMaps, addresses, groups]);
-
-  useEffect(() => {
-    (async () => {
-      // Parse the response and add it to the addressToGroupsMaps
-      if (responses.length !== addressToGroupsMaps.length) {
-        // Get the responses that haven't been parsed yet
-        const responsesToParse = responses.slice(
-          addressToGroupsMaps.length,
-          responses.length
-        );
-
-        // Parse the responses
-        for (const response of responsesToParse) {
-          const buffer = await response.arrayBuffer();
-          const addressesToGroups = AddressToGroupsMap.deserializeBinary(
-            new Uint8Array(buffer)
-          );
-          setAddressToGroupsMaps(prev => [...prev, addressesToGroups]);
-        }
-      }
-    })();
-  }, [addressToGroupsMaps.length, responses]);
 
   // Fetch the address to groups mapping on page load
   useEffect(() => {

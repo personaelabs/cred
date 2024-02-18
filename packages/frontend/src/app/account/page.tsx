@@ -96,7 +96,9 @@ export default function AccountPage() {
         </div>
       )}
 
-      {!isLoading && (
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
             {eligibleGroups.length === 0 ? (
