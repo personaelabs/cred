@@ -14,23 +14,26 @@ model FidAttestation {
   fid         Int
   attestation Bytes
   signInSig   Bytes
-  merkleRoot  String
-  MerkleTree  MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
+  treeId      Int
+  MerkleTree  MerkleTree @relation(fields: [treeId], references: [id])
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  @@id([fid, merkleRoot])
+  @@id([fid, treeId])
 }
 
 model MerkleTree {
-  merkleRoot     String           @id
+  id             Int              @id @default(autoincrement())
+  merkleRoot     String
   Group          Group            @relation(fields: [groupId], references: [id])
   groupId        Int
-  blockNumber    BigInt?
+  blockNumber    BigInt
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   merkleProofs   MerkleProof[]
   FidAttestation FidAttestation[]
+
+  @@unique([merkleRoot, groupId, blockNumber])
 }
 
 model MerkleProof {
@@ -41,10 +44,10 @@ model MerkleProof {
   path        String[]
   pathIndices Int[]
 
-  MerkleTree MerkleTree @relation(fields: [merkleRoot], references: [merkleRoot])
-  merkleRoot String
+  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
+  treeId     Int
 
-  @@id([merkleRoot, address])
+  @@id([treeId, address])
 }
 
 model Group {

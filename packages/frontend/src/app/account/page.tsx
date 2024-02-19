@@ -2,24 +2,25 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import WalletView from '@/components/ui/WalletView'; // Fixed import statement
-import { AddressToGroupsResponse } from '@/app/api/address-to-groups/route';
-import { GroupSelect } from '../api/groups/route';
 import Link from 'next/link';
+import useEligibleGroups from '@/hooks/useEligibleGroups';
+import { Hex } from 'viem';
+import { Loader2 } from 'lucide-react';
 
 export default function AccountPage() {
-  const [addressesToGroups, setAddressesToGroups] =
-    useState<AddressToGroupsResponse>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [groups, setGroups] = useState<GroupSelect[]>([]);
-  const [accounts, setAccounts] = useState<string[]>([]);
+  const [accounts, setAccounts] = useState<Hex[]>([]);
   const { user } = useUser();
+  const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
+  const eligibleGroups = useEligibleGroups(accounts);
+
+  const isLoading = eligibleGroups === null;
 
   const listenForAccountChanges = () => {
     if ((window as any).ethereum) {
-      (window as any).ethereum.on('accountsChanged', (accounts: string[]) => {
+      (window as any).ethereum.on('accountsChanged', (accounts: Hex[]) => {
         setAccounts(accounts);
       });
     }
@@ -40,75 +41,34 @@ export default function AccountPage() {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      const groupResponse = await fetch('/api/groups');
+  const switchWallets = async () => {
+    if ((window as any).ethereum) {
+      setIsSwitchingWallets(true);
+      await (window as any).ethereum.request({
+        method: 'wallet_revokePermissions',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
 
-      if (!groupResponse.ok) {
-        throw new Error('Group fetch failed');
-      }
-      const groupData = (await groupResponse.json()) as GroupSelect[];
-      setGroups(groupData);
-    })();
-  }, []);
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      setIsLoading(true);
-      for (const account of accounts) {
-        const searchParams = new URLSearchParams();
-        searchParams.set('addressPrefix', account.slice(0, 4));
-        const response = await fetch(
-          `/api/address-to-groups?${searchParams.toString()}`
-        );
-        if (!response.ok) {
-          throw new Error('Data fetch failed'); // This will be caught by the catch block
-        }
-
-        const data = await response.json();
-        setAddressesToGroups(prev => ({ ...prev, ...data }));
-      }
-      setIsLoading(false);
-    };
-
-    fetchGroups();
-  }, [accounts]);
-
-  const eligibleGroups = () => {
-    const addressAndGroup: {
-      address: string;
-      group: string;
-    }[] = [];
-
-    for (const account of accounts) {
-      if (addressesToGroups[account]) {
-        for (const group of addressesToGroups[account]) {
-          addressAndGroup.push({
-            address: account,
-            group,
-          });
-        }
-      }
+      const accounts = await (window as any).ethereum.request({
+        method: 'eth_requestAccounts',
+        params: [
+          {
+            eth_accounts: {},
+          },
+        ],
+      });
+      setAccounts(accounts);
+      setIsSwitchingWallets(false);
     }
-
-    // Filter out duplicate groups
-    const uniqueGroups = addressAndGroup.filter(
-      ({ group }, index) =>
-        index === addressAndGroup.findIndex(t => t.group === group)
-    );
-
-    return uniqueGroups.map(({ address, group }) => {
-      return {
-        address,
-        group: groups.find(g => g.handle === group)!,
-      };
-    });
   };
 
   const addedGroups =
-    user?.fidAttestations.map(
-      attestation => attestation.MerkleTree.Group.handle
-    ) || [];
+    user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
+    [];
 
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
@@ -119,7 +79,7 @@ export default function AccountPage() {
           <img
             src={user.pfp_url}
             alt="profile image"
-            className="w-[60px] h-60x] rounded-full object-cover"
+            className="w-[60px] h-[60px] rounded-full object-cover"
           ></img>
           <div>
             <div>{user.display_name} </div>
@@ -128,7 +88,7 @@ export default function AccountPage() {
         </div>
       )}
 
-      {!isLoading && accounts.length == 0 && (
+      {accounts.length == 0 && !isSwitchingWallets && (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80">Connect your wallets to add creddd</div>
           <Button onClick={connectAccounts}>
@@ -137,19 +97,26 @@ export default function AccountPage() {
         </div>
       )}
 
-      {isLoading && <div>Loading...</div>}
-
-      {!isLoading && accounts && accounts.length > 0 && (
+      {accounts.length > 0 && isLoading ? (
+        <div className="flex flex-row items-center">
+          <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
+          Searching for creddd
+        </div>
+      ) : accounts.length > 0 && !isLoading ? (
         <div className="flex flex-col gap-[14px]">
           <div className="opacity-80 text-center">
-            You are eligible for the following creddd:
+            {eligibleGroups.length === 0 ? (
+              <>No creddd found for connected wallets</>
+            ) : (
+              <>Found the following creddd:</>
+            )}
           </div>
           <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
-            {eligibleGroups().map((group, i) => (
+            {eligibleGroups.map((group, i) => (
               <WalletView
                 walletAddr={group.address}
-                group={group.group}
-                added={addedGroups.some(g => g === group.group.handle)}
+                group={group}
+                added={addedGroups.some(g => g === group.id)}
                 key={i}
               />
             ))}
@@ -166,8 +133,13 @@ export default function AccountPage() {
             ) : (
               <></>
             )}
+            <Button variant="link" onClick={switchWallets}>
+              Switch wallets
+            </Button>
           </div>
         </div>
+      ) : (
+        <></>
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { Hex } from 'viem';
+import { GroupSelect } from './api/groups/route';
 
 /**
  * Witness to pass to the prover
@@ -23,6 +24,7 @@ export interface FidAttestationRequestBody {
   signInSigS: Hex;
   proof: Hex;
   fid: number;
+  treeId: number;
 }
 
 export interface NeynarUserResponse {
@@ -31,3 +33,7 @@ export interface NeynarUserResponse {
   display_name: string;
   pfp_url: string;
 }
+
+export type EligibleGroup = {
+  address: Hex;
+} & GroupSelect;

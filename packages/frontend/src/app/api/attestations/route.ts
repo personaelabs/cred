@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { FidAttestationRequestBody } from '@/app/types';
 // import { SIG_SALT } from '@/hooks/useProver';
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
@@ -67,14 +68,18 @@ export async function POST(req: NextRequest) {
   const merkleRootBytes = await circuit.get_merkle_root(proofBytes);
   const merkleRoot = bytesToHex(merkleRootBytes);
 
-  const merkleRootInDb = await prisma.merkleTree.findFirst({
+  const merkleTreeInDb = await prisma.merkleTree.findUnique({
     where: {
-      merkleRoot,
+      id: body.treeId,
     },
   });
 
-  if (!merkleRootInDb) {
+  if (!merkleTreeInDb) {
     return Response.json({ error: 'Merkle root not found' }, { status: 400 });
+  }
+
+  if (merkleRoot !== merkleTreeInDb.merkleRoot) {
+    return Response.json({ error: 'Invalid merkle root' }, { status: 400 });
   }
 
   // 5. Verify the message
@@ -90,9 +95,9 @@ export async function POST(req: NextRequest) {
 
   const attestationExists = await prisma.fidAttestation.findUnique({
     where: {
-      fid_merkleRoot: {
-        fid,
-        merkleRoot,
+      fid_treeId: {
+        fid: fid,
+        treeId: merkleTreeInDb.id,
       },
     },
   });
@@ -110,7 +115,7 @@ export async function POST(req: NextRequest) {
       fid: fid,
       signInSig: Buffer.from(hexToBytes(body.sourcePubKeySigHash)),
       attestation: Buffer.from(proofBytes),
-      merkleRoot,
+      treeId: body.treeId,
     },
   });
 

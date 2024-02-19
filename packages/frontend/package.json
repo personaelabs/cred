@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:proto": "sh ./scripts/build_proto.sh",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -37,7 +38,8 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.0",
     "viem": "^1.21.4",
-    "wagmi": "^1.4.12"
+    "wagmi": "^1.4.12",
+    "ts-protoc-gen": "^0.15.0"
   },
   "devDependencies": {
     "@types/node": "^20",

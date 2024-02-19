@@ -35,21 +35,18 @@ const indexEarlyHolders = async (contract: Contract) => {
 
   const maxBlock = Number(_maxBlock);
 
-  // Get the block number of the last tree
-  const lastTree = await prisma.merkleTree.findFirst({
+  // Get the block number of the group's latest tree
+  const latestTree = await prisma.merkleTree.findFirst({
     where: {
       groupId: group.id,
-      blockNumber: {
-        not: null,
-      },
     },
     orderBy: {
       blockNumber: 'desc',
     },
   });
 
-  if (lastTree?.blockNumber) {
-    if (lastTree.blockNumber === BigInt(maxBlock)) {
+  if (latestTree?.blockNumber) {
+    if (latestTree.blockNumber === BigInt(maxBlock)) {
       console.log(
         chalk.blue(
           `Early holders for ${contract.symbol?.toUpperCase()} (${contract.id}) already indexed`
@@ -58,9 +55,9 @@ const indexEarlyHolders = async (contract: Contract) => {
       return;
     }
 
-    if (lastTree.blockNumber > BigInt(maxBlock)) {
+    if (latestTree.blockNumber > BigInt(maxBlock)) {
       throw new Error(
-        `Last tree block number ${lastTree.blockNumber} is greater than synched max block ${maxBlock}`
+        `Last tree block number ${latestTree.blockNumber} is greater than synched max block ${maxBlock}`
       );
     }
   }

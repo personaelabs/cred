@@ -8,6 +8,7 @@ import {
   useEffect,
   ReactNode,
   FC,
+  useCallback,
 } from 'react';
 
 interface UserContextType {
@@ -17,6 +18,7 @@ interface UserContextType {
   siwfResponse: StatusAPIResponse | null;
   logout: () => void;
   isLoggedIn: () => boolean;
+  refetchUser: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -42,11 +44,19 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const pathname = usePathname();
 
   const fetchUser = async (fid: number) => {
-    const result = await fetch(`/api/fc-accounts/${fid}`);
+    const result = await fetch(`/api/fc-accounts/${fid}`, {
+      cache: 'no-store',
+    });
     const data = (await result.json()) as GetUserResponse;
 
     setUser(data);
   };
+
+  const refetchUser = useCallback(() => {
+    if (user) {
+      fetchUser(user.fid);
+    }
+  }, [user]);
 
   useEffect(() => {
     const isUserProfilePage = /\/user\//.test(pathname);
@@ -103,6 +113,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
         siwfResponse,
         logout,
         isLoggedIn,
+        refetchUser,
       }}
     >
       {children}
