@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
   await prisma.fidAttestation.create({
     data: {
       fid: fid,
-      signInSig: Buffer.from(hexToBytes(body.sourcePubKeySigHash)),
+      signInSig: Buffer.from(hexToBytes(body.signInSigS)),
       attestation: Buffer.from(proofBytes),
       treeId: body.treeId,
     },

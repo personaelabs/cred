@@ -19,7 +19,6 @@ export interface WitnessInput {
  * Request body of POST /api/attestations
  */
 export interface FidAttestationRequestBody {
-  sourcePubKeySigHash: Hex;
   signInSigNonce: string;
   signInSigS: Hex;
   proof: Hex;

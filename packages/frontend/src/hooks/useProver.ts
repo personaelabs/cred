@@ -17,7 +17,6 @@ import {
   hexToBytes,
   hexToCompactSignature,
   hexToSignature,
-  keccak256,
 } from 'viem';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
@@ -65,8 +64,6 @@ const useProver = () => {
       });
 
       const merkleTree = await getMerkleTree(groupId);
-
-      const sourcePubKeySigHash = keccak256(sig);
 
       const { s, r, v } = hexToSignature(sig);
       const isYOdd = calculateSigRecovery(v);
@@ -116,7 +113,6 @@ const useProver = () => {
       if (proof) {
         return {
           proof: toHexString(proof),
-          sourcePubKeySigHash,
           signInSigS,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
