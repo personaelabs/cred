@@ -102,26 +102,34 @@ const indexMerkleTree = async () => {
       await Promise.all(promises);
     }
   } else {
-    // In development, only index the dev group
+    // In development, only index the dev groups
 
-    const devGroupData = {
-      handle: 'dev',
-      displayName: 'Dev',
-    };
-    const devGroup = await prisma.group.upsert({
-      create: devGroupData,
-      update: devGroupData,
-      where: {
-        handle: devGroupData.handle,
-      },
-    });
-
+    const NUM_DEV_GROUPS = 5;
     const addresses = getDevAddresses();
-    console.log(
-      `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
-    );
 
-    await saveTree({ groupId: devGroup.id, addresses, blockNumber: BigInt(0) });
+    for (let i = 0; i < NUM_DEV_GROUPS; i++) {
+      const devGroupData = {
+        handle: `dev${i}`,
+        displayName: `Dev ${i}`,
+      };
+      const devGroup = await prisma.group.upsert({
+        create: devGroupData,
+        update: devGroupData,
+        where: {
+          handle: devGroupData.handle,
+        },
+      });
+
+      console.log(
+        `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
+      );
+
+      await saveTree({
+        groupId: devGroup.id,
+        addresses,
+        blockNumber: BigInt(0),
+      });
+    }
   }
 
   await ioredis.quit();

@@ -130,6 +130,8 @@ export const getDevAddresses = () => {
     '0xcb46219ba114245c3a18761e4f7891f9c4bef8c0', // lsankar.eth
     '0x141b63d93daf55bfb7f396eee6114f3a5d4a90b2', // personaelabs.eth
     '0x4f7d469a5237bd5feae5a3d852eea4b65e06aad1', // pfeffunit.eth
+    '0x7806db3adab7e0bdfbba3840bea9389b36c48f52',
+    '0xe20fa23c3bc21e0307b6ef0cc8eff9e76a563e47',
   ];
 
   const DEV_GROUP_SIZE = 1000;
