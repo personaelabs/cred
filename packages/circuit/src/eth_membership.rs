@@ -113,7 +113,7 @@ mod tests {
     use ark_ec::AffineRepr;
     use ark_ff::BigInteger;
     use num_bigint::BigUint;
-    use sapir::merkle_tree::{MerkleProof, MerkleTree};
+    use sapir::merkle_tree::tree::{MerkleProof, MerkleTree};
 
     type F = ark_secq256k1::Fr;
 
