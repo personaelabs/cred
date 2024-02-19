@@ -24,6 +24,7 @@ export interface FidAttestationRequestBody {
   signInSigS: Hex;
   proof: Hex;
   fid: number;
+  treeId: number;
 }
 
 export interface NeynarUserResponse {

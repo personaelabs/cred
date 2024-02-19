@@ -120,6 +120,7 @@ const useProver = () => {
           signInSigS,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
+          treeId: merkleTree.id,
         };
       }
 

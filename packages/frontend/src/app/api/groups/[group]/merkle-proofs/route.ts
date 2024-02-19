@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
 const merkleTreeSelect = {
+  id: true,
   merkleRoot: true,
   merkleProofs: {
     select: {
