@@ -33,9 +33,7 @@ services:
   - type: redis
     plan: pro plus
     name: cred
-    ipAllowList: 
-      - source: 0.0.0.0/0
-        description: everywhere
+    ipAllowList: []
       
 databases:
   - name: cred
