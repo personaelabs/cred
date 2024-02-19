@@ -124,6 +124,29 @@ const indexMerkleTree = async () => {
         `Indexing ${addresses.length} addresses for ${devGroup.displayName}`
       );
 
+      const existingDevTrees = await prisma.merkleTree.findMany({
+        where: {
+          groupId: devGroup.id,
+        },
+      });
+
+      // Delete existing trees and proofs for the dev group.
+      // This is necessary because the dev group's merkle tree always has a block number of 0,
+      // but we want to ensure that latest tree is always stored as the "latest" tree.
+      for (const existingDevTree of existingDevTrees) {
+        await prisma.merkleProof.deleteMany({
+          where: {
+            treeId: existingDevTree.id,
+          },
+        });
+
+        await prisma.merkleTree.delete({
+          where: {
+            id: existingDevTree.id,
+          },
+        });
+      }
+
       await saveTree({
         groupId: devGroup.id,
         addresses,
