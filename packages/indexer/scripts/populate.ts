@@ -13,19 +13,19 @@ const CONTRACTS: Pick<
   | 'targetGroups'
 >[] = [
   {
-    address: '0x1151cb3d861920e07a38e03eead12c32178567f6',
-    name: 'Bonk',
-    symbol: 'BONK',
+    address: '0xa9d54f37ebb99f83b603cc95fc1a5f3907aaccfd',
+    name: 'Pikaboss',
+    symbol: 'pika',
     deployedBlock: BigInt(16628745),
     targetGroups: ['earlyHolder', 'whale'],
     chain: 'Ethereum',
     type: 'ERC20',
   },
   {
-    address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-    name: 'Uniswap',
-    symbol: 'UNI',
-    deployedBlock: BigInt(10861674),
+    address: '0x02e7f808990638e9e67e1f00313037ede2362361',
+    name: 'KiboShib',
+    symbol: 'KIBSHI',
+    deployedBlock: BigInt(16140853),
     targetGroups: ['earlyHolder', 'whale'],
     chain: 'Ethereum',
     type: 'ERC20',
