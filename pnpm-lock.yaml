@@ -55,6 +55,9 @@ importers:
 
   packages/frontend:
     dependencies:
+      '@farcaster/auth-client':
+        specifier: ^0.1.0
+        version: 0.1.0(viem@1.21.4)
       '@farcaster/auth-kit':
         specifier: ^0.2.0
         version: 0.2.0(@types/react@18.2.55)(react-dom@18.2.0)(react@18.2.0)(viem@1.21.4)

@@ -20,10 +20,12 @@ export interface WitnessInput {
  */
 export interface FidAttestationRequestBody {
   signInSigNonce: string;
-  signInSigS: Hex;
+  signInSig: Hex;
   proof: Hex;
   fid: number;
   treeId: number;
+  custody: Hex;
+  issuedAt: string;
 }
 
 export interface NeynarUserResponse {

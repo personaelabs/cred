@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/auth-client": "^0.1.0",
     "@farcaster/auth-kit": "^0.2.0",
     "@prisma/client": "4.5.0",
     "@radix-ui/react-alert-dialog": "^1.0.5",

@@ -91,3 +91,34 @@ export const postJSON = async <T>({
     body: JSON.stringify(body),
   });
 };
+
+export const buildSiwfMessage = ({
+  domain,
+  address,
+  siweUri,
+  nonce,
+  issuedAt,
+  fid,
+}: {
+  domain: string;
+  address: string;
+  siweUri: string;
+  nonce: string;
+  issuedAt: string;
+  fid: number;
+}) => {
+  return (
+    `${domain} wants you to sign in with your Ethereum account:\n` +
+    `${address}\n` +
+    '\n' +
+    'Farcaster Connect\n' +
+    '\n' +
+    `URI: ${siweUri}\n` +
+    'Version: 1\n' +
+    'Chain ID: 10\n' +
+    `Nonce: ${nonce}\n` +
+    `Issued At: ${issuedAt}\n` +
+    'Resources:\n' +
+    `- farcaster://fid/${fid}`
+  );
+};

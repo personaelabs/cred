@@ -111,14 +111,38 @@ const useProver = () => {
       const proof = await prover.prove(witness);
 
       if (proof) {
+        // Extract the `issuedAt` from the SIWF message
+        const issuedAt = siwfResponse.message?.match(
+          /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+        );
+
+        if (!issuedAt || issuedAt.length === 0) {
+          throw new Error('Could not extract `issuedAt` from SIWF message');
+        }
+
         return {
           proof: toHexString(proof),
-          signInSigS,
+          signInSig: siwfResponse.signature,
+          custody: siwfResponse.custody!,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
           treeId: merkleTree.id,
+          issuedAt: issuedAt[0],
         };
       }
+
+      /*
+      console.log(siwfResponse.message);
+      return {
+        proof: '0x0',
+        signInSigS: siwfResponse.signature!,
+        custody: siwfResponse.custody!,
+        signInSigNonce: siwfResponse.nonce,
+        fid: user.fid,
+        treeId: 0,
+        //        issuedAt: buildSignInMessage(siwfResponse.message)
+      };
+      */
 
       return null;
     } else {

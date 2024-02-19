@@ -18,6 +18,7 @@ const config = {
   rpcUrl: 'https://mainnet.optimism.io',
   domain: 'creddd.xyz',
   siweUri: 'http://creddd.xyz/login',
+  relay: 'https://relay.farcaster.xyz',
 };
 
 export default function RootLayout({

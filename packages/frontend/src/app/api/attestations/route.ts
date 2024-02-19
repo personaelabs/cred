@@ -1,45 +1,64 @@
 export const dynamic = 'force-dynamic';
 import { FidAttestationRequestBody } from '@/app/types';
-// import { SIG_SALT } from '@/hooks/useProver';
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 import prisma from '@/lib/prisma';
-// import { createAppClient, viemConnector } from '@farcaster/auth-kit';
+import {
+  createClient,
+  verifySignInMessage,
+  viemConnector,
+} from '@farcaster/auth-client';
 import { NextRequest } from 'next/server';
-import { bytesToHex, hashMessage, hexToBytes, toHex } from 'viem';
+import {
+  bytesToHex,
+  hashMessage,
+  hexToBytes,
+  hexToCompactSignature,
+  toHex,
+} from 'viem';
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
+import { buildSiwfMessage } from '@/lib/utils';
 
-/*
-const appClient = createAppClient({
-  relay: 'https://relay.farcaster.xyz',
-  ethereum: viemConnector(),
-});
-*/
-
-// TODO: Adjust these to match the frontend implementation
-// const SIWF_DOMAIN = 'creddd.xyz';
-// const SIWF_MESSAGE = `${SIWF_DOMAIN} wants you to sign in with your Ethereum account`;
 let circuitInitialized = false;
+
+// Initialize the SIWF client
+const client = createClient({
+  relay: 'https://relay.farcaster.xyz',
+  ethereum: viemConnector({
+    rpcUrl: 'https://mainnet.optimism.io',
+  }),
+});
 
 // Verify and save a new FID attestation
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as FidAttestationRequestBody;
-  const fid = body.fid;
 
-  /*
-  // 1. Verify `signInSig`
-  const { success, fid } = await appClient.verifySignInMessage({
+  // Build the SIWF message that is expected to be signed by the user
+  const siweMessage = buildSiwfMessage({
+    domain: 'creddd.xyz',
+    address: body.custody,
+    siweUri: 'http://creddd.xyz/login',
     nonce: body.signInSigNonce,
-    message: SIWF_MESSAGE,
-    domain: SIWF_DOMAIN,
+    issuedAt: body.issuedAt,
+    fid: body.fid,
+  });
+
+  // 1. Verify `signInSig`
+  const { success, fid } = await verifySignInMessage(client, {
+    nonce: body.signInSigNonce,
+    message: siweMessage,
+    domain: 'creddd.xyz',
     signature: body.signInSig,
   });
 
   if (!success) {
     return Response.json({ error: 'Invalid SIFW signature' }, { status: 400 });
   }
-  */
+
+  if (fid !== Number(body.fid)) {
+    return Response.json({ error: 'Invalid FID' }, { status: 400 });
+  }
 
   // 2. Verify the proof
 
@@ -54,9 +73,11 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid proof' }, { status: 400 });
   }
 
+  const signInSigSInBody = hexToCompactSignature(body.signInSig).yParityAndS;
+
   // 3. Verify that the `signInSig` in the POST body matches the `signInSig` in the proof
   const signInSigS = toHex(await circuit.get_sign_in_sig(proofBytes));
-  if (signInSigS !== body.signInSigS) {
+  if (signInSigS !== signInSigSInBody) {
     return Response.json(
       { error: 'Invalid signInSig in proof' },
       { status: 400 }
@@ -82,7 +103,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid merkle root' }, { status: 400 });
   }
 
-  // 5. Verify the message
+  // 5. Verify the signed message in the proof
 
   const message = `\n${SIG_SALT}Personae attest:${fid}`;
   const expectedMsgHash = await hashMessage(message);
@@ -113,7 +134,7 @@ export async function POST(req: NextRequest) {
   await prisma.fidAttestation.create({
     data: {
       fid: fid,
-      signInSig: Buffer.from(hexToBytes(body.signInSigS)),
+      signInSig: Buffer.from(hexToBytes(body.signInSig)),
       attestation: Buffer.from(proofBytes),
       treeId: body.treeId,
     },
