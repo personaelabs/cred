@@ -1,78 +1,76 @@
 import 'dotenv/config';
-
-import { ContractType } from '@prisma/client';
-
+import { ContractType, Contract } from '@prisma/client';
 import prisma from '../src/prisma';
 
-export type EthContract = {
-  address: string;
-  name: string;
-  symbol: string;
-  deployedBlock: number;
-};
-
-const _tokens2_18_24: EthContract[] = [
+const tokens = [
   {
     address: '0xb8a87405d9a4f2f866319b77004e88dff66c0d92',
-    deployedBlock: 19235060,
+    deployedBlock: BigInt(19235060),
     name: 'Sora',
     symbol: 'sora',
+    chain: 'Ethereum',
   },
   {
     address: '0xaaeE1A9723aaDB7afA2810263653A34bA2C21C7a',
-    deployedBlock: 17731591,
+    deployedBlock: BigInt(17731591),
     name: 'Mog Coin',
     symbol: 'mog',
+    chain: 'Ethereum',
   },
   {
     address: '0x24fcFC492C1393274B6bcd568ac9e225BEc93584',
-    deployedBlock: 18709570,
+    deployedBlock: BigInt(18709570),
     name: 'Heroes of Mavia',
     symbol: 'mavia',
+    chain: 'Ethereum',
   },
   {
     address: '0x710287D1D39DCf62094A83EBB3e736e79400068a',
-    deployedBlock: 18569660,
+    deployedBlock: BigInt(18569660),
     name: 'enqAI',
     symbol: 'enqai',
+    chain: 'Ethereum',
   },
-];
 
-const _tokens2_19_24: EthContract[] = [
   {
     address: '0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3',
-    deployedBlock: 14670968,
+    deployedBlock: BigInt(14670968),
     name: 'Ondo',
     symbol: 'ondo',
+    chain: 'Ethereum',
   },
   {
     address: '0x58cB30368ceB2d194740b144EAB4c2da8a917Dcb',
-    deployedBlock: 18665578,
+    deployedBlock: BigInt(18665578),
     name: 'Zyncoin',
     symbol: 'zyn',
+    chain: 'Ethereum',
   },
   {
     address: '0xe3DBC4F88EAa632DDF9708732E2832EEaA6688AB',
-    deployedBlock: 19215261,
+    deployedBlock: BigInt(19215261),
     name: 'Arbius',
     symbol: 'aius',
+    chain: 'Ethereum',
   },
   {
     address: '0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44',
-    deployedBlock: 16521600,
+    deployedBlock: BigInt(16521600),
     name: 'Wrapped TAO',
     symbol: 'wTAO',
+    chain: 'Ethereum',
   },
 ];
 
-const addTokens = async (tokens: EthContract[]) => {
+const addTokens = async (
+  tokens: Pick<
+    Contract,
+    'address' | 'deployedBlock' | 'name' | 'symbol' | 'chain'
+  >[]
+) => {
   for (const token of tokens) {
-    const dbToken = {
-      address: token.address,
-      chain: 'Ethereum',
-      deployedBlock: BigInt(token.deployedBlock),
-      name: token.name,
-      symbol: token.symbol,
+    const data = {
+      ...token,
       type: ContractType.ERC20,
       targetGroups: ['earlyHolder', 'whale'],
     };
@@ -80,11 +78,11 @@ const addTokens = async (tokens: EthContract[]) => {
     console.log(`Adding token ${token.symbol} (${token.address})`);
 
     await prisma.contract.upsert({
-      update: dbToken,
-      create: dbToken,
+      update: data,
+      create: data,
       where: {
         address_chain: {
-          address: dbToken.address,
+          address: data.address,
           chain: 'Ethereum',
         },
       },
@@ -92,4 +90,4 @@ const addTokens = async (tokens: EthContract[]) => {
   }
 };
 
-addTokens(_tokens2_19_24);
+addTokens(tokens);
