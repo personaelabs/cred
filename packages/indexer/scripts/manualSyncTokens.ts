@@ -60,6 +60,20 @@ const tokens = [
     symbol: 'wTAO',
     chain: 'Ethereum',
   },
+  {
+    address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+    deployedBlock: BigInt(10861674),
+    name: 'Uniswap',
+    symbol: 'uni',
+    chain: 'Ethereum',
+  },
+  {
+    address: '0x5a98fcbea516cf06857215779fd812ca3bef1b32',
+    symbol: 'ldo',
+    name: 'Lido',
+    deployedBlock: BigInt(11473216),
+    chain: 'Ethereum',
+  },
 ];
 
 const addTokens = async (
