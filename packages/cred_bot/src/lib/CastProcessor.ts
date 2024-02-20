@@ -56,14 +56,24 @@ class CastProcessor {
 
       for (const cast of newCasts) {
         if (!(await this.isCastProcessed(Number(cast.id)))) {
-          await this.prisma.processedCast.create({
-            data: {
+          await this.prisma.processedCast.upsert({
+            where: {
+              castId: Number(cast.id),
+            },
+            create: {
               hash: toHexString(cast.hash),
               originalText: cast.text,
               castId: Number(cast.id),
               castCreatedAt: cast.created_at,
               status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
               actionDetails: '{}',
+            },
+            update: {
+              hash: toHexString(cast.hash),
+              originalText: cast.text,
+              castId: Number(cast.id),
+              castCreatedAt: cast.created_at,
+              status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
             },
           });
 
@@ -129,9 +139,6 @@ class CastProcessor {
           processedTime: new Date(),
         },
       });
-
-      // wait 5 seconds
-      await new Promise(resolve => setTimeout(resolve, 50000));
     } catch (error) {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
@@ -180,9 +187,6 @@ class CastProcessor {
           processedTime: new Date(),
         },
       });
-
-      // wait 5 seconds
-      await new Promise(resolve => setTimeout(resolve, 50000));
     } catch (error) {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
@@ -198,7 +202,6 @@ class CastProcessor {
   }
 
   private async isCastProcessed(castId: number): Promise<boolean> {
-    return false;
     const count = await this.prisma.processedCast.count({
       where: {
         castId: castId,
