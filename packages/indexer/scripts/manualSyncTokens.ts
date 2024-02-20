@@ -57,6 +57,12 @@ const _tokens2_19_24: EthContract[] = [
     name: 'Arbius',
     symbol: 'aius',
   },
+  {
+    address: '0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44',
+    deployedBlock: 16521600,
+    name: 'Wrapped TAO',
+    symbol: 'wTAO',
+  },
 ];
 
 const addTokens = async (tokens: EthContract[]) => {
