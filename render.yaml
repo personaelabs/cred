@@ -22,8 +22,6 @@ services:
         fromDatabase:
           name: cred
           property: connectionString
-      - key: NODE_ENV
-        value: production
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
