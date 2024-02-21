@@ -43,12 +43,19 @@ export async function GET(
   const fid = Number(params.fid);
 
   // Get attestations (i.e. proofs) for the FID
-  const fidAttestations = await prisma.fidAttestation.findMany({
+  let fidAttestations = await prisma.fidAttestation.findMany({
     select: selectAttestation,
     where: {
       fid,
     },
   });
+
+  // Filter out dev groups in production
+  if (process.env.VERCEL_ENV === 'production') {
+    fidAttestations = fidAttestations.filter(
+      attestation => !attestation.MerkleTree.Group.handle.startsWith('dev0')
+    );
+  }
 
   // Get user data from Neynar
   const result = await neynar.get<{ users: NeynarUserResponse[] }>(
