@@ -92,6 +92,8 @@ const addTokens = async (
   for (const token of tokens) {
     const data = {
       ...token,
+      // Save contract address in lower case
+      address: token.address.toLowerCase(),
       type: ContractType.ERC20,
       targetGroups: ['earlyHolder', 'whale'],
     };
