@@ -24,7 +24,7 @@ const main = async () => {
     },
   });
 
-  const t =
+  let t =
     mostRecentProcessed?.processedTime.toISOString() ??
     new Date(0).toISOString();
 
@@ -35,7 +35,10 @@ const main = async () => {
   // Loop `processNewCasts` for an hour
   while (!oneHourPassed(startTime)) {
     console.time('processNewCasts');
-    await c.processNewCasts(t);
+    const updatedT = await c.processNewCasts(t);
+    if (updatedT) {
+      t = updatedT;
+    }
     console.timeEnd('processNewCasts');
   }
 

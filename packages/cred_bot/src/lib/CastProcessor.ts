@@ -46,8 +46,14 @@ class CastProcessor {
     await this.sourceClient.end();
   }
 
-  // We determne which casts are relevant to our interests by checking the mentions column for our @credbot user ID.
-  public async processNewCasts(lastProcessedTimestamp: string): Promise<void> {
+  /**
+   *  We determne which casts are relevant to our interests by checking the mentions column for our @credbot user ID.
+   * @param lastProcessedTimestamp
+   * @returns The timestamp of the most recent processed cast or null if no new casts were processed.
+   */
+  public async processNewCasts(
+    lastProcessedTimestamp: string
+  ): Promise<string | null> {
     try {
       const newCastsQuery = `
                 SELECT * 
@@ -96,9 +102,16 @@ class CastProcessor {
           console.log(`Skipping already processed cast with ID: ${cast.id}`);
         }
       }
+
+      // Return the timestamp of the most processed recent cast
+      if (newCasts.length > 0) {
+        return newCasts[newCasts.length - 1].created_at.toISOString();
+      }
     } catch (error) {
       console.error('Error processing new casts:', error);
     }
+
+    return null;
   }
 
   private async bootCast(cast: Cast): Promise<void> {
