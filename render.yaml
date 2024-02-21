@@ -5,7 +5,7 @@ services:
     plan: pro
     runtime: node
     region: oregon
-    buildCommand: pnpm i
+    buildCommand: pnpm i && pnpm -F db migrate:prod
     startCommand: pnpm -F cred_bot exec ts-node src/index.ts
     rootDir: ./
     schedule: '0 * * * *'
