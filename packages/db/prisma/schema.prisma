@@ -10,6 +10,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ProcessedCast {
+  castId          Int      @id
+  hash            String
+  originalText    String
+  castCreatedAt   DateTime
+  processedTime   DateTime @default(now())
+  status          String
+  actionDetails   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  processingError String?
+}
+
 model FidAttestation {
   fid         Int
   attestation Bytes
