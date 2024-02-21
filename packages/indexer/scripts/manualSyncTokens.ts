@@ -74,6 +74,13 @@ const tokens = [
     deployedBlock: BigInt(11473216),
     chain: 'Ethereum',
   },
+  {
+    address: '0x470c8950C0c3aA4B09654bC73b004615119A44b5',
+    symbol: 'kizuna',
+    name: 'Kizuna',
+    deployedBlock: BigInt(18265095),
+    chain: 'Ethereum',
+  },
 ];
 
 const addTokens = async (
