@@ -104,7 +104,7 @@ export default function AccountPage() {
         {accounts.length > 0 && isLoading ? (
           <div className="flex flex-row items-center">
             <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
-            Searching for creddd
+            Searching for creddd (this could take a moment...)
           </div>
         ) : accounts.length > 0 && !isLoading ? (
           <div className="flex flex-col gap-[14px]">
