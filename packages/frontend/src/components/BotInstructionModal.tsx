@@ -38,12 +38,12 @@ const BotInstructionModal = (props: BotInstructionModalProps) => {
           <div>
             <ul className="list-disc list-outside">
               <li>
-                Reply to your cast with &ldquo;<b>@credbost boost</b>&ldquo; to
-                boost your cast.
+                Reply to any cast with &ldquo;<b>@credbost boost</b>&ldquo; to
+                boost it to <b>@credbot</b>s feed.
               </li>
               <li>
-                Reply to your cast with &ldquo;<b>@cred flex</b>&ldquo; to flex
-                your creddd.
+                Reply to any cast with &ldquo;<b>@credbot flex</b>&ldquo; to
+                flex your creddd in thread.
               </li>
             </ul>
           </div>
