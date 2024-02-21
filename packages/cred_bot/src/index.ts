@@ -1,6 +1,13 @@
 import prisma from './prisma';
 import CastProcessor from './lib/CastProcessor';
 
+// Returns `true` if an hour has passed since `startTime`
+const oneHourPassed = (startTime: Date): boolean => {
+  const currentTime = new Date();
+  const elapsedTimeInMilliseconds = currentTime.getTime() - startTime.getTime();
+  return elapsedTimeInMilliseconds >= 60 * 60 * 1000;
+};
+
 const main = async () => {
   const neynarDbConfig = {
     host: process.env.NEYNAR_DB_HOST,
@@ -21,7 +28,18 @@ const main = async () => {
     mostRecentProcessed?.processedTime.toISOString() ??
     new Date(0).toISOString();
 
-  await c.processNewCasts(t);
+  await c.connectSourceClient();
+
+  const startTime = new Date();
+
+  // Loop `processNewCasts` for an hour
+  while (!oneHourPassed(startTime)) {
+    console.time('processNewCasts');
+    await c.processNewCasts(t);
+    console.timeEnd('processNewCasts');
+  }
+
+  await c.disconnectSourceClient();
 };
 
 main();

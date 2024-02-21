@@ -38,10 +38,17 @@ class CastProcessor {
     this.sourceClient = new Client(this.sourceDbConfig);
   }
 
+  public async connectSourceClient(): Promise<void> {
+    await this.sourceClient.connect();
+  }
+
+  public async disconnectSourceClient(): Promise<void> {
+    await this.sourceClient.end();
+  }
+
   // We determne which casts are relevant to our interests by checking the mentions column for our @credbot user ID.
   public async processNewCasts(lastProcessedTimestamp: string): Promise<void> {
     try {
-      await this.sourceClient.connect();
       const newCastsQuery = `
                 SELECT * 
                 FROM casts 
@@ -91,8 +98,6 @@ class CastProcessor {
       }
     } catch (error) {
       console.error('Error processing new casts:', error);
-    } finally {
-      await this.sourceClient.end();
     }
   }
 

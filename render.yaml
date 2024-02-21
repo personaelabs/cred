@@ -8,7 +8,7 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F cred_bot exec ts-node src/index.ts
     rootDir: ./
-    schedule: '* * * * *'
+    schedule: '0 * * * *'
     buildFilter:
       paths:
         - packages/cred_bot/**
