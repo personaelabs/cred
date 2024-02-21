@@ -8,7 +8,6 @@ import useProver from '@/hooks/useProver';
 import { GroupSelect } from '@/app/api/groups/route';
 import { postJSON } from '@/lib/utils';
 import { Check, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 
 // Assuming demoSignMessage is defined elsewhere and imported
@@ -18,6 +17,7 @@ interface WalletViewProps {
   walletAddr: string;
   group: GroupSelect;
   added: boolean;
+  afterAdd: () => void;
 }
 
 const WalletView: React.FC<WalletViewProps> = ({
@@ -49,12 +49,11 @@ const WalletView: React.FC<WalletViewProps> = ({
         body: proof,
       });
 
-      toast.success(`Successfully added creddd!`);
-
       setAdded(true);
       refetchUser();
     }
     setIsAdding(false);
+    props.afterAdd();
   };
 
   return (
