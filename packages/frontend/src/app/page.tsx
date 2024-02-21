@@ -2,15 +2,13 @@
 import { useRouter } from 'next/navigation';
 import { SignInButton } from '@farcaster/auth-kit';
 import { useUser } from '@/context/UserContext';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
 
-  const { user, loginWithFarcaster } = useUser();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, loginWithFarcaster, userNotFound } = useUser();
 
   // Are we already logged in load, from local storage?
   useEffect(() => {
@@ -26,17 +24,8 @@ export default function Home() {
     <div className="flex flex-col justify-start items-center h-[90vh] gap-10">
       <h2 className="text-3xl font-bold mb-2">Welcome</h2>
       <div>
-        {!isLoggedIn ? (
-          <SignInButton
-            onSuccess={data => {
-              if (isLoggedIn) {
-                return;
-              }
-              setIsLoggedIn(true);
-
-              loginWithFarcaster(data);
-            }}
-          />
+        {userNotFound === true ? (
+          <SignInButton onSuccess={loginWithFarcaster} />
         ) : (
           <Loader2 className="animate-spin"></Loader2>
         )}

@@ -17,8 +17,8 @@ interface UserContextType {
   // Response body from SIWF
   siwfResponse: StatusAPIResponse | null;
   logout: () => void;
-  isLoggedIn: () => boolean;
   refetchUser: () => void;
+  userNotFound: boolean | null;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -37,6 +37,7 @@ interface UserProviderProps {
 
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<GetUserResponse | null>(null);
+  const [userNotFound, setUserNotFound] = useState<boolean | null>(null);
   const [siwfResponse, setSiwfResponse] = useState<StatusAPIResponse | null>(
     null
   );
@@ -69,6 +70,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       } else {
         // If there's no FID in local storage, redirect to the login page
         console.log('No fid in local storage');
+        setUserNotFound(true);
         router.push('/');
       }
 
@@ -82,10 +84,6 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       }
     }
   }, [pathname, router]);
-
-  const isLoggedIn = () => {
-    return user !== null;
-  };
 
   const loginWithFarcaster = (userData: StatusAPIResponse) => {
     if (userData.fid) {
@@ -112,8 +110,8 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
         loginWithFarcaster,
         siwfResponse,
         logout,
-        isLoggedIn,
         refetchUser,
+        userNotFound,
       }}
     >
       {children}
