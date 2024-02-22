@@ -76,6 +76,7 @@ const populate = async () => {
         attestation: Buffer.from('dummy'),
         treeId: devTree.id,
       })),
+      skipDuplicates: true,
     });
   }
 };

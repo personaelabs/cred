@@ -31,6 +31,7 @@ services:
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
+    preDeployCommand: pnpm -F db migrate:prod && pnpm -F indexer exec ts-node ./scripts/populate.ts
     rootDir: ./
     schedule: '0 * * * *'
     buildFilter:
