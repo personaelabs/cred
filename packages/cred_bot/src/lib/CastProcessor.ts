@@ -28,6 +28,13 @@ class CastProcessor {
    * @returns The timestamp of the most recent processed cast or null if no new casts were processed.
    */
   public async processNewCasts(): Promise<void> {
+    // Use a longer interval in development and PR environments to avoid rate limiting.
+    const interval =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.IS_PULL_REQUEST === 'true'
+        ? 5000
+        : 1500;
+
     setInterval(async () => {
       const startTime = new Date();
       try {
@@ -94,7 +101,7 @@ class CastProcessor {
       }
       const endTime = new Date();
       console.log(`Processed in ${endTime.getTime() - startTime.getTime()}ms`);
-    }, 1500);
+    }, interval);
   }
 
   private async bootCast(cast: Cast): Promise<void> {
