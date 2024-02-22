@@ -201,6 +201,8 @@ class CastProcessor {
       }
 
       const newMessage = `Look a this cool profile: @ https://test`;
+      console.log(`process.env.IS_PULL_REQUEST`, process.env.IS_PULL_REQUEST);
+      console.log(`process.env.NODE_ENV`, process.env.NODE_ENV);
       if (
         process.env.NODE_ENV !== 'production' ||
         process.env.IS_PULL_REQUEST === 'true' // Render sets `IS_PULL_REQUEST` to 'true' in PR builds
