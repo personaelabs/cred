@@ -60,7 +60,10 @@ const upsertGroup = async (contract: Contract, targetGroup: string) => {
 };
 
 const indexMerkleTree = async () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.IS_PULL_REQUEST !== 'true'
+  ) {
     // await syncMemeTokensMeta();
 
     // Get all contracts
