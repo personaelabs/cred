@@ -6,7 +6,7 @@ services:
     runtime: node
     region: oregon
     buildCommand: pnpm i && pnpm -F db migrate:prod
-    startCommand: pnpm -F cred_bot exec ts-node src/index.ts
+    startCommand: NODE_ENV="production" pnpm -F cred_bot exec ts-node src/index.ts
     rootDir: ./
     schedule: '0 * * * *'
     buildFilter:
