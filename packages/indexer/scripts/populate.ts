@@ -32,12 +32,14 @@ const CONTRACTS: Pick<
   },
 ];
 
+const DEV_FIDS: number[] = [54, 12783, 20559];
+
 const { IS_PULL_REQUEST, NODE_ENV } = process.env;
 
 const populate = async () => {
   // Run this script only in PRs (i.e. Render preview environments)
   // and non-production environments
-  if (IS_PULL_REQUEST || NODE_ENV !== 'production') {
+  if (IS_PULL_REQUEST === 'true' || NODE_ENV !== 'production') {
     for (const contract of CONTRACTS) {
       await prisma.contract.upsert({
         update: contract,
@@ -50,6 +52,31 @@ const populate = async () => {
         },
       });
     }
+
+    // Index the dev Merkle trees.
+    // We just need to import the file to trigger the indexing
+    require('../src/indexMerkleTree');
+
+    // Get one of the created Merkle tree
+    const devTree = await prisma.merkleTree.findFirst({
+      select: {
+        id: true,
+      },
+    });
+
+    if (!devTree) {
+      throw new Error('No Merkle tree found!');
+    }
+
+    // Create some dummy FID attestations
+    await prisma.fidAttestation.createMany({
+      data: DEV_FIDS.map(fid => ({
+        fid,
+        signInSig: Buffer.from('dummy'),
+        attestation: Buffer.from('dummy'),
+        treeId: devTree.id,
+      })),
+    });
   }
 };
 

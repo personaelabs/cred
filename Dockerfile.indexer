@@ -27,4 +27,10 @@ RUN pnpm -F merkle-tree-rs exec pnpm build
 # Install dependencies
 RUN pnpm i
 
+# Run db migrations
+RUN pnpm -F db migrate:prod
+
+# Populate the database with some data. The script only runs in non-production environments.
+RUN pnpm -F indexer exec ts-node ./scripts/populate.ts
+
 CMD ["sh", "./scripts/start-indexer.sh"]
