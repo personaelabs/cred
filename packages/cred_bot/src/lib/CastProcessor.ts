@@ -1,4 +1,3 @@
-import { Client } from 'pg';
 import { PrismaClient } from '@prisma/client';
 import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 
@@ -7,43 +6,20 @@ const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
 const CREDBOT_FID = 345834;
 const PERSONAE_CHANNEL_NAME = 'personae;';
 
-function toHexString(byteArray: Uint8Array): string {
-  return (
-    '0x' +
-    byteArray.reduce(
-      (output, elem) => output + ('0' + elem.toString(16)).slice(-2),
-      ''
-    )
-  );
-}
-
 interface Cast {
-  id: number;
   fid: string;
-  created_at: Date;
-  hash: Uint8Array;
+  timestamp: Date;
+  hash: string;
   text: string;
-  parent_hash: Uint8Array;
-  parent_fid: string;
+  parent_hash: string | null;
+  parent_fid: string | null;
 }
 
 class CastProcessor {
-  private sourceDbConfig: any;
-  private sourceClient: Client;
   private prisma: PrismaClient;
 
-  constructor(dbConfig: any, prisma: PrismaClient) {
-    this.sourceDbConfig = dbConfig;
+  constructor(prisma: PrismaClient) {
     this.prisma = prisma;
-    this.sourceClient = new Client(this.sourceDbConfig);
-  }
-
-  public async connectSourceClient(): Promise<void> {
-    await this.sourceClient.connect();
-  }
-
-  public async disconnectSourceClient(): Promise<void> {
-    await this.sourceClient.end();
   }
 
   /**
@@ -51,67 +27,74 @@ class CastProcessor {
    * @param lastProcessedTimestamp
    * @returns The timestamp of the most recent processed cast or null if no new casts were processed.
    */
-  public async processNewCasts(
-    lastProcessedTimestamp: string
-  ): Promise<string | null> {
-    try {
-      const newCastsQuery = `
-                SELECT * 
-                FROM casts 
-                WHERE ${CREDBOT_FID} = ANY(mentions)
-                AND created_at > $1
-                ORDER BY created_at ASC;`;
-
-      const { rows: newCasts } = await this.sourceClient.query<Cast>(
-        newCastsQuery,
-        [lastProcessedTimestamp]
-      );
-
-      for (const cast of newCasts) {
-        if (!(await this.isCastProcessed(Number(cast.id)))) {
-          await this.prisma.processedCast.upsert({
-            where: {
-              castId: Number(cast.id),
-            },
-            create: {
-              hash: toHexString(cast.hash),
-              originalText: cast.text,
-              castId: Number(cast.id),
-              castCreatedAt: cast.created_at,
-              status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
-              actionDetails: '{}',
-            },
-            update: {
-              hash: toHexString(cast.hash),
-              originalText: cast.text,
-              castId: Number(cast.id),
-              castCreatedAt: cast.created_at,
-              status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
-            },
-          });
-
-          // OK now what is this?
-          // If `cast.text` has "boost" in it, then we want to boost it.
-          // Normalize for case-insensitivity
-          if (cast.text.toLowerCase().includes('boost')) {
-            await this.bootCast(cast);
-          } else if (cast.text.toLowerCase().includes('flex')) {
-            await this.flexCast(cast);
+  public async processNewCasts(): Promise<void> {
+    setInterval(async () => {
+      const startTime = new Date();
+      try {
+        // Keep fetching the latest 5 mentions every 1.5 seconds.
+        const result = await neynarClient.fetchMentionAndReplyNotifications(
+          CREDBOT_FID,
+          {
+            limit: 5,
           }
-        } else {
-          console.log(`Skipping already processed cast with ID: ${cast.id}`);
+        );
+
+        const newCasts =
+          result.result.notifications?.filter(notification =>
+            notification.mentionedProfiles.some(p => p.fid === CREDBOT_FID)
+          ) || [];
+
+        for (const cast of newCasts) {
+          if (!(await this.isCastProcessed(cast.hash))) {
+            await this.prisma.processedCast.upsert({
+              where: {
+                hash: cast.hash,
+              },
+              create: {
+                hash: cast.hash,
+                originalText: cast.text,
+                timestamp: cast.timestamp,
+                status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
+                actionDetails: '{}',
+              },
+              update: {
+                hash: cast.hash,
+                originalText: cast.text,
+                timestamp: cast.timestamp,
+                status: 'pending', // Iniitally pending, so we know we at least saw it, before we attempt to engage further.
+              },
+            });
+
+            // OK now what is this?
+            // If `cast.text` has "boost" in it, then we want to boost it.
+            // Normalize for case-insensitivity
+            if (cast.text.toLowerCase().includes('boost')) {
+              await this.bootCast({
+                fid: cast.author.fid.toString(),
+                timestamp: new Date(cast.timestamp),
+                hash: cast.hash,
+                text: cast.text,
+                parent_fid: cast.parentAuthor.fid?.toString() || null,
+                parent_hash: cast.parentHash,
+              });
+            } else if (cast.text.toLowerCase().includes('flex')) {
+              await this.flexCast({
+                fid: cast.author.fid.toString(),
+                timestamp: new Date(cast.timestamp),
+                hash: cast.hash,
+                text: cast.text,
+                parent_fid: cast.parentAuthor.fid?.toString() || null,
+                parent_hash: cast.parentHash,
+              });
+            }
+          }
         }
+      } catch (error) {
+        console.error('Error processing new casts:', error);
       }
-
-      // Return the timestamp of the most processed recent cast
-      if (newCasts.length > 0) {
-        return newCasts[newCasts.length - 1].created_at.toISOString();
-      }
-    } catch (error) {
-      console.error('Error processing new casts:', error);
-    }
-
-    return null;
+      const endTime = new Date();
+      console.log(`Processed in ${endTime.getTime() - startTime.getTime()}ms`);
+    }, 1500);
   }
 
   private async bootCast(cast: Cast): Promise<void> {
@@ -140,17 +123,14 @@ class CastProcessor {
 
       // TODO: write this BOOST copy!
       const newMessage = `@${userResp.result.user.username} @ https://path/to/creddd/profile`;
-
       await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        embeds: [
-          { cast_id: { fid: Number(cast.fid), hash: toHexString(cast.hash) } },
-        ],
+        embeds: [{ cast_id: { fid: Number(cast.fid), hash: cast.hash } }],
         channelId: PERSONAE_CHANNEL_NAME,
       });
 
       await this.prisma.processedCast.update({
         where: {
-          castId: Number(cast.id),
+          hash: cast.hash,
         },
         data: {
           status: 'boosted',
@@ -161,7 +141,7 @@ class CastProcessor {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
         where: {
-          castId: Number(cast.id),
+          hash: cast.hash,
         },
         data: {
           status: 'error-in-boosted',
@@ -193,13 +173,14 @@ class CastProcessor {
 
       const newMessage = `Look a this cool profile: @ https://test`;
       await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        replyTo: toHexString(cast.parent_hash),
+        replyTo: cast.parent_hash as string,
       });
 
       await this.prisma.processedCast.update({
         where: {
-          castId: Number(cast.id),
+          hash: cast.hash,
         },
+
         data: {
           status: 'flexed',
           processedTime: new Date(),
@@ -209,7 +190,7 @@ class CastProcessor {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
         where: {
-          castId: Number(cast.id),
+          hash: cast.hash,
         },
         data: {
           status: 'error-in-flex',
@@ -219,10 +200,10 @@ class CastProcessor {
     }
   }
 
-  private async isCastProcessed(castId: number): Promise<boolean> {
+  private async isCastProcessed(hash: string): Promise<boolean> {
     const count = await this.prisma.processedCast.count({
       where: {
-        castId: castId,
+        hash,
       },
     });
     return count > 0;
