@@ -141,22 +141,31 @@ class CastProcessor {
       // TODO: write this BOOST copy!
       const newMessage = `@${userResp.result.user.username} @ https://path/to/creddd/profile`;
 
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        embeds: [
-          { cast_id: { fid: Number(cast.fid), hash: toHexString(cast.hash) } },
-        ],
-        channelId: PERSONAE_CHANNEL_NAME,
-      });
+      if (
+        process.env.NODE_ENV !== 'production' ||
+        process.env.IS_PULL_REQUEST === 'true' // Render sets `IS_PULL_REQUEST` to 'true' in PR builds
+      ) {
+        console.log('Skipping publishing cast in non-production environment');
+      } else {
+        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+          embeds: [
+            {
+              cast_id: { fid: Number(cast.fid), hash: toHexString(cast.hash) },
+            },
+          ],
+          channelId: PERSONAE_CHANNEL_NAME,
+        });
 
-      await this.prisma.processedCast.update({
-        where: {
-          castId: Number(cast.id),
-        },
-        data: {
-          status: 'boosted',
-          processedTime: new Date(),
-        },
-      });
+        await this.prisma.processedCast.update({
+          where: {
+            castId: Number(cast.id),
+          },
+          data: {
+            status: 'boosted',
+            processedTime: new Date(),
+          },
+        });
+      }
     } catch (error) {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
@@ -192,19 +201,27 @@ class CastProcessor {
       }
 
       const newMessage = `Look a this cool profile: @ https://test`;
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        replyTo: toHexString(cast.parent_hash),
-      });
+      if (
+        process.env.NODE_ENV !== 'production' ||
+        process.env.IS_PULL_REQUEST === 'true' // Render sets `IS_PULL_REQUEST` to 'true' in PR builds
+      ) {
+        console.log('Skipping publishing cast in non-production environment');
+      } else {
+        console.log('Publishing cast in production environment');
+        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+          replyTo: toHexString(cast.parent_hash),
+        });
 
-      await this.prisma.processedCast.update({
-        where: {
-          castId: Number(cast.id),
-        },
-        data: {
-          status: 'flexed',
-          processedTime: new Date(),
-        },
-      });
+        await this.prisma.processedCast.update({
+          where: {
+            castId: Number(cast.id),
+          },
+          data: {
+            status: 'flexed',
+            processedTime: new Date(),
+          },
+        });
+      }
     } catch (error) {
       console.error('Error processing new casts:', error);
       await this.prisma.processedCast.update({
