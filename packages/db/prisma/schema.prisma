@@ -11,10 +11,9 @@ datasource db {
 }
 
 model ProcessedCast {
-  castId          Int      @id
-  hash            String
+  hash            String   @id
   originalText    String
-  castCreatedAt   DateTime
+  timestamp       DateTime
   processedTime   DateTime @default(now())
   status          String
   actionDetails   String
