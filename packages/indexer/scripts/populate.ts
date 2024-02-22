@@ -53,20 +53,33 @@ const populate = async () => {
       });
     }
 
-    // Index the dev Merkle trees.
-    // We just need to import the file to trigger the indexing
-    require('../src/indexMerkleTree');
-
-    // Get one of the created Merkle tree
-    const devTree = await prisma.merkleTree.findFirst({
-      select: {
-        id: true,
+    // Upsert a dummy group
+    const devGroupData = {
+      handle: `dev0`,
+      displayName: `Dev 0`,
+    };
+    const devGroup = await prisma.group.upsert({
+      create: devGroupData,
+      update: devGroupData,
+      where: {
+        handle: devGroupData.handle,
       },
     });
 
-    if (!devTree) {
-      throw new Error('No Merkle tree found!');
-    }
+    // Upsert a dummy tree
+    const devTreeData = {
+      merkleRoot: '0x0',
+      groupId: devGroup.id,
+      blockNumber: BigInt(0),
+    };
+
+    const devTree = await prisma.merkleTree.upsert({
+      create: devTreeData,
+      update: devTreeData,
+      where: {
+        merkleRoot_groupId_blockNumber: devTreeData,
+      },
+    });
 
     // Create some dummy FID attestations
     await prisma.fidAttestation.createMany({
