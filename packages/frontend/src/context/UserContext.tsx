@@ -18,7 +18,7 @@ interface UserContextType {
   siwfResponse: StatusAPIResponse | null;
   logout: () => void;
   refetchUser: () => void;
-  userNotFound: boolean | null;
+  userFound: boolean | null;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -37,7 +37,7 @@ interface UserProviderProps {
 
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<GetUserResponse | null>(null);
-  const [userNotFound, setUserNotFound] = useState<boolean | null>(null);
+  const [userFound, setUserFound] = useState<boolean | null>(null);
   const [siwfResponse, setSiwfResponse] = useState<StatusAPIResponse | null>(
     null
   );
@@ -60,6 +60,12 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   }, [user]);
 
   useEffect(() => {
+    if (user) {
+      setUserFound(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
     const isUserProfilePage = /\/user\//.test(pathname);
 
     // Check login status if this is not a user profile page
@@ -70,7 +76,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
       } else {
         // If there's no FID in local storage, redirect to the login page
         console.log('No fid in local storage');
-        setUserNotFound(true);
+        setUserFound(false);
         router.push('/');
       }
 
@@ -87,6 +93,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
 
   const loginWithFarcaster = (userData: StatusAPIResponse) => {
     if (userData.fid) {
+      setUserFound(true);
       setSiwfResponse(userData);
       localStorage.setItem('fid', userData.fid.toString());
       localStorage.setItem('siwfResponse', JSON.stringify(userData));
@@ -111,7 +118,7 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
         siwfResponse,
         logout,
         refetchUser,
-        userNotFound,
+        userFound,
       }}
     >
       {children}
