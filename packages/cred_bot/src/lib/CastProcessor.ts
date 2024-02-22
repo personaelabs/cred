@@ -193,7 +193,7 @@ class CastProcessor {
 
       const newMessage = `Look a this cool profile: @ https://test`;
       await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        replyTo: cast.parent_fid,
+        replyTo: toHexString(cast.parent_hash),
       });
 
       await this.prisma.processedCast.update({
