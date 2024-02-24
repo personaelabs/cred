@@ -24,17 +24,17 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
-  - type: cron
+  - type: worker
     name: cred-indexer
-    plan: pro plus
+    plan: standard
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
     rootDir: ./
-    schedule: '0 * * * *'
     buildFilter:
       paths:
         - packages/indexer/**
+        - packages/indexer-rs/**
         - packages/db/**
       ignoredPaths:
         - packages/circuit/**
@@ -49,16 +49,9 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cred
-          property: connectionString
-  - type: redis
-    plan: pro plus
-    name: cred
-    ipAllowList: []
-      
+    disk:
+      name: db
+      mountPath: ./db      
 databases:
   - name: cred
     databaseName: cred
