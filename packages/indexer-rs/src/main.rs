@@ -19,7 +19,7 @@ pub mod transfer_event {
     include!(concat!(env!("OUT_DIR"), "/transfer_event.rs"));
 }
 
-const PATH: &str = "../../db";
+const PATH: &str = "./db";
 
 #[derive(Debug, Clone)]
 pub struct TransferEvent {
