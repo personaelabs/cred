@@ -1,0 +1,3 @@
+[workspace]
+members = ["packages/indexer-rs"]
+resolver = "2"

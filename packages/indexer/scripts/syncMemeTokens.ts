@@ -56,7 +56,7 @@ const getMemeTokens = async (): Promise<string[]> => {
     vs_currency: 'usd',
     x_cg_pro_api_key: process.env.COINGECKO_API_KEY as string,
     days: 'max',
-    per_page: '100',
+    per_page: '30',
     order: 'market_cap_desc',
   };
 

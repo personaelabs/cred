@@ -5,8 +5,11 @@ target/
 false/
 
 !./packages/circuit/pkg/*
+indexer/db
 addr_membership_js/
 addr_membership.r1cs
 
 .DS_Store
 .eslintcache
+
+db/

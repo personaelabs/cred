@@ -72,9 +72,6 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
         from: msg.getFrom_asB64(),
         to: msg.getTo_asB64(),
         value: msg.getValue_asB64(),
-        logindex: jspb.Message.getFieldWithDefault(msg, 4, 0),
-        transactionindex: jspb.Message.getFieldWithDefault(msg, 5, 0),
-        blocknumber: jspb.Message.getFieldWithDefault(msg, 6, 0),
       };
 
     if (includeInstance) {
@@ -121,18 +118,6 @@ proto.ERC20TransferEvent.deserializeBinaryFromReader = function (msg, reader) {
         var value = /** @type {!Uint8Array} */ (reader.readBytes());
         msg.setValue(value);
         break;
-      case 4:
-        var value = /** @type {number} */ (reader.readUint32());
-        msg.setLogindex(value);
-        break;
-      case 5:
-        var value = /** @type {number} */ (reader.readUint32());
-        msg.setTransactionindex(value);
-        break;
-      case 6:
-        var value = /** @type {number} */ (reader.readUint64());
-        msg.setBlocknumber(value);
-        break;
       default:
         reader.skipField();
         break;
@@ -171,18 +156,6 @@ proto.ERC20TransferEvent.serializeBinaryToWriter = function (message, writer) {
   f = message.getValue_asU8();
   if (f.length > 0) {
     writer.writeBytes(3, f);
-  }
-  f = message.getLogindex();
-  if (f !== 0) {
-    writer.writeUint32(4, f);
-  }
-  f = message.getTransactionindex();
-  if (f !== 0) {
-    writer.writeUint32(5, f);
-  }
-  f = message.getBlocknumber();
-  if (f !== 0) {
-    writer.writeUint64(6, f);
   }
 };
 
@@ -298,54 +271,6 @@ proto.ERC20TransferEvent.prototype.getValue_asU8 = function () {
  */
 proto.ERC20TransferEvent.prototype.setValue = function (value) {
   return jspb.Message.setProto3BytesField(this, 3, value);
-};
-
-/**
- * optional uint32 logIndex = 4;
- * @return {number}
- */
-proto.ERC20TransferEvent.prototype.getLogindex = function () {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
-};
-
-/**
- * @param {number} value
- * @return {!proto.ERC20TransferEvent} returns this
- */
-proto.ERC20TransferEvent.prototype.setLogindex = function (value) {
-  return jspb.Message.setProto3IntField(this, 4, value);
-};
-
-/**
- * optional uint32 transactionIndex = 5;
- * @return {number}
- */
-proto.ERC20TransferEvent.prototype.getTransactionindex = function () {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
-};
-
-/**
- * @param {number} value
- * @return {!proto.ERC20TransferEvent} returns this
- */
-proto.ERC20TransferEvent.prototype.setTransactionindex = function (value) {
-  return jspb.Message.setProto3IntField(this, 5, value);
-};
-
-/**
- * optional uint64 blockNumber = 6;
- * @return {number}
- */
-proto.ERC20TransferEvent.prototype.getBlocknumber = function () {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
-};
-
-/**
- * @param {number} value
- * @return {!proto.ERC20TransferEvent} returns this
- */
-proto.ERC20TransferEvent.prototype.setBlocknumber = function (value) {
-  return jspb.Message.setProto3IntField(this, 6, value);
 };
 
 goog.object.extend(exports, proto);

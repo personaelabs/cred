@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-merkle-tree = { git = "https://github.com/personaelabs/merkle-tree", branch = "main" }
+merkle-tree = { git = "https://github.com/personaelabs/merkle-tree", rev = "ad9f4fab8e2ab21fa1023ef2d486f59102954eb7" }
 
 [dependencies.neon]
 version = "0.10"
