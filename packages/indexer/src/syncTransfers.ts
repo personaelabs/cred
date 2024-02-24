@@ -152,6 +152,6 @@ rocksdb.open().then(async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await syncTransfers();
-    await sleep(1000 * 5); // 5 minutes
+    await sleep(1000 * 5 * 60); // 5 minutes
   }
 });

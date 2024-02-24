@@ -282,6 +282,6 @@ async fn main() -> Result<(), QueryError> {
 
     loop {
         index_trees(&client).await?;
-        thread::sleep(std::time::Duration::from_secs(5)); // Sleep for 5 minutes
+        thread::sleep(std::time::Duration::from_secs(5 * 60)); // Sleep for 5 minutes
     }
 }
