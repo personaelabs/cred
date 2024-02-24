@@ -1,14 +1,13 @@
 previewsEnabled: true
 services:
-  - type: cron
+  - type: worker
     name: credbot
     plan: pro
     runtime: node
     region: oregon
-    buildCommand: pnpm i && pnpm -F db migrate:prod
+    buildCommand: pnpm i && pnpm -F db migrate:prod && pnpm -F indexer exec ts-node ./scripts/populate.ts
     startCommand: pnpm -F cred_bot exec ts-node src/index.ts
     rootDir: ./
-    schedule: '0 * * * *'
     buildFilter:
       paths:
         - packages/cred_bot/**

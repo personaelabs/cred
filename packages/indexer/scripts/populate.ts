@@ -32,12 +32,14 @@ const CONTRACTS: Pick<
   },
 ];
 
+const DEV_FIDS: number[] = [54, 12783, 20559];
+
 const { IS_PULL_REQUEST, NODE_ENV } = process.env;
 
 const populate = async () => {
   // Run this script only in PRs (i.e. Render preview environments)
   // and non-production environments
-  if (IS_PULL_REQUEST || NODE_ENV !== 'production') {
+  if (IS_PULL_REQUEST === 'true' || NODE_ENV !== 'production') {
     for (const contract of CONTRACTS) {
       await prisma.contract.upsert({
         update: contract,
@@ -50,6 +52,50 @@ const populate = async () => {
         },
       });
     }
+    console.log('Populated contracts');
+
+    // Upsert a dummy group
+    const devGroupData = {
+      handle: `dev0`,
+      displayName: `Dev 0`,
+    };
+    const devGroup = await prisma.group.upsert({
+      create: devGroupData,
+      update: devGroupData,
+      where: {
+        handle: devGroupData.handle,
+      },
+    });
+
+    // Upsert a dummy tree
+    const devTreeData = {
+      merkleRoot: '0x0',
+      groupId: devGroup.id,
+      blockNumber: BigInt(0),
+    };
+
+    const devTree = await prisma.merkleTree.upsert({
+      create: devTreeData,
+      update: devTreeData,
+      where: {
+        merkleRoot_groupId_blockNumber: devTreeData,
+      },
+    });
+
+    console.log('Populated group and tree');
+
+    // Create some dummy FID attestations
+    await prisma.fidAttestation.createMany({
+      data: DEV_FIDS.map(fid => ({
+        fid,
+        signInSig: Buffer.from('dummy'),
+        attestation: Buffer.from('dummy'),
+        treeId: devTree.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    console.log('Populated FID attestations');
   }
 };
 
