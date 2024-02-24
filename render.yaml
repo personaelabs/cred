@@ -51,7 +51,7 @@ services:
       - fromGroup: cred
     disk:
       name: db
-      mountPath: ./db      
+      mountPath: /db      
 databases:
   - name: cred
     databaseName: cred
