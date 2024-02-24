@@ -15,7 +15,7 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", default-features = false, features = [
     "postgresql",
 ], tag = "0.6.11" }
-merkle-tree = { git = "https://github.com/personaelabs/merkle-tree", rev = "ad9f4fab8e2ab21fa1023ef2d486f59102954eb7" }
+merkle-tree = { git = "https://github.com/personaelabs/merkle-tree", branch = "lib" }
 prost = "0.10.1"
 prost-types = "0.10.0"
 bytes = "1.1.0"

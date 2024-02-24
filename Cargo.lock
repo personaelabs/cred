@@ -555,7 +555,7 @@ checksum = "2d886547e41f740c616ae73108f6eb70afe6d940c7bc697cb30f13daec073037"
 dependencies = [
  "camino",
  "cargo-platform",
- "semver 1.0.22",
+ "semver",
  "serde",
  "serde_json",
  "thiserror",
@@ -634,7 +634,7 @@ checksum = "67523a3b4be3ce1989d607a828d036249522dd9c1c8de7f4dd2dae43a37369d1"
 dependencies = [
  "glob",
  "libc",
- "libloading 0.8.1",
+ "libloading",
 ]
 
 [[package]]
@@ -1463,7 +1463,7 @@ dependencies = [
  "chrono",
  "ethers-core",
  "reqwest",
- "semver 1.0.22",
+ "semver",
  "serde",
  "serde_json",
  "thiserror",
@@ -1572,7 +1572,7 @@ dependencies = [
  "path-slash",
  "rayon",
  "regex",
- "semver 1.0.22",
+ "semver",
  "serde",
  "serde_json",
  "solang-parser",
@@ -2209,7 +2209,7 @@ dependencies = [
  "bytes",
  "dotenv",
  "futures",
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree?rev=ad9f4fab8e2ab21fa1023ef2d486f59102954eb7)",
+ "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree?branch=lib)",
  "num-bigint",
  "prisma-client-rust",
  "prisma-client-rust-cli",
@@ -2453,16 +2453,6 @@ checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
 
 [[package]]
 name = "libloading"
-version = "0.6.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "351a32417a12d5f7e82c368a66781e307834dae04c6ce0cd4456d52989229883"
-dependencies = [
- "cfg-if",
- "winapi",
-]
-
-[[package]]
-name = "libloading"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c571b676ddfc9a8c12f1f3d3085a7b163966a8fd8098a90640953ce5f6170161"
@@ -2618,6 +2608,22 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 [[package]]
 name = "merkle-tree"
 version = "0.1.0"
+source = "git+https://github.com/personaelabs/merkle-tree?branch=lib#385d874c64bb4a469e039d2af892d59428f3aab1"
+dependencies = [
+ "ark-ff",
+ "ark-secp256k1",
+ "ark-serialize",
+ "ark-std",
+ "num-bigint",
+ "poseidon",
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "merkle-tree"
+version = "0.1.0"
 source = "git+https://github.com/personaelabs/merkle-tree.git?branch=main#ad9f4fab8e2ab21fa1023ef2d486f59102954eb7"
 dependencies = [
  "ark-ff",
@@ -2634,35 +2640,6 @@ dependencies = [
  "serde",
  "serde_json",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "merkle-tree"
-version = "0.1.0"
-source = "git+https://github.com/personaelabs/merkle-tree?rev=ad9f4fab8e2ab21fa1023ef2d486f59102954eb7#ad9f4fab8e2ab21fa1023ef2d486f59102954eb7"
-dependencies = [
- "ark-ff",
- "ark-secp256k1",
- "ark-serialize",
- "ark-std",
- "console_error_panic_hook",
- "csv",
- "hex",
- "num-bigint",
- "once_cell",
- "poseidon",
- "rayon",
- "serde",
- "serde_json",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "merkle-tree-rs"
-version = "0.1.0"
-dependencies = [
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree?rev=ad9f4fab8e2ab21fa1023ef2d486f59102954eb7)",
- "neon",
 ]
 
 [[package]]
@@ -2874,47 +2851,6 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
-]
-
-[[package]]
-name = "neon"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28e15415261d880aed48122e917a45e87bb82cf0260bb6db48bbab44b7464373"
-dependencies = [
- "neon-build",
- "neon-macros",
- "neon-runtime",
- "semver 0.9.0",
- "smallvec",
-]
-
-[[package]]
-name = "neon-build"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bac98a702e71804af3dacfde41edde4a16076a7bbe889ae61e56e18c5b1c811"
-
-[[package]]
-name = "neon-macros"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7288eac8b54af7913c60e0eb0e2a7683020dffa342ab3fd15e28f035ba897cf"
-dependencies = [
- "quote",
- "syn 1.0.109",
- "syn-mid",
-]
-
-[[package]]
-name = "neon-runtime"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4676720fa8bb32c64c3d9f49c47a47289239ec46b4bdb66d0913cc512cb0daca"
-dependencies = [
- "cfg-if",
- "libloading 0.6.7",
- "smallvec",
 ]
 
 [[package]]
@@ -4370,7 +4306,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
- "semver 1.0.22",
+ "semver",
 ]
 
 [[package]]
@@ -4602,27 +4538,12 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d7eb9ef2c18661902cc47e535f9bc51b78acd254da71d375c2f6720d9a40403"
-dependencies = [
- "semver-parser",
-]
-
-[[package]]
-name = "semver"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d43fe69e652f3df9bdc2b85b2854a0825b86e4fb76bc44d945137d053639ca"
 dependencies = [
  "serde",
 ]
-
-[[package]]
-name = "semver-parser"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "send_wrapper"
@@ -5082,7 +5003,7 @@ dependencies = [
  "hex",
  "once_cell",
  "reqwest",
- "semver 1.0.22",
+ "semver",
  "serde",
  "serde_json",
  "sha2 0.10.8",
@@ -5111,17 +5032,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "syn-mid"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fea305d57546cc8cd04feb14b62ec84bf17f50e3f7b12560d7bfa9265f39d9ed"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
