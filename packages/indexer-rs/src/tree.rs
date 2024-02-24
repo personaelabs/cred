@@ -132,29 +132,31 @@ pub async fn save_tree(
         let old_tree_ids = old_trees.iter().map(|tree| tree.id).collect::<Vec<i32>>();
         println!("Found {} old trees", old_tree_ids.len());
 
-        let comma_separated = old_tree_ids
-            .iter()
-            .map(|&num| format!("{}", num)) // Convert each integer to String
-            .collect::<Vec<_>>() // Collect into a Vec<String>
-            .join(", "); // Join with commas
+        if !old_tree_ids.is_empty() {
+            let comma_separated = old_tree_ids
+                .iter()
+                .map(|&num| format!("{}", num)) // Convert each integer to String
+                .collect::<Vec<_>>() // Collect into a Vec<String>
+                .join(", "); // Join with commas
 
-        let query = format!(
-            "DELETE FROM \"MerkleProof\" WHERE \"treeId\" IN ({})",
-            comma_separated
-        );
+            let query = format!(
+                "DELETE FROM \"MerkleProof\" WHERE \"treeId\" IN ({})",
+                comma_separated
+            );
 
-        // Delete the Merkle proofs of the old trees.
-        let del_result = prisma_client
-            ._execute_raw(raw!(&query))
-            .exec()
-            .await
-            .unwrap();
+            // Delete the Merkle proofs of the old trees.
+            let del_result = prisma_client
+                ._execute_raw(raw!(&query))
+                .exec()
+                .await
+                .unwrap();
 
-        println!(
-            "Deleted {} old proofs in {:?}",
-            del_result,
-            start_time.elapsed()
-        );
+            println!(
+                "Deleted {} old proofs in {:?}",
+                del_result,
+                start_time.elapsed()
+            );
+        }
     }
 
     Ok(())
