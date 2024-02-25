@@ -41,4 +41,6 @@ COPY Cargo.toml.docker Cargo.toml
 COPY rust-toolchain rust-toolchain
 COPY scripts scripts
 
+RUN pnpm -F db exec prisma generate
+
 CMD ["sh", "./scripts/start-indexer.sh"]
