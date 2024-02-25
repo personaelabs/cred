@@ -1,13 +1,12 @@
 extern crate merkle_tree as merkle_tree_lib;
-use crate::prisma::{group, merkle_tree};
-use crate::prisma::{merkle_proof, PrismaClient};
-use merkle_tree_lib::ark_ff::{Field, PrimeField};
+use crate::merkle_proof;
+use crate::storage::{GroupMerkleTree, GroupMerkleTreeWithProofs, Storage};
+use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
 use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
 use merkle_tree_lib::tree::{MerkleProof, MerkleTree};
 use num_bigint::BigUint;
-use prisma_client_rust::prisma_models::PrismaListValue;
-use prisma_client_rust::{raw, PrismaValue, QueryError};
+use prost::Message;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 
@@ -18,12 +17,12 @@ fn to_hex(fe: Fq) -> String {
     format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
 }
 
-pub async fn save_tree(
-    prisma_client: &PrismaClient,
+pub async fn save_tree<S: Storage>(
+    storage: &S,
     group_id: i32,
     mut addresses: Vec<[u8; 20]>,
-    block_number: u64,
-) -> Result<(), QueryError> {
+    block_number: i64,
+) -> Result<(), S::ErrorType> {
     addresses.sort();
     let mut tree = MerkleTree::<Fq, TREE_WIDTH>::new(secp256k1_w3());
 
@@ -47,116 +46,62 @@ pub async fn save_tree(
 
     let merkle_root = to_hex(tree.root.unwrap());
 
-    let existing_tree = prisma_client
-        .merkle_tree()
-        .find_first(vec![
-            merkle_tree::group_id::equals(group_id),
-            merkle_tree::merkle_root::equals(merkle_root.clone()),
-        ])
-        .exec()
+    let existing_tree = storage
+        .get_tree_by_root_and_group(&merkle_root, group_id)
         .await?;
 
     if existing_tree.is_some() {
         println!("Tree already exists");
         // Update the block number
-        prisma_client
-            .merkle_tree()
-            .update(
-                merkle_tree::id::equals(existing_tree.unwrap().id),
-                vec![merkle_tree::block_number::set(block_number as i64)],
-            )
-            .exec()
+        storage
+            .update_group_merkle_tree(GroupMerkleTree {
+                merkle_root: merkle_root.clone(),
+                group_id,
+                block_number,
+            })
             .await?;
     } else {
-        // Create a new tree
-        let new_merkle_tree = prisma_client
-            .merkle_tree()
-            .create(
-                merkle_root,
-                r#group::id::equals(group_id),
-                block_number as i64,
-                vec![],
-            )
-            .exec()
-            .await?;
-
         // Save the Merkle proofs in chunks
-        let chunk_size = 10000;
 
         let start_time = std::time::Instant::now();
-        for chunk in leaves.chunks(chunk_size) {
-            let proofs = chunk.par_iter().map(|leaf| tree.create_proof(*leaf));
 
-            prisma_client
-                .merkle_proof()
-                .create_many(
-                    proofs
-                        .map(|proof: MerkleProof<Fq>| {
-                            merkle_proof::create_unchecked(
-                                to_hex(proof.leaf),
-                                new_merkle_tree.id,
-                                vec![
-                                    merkle_proof::path_indices::set(
-                                        proof.path_indices.iter().map(|i| *i as i32).collect(),
-                                    ),
-                                    merkle_proof::path::set(
-                                        proof
-                                            .siblings
-                                            .iter()
-                                            .map(|sibling| to_hex(*sibling))
-                                            .collect(),
-                                    ),
-                                ],
-                            )
-                        })
+        let merkle_proofs = leaves.par_iter().map(|leaf| tree.create_proof(*leaf));
+
+        let merkle_proofs_proto = merkle_proofs
+            .map(|proof: MerkleProof<Fq>| {
+                let merkle_proof_proto = merkle_proof::MerkleProof {
+                    address: proof.leaf.0.to_bytes_be(),
+                    indices: proof
+                        .path_indices
+                        .iter()
+                        .map(|i| *i != 0)
+                        .collect::<Vec<bool>>(),
+                    siblings: proof
+                        .siblings
+                        .iter()
+                        .map(|sibling| sibling.0.to_bytes_be())
                         .collect(),
-                )
-                .exec()
-                .await?;
-        }
+                };
+
+                let mut buf = vec![];
+                merkle_proof_proto.encode(&mut buf).unwrap();
+
+                buf
+            })
+            .collect();
+
+        // Create a new tree
+        storage
+            .create_group_merkle_tree(GroupMerkleTreeWithProofs {
+                merkle_root: merkle_root.clone(),
+                group_id,
+                block_number,
+                proofs: merkle_proofs_proto,
+            })
+            .await?;
 
         let elapsed = start_time.elapsed();
         println!("Saved {} proofs in {:?}", leaves.len(), elapsed);
-
-        let start_time = std::time::Instant::now();
-        // Get all Merkle trees for the group except the one we just created
-        let old_trees = prisma_client
-            .merkle_tree()
-            .find_many(vec![
-                merkle_tree::group_id::equals(group_id),
-                merkle_tree::id::not(new_merkle_tree.id),
-            ])
-            .exec()
-            .await?;
-
-        let old_tree_ids = old_trees.iter().map(|tree| tree.id).collect::<Vec<i32>>();
-        println!("Found {} old trees", old_tree_ids.len());
-
-        if !old_tree_ids.is_empty() {
-            let comma_separated = old_tree_ids
-                .iter()
-                .map(|&num| format!("{}", num)) // Convert each integer to String
-                .collect::<Vec<_>>() // Collect into a Vec<String>
-                .join(", "); // Join with commas
-
-            let query = format!(
-                "DELETE FROM \"MerkleProof\" WHERE \"treeId\" IN ({})",
-                comma_separated
-            );
-
-            // Delete the Merkle proofs of the old trees.
-            let del_result = prisma_client
-                ._execute_raw(raw!(&query))
-                .exec()
-                .await
-                .unwrap();
-
-            println!(
-                "Deleted {} old proofs in {:?}",
-                del_result,
-                start_time.elapsed()
-            );
-        }
     }
 
     Ok(())

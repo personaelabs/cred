@@ -1,44 +1,44 @@
-use crate::prisma;
 use crate::processors::ProcessorLike;
+use crate::storage::{Contract, Storage};
 use crate::tree::save_tree;
 use crate::TransferEvent;
 use num_bigint::BigUint;
-use prisma::contract;
-use prisma::PrismaClient;
-use prisma_client_rust::queries::QueryError;
 use std::collections::{HashMap, HashSet};
 use std::io::Error;
 use std::io::ErrorKind;
+use std::marker::PhantomData;
 
 const MINTER_ADDRESS: [u8; 20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-pub fn get_whale_handle(contract: &contract::Data) -> String {
-    format!("whale-{}", contract.name.to_lowercase())
+pub fn get_whale_handle(contract_name: &str) -> String {
+    format!("whale-{}", contract_name.to_lowercase())
 }
 
-pub struct WhaleIndexer {
+pub struct WhaleIndexer<S> {
     balances: HashMap<[u8; 20], BigUint>,
     total_supply: BigUint,
     whale_threshold: BigUint,
     whales: HashSet<[u8; 20]>,
-    contract: contract::Data,
+    contract: Contract,
+    _marker: PhantomData<S>,
 }
 
-impl WhaleIndexer {
-    pub fn new(contract: contract::Data) -> Self {
+impl<S: Storage> WhaleIndexer<S> {
+    pub fn new(contract: Contract) -> Self {
         WhaleIndexer {
             balances: HashMap::new(),
             total_supply: BigUint::from(0u32),
             whale_threshold: BigUint::from(0u32),
             whales: HashSet::new(),
             contract,
+            _marker: PhantomData,
         }
     }
 }
 
-impl ProcessorLike for WhaleIndexer {
+impl<S: Storage> ProcessorLike<S> for WhaleIndexer<S> {
     fn group_handle(&self) -> String {
-        get_whale_handle(&self.contract)
+        get_whale_handle(&self.contract.name)
     }
 
     fn process_log(&mut self, log: &TransferEvent) -> Result<(), Error> {
@@ -90,15 +90,11 @@ impl ProcessorLike for WhaleIndexer {
         Ok(())
     }
 
-    async fn index_tree(
-        &self,
-        prisma_client: &PrismaClient,
-        block_number: u64,
-    ) -> Result<(), QueryError> {
-        let group = self.get_group(prisma_client).await?;
+    async fn index_tree(&self, storage: &S, block_number: i64) -> Result<(), S::ErrorType> {
+        let group = self.get_group(storage).await?;
         let group_id = group.id;
         save_tree(
-            prisma_client,
+            storage,
             group_id,
             self.whales.clone().into_iter().collect(),
             block_number,

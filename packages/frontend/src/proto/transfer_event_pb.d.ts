@@ -1,4 +1,4 @@
-// package: transfer_event
+// package:
 // file: transfer_event.proto
 
 import * as jspb from 'google-protobuf';

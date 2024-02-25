@@ -3,7 +3,7 @@ import { Hex, HttpTransport, PublicClient } from 'viem';
 import { getNextAvailableClient, releaseClient } from './providers/ethRpc';
 import * as chains from 'viem/chains';
 
-export const IGNORE_CONTRACTS = ['op', 'arb', 'link', 'mkr'];
+export const IGNORE_CONTRACTS = ['link', 'mkr'];
 
 export const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));

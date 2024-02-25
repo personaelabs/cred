@@ -42,24 +42,10 @@ model MerkleTree {
   blockNumber    BigInt
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  merkleProofs   MerkleProof[]
+  merkleProofs   Bytes[]
   FidAttestation FidAttestation[]
 
   @@unique([merkleRoot, groupId, blockNumber])
-}
-
-model MerkleProof {
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  address     String
-  path        String[]
-  pathIndices Int[]
-
-  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
-  treeId     Int
-
-  @@id([treeId, address])
 }
 
 model Group {

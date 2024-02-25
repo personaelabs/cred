@@ -17,11 +17,12 @@
     "compile-circuit": "sh ./scripts/compile-web.sh && sh ./scripts/compile-node.sh"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
     "husky": "^9.0.11",
     "prettier": "^3.0.3",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1"
+    "ts-protoc-gen": "^0.15.0"
   },
   "dependencies": {
     "lint-staged": "^15.2.2"

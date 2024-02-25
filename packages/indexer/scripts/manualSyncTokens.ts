@@ -4,6 +4,14 @@ import prisma from '../src/prisma';
 
 const tokens = [
   {
+    address: '0x4200000000000000000000000000000000000042',
+    deployedBlock: BigInt(6490467),
+    name: 'OP',
+    symbol: 'op',
+    chain: 'OP Mainnet',
+  },
+  /*
+  {
     address: '0xb8a87405d9a4f2f866319b77004e88dff66c0d92',
     deployedBlock: BigInt(19235060),
     name: 'Sora',
@@ -81,6 +89,7 @@ const tokens = [
     deployedBlock: BigInt(18265095),
     chain: 'Ethereum',
   },
+  */
 ];
 
 const addTokens = async (
@@ -92,23 +101,19 @@ const addTokens = async (
   for (const token of tokens) {
     const data = {
       ...token,
+      id: 73,
       // Save contract address in lower case
       address: token.address.toLowerCase(),
       type: ContractType.ERC20,
       targetGroups: ['earlyHolder', 'whale'],
     };
 
+    console.log({ data });
+
     console.log(`Adding token ${token.symbol} (${token.address})`);
 
-    await prisma.contract.upsert({
-      update: data,
-      create: data,
-      where: {
-        address_chain: {
-          address: data.address,
-          chain: 'Ethereum',
-        },
-      },
+    await prisma.contract.create({
+      data: data,
     });
   }
 };

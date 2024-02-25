@@ -1,22 +1,28 @@
-mod prisma;
 mod processors;
+mod storage;
 mod tree;
+
 use futures::future::join_all;
 use num_bigint::BigUint;
-use prisma::PrismaClient;
-use prisma::{contract, group};
-use prisma_client_rust::{Direction, NewClientError, QueryError};
 use processors::early_holders::{get_early_holder_handle, EarlyHolderIndexer};
 use processors::whales::{get_whale_handle, WhaleIndexer};
 use processors::ProcessorLike;
 use prost::Message;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rocksdb::{IteratorMode, Options, ReadOptions, DB};
 use std::{io::Cursor, time::Instant};
+use storage::postgres::PostgresStorage;
+use storage::{Contract, Storage};
+use tokio_postgres::{Error, NoTls};
 use tokio_retry::strategy::{jitter, ExponentialBackoff};
 use tokio_retry::Retry;
 
 pub mod transfer_event {
     include!(concat!(env!("OUT_DIR"), "/transfer_event.rs"));
+}
+
+pub mod merkle_proof {
+    include!(concat!(env!("OUT_DIR"), "/merkle_proof.rs"));
 }
 
 const PATH: &str = "./db";
@@ -28,9 +34,9 @@ pub struct TransferEvent {
     value: BigUint,
 }
 
-enum Processor {
-    Whale(WhaleIndexer),
-    EarlyHolder(EarlyHolderIndexer),
+enum Processor<S: Storage> {
+    Whale(WhaleIndexer<S>),
+    EarlyHolder(EarlyHolderIndexer<S>),
 }
 
 fn get_block_num_from_key(key: &[u8]) -> u64 {
@@ -45,20 +51,19 @@ fn get_contract_id_from_key(key: &[u8]) -> u16 {
     u16::from_be_bytes(contract_id_bytes)
 }
 
-async fn process_contract_logs(
-    prisma_client: &PrismaClient,
+async fn process_contract_logs<S: Storage>(
+    storage: &S,
     db: &DB,
-    contract: &contract::Data,
-) -> Result<(), QueryError> {
+    contract: &Contract,
+) -> Result<(), S::ErrorType> {
     // Initialize the processors
     let whale_processor = WhaleIndexer::new(contract.clone());
-    let early_holders_processor = EarlyHolderIndexer::new(contract.clone());
+    let early_holders_processor = EarlyHolderIndexer::new(contract.name.clone());
 
     println!("Processing logs for contract {}", contract.id);
 
     let next_contract_id = contract.id + 1;
     let next_contract_id_key = &next_contract_id.to_be_bytes()[2..];
-    println!("Next contract id key {:?}", next_contract_id_key);
 
     let iterator = db.iterator(IteratorMode::From(
         next_contract_id_key,
@@ -69,9 +74,8 @@ async fn process_contract_logs(
     for item in iterator {
         let (key, _value) = item.unwrap();
         let contract_id = get_contract_id_from_key(&key);
-        println!("Contract id {:?}", contract_id);
         if contract_id == contract.id as u16 {
-            latest_log_block_num = Some(get_block_num_from_key(&key));
+            latest_log_block_num = Some(get_block_num_from_key(&key) as i64);
             println!("Latest log block num {:?}", latest_log_block_num.unwrap());
             break;
         }
@@ -83,21 +87,19 @@ async fn process_contract_logs(
         }
     }
 
-    let mut processors: Vec<Processor> = vec![];
+    let mut processors: Vec<Processor<S>> = vec![];
 
     // Add the whale processor to `processors` if there are new logs
     if latest_log_block_num.is_some() {
         // Add the whale processor to `processors` if there are new logs
-        if whale_processor.latest_tree_block_num(prisma_client).await?
-            != latest_log_block_num.unwrap()
-        {
+        if whale_processor.latest_tree_block_num(storage).await? != latest_log_block_num.unwrap() {
             println!("New logs for contract {}", contract.id);
             processors.push(Processor::Whale(whale_processor));
         }
 
         // Add the early holder processor to `processors` if there are new logs
         if early_holders_processor
-            .latest_tree_block_num(prisma_client)
+            .latest_tree_block_num(storage)
             .await?
             != latest_log_block_num.unwrap()
         {
@@ -113,8 +115,8 @@ async fn process_contract_logs(
     // The prefix is the contract id in 2 bytes
     let prefix = &contract.id.to_be_bytes()[2..];
 
-    let start_time = Instant::now();
-    let iterator_ops = ReadOptions::default();
+    let mut iterator_ops = ReadOptions::default();
+    iterator_ops.set_async_io(true);
 
     // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
     let iterator = db.iterator_opt(
@@ -122,44 +124,56 @@ async fn process_contract_logs(
         iterator_ops,
     );
 
+    let start_time = Instant::now();
+    let mut items = vec![];
+
     for item in iterator {
         let (key, value) = item.unwrap();
         if key.starts_with(prefix) {
-            let decoded: transfer_event::Erc20TransferEvent =
+            items.push(value);
+        } else {
+            // We have reached the end of the logs for this contract
+            break;
+        }
+    }
+
+    // Decode the logs in parallel
+    let decoded_items = items
+        .par_iter()
+        .map(|value| {
+            // Decode the logs that are in protobuf format
+            let decoded =
                 transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
-            let transfer_event = TransferEvent {
+
+            TransferEvent {
                 from: decoded.from.try_into().unwrap(),
                 to: decoded.to.try_into().unwrap(),
                 value: BigUint::from_bytes_be(&decoded.value),
-            };
+            }
+        })
+        .collect::<Vec<TransferEvent>>();
 
-            let mut errored_processors = vec![];
-            for (i, processor) in processors.iter_mut().enumerate() {
-                match processor {
-                    Processor::Whale(whale_processor) => {
+    let mut negative_balance = false;
+    for transfer_event in decoded_items {
+        for processor in processors.iter_mut() {
+            match processor {
+                Processor::Whale(whale_processor) => {
+                    if !negative_balance {
                         match whale_processor.process_log(&transfer_event) {
                             Ok(_) => {}
                             Err(_) => {
                                 println!("Error processing log {:?}", contract.symbol);
-                                errored_processors.push(i);
+                                negative_balance = true;
                             }
                         };
                     }
-                    Processor::EarlyHolder(early_holders_processor) => {
-                        early_holders_processor
-                            .process_log(&transfer_event)
-                            .unwrap();
-                    }
+                }
+                Processor::EarlyHolder(early_holders_processor) => {
+                    early_holders_processor
+                        .process_log(&transfer_event)
+                        .unwrap();
                 }
             }
-
-            // Remove errored processors from the list of processors to execute
-            for i in errored_processors {
-                processors.remove(i);
-            }
-        } else {
-            // We have reached the end of the logs for this contract
-            break;
         }
     }
 
@@ -174,12 +188,12 @@ async fn process_contract_logs(
         match processor {
             Processor::Whale(whale_processor) => {
                 whale_processor
-                    .index_tree(prisma_client, latest_log_block_num.unwrap())
+                    .index_tree(storage, latest_log_block_num.unwrap())
                     .await?;
             }
             Processor::EarlyHolder(early_holders_processor) => {
                 early_holders_processor
-                    .index_tree(prisma_client, latest_log_block_num.unwrap())
+                    .index_tree(storage, latest_log_block_num.unwrap())
                     .await?;
             }
         }
@@ -189,56 +203,33 @@ async fn process_contract_logs(
     Ok(())
 }
 
-async fn index_trees(client: &PrismaClient) -> Result<(), QueryError> {
-    let result: Result<Vec<contract::Data>, QueryError> = client
-        .contract()
-        .find_many(vec![])
-        .order_by(contract::id::order(Direction::Asc))
-        .exec()
-        .await;
-
-    let contracts = result.unwrap();
-
-    println!("Contracts {:?}", contracts.len());
+async fn index_trees<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
+    let contracts = storage.get_contracts().await?;
 
     // Upsert groups for contracts
     for contract in &contracts {
-        for target_group in contract.target_groups.clone() {
+        for target_group in &contract.target_groups {
             let (handle, display_name) = if target_group == "whale" {
                 (
-                    get_whale_handle(contract),
-                    format!("{} whale", contract.symbol.clone().unwrap().to_uppercase()),
+                    get_whale_handle(&contract.name),
+                    format!("{} whale", contract.symbol.clone().to_uppercase()),
                 )
             } else if target_group == "earlyHolder" {
                 (
-                    get_early_holder_handle(contract),
-                    format!(
-                        "Early {} holder",
-                        contract.symbol.clone().unwrap().to_uppercase()
-                    ),
+                    get_early_holder_handle(&contract.name),
+                    format!("Early {} holder", contract.symbol.clone().to_uppercase()),
                 )
             } else {
                 panic!("Invalid target group: {}", target_group);
             };
 
-            client
-                .group()
-                .upsert(
-                    group::handle::equals(handle.clone()),
-                    group::create(
-                        handle,
-                        display_name.clone(),
-                        vec![
-                            group::display_name::set(display_name.clone()),
-                            group::r#type::set(Some(target_group.clone())),
-                        ],
-                    ),
-                    vec![
-                        group::display_name::set(display_name.clone()),
-                        group::r#type::set(Some(target_group)),
-                    ],
+            storage
+                .upsert_group(
+                    handle.clone(),
+                    GroupUpsertData {
+                        display_name: display_name.clone(),
+                    },
                 )
-                .exec()
                 .await?;
         }
     }
@@ -246,7 +237,6 @@ async fn index_trees(client: &PrismaClient) -> Result<(), QueryError> {
     let db_options = Options::default();
     let db = DB::open_for_read_only(&db_options, PATH, true).unwrap();
 
-    let start_time = Instant::now();
     let mut indexing_jobs = vec![];
 
     let retry_strategy = ExponentialBackoff::from_millis(10)
@@ -255,7 +245,7 @@ async fn index_trees(client: &PrismaClient) -> Result<(), QueryError> {
 
     for contract in contracts.iter() {
         let with_retries = Retry::spawn(retry_strategy.clone(), || async {
-            let result = process_contract_logs(&client, &db, contract).await;
+            let result = process_contract_logs(storage, &db, contract).await;
             if result.is_err() {
                 println!("Error {:?}", result);
             }
@@ -275,13 +265,28 @@ async fn index_trees(client: &PrismaClient) -> Result<(), QueryError> {
 
 use std::thread;
 
+use crate::storage::GroupUpsertData;
+
 #[tokio::main]
-async fn main() -> Result<(), QueryError> {
-    let client: Result<PrismaClient, NewClientError> = PrismaClient::_builder().build().await;
-    let client = client.unwrap();
+async fn main() -> Result<(), Error> {
+    dotenv::dotenv().ok();
+
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    // Connect to the database.
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+    let storage = PostgresStorage::new(client);
+
+    // The connection object performs the actual communication with the database,
+    // so spawn it off to run on its own.
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
 
     loop {
-        index_trees(&client).await?;
+        index_trees(&storage).await?;
         thread::sleep(std::time::Duration::from_secs(5 * 60)); // Sleep for 5 minutes
     }
 }

@@ -148,10 +148,14 @@ const syncTransfers = async () => {
   await runInParallel(runSyncJob, jobs);
 };
 
-rocksdb.open().then(async () => {
+const main = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    await rocksdb.open();
     await syncTransfers();
     await sleep(1000 * 5 * 60); // 5 minutes
+    await rocksdb.close();
   }
-});
+};
+
+main();

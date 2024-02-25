@@ -1,5 +1,11 @@
 use std::io::Result;
 fn main() -> Result<()> {
-    prost_build::compile_protos(&["./src/transfer_event.proto"], &["src/"])?;
+    prost_build::compile_protos(
+        &[
+            "../protobufs/schemas/transfer_event.proto",
+            "../protobufs/schemas/merkle_proof.proto",
+        ],
+        &["../protobufs/schemas"],
+    )?;
     Ok(())
 }

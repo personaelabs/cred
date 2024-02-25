@@ -1,27 +1,14 @@
-use crate::prisma;
-use crate::tree::save_tree;
+use crate::storage::{Group, Storage};
 use crate::TransferEvent;
-use num_bigint::BigUint;
-use prisma::PrismaClient;
-use prisma::{contract, group, merkle_tree};
-use prisma_client_rust::queries::QueryError;
-use prisma_client_rust::Direction;
-use std::collections::{HashMap, HashSet};
-use std::io::Error;
-use std::io::ErrorKind;
 
 pub mod early_holders;
 pub mod whales;
 
-pub trait ProcessorLike {
+pub trait ProcessorLike<S: Storage> {
     fn group_handle(&self) -> String;
 
-    async fn get_group(&self, prisma_client: &PrismaClient) -> Result<group::Data, QueryError> {
-        let group = prisma_client
-            .r#group()
-            .find_unique(group::handle::equals(self.group_handle()))
-            .exec()
-            .await?;
+    async fn get_group(&self, storage: &S) -> Result<Group, S::ErrorType> {
+        let group = storage.get_group_by_handle(&self.group_handle()).await?;
 
         if group.is_none() {
             panic!("Group not found");
@@ -30,29 +17,20 @@ pub trait ProcessorLike {
         Ok(group.unwrap())
     }
 
-    async fn latest_tree_block_num(&self, prisma_client: &PrismaClient) -> Result<u64, QueryError> {
-        let group = self.get_group(prisma_client).await?;
+    async fn latest_tree_block_num(&self, storage: &S) -> Result<i64, S::ErrorType> {
+        let group = self.get_group(storage).await?;
         let group_id = group.id;
 
         // Get the latest tree of the group
-        let tree = prisma_client
-            .merkle_tree()
-            .find_first(vec![merkle_tree::group_id::equals(group_id)])
-            .order_by(merkle_tree::block_number::order(Direction::Desc))
-            .exec()
-            .await?;
+        let tree = storage.get_latest_group_merkle_tree(group_id).await?;
 
-        if tree.is_some() {
-            Ok(tree.unwrap().block_number as u64)
+        if let Some(tree) = tree {
+            Ok(tree.block_number)
         } else {
             Ok(0)
         }
     }
 
-    fn process_log(&mut self, log: &TransferEvent) -> Result<(), Error>;
-    async fn index_tree(
-        &self,
-        prisma_client: &PrismaClient,
-        block_number: u64,
-    ) -> Result<(), QueryError>;
+    fn process_log(&mut self, log: &TransferEvent) -> Result<(), std::io::Error>;
+    async fn index_tree(&self, storage: &S, block_number: i64) -> Result<(), S::ErrorType>;
 }
