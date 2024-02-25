@@ -26,7 +26,7 @@ services:
       - fromGroup: cred
   - type: worker
     name: cred-indexer
-    plan: pro
+    plan: pro plus
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
