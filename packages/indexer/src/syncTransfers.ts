@@ -7,7 +7,7 @@ import {
   toBytes,
 } from 'viem';
 import prisma from './prisma';
-import { IGNORE_CONTRACTS, runInParallel, sleep } from './utils';
+import { IGNORE_CONTRACTS, runInParallel } from './utils';
 import { Contract } from '@prisma/client';
 import * as chains from 'viem/chains';
 import { parseERC20TransferLogs, processLogs } from './lib/processLogs';
@@ -118,7 +118,7 @@ const runSyncJob = async (
   console.timeEnd(`Synched transfers for ${contract.symbol}`);
 };
 
-const syncTransfers = async () => {
+export const syncTransfers = async () => {
   // Get all contracts
   const contracts = await prisma.contract.findMany({
     where: {
@@ -147,15 +147,3 @@ const syncTransfers = async () => {
   // Run the sync jobs in parallel
   await runInParallel(runSyncJob, jobs);
 };
-
-const main = async () => {
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    await rocksdb.open();
-    await syncTransfers();
-    await sleep(1000 * 5 * 60); // 5 minutes
-    await rocksdb.close();
-  }
-};
-
-main();

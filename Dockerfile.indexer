@@ -16,6 +16,9 @@ COPY package.json .
 COPY pnpm-lock.yaml .
 COPY pnpm-workspace.yaml .
 
+COPY packages/db/package.json packages/db/package.json
+COPY packages/indexer/package.json packages/indexer/package.json
+
 # Install dependencies
 RUN pnpm i
 
