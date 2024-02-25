@@ -11,6 +11,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Make sure Rust is in the PATH
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+
 COPY package.json .
 COPY pnpm-lock.yaml .
 COPY pnpm-workspace.yaml .
@@ -18,7 +19,11 @@ COPY pnpm-workspace.yaml .
 # Install dependencies
 RUN pnpm i
 
-RUN apt-get update -y
+RUN apt-get update -y && \
+    apt-get install -y llvm clang
+
+RUN export LIBCLANG_PATH=/usr/lib/llvm-14/lib/libclang-14.so.1
+
 
 # Download and install protoc
 RUN apt install -y protobuf-compiler
