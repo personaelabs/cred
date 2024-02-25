@@ -30,5 +30,6 @@ COPY Cargo.lock Cargo.lock
 COPY Cargo.toml.docker Cargo.toml
 #COPY Cargo.toml Cargo.toml
 COPY rust-toolchain rust-toolchain
+COPY scripts scripts
 
 CMD ["sh", "./scripts/start-indexer.sh"]
