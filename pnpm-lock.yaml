@@ -160,9 +160,6 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
-      ts-protoc-gen:
-        specifier: ^0.15.0
-        version: 0.15.0
       vaul:
         specifier: ^0.8.0
         version: 0.8.9(@types/react-dom@18.2.18)(@types/react@18.2.55)(react-dom@18.2.0)(react@18.2.0)
@@ -252,12 +249,6 @@ importers:
       '@types/rocksdb':
         specifier: ^3.0.5
         version: 3.0.5
-
-  packages/merkle-tree-rs:
-    devDependencies:
-      cargo-cp-artifact:
-        specifier: ^0.1
-        version: 0.1.8
 
 packages:
 
@@ -4115,11 +4106,6 @@ packages:
 
   /caniuse-lite@1.0.30001584:
     resolution: {integrity: sha512-LOz7CCQ9M1G7OjJOF9/mzmqmj3jE/7VOmrfw6Mgs0E8cjOsbRXQJHsPBfmBOXDskXKrHLyyW3n7kpDW/4BsfpQ==}
-
-  /cargo-cp-artifact@0.1.8:
-    resolution: {integrity: sha512-3j4DaoTrsCD1MRkTF2Soacii0Nx7UHCce0EwUf4fHnggwiE4fbmF2AbnfzayR36DF8KGadfh7M/Yfy625kgPlA==}
-    hasBin: true
-    dev: true
 
   /catering@2.1.1:
     resolution: {integrity: sha512-K7Qy8O9p76sL3/3m7/zLKbRkyOlSZAgzEaLhyj2mXS8PsCud2Eo4hAb8aLtZqHh0QGqLcb9dlJSu6lHRVENm1w==}
