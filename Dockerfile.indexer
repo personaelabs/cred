@@ -29,12 +29,9 @@ RUN apt install -y protobuf-compiler
 COPY packages/db packages/db
 COPY packages/indexer packages/indexer
 COPY packages/indexer-rs packages/indexer-rs
-COPY .cargo .cargo
 COPY Cargo.lock Cargo.lock
 COPY Cargo.toml.docker Cargo.toml
 #COPY Cargo.toml Cargo.toml
 COPY rust-toolchain rust-toolchain
-
-RUN cargo prisma generate --schema=packages/indexer-rs/schema.prisma
 
 CMD ["sh", "./scripts/start-indexer.sh"]
