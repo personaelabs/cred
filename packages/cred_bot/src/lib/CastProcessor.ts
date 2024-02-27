@@ -10,6 +10,8 @@ const IS_PROD =
   process.env.NODE_ENV === 'production' &&
   process.env.IS_PULL_REQUEST !== 'true';
 
+console.log('IS_PROD:', IS_PROD);
+
 interface Cast {
   fid: string;
   timestamp: Date;
