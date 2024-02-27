@@ -178,7 +178,7 @@ class CastProcessor {
 
       const hasFidAttestation = await this.prisma.fidAttestation.findFirst({
         where: {
-          fid: Number(cast.parent_fid),
+          fid: Number(cast.fid),
         },
       });
 
@@ -187,9 +187,7 @@ class CastProcessor {
         return;
       }
 
-      const userResp = await neynarClient.lookupUserByFid(
-        Number(cast.parent_fid)
-      );
+      const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
       const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
       if (IS_PROD) {
