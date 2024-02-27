@@ -23,10 +23,18 @@ export async function GET(req: NextRequest) {
         "treeId"
       HAVING
         count(*) > 100
+    ),
+    static_trees AS (
+      SELECT
+        "MerkleTree".id
+      FROM
+        "MerkleTree"
+      LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
+    WHERE
+      "Group".TYPE = 'static'
     )
     SELECT
-      "MerkleProof".address,
-      ARRAY_AGG("Group".id) AS "groups"
+      "MerkleProof".address, ARRAY_AGG("Group".id) AS "groups"
     FROM
       "MerkleProof"
       LEFT JOIN "MerkleTree" ON "MerkleProof"."treeId" = "MerkleTree".id
@@ -35,7 +43,10 @@ export async function GET(req: NextRequest) {
       "MerkleTree".id IN(
         SELECT
           "treeId" FROM large_enough_trees)
-    GROUP BY
+      OR "MerkleTree".id in(
+        SELECT
+          "id" FROM static_trees)
+        GROUP BY
 	"MerkleProof".address
     OFFSET ${skip}
     LIMIT ${take}
