@@ -28,5 +28,5 @@ Sentry.init({
     }),
   ],
 
-  enabled: process.env.NODE_ENV === 'production',
+  enabled: process.env.NODE_ENV !== 'development',
 });
