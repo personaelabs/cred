@@ -82,7 +82,7 @@ enum ContractType {
 
 model Contract {
   id            Int          @id @default(autoincrement())
-  address       String       @unique
+  address       String
   name          String
   type          ContractType
   deployedBlock BigInt
