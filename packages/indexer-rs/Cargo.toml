@@ -23,6 +23,7 @@ rocksdb = { version = "0.22.0", default-features = false, features = [
 ] }
 tokio-retry = "0.3"
 tokio-postgres = { version = "0.7.10" }
+num-format = "0.4.4"
 
 [build-dependencies]
 prost-build = "0.10.1"
