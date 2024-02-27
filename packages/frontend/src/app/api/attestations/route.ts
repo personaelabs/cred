@@ -99,7 +99,17 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Merkle root not found' }, { status: 400 });
   }
 
-  if (merkleRoot !== merkleTreeInDb.merkleRoot) {
+  // Pad the merkle root returned from the db to 32 bytes.
+  // The merkle root in the database is stored as a hex string but isn't padded to 32 bytes so we need to pad it here.
+  const merkleRootInDb = `0x${merkleTreeInDb.merkleRoot
+    .replace('0x', '')
+    .padStart(64, '0')}`;
+
+  // For debugging
+  console.log('merkleRoot', merkleRoot);
+  console.log('merkleRootInDb', merkleRootInDb);
+
+  if (merkleRoot !== merkleRootInDb) {
     return Response.json({ error: 'Invalid merkle root' }, { status: 400 });
   }
 
