@@ -106,7 +106,7 @@ const addTokens = async (
       where: {
         address_chain: {
           address: data.address,
-          chain: 'Ethereum',
+          chain: data.chain,
         },
       },
     });
