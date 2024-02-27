@@ -4,7 +4,15 @@ import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
 
 const CREDBOT_FID = 345834;
-const PERSONAE_CHANNEL_NAME = 'personae;';
+const PERSONAE_CHANNEL_NAME = 'personae';
+
+const IS_PROD =
+  process.env.NODE_ENV === 'production' &&
+  process.env.IS_PULL_REQUEST !== 'true';
+
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('IS_PULL_REQUEST:', process.env.IS_PULL_REQUEST);
+console.log('IS_PROD:', IS_PROD);
 
 interface Cast {
   fid: string;
@@ -29,11 +37,7 @@ class CastProcessor {
    */
   public async processNewCasts(): Promise<void> {
     // Use a longer interval in development and PR environments to avoid rate limiting.
-    const interval =
-      process.env.NODE_ENV !== 'production' ||
-      process.env.IS_PULL_REQUEST === 'true'
-        ? 5000
-        : 1500;
+    const interval = IS_PROD ? 1500 : 5000;
 
     setInterval(async () => {
       const startTime = new Date();
@@ -128,12 +132,17 @@ class CastProcessor {
         Number(cast.parent_fid)
       );
 
-      // TODO: write this BOOST copy!
-      const newMessage = `@${userResp.result.user.username} @ https://path/to/creddd/profile`;
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        embeds: [{ cast_id: { fid: Number(cast.fid), hash: cast.hash } }],
-        channelId: PERSONAE_CHANNEL_NAME,
-      });
+      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
+      if (IS_PROD) {
+        // We only send the message in production until we have a dedicated dev bot.
+        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+          embeds: [{ cast_id: { fid: Number(cast.fid), hash: cast.hash } }],
+          channelId: PERSONAE_CHANNEL_NAME,
+        });
+      }
+
+      // Log new message.
+      console.log('New message:', newMessage);
 
       await this.prisma.processedCast.update({
         where: {
@@ -178,10 +187,19 @@ class CastProcessor {
         return;
       }
 
-      const newMessage = `Look a this cool profile: @ https://test`;
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-        replyTo: cast.parent_hash as string,
-      });
+      const userResp = await neynarClient.lookupUserByFid(
+        Number(cast.parent_fid)
+      );
+
+      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
+      if (IS_PROD) {
+        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+          replyTo: cast.parent_hash as string,
+        });
+      }
+
+      // Log new message.
+      console.log('New message:', newMessage);
 
       await this.prisma.processedCast.update({
         where: {
