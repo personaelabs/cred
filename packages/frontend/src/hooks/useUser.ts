@@ -1,6 +1,7 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
 import { useEffect, useState } from 'react';
 import OG_USERS from '@/lib/creddd1Users';
+import { throwFetchError } from '@/lib/utils';
 
 const useUser = (fid: string) => {
   const [user, setUser] = useState<GetUserResponse | null>(null);
@@ -14,7 +15,7 @@ const useUser = (fid: string) => {
           cache: 'no-store',
         });
         if (!response.ok) {
-          throw new Error('User fetch failed');
+          await throwFetchError(response);
         }
         const data = (await response.json()) as GetUserResponse;
         setUser(data);

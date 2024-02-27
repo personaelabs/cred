@@ -9,6 +9,7 @@ import {
   calculateSigRecovery,
   concatUint8Arrays,
   fromHexString,
+  throwFetchError,
   toHexString,
 } from '@/lib/utils';
 import {
@@ -42,7 +43,7 @@ const getMerkleTree = async (groupId: number): Promise<MerkleTreeSelect> => {
     );
 
     if (!response.ok) {
-      throw new Error('Merkle tree fetch failed');
+      await throwFetchError(response);
     }
 
     console.log('Fetched merkle tree', skip);

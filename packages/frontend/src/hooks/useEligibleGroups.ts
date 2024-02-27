@@ -1,5 +1,6 @@
 import { GroupSelect } from '@/app/api/groups/route';
 import { EligibleGroup } from '@/app/types';
+import { throwFetchError } from '@/lib/utils';
 import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
 import { useCallback, useEffect, useState } from 'react';
 import { Hex } from 'viem';
@@ -19,7 +20,7 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
       const groupResponse = await fetch('/api/groups');
 
       if (!groupResponse.ok) {
-        throw new Error('Group fetch failed');
+        await throwFetchError(groupResponse);
       }
 
       const groupData = (await groupResponse.json()) as GroupSelect[];
@@ -50,7 +51,7 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
       );
 
       if (!response.ok) {
-        throw new Error('Address to groups fetch failed');
+        await throwFetchError(response);
       }
 
       // If the response is 204, then there are no more records to fetch

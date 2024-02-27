@@ -1,4 +1,5 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
+import { throwFetchError } from '@/lib/utils';
 import { StatusAPIResponse } from '@farcaster/auth-kit';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -48,6 +49,11 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     const result = await fetch(`/api/fc-accounts/${fid}`, {
       cache: 'no-store',
     });
+
+    if (!result.ok) {
+      await throwFetchError(result);
+    }
+
     const data = (await result.json()) as GetUserResponse;
 
     setUser(data);

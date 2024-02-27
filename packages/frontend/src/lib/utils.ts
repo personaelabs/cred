@@ -83,13 +83,19 @@ export const postJSON = async <T>({
   body: T;
   method: 'POST' | 'GET' | 'DELETE' | 'PUT' | 'PATCH';
 }) => {
-  return await fetch(url, {
+  const result = await fetch(url, {
     method,
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
+
+  if (!result.ok) {
+    await throwFetchError(result);
+  }
+
+  return result;
 };
 
 export const buildSiwfMessage = ({
@@ -121,4 +127,9 @@ export const buildSiwfMessage = ({
     'Resources:\n' +
     `- farcaster://fid/${fid}`
   );
+};
+
+export const throwFetchError = async (response: Response) => {
+  const error = await response.json();
+  throw new Error(JSON.stringify(error));
 };
