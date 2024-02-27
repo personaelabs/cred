@@ -43,6 +43,4 @@ COPY scripts scripts
 
 RUN pnpm -F db exec prisma generate
 
-RUN cargo build --release
-
 CMD ["sh", "./scripts/start-indexer.sh"]
