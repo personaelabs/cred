@@ -27,9 +27,49 @@ interface Prover {
 }
 
 const getMerkleTree = async (groupId: number): Promise<MerkleTreeSelect> => {
-  const res = await fetch(`/api/groups/${groupId}/merkle-proofs`);
-  const tree = (await res.json()) as MerkleTreeSelect;
-  return tree;
+  let skip = 0;
+  const take = 30000;
+
+  let merkleTree: MerkleTreeSelect | null = null;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const searchParams = new URLSearchParams();
+    searchParams.set('skip', skip.toString());
+    searchParams.set('take', take.toString());
+    const response = await fetch(
+      `/api/groups/${groupId}/merkle-proofs?${searchParams.toString()}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Merkle tree fetch failed');
+    }
+
+    console.log('Fetched merkle tree', skip);
+
+    // If the response is 204, then there are no more records to fetch
+    if (response.status === 204) {
+      break;
+    }
+
+    const tree = (await response.json()) as MerkleTreeSelect;
+
+    if (!merkleTree) {
+      merkleTree = tree;
+    } else {
+      merkleTree.merkleProofs.push(...tree.merkleProofs);
+    }
+
+    skip += take;
+  }
+
+  if (!merkleTree) {
+    throw new Error('Failed to fetch merkle tree');
+  }
+
+  console.log('Fetched merkle tree', merkleTree.merkleProofs.length);
+
+  return merkleTree;
 };
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
