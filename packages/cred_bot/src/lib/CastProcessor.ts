@@ -3,9 +3,6 @@ import { NeynarAPIClient } from '@neynar/nodejs-sdk';
 
 const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY!);
 
-const CREDBOT_FID = 345834;
-const PERSONAE_CHANNEL_NAME = 'personae';
-
 const IS_PROD =
   process.env.NODE_ENV === 'production' &&
   process.env.IS_PULL_REQUEST !== 'true';
@@ -13,6 +10,13 @@ const IS_PROD =
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('IS_PULL_REQUEST:', process.env.IS_PULL_REQUEST);
 console.log('IS_PROD:', IS_PROD);
+
+const CREDBOT_FID = 345834;
+const DEVBOT_FID = 374541;
+
+const BOT_FID = IS_PROD ? CREDBOT_FID : DEVBOT_FID;
+
+const PERSONAE_CHANNEL_NAME = IS_PROD ? 'personae' : 'personae-dev';
 
 interface Cast {
   fid: string;
@@ -44,7 +48,7 @@ class CastProcessor {
       try {
         // Keep fetching the latest 5 mentions every 1.5 seconds.
         const result = await neynarClient.fetchMentionAndReplyNotifications(
-          CREDBOT_FID,
+          BOT_FID,
           {
             limit: 5,
           }
@@ -52,7 +56,7 @@ class CastProcessor {
 
         const newCasts =
           result.result.notifications?.filter(notification =>
-            notification.mentionedProfiles.some(p => p.fid === CREDBOT_FID)
+            notification.mentionedProfiles.some(p => p.fid === BOT_FID)
           ) || [];
 
         for (const cast of newCasts) {
@@ -131,20 +135,18 @@ class CastProcessor {
       const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
       const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
-      if (IS_PROD) {
-        // We only send the message in production until we have a dedicated dev bot.
-        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-          embeds: [
-            {
-              cast_id: {
-                fid: Number(cast.parent_fid),
-                hash: cast.parent_hash!,
-              },
+      // We only send the message in production until we have a dedicated dev bot.
+      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+        embeds: [
+          {
+            cast_id: {
+              fid: Number(cast.parent_fid),
+              hash: cast.parent_hash!,
             },
-          ],
-          channelId: PERSONAE_CHANNEL_NAME,
-        });
-      }
+          },
+        ],
+        channelId: PERSONAE_CHANNEL_NAME,
+      });
 
       // Log new message.
       console.log('New message:', newMessage);
@@ -195,11 +197,9 @@ class CastProcessor {
       const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
       const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
-      if (IS_PROD) {
-        await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-          replyTo: cast.parent_hash as string,
-        });
-      }
+      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+        replyTo: cast.parent_hash as string,
+      });
 
       // Log new message.
       console.log('New message:', newMessage);
