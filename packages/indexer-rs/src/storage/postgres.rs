@@ -67,10 +67,7 @@ impl Storage for PostgresStorage {
         Ok(())
     }
 
-    async fn create_group_merkle_tree(
-        &self,
-        tree: GroupMerkleTreeWithProofs,
-    ) -> Result<i32, Error> {
+    async fn save_group_merkle_tree(&self, tree: GroupMerkleTreeWithProofs) -> Result<i32, Error> {
         let result=        self.client
             .query_one(
                 r#"INSERT INTO "MerkleTree" ("merkleRoot", "groupId", "blockNumber", "merkleProofs", "updatedAt") VALUES($1, $2, $3, $4, NOW()) RETURNING "id""#,

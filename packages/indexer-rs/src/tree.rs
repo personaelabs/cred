@@ -92,7 +92,7 @@ pub async fn save_tree<S: Storage>(
 
         // Create a new tree
         storage
-            .create_group_merkle_tree(GroupMerkleTreeWithProofs {
+            .save_group_merkle_tree(GroupMerkleTreeWithProofs {
                 merkle_root: merkle_root.clone(),
                 group_id,
                 block_number,

@@ -62,9 +62,14 @@ async fn process_contract_logs<S: Storage>(
 
     println!("Processing logs for contract {}", contract.id);
 
+    // First, we find the latest log block number for `contract`.
+    // We do this by iterating through the logs in reverse order and stopping when we find the first log for `contract`.
+    // We iterate in reverse from the next contract id.
+
     let next_contract_id = contract.id + 1;
     let next_contract_id_key = &next_contract_id.to_be_bytes()[2..];
 
+    // Initialize the RocksDB iterator
     let iterator = db.iterator(IteratorMode::From(
         next_contract_id_key,
         rocksdb::Direction::Reverse,
@@ -74,6 +79,8 @@ async fn process_contract_logs<S: Storage>(
     for item in iterator {
         let (key, _value) = item.unwrap();
         let contract_id = get_contract_id_from_key(&key);
+
+        // If we find a log for `contract.id`, we stop the iteration
         if contract_id == contract.id as u16 {
             latest_log_block_num = Some(get_block_num_from_key(&key) as i64);
             println!("Latest log block num {:?}", latest_log_block_num.unwrap());
@@ -112,15 +119,16 @@ async fn process_contract_logs<S: Storage>(
         return Ok(());
     }
 
-    // The prefix is the contract id in 2 bytes
-    let prefix = &contract.id.to_be_bytes()[2..];
+    // The iterator prefix is the contract id in 2 bytes
+    let iterator_prefix = &contract.id.to_be_bytes()[2..];
 
+    // Initialize the RocksDB iterator that starts from the first log for `contract.id`
     let mut iterator_ops = ReadOptions::default();
     iterator_ops.set_async_io(true);
 
     // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
     let iterator = db.iterator_opt(
-        IteratorMode::From(prefix, rocksdb::Direction::Forward),
+        IteratorMode::From(iterator_prefix, rocksdb::Direction::Forward),
         iterator_ops,
     );
 
@@ -129,15 +137,17 @@ async fn process_contract_logs<S: Storage>(
 
     for item in iterator {
         let (key, value) = item.unwrap();
-        if key.starts_with(prefix) {
+        if key.starts_with(iterator_prefix) {
             items.push(value);
         } else {
-            // We have reached the end of the logs for this contract
+            // If the key doesn't start with the prefix, we stop the iteration
+            // as that means we have iterated through all the logs for `contract.id`
             break;
         }
     }
 
-    // Decode the logs in parallel
+    // Decode the logs in parallel.
+    // The logs are in protobuf format
     let decoded_items = items
         .par_iter()
         .map(|value| {
@@ -153,13 +163,16 @@ async fn process_contract_logs<S: Storage>(
         })
         .collect::<Vec<TransferEvent>>();
 
+    // Flag to indicate if the contract has negative balance.
+    // If the contract has negative balance, we don't abort the processing.
     let mut negative_balance = false;
-    for transfer_event in decoded_items {
+
+    for transfer_event_log in decoded_items {
         for processor in processors.iter_mut() {
             match processor {
                 Processor::Whale(whale_processor) => {
                     if !negative_balance {
-                        match whale_processor.process_log(&transfer_event) {
+                        match whale_processor.process_log(&transfer_event_log) {
                             Ok(_) => {}
                             Err(_) => {
                                 println!("Error processing log {:?}", contract.symbol);
@@ -170,7 +183,7 @@ async fn process_contract_logs<S: Storage>(
                 }
                 Processor::EarlyHolder(early_holders_processor) => {
                     early_holders_processor
-                        .process_log(&transfer_event)
+                        .process_log(&transfer_event_log)
                         .unwrap();
                 }
             }
@@ -183,7 +196,7 @@ async fn process_contract_logs<S: Storage>(
         contract.id, elapsed
     );
 
-    // Index the trees
+    // Index the Merkle trees based on the output of the processors
     for processor in &mut processors {
         match processor {
             Processor::Whale(whale_processor) => {
@@ -203,12 +216,13 @@ async fn process_contract_logs<S: Storage>(
     Ok(())
 }
 
-async fn index_trees<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
+// Initialize groups for all contracts
+async fn init_contract_groups<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
     let contracts = storage.get_contracts().await?;
 
-    // Upsert groups for contracts
-    for contract in &contracts {
-        for target_group in &contract.target_groups {
+    let group_upserts = contracts.iter().flat_map(|contract| {
+        contract.target_groups.iter().map(|target_group| {
+            // Get the handle and display name for the group based on the target group
             let (handle, display_name) = if target_group == "whale" {
                 (
                     get_whale_handle(&contract.name),
@@ -223,29 +237,42 @@ async fn index_trees<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
                 panic!("Invalid target group: {}", target_group);
             };
 
-            storage
-                .upsert_group(
-                    handle.clone(),
-                    GroupUpsertData {
-                        display_name: display_name.clone(),
-                    },
-                )
-                .await?;
-        }
-    }
+            // Return the future that upserts the group
+            storage.upsert_group(
+                handle.clone(),
+                GroupUpsertData {
+                    display_name: display_name.clone(),
+                },
+            )
+        })
+    });
 
-    let db_options = Options::default();
-    let db = DB::open_for_read_only(&db_options, PATH, true).unwrap();
+    // Run all upserts concurrently
+    join_all(group_upserts).await;
+
+    Ok(())
+}
+
+/// Index the Merkle trees for all groups
+async fn index_merkle_trees<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
+    // Get all contracts from the storage
+    let contracts = storage.get_contracts().await?;
+
+    // Open the RocksDB connection
+    let rocksdb_options = Options::default();
+    let rocksdb_conn = DB::open_for_read_only(&rocksdb_options, PATH, true).unwrap();
 
     let mut indexing_jobs = vec![];
 
+    // Initialize the retry strategy
     let retry_strategy = ExponentialBackoff::from_millis(10)
         .map(jitter) // add jitter to delays
         .take(3); // limit to 3 retries
 
     for contract in contracts.iter() {
+        // Wrap the `process_contract_logs` function in a retry
         let with_retries = Retry::spawn(retry_strategy.clone(), || async {
-            let result = process_contract_logs(storage, &db, contract).await;
+            let result = process_contract_logs(storage, &rocksdb_conn, contract).await;
             if result.is_err() {
                 println!("Error {:?}", result);
             }
@@ -257,6 +284,7 @@ async fn index_trees<S: Storage>(storage: &S) -> Result<(), S::ErrorType> {
     }
 
     let start_time = Instant::now();
+    // Run the indexing jobs concurrently
     join_all(indexing_jobs).await;
     println!("Indexing took {:?}", start_time.elapsed());
 
@@ -286,7 +314,8 @@ async fn main() -> Result<(), Error> {
     });
 
     loop {
-        index_trees(&storage).await?;
+        init_contract_groups(&storage).await?;
+        index_merkle_trees(&storage).await?;
         thread::sleep(std::time::Duration::from_secs(5 * 60)); // Sleep for 5 minutes
     }
 }
