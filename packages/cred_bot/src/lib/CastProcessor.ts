@@ -134,7 +134,14 @@ class CastProcessor {
       if (IS_PROD) {
         // We only send the message in production until we have a dedicated dev bot.
         await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
-          embeds: [{ cast_id: { fid: Number(cast.fid), hash: cast.hash } }],
+          embeds: [
+            {
+              cast_id: {
+                fid: Number(cast.parent_fid),
+                hash: cast.parent_hash!,
+              },
+            },
+          ],
           channelId: PERSONAE_CHANNEL_NAME,
         });
       }
