@@ -134,7 +134,7 @@ class CastProcessor {
 
       const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
-      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
+      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.fid}`;
       // We only send the message in production until we have a dedicated dev bot.
       await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
         embeds: [
@@ -196,7 +196,7 @@ class CastProcessor {
 
       const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
-      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.parent_fid}`;
+      const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.fid}`;
       await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
         replyTo: cast.parent_hash as string,
       });
