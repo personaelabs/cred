@@ -3,7 +3,7 @@
 import * as Comlink from 'comlink';
 import { useEffect } from 'react';
 import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
-import { WalletClient } from 'wagmi';
+import { WalletClient } from 'viem';
 import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
 import {
   calculateSigRecovery,
@@ -98,6 +98,7 @@ const useProver = () => {
       // Sign message with the source key
       const sig = await client.signMessage({
         message,
+        account: address,
       });
 
       toast('Adding creddd...', {
