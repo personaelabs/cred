@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex } from 'viem';
+import * as Sentry from '@sentry/nextjs';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -72,7 +73,8 @@ export const concatUint8Arrays = (arrays: Uint8Array[]) => {
 };
 
 /**
- * Send a POST request with a JSON body to the specified URL
+ * Send a POST request with a JSON body to the specified URL.
+ * The caller is responsible for handling errors.
  */
 export const postJSON = async <T>({
   url,
@@ -82,14 +84,16 @@ export const postJSON = async <T>({
   url: string;
   body: T;
   method: 'POST' | 'GET' | 'DELETE' | 'PUT' | 'PATCH';
-}) => {
-  return await fetch(url, {
+}): Promise<Response> => {
+  const result = await fetch(url, {
     method,
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
+
+  return result;
 };
 
 export const buildSiwfMessage = ({
@@ -121,4 +125,9 @@ export const buildSiwfMessage = ({
     'Resources:\n' +
     `- farcaster://fid/${fid}`
   );
+};
+
+export const captureFetchError = async (response: Response) => {
+  const error = await response.json();
+  Sentry.captureException(new Error(JSON.stringify(error)));
 };

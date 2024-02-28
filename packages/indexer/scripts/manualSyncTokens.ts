@@ -112,8 +112,15 @@ const addTokens = async (
 
     console.log(`Adding token ${token.symbol} (${token.address})`);
 
-    await prisma.contract.create({
-      data: data,
+    await prisma.contract.upsert({
+      update: data,
+      create: data,
+      where: {
+        address_chain: {
+          address: data.address,
+          chain: data.chain,
+        },
+      },
     });
   }
 };

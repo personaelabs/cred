@@ -1,4 +1,5 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
+import { captureFetchError } from '@/lib/utils';
 import { StatusAPIResponse } from '@farcaster/auth-kit';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -10,6 +11,7 @@ import {
   FC,
   useCallback,
 } from 'react';
+import { toast } from 'sonner';
 
 interface UserContextType {
   user: GetUserResponse | null;
@@ -48,9 +50,14 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     const result = await fetch(`/api/fc-accounts/${fid}`, {
       cache: 'no-store',
     });
-    const data = (await result.json()) as GetUserResponse;
 
-    setUser(data);
+    if (result.ok) {
+      const data = (await result.json()) as GetUserResponse;
+      setUser(data);
+    } else {
+      toast.error('Failed to fetch user data');
+      await captureFetchError(result);
+    }
   };
 
   const refetchUser = useCallback(() => {
