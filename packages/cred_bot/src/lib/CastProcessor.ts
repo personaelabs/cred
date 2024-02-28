@@ -18,6 +18,14 @@ const BOT_FID = IS_PROD ? CREDBOT_FID : DEVBOT_FID;
 
 const PERSONAE_CHANNEL_NAME = IS_PROD ? 'personae' : 'personae-dev';
 
+const SIGNER_UUID = IS_PROD
+  ? process.env.SIGNER_UUID
+  : process.env.DEV_SIGNER_UUID;
+
+if (!SIGNER_UUID) {
+  throw new Error('SIGNER_UUID is required');
+}
+
 interface Cast {
   fid: string;
   timestamp: Date;
@@ -136,7 +144,7 @@ class CastProcessor {
 
       const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.fid}`;
       // We only send the message in production until we have a dedicated dev bot.
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+      await neynarClient.publishCast(SIGNER_UUID!, newMessage, {
         embeds: [
           {
             cast_id: {
@@ -197,7 +205,7 @@ class CastProcessor {
       const userResp = await neynarClient.lookupUserByFid(Number(cast.fid));
 
       const newMessage = `user @${userResp.result.user.username} verified: https://creddd.xyz/user/${cast.fid}`;
-      await neynarClient.publishCast(process.env.SIGNER_UUID!, newMessage, {
+      await neynarClient.publishCast(SIGNER_UUID!, newMessage, {
         replyTo: cast.parent_hash as string,
       });
 
