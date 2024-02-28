@@ -1,7 +1,8 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
 import { useEffect, useState } from 'react';
 import OG_USERS from '@/lib/creddd1Users';
-import { throwFetchError } from '@/lib/utils';
+import { captureFetchError } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const useUser = (fid: string) => {
   const [user, setUser] = useState<GetUserResponse | null>(null);
@@ -14,11 +15,13 @@ const useUser = (fid: string) => {
         const response = await fetch(`/api/fc-accounts/${fid}`, {
           cache: 'no-store',
         });
-        if (!response.ok) {
-          await throwFetchError(response);
+        if (response.ok) {
+          const data = (await response.json()) as GetUserResponse;
+          setUser(data);
+        } else {
+          toast.error('Failed to fetch user data');
+          await captureFetchError(response);
         }
-        const data = (await response.json()) as GetUserResponse;
-        setUser(data);
       }
     })();
   }, [fid]);
