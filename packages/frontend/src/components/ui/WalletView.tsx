@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { mainnet } from 'viem/chains';
 import useProver from '@/hooks/useProver';
 import { GroupSelect } from '@/app/api/groups/route';
-import { postJSON } from '@/lib/utils';
+import { captureFetchError, postJSON } from '@/lib/utils';
 import { Check, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+import { toast } from 'sonner';
 
 // Assuming demoSignMessage is defined elsewhere and imported
 // import { demoSignMessage } from 'wherever-this-function-is-defined';
@@ -43,17 +44,26 @@ const WalletView: React.FC<WalletViewProps> = ({
     const proof = await prover.prove(addr as Hex, client, groupId);
 
     if (proof) {
-      await postJSON({
+      const response = await postJSON({
         method: 'POST',
         url: '/api/attestations',
         body: proof,
       });
 
-      setAdded(true);
-      refetchUser();
+      if (response.ok) {
+        setAdded(true);
+        refetchUser();
+        props.afterAdd();
+      } else {
+        toast.error('Failed to add creddd', {
+          duration: 100000,
+          closeButton: true,
+        });
+        await captureFetchError(response);
+      }
     }
+
     setIsAdding(false);
-    props.afterAdd();
   };
 
   return (

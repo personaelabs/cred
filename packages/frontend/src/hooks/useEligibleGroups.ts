@@ -1,8 +1,9 @@
 import { GroupSelect } from '@/app/api/groups/route';
 import { EligibleGroup } from '@/app/types';
-import { throwFetchError } from '@/lib/utils';
+import { captureFetchError } from '@/lib/utils';
 import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Hex } from 'viem';
 
 const useEligibleGroups = (addresses: Hex[] | null) => {
@@ -19,12 +20,13 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
     (async () => {
       const groupResponse = await fetch('/api/groups');
 
-      if (!groupResponse.ok) {
-        await throwFetchError(groupResponse);
+      if (groupResponse.ok) {
+        const groupData = (await groupResponse.json()) as GroupSelect[];
+        setGroups(groupData);
+      } else {
+        toast.error('Failed to fetch groups');
+        await captureFetchError(groupResponse);
       }
-
-      const groupData = (await groupResponse.json()) as GroupSelect[];
-      setGroups(groupData);
     })();
   }, []);
 
@@ -51,7 +53,8 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
       );
 
       if (!response.ok) {
-        await throwFetchError(response);
+        await captureFetchError(response);
+        throw new Error('Failed to fetch address to groups mapping');
       }
 
       // If the response is 204, then there are no more records to fetch
@@ -72,7 +75,7 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
     setAddressToGroupsMaps(_addressToGroupsMap);
   }, []);
 
-  const searchEligibleGroups = useCallback(async () => {
+  const searchEligibleGroups = useCallback(() => {
     // Search for the eligible groups once the addresses and groups are available
     if (addresses && groups && addressToGroupsMaps) {
       const _eligibleGroups = [];
@@ -119,7 +122,10 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
 
   // Fetch the address to groups mapping on page load
   useEffect(() => {
-    fetchMapping();
+    fetchMapping().catch(e => {
+      toast.error('Failed to fetch address to groups mapping');
+      console.error(e);
+    });
   }, [fetchMapping]);
 
   useEffect(() => {
