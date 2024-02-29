@@ -142,6 +142,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Check if the FID is new in the db or not
+  const fidExists = await prisma.fidAttestation.findFirst({
+    where: {
+      fid,
+    },
+  });
+
   // Save the attestation to the database
   await prisma.fidAttestation.create({
     data: {
@@ -152,19 +159,25 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  const fids = await prisma.fidAttestation.findMany({
-    select: {
-      fid: true,
-    },
-    distinct: ['fid'],
-  });
+  // If the FID is new, add its custody and verified addresses to the mint allow list on Zora
+  if (!fidExists) {
+    const fids = await prisma.fidAttestation.findMany({
+      select: {
+        fid: true,
+      },
+      distinct: ['fid'],
+    });
 
-  // Get the custody and verified addresses of the given FIDs from Neynar
-  const addresses = await getUserAddresses(fids.map(f => f.fid));
-  console.log('addresses', addresses);
+    // Get the custody and verified addresses of the given FIDs from Neynar
+    const addresses = await getUserAddresses(fids.map(f => f.fid));
+    console.log('addresses', addresses);
 
-  // Update the mint allow list on Zora
-  await updateAllowList(addresses);
+    // Update the mint allow list on Zora.
+    // Run this only in production.
+    if (process.env.VERCEL_ENV === 'production') {
+      await updateAllowList(addresses);
+    }
+  }
 
   return Response.json('OK', { status: 200 });
 }
