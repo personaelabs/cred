@@ -19,6 +19,8 @@ import {
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
 import { buildSiwfMessage } from '@/lib/utils';
+import { updateAllowList } from '@/lib/zora/zora';
+import { getUserAddresses } from '@/lib/neynar';
 
 let circuitInitialized = false;
 
@@ -149,6 +151,20 @@ export async function POST(req: NextRequest) {
       treeId: body.treeId,
     },
   });
+
+  const fids = await prisma.fidAttestation.findMany({
+    select: {
+      fid: true,
+    },
+    distinct: ['fid'],
+  });
+
+  // Get the custody and verified addresses of the given FIDs from Neynar
+  const addresses = await getUserAddresses(fids.map(f => f.fid));
+  console.log('addresses', addresses);
+
+  // Update the mint allow list on Zora
+  await updateAllowList(addresses);
 
   return Response.json('OK', { status: 200 });
 }
