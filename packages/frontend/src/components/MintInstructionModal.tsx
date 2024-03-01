@@ -22,7 +22,7 @@ const MintInstructionModal = (props: MintInstructionModalProps) => {
           <div className="flex justify-center">
             <Button
               onClick={() => {
-                window.open('http://linktoframe');
+                window.open('https://warpcast.com/dantehrani.eth/0xe62d1e66');
               }}
             >
               Mint
