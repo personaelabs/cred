@@ -234,8 +234,8 @@ app.frame('/about', async c => {
         creddd is a protocol for attaching onchain reputation to your everyday
         identity.
         <br />
-        It uses a privacy technology called “zero-knowledge proofs” to prove you
-        reputation while obscuring your full onchain activity.
+        It uses a privacy technology called “zero-knowledge proofs” to prove
+        your reputation while obscuring your full onchain activity.
       </div>
     ),
     intents: [
