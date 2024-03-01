@@ -28,11 +28,12 @@ const { VERCEL_ENV } = process.env;
 console.log('VERCEL_ENV', VERCEL_ENV);
 
 const app = new Frog({
-  basePath: '/api',
+  basePath: '/api/frames',
   browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  //  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  verify: false,
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: VERCEL_ENV !== 'production',
