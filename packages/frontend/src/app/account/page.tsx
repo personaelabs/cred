@@ -9,14 +9,14 @@ import Link from 'next/link';
 import useEligibleGroups from '@/hooks/useEligibleGroups';
 import { Hex } from 'viem';
 import { Loader2 } from 'lucide-react';
-import BotInstructionModal from '@/components/BotInstructionModal';
+import MintInstructionModal from '@/components/MintInstructionModal';
 
 export default function AccountPage() {
   const [accounts, setAccounts] = useState<Hex[]>([]);
   const { user } = useUser();
   const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
   const eligibleGroups = useEligibleGroups(accounts);
-  const [isBotInstructionModalOpen, setIsBotInstructionModalOpen] =
+  const [isMintInstructionModalOpen, setIsMintInstructionModalOpen] =
     useState<boolean>(false);
 
   const isLoading = eligibleGroups === null;
@@ -123,7 +123,7 @@ export default function AccountPage() {
                   added={addedGroups.some(g => g === group.id)}
                   key={i}
                   afterAdd={() => {
-                    setIsBotInstructionModalOpen(true);
+                    setIsMintInstructionModalOpen(true);
                   }}
                 />
               ))}
@@ -149,9 +149,11 @@ export default function AccountPage() {
           <></>
         )}
       </div>
-      <BotInstructionModal
-        isOpen={isBotInstructionModalOpen}
-        onClose={() => setIsBotInstructionModalOpen(false)}
+      <MintInstructionModal
+        isOpen={isMintInstructionModalOpen}
+        onClose={() => {
+          setIsMintInstructionModalOpen(false);
+        }}
       />
     </>
   );
