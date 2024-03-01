@@ -5,6 +5,8 @@ import { NextRequest } from 'next/server';
 import neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
 
+console.log('NODE_ENV', process.env.NODE_ENV);
+
 const selectAttestation = {
   MerkleTree: {
     select: {
@@ -51,7 +53,7 @@ export async function GET(
   });
 
   // Filter out dev groups in production
-  if (process.env.VERCEL_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production') {
     fidAttestations = fidAttestations.filter(
       attestation => !attestation.MerkleTree.Group.handle.startsWith('dev0')
     );
