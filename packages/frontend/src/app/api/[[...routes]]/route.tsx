@@ -88,6 +88,8 @@ app.frame('/', c => {
 app.frame('/check', async c => {
   const { frameData } = c;
 
+  console.log('check fid', frameData?.fid);
+
   if (!frameData) {
     throw new Error('No frame data');
   }
@@ -162,6 +164,8 @@ app.frame('/check', async c => {
 app.frame('/mint', async c => {
   const { frameData } = c;
 
+  console.log('mint fid', frameData?.fid);
+
   if (!frameData) {
     throw new Error('No frame data');
   }
@@ -217,6 +221,8 @@ app.frame('/mint', async c => {
  */
 app.frame('/about', async c => {
   const { frameData } = c;
+
+  console.log('about fid', frameData?.fid);
 
   if (!frameData) {
     throw new Error('No frame data');
