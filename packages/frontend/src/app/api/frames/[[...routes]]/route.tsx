@@ -32,7 +32,8 @@ const app = new Frog({
   browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  // verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  verify: false,
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: VERCEL_ENV !== 'production',
@@ -70,7 +71,6 @@ const hasMinted = async (tokenId: number, fid: number) => {
 
 app.frame('/', c => {
   return c.res({
-    action: '/about',
     image: (
       <div
         style={{
@@ -81,7 +81,10 @@ app.frame('/', c => {
         Mint the creddd genesis NFT
       </div>
     ),
-    intents: [<Button>Check eligibility</Button>, <Button>About</Button>],
+    intents: [
+      <Button action="/check">Check eligibility</Button>,
+      <Button action="/about">About</Button>,
+    ],
   });
 });
 
@@ -225,8 +228,10 @@ app.frame('/mint', async c => {
  * Render the about page.
  */
 app.frame('/about', async c => {
-  const { frameData } = c;
+  const { frameData, req } = c;
 
+  console.log('await req.json()', await req.json());
+  console.log('frameData', frameData);
   console.log('about fid', frameData?.fid);
 
   if (!frameData) {
