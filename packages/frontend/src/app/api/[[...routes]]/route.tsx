@@ -7,6 +7,17 @@ import { adminMint } from '@/lib/zora/zora';
 import { getCustodyAddress } from '@/lib/neynar';
 
 const TEXT_COLOR = '#FDA174';
+const CONTAINER_STYLE = {
+  color: TEXT_COLOR,
+  display: 'flex',
+  flexDirection: 'column' as any,
+  width: '100%',
+  paddingLeft: 20,
+  paddingRight: 20,
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
+};
 
 const CREDDD_GENESIS_TOKEN_ID = 1;
 
@@ -52,13 +63,7 @@ app.frame('/', c => {
     image: (
       <div
         style={{
-          color: TEXT_COLOR,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-          height: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
+          ...CONTAINER_STYLE,
           fontSize: 60,
         }}
       >
@@ -69,6 +74,11 @@ app.frame('/', c => {
   });
 });
 
+/**
+ * Check if the user is eligible to mint the NFT.
+ * Renders a "Mint" button if the user is eligible,
+ * otherwise renders a "Add creddd" button.
+ */
 app.frame('/check', async c => {
   const { frameData } = c;
 
@@ -84,15 +94,7 @@ app.frame('/check', async c => {
       image: (
         <div
           style={{
-            color: TEXT_COLOR,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            paddingLeft: 20,
-            paddingRight: 20,
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
+            ...CONTAINER_STYLE,
             fontSize: 40,
           }}
         >
@@ -117,13 +119,7 @@ app.frame('/check', async c => {
       image: (
         <div
           style={{
-            color: TEXT_COLOR,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
+            ...CONTAINER_STYLE,
             fontSize: 40,
           }}
         >
@@ -138,15 +134,7 @@ app.frame('/check', async c => {
       image: (
         <div
           style={{
-            color: TEXT_COLOR,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            paddingLeft: 20,
-            paddingRight: 20,
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
+            ...CONTAINER_STYLE,
             fontSize: 40,
           }}
         >
@@ -163,6 +151,10 @@ app.frame('/check', async c => {
   }
 });
 
+/**
+ * Mint the NFT to the user's custody address
+ * and render a "View on Zora" button.
+ */
 app.frame('/mint', async c => {
   const { frameData } = c;
 
@@ -201,15 +193,7 @@ app.frame('/mint', async c => {
     image: (
       <div
         style={{
-          color: TEXT_COLOR,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-          paddingLeft: 20,
-          paddingRight: 20,
-          height: '100%',
-          justifyContent: 'center',
-          alignItems: 'center',
+          ...CONTAINER_STYLE,
           fontSize: 40,
         }}
       >
@@ -221,6 +205,28 @@ app.frame('/mint', async c => {
         View on Zora
       </Button.Link>,
     ],
+  });
+});
+
+app.frame('/about', async c => {
+  const { frameData } = c;
+
+  if (!frameData) {
+    throw new Error('No frame data');
+  }
+
+  return c.res({
+    image: (
+      <div
+        style={{
+          ...CONTAINER_STYLE,
+          fontSize: 40,
+        }}
+      >
+        About
+      </div>
+    ),
+    intents: [<Button.Reset>Back</Button.Reset>],
   });
 });
 
