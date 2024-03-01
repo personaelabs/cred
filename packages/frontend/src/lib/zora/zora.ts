@@ -90,12 +90,16 @@ export const updateAllowList = async (addresses: Hex[]) => {
 };
 
 export const adminMint = async (address: Hex) => {
-  const result = await walletClient.writeContract({
-    abi: tokenAbi,
-    address: TOKEN_CONTRACT,
-    functionName: 'adminMint',
-    args: [address, 1, 1, '0x'],
-  });
+  console.log('Minting to', address);
 
-  console.log(`Transaction sent: ${result}`);
+  // Only mint in production
+  if (process.env.VERCEL_ENV === 'production') {
+    const result = await walletClient.writeContract({
+      abi: tokenAbi,
+      address: TOKEN_CONTRACT,
+      functionName: 'adminMint',
+      args: [address, 1, 1, '0x'],
+    });
+    console.log(`Transaction sent: ${result}`);
+  }
 };
