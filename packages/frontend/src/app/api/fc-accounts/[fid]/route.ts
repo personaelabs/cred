@@ -53,7 +53,7 @@ export async function GET(
   // Filter out dev groups in production
   if (process.env.VERCEL_ENV === 'production') {
     fidAttestations = fidAttestations.filter(
-      attestation => !attestation.MerkleTree.Group.handle.startsWith('dev0')
+      attestation => !attestation.MerkleTree.Group.handle.startsWith('dev')
     );
   }
 
