@@ -32,8 +32,7 @@ const app = new Frog({
   browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  //  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
-  verify: false,
+  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: VERCEL_ENV !== 'production',
