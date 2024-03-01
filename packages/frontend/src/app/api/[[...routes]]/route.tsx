@@ -24,16 +24,18 @@ const CONTAINER_STYLE = {
 
 const CREDDD_GENESIS_TOKEN_ID = 1;
 
-console.log('process.env.VERCEL_ENV', process.env.VERCEL_ENV);
+const { VERCEL_ENV } = process.env;
+console.log('VERCEL_ENV', VERCEL_ENV);
 
 const app = new Frog({
   basePath: '/api',
+  browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: true,
+  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: process.env.VERCEL_ENV !== 'production',
+    enabled: VERCEL_ENV !== 'production',
   },
 });
 
