@@ -17,7 +17,7 @@ export default function AccountPage() {
   const [isSwitchingWallets, setIsSwitchingWallets] = useState<boolean>(false);
   const eligibleGroups = useEligibleGroups(accounts);
   const [isMintInstructionModalOpen, setIsMintInstructionModalOpen] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   const isLoading = eligibleGroups === null;
 
