@@ -71,7 +71,17 @@ const hasMinted = async (tokenId: number, fid: number) => {
 app.frame('/', c => {
   const { buttonValue } = c;
 
-  console.log('buttonValue', buttonValue);
+  if (buttonValue === 'check') {
+    return checkFrame(c);
+  }
+
+  if (buttonValue === 'about') {
+    return aboutFrame(c);
+  }
+
+  if (buttonValue === 'mint') {
+    return mintFrame(c);
+  }
 
   return c.res({
     action: '/',
@@ -97,7 +107,7 @@ app.frame('/', c => {
  * Renders a "Mint" button if the user is eligible,
  * otherwise renders a "Add creddd" button.
  */
-app.frame('/check', async c => {
+const checkFrame = async (c: any) => {
   const { frameData } = c;
 
   console.log('check fid', frameData?.fid);
@@ -163,17 +173,18 @@ app.frame('/check', async c => {
         </div>
       ),
       intents: [
+        <Button.Reset>Back</Button.Reset>,
         <Button.Link href="https://creddd.xyz">Add creddd</Button.Link>,
       ],
     });
   }
-});
+};
 
 /**
  * Mint the NFT to the user's custody address
  * and render a "View on Zora" button.
  */
-app.frame('/mint', async c => {
+const mintFrame = async (c: any) => {
   const { frameData } = c;
 
   console.log('mint fid', frameData?.fid);
@@ -226,17 +237,13 @@ app.frame('/mint', async c => {
       </Button.Link>,
     ],
   });
-});
+};
 
 /**
  * Render the about page.
  */
-app.frame('/about', async c => {
-  const { frameData, req } = c;
-
-  console.log('await req.json()', await req.json());
-  console.log('frameData', frameData);
-  console.log('about fid', frameData?.fid);
+const aboutFrame = async (c: any) => {
+  const { frameData } = c;
 
   if (!frameData) {
     throw new Error('No frame data');
@@ -265,7 +272,7 @@ app.frame('/about', async c => {
       </Button.Link>,
     ],
   });
-});
+};
 
 export const GET = handle(app);
 export const POST = handle(app);
