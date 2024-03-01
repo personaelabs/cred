@@ -88,3 +88,14 @@ export const updateAllowList = async (addresses: Hex[]) => {
 
   console.log(`Transaction sent: ${result}`);
 };
+
+export const adminMint = async (address: Hex) => {
+  const result = await walletClient.writeContract({
+    abi: tokenAbi,
+    address: TOKEN_CONTRACT,
+    functionName: 'adminMint',
+    args: [address, 1, 1, '0x'],
+  });
+
+  console.log(`Transaction sent: ${result}`);
+};
