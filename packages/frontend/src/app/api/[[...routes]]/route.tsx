@@ -29,6 +29,7 @@ const app = new Frog({
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
   verify: process.env.VERCEL_ENV === 'production',
+  secret: process.env.FROG_SECRET || '',
 });
 
 /**
