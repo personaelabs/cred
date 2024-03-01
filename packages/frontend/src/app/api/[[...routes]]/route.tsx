@@ -12,8 +12,8 @@ const CONTAINER_STYLE = {
   display: 'flex',
   flexDirection: 'column' as any,
   width: '100%',
-  paddingLeft: 20,
-  paddingRight: 20,
+  paddingLeft: 60,
+  paddingRight: 60,
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
@@ -70,7 +70,10 @@ app.frame('/', c => {
         Mint the creddd genesis NFT
       </div>
     ),
-    intents: [<Button action="/check">Check eligibility</Button>],
+    intents: [
+      <Button action="/check">Check eligibility</Button>,
+      <Button action="/about">About</Button>,
+    ],
   });
 });
 
@@ -208,6 +211,9 @@ app.frame('/mint', async c => {
   });
 });
 
+/**
+ * Render the about page.
+ */
 app.frame('/about', async c => {
   const { frameData } = c;
 
@@ -220,13 +226,23 @@ app.frame('/about', async c => {
       <div
         style={{
           ...CONTAINER_STYLE,
-          fontSize: 40,
+          textAlign: 'center',
+          fontSize: 36,
         }}
       >
-        About
+        creddd is a protocol for attaching onchain reputation to your everyday
+        identity.
+        <br />
+        It uses a privacy technology called “zero-knowledge proofs” to prove you
+        reputation while obscuring your full onchain activity.
       </div>
     ),
-    intents: [<Button.Reset>Back</Button.Reset>],
+    intents: [
+      <Button.Reset>Back</Button.Reset>,
+      <Button.Link href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20">
+        Read more
+      </Button.Link>,
+    ],
   });
 });
 
