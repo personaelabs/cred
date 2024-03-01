@@ -70,6 +70,7 @@ const hasMinted = async (tokenId: number, fid: number) => {
 
 app.frame('/', c => {
   return c.res({
+    action: '/about',
     image: (
       <div
         style={{
@@ -80,10 +81,7 @@ app.frame('/', c => {
         Mint the creddd genesis NFT
       </div>
     ),
-    intents: [
-      <Button action="/check">Check eligibility</Button>,
-      <Button action="/about">About</Button>,
-    ],
+    intents: [<Button>Check eligibility</Button>, <Button>About</Button>],
   });
 });
 
@@ -227,11 +225,7 @@ app.frame('/mint', async c => {
  * Render the about page.
  */
 app.frame('/about', async c => {
-  const { frameData, req } = c;
-
-  const body = await req.json();
-  console.log('frameUrl ', body);
-  console.log('req.url', req.url);
+  const { frameData } = c;
 
   console.log('about fid', frameData?.fid);
 
