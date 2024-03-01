@@ -30,7 +30,7 @@ const app = new Frog({
   basePath: '/api',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: process.env.VERCEL_ENV === 'production',
+  verify: 'silent',
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: process.env.VERCEL_ENV !== 'production',
@@ -92,7 +92,11 @@ app.frame('/', c => {
  * otherwise renders a "Add creddd" button.
  */
 app.frame('/check', async c => {
-  const { frameData } = c;
+  const { frameData, verified } = c;
+
+  if (!verified) {
+    throw new Error('Not verified');
+  }
 
   console.log('check fid', frameData?.fid);
 
@@ -168,7 +172,11 @@ app.frame('/check', async c => {
  * and render a "View on Zora" button.
  */
 app.frame('/mint', async c => {
-  const { frameData } = c;
+  const { frameData, verified } = c;
+
+  if (!verified) {
+    throw new Error('Not verified');
+  }
 
   console.log('mint fid', frameData?.fid);
 
@@ -226,7 +234,11 @@ app.frame('/mint', async c => {
  * Render the about page.
  */
 app.frame('/about', async c => {
-  const { frameData } = c;
+  const { frameData, verified } = c;
+
+  if (!verified) {
+    throw new Error('Not verified');
+  }
 
   console.log('about fid', frameData?.fid);
 
