@@ -145,7 +145,7 @@ const checkFrame = async (c: any) => {
     // The use has creddd.
     // We can mint the NFT.
     return c.res({
-      action: '/mint',
+      action: '/',
       image: (
         <div
           style={{
@@ -157,7 +157,7 @@ const checkFrame = async (c: any) => {
           You are eligible to mint.
         </div>
       ),
-      intents: [<Button>Mint</Button>],
+      intents: [<Button value="mint">Mint</Button>],
     });
   } else {
     return c.res({
