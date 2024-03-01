@@ -9,6 +9,7 @@ import { getCustodyAddress } from '@/lib/neynar';
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
   color: TEXT_COLOR,
+  backgroundColor: '#1E1E1E',
   display: 'flex',
   flexDirection: 'column' as any,
   width: '100%',
@@ -17,6 +18,8 @@ const CONTAINER_STYLE = {
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
+  borderWidth: 40,
+  borderColor: TEXT_COLOR,
 };
 
 const CREDDD_GENESIS_TOKEN_ID = 1;
