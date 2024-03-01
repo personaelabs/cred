@@ -8,6 +8,8 @@ import { getCustodyAddress } from '@/lib/neynar';
 
 const TEXT_COLOR = '#FDA174';
 
+const CREDDD_GENESIS_TOKEN_ID = 1;
+
 const app = new Frog({
   basePath: '/api',
   // Supply a Hub API URL to enable frame verification.
@@ -26,6 +28,22 @@ const isEligible = async (fid: number) => {
   });
 
   return !!attestationExists;
+};
+
+/**
+ * Check if the user has already minted the NFT.
+ */
+const hasMinted = async (tokenId: number, fid: number) => {
+  const mingLog = await prisma.mintLog.findUnique({
+    where: {
+      fid_tokenId: {
+        fid,
+        tokenId,
+      },
+    },
+  });
+
+  return !!mingLog;
 };
 
 app.frame('/', c => {
@@ -58,6 +76,37 @@ app.frame('/check', async c => {
     throw new Error('No frame data');
   }
 
+  const alreadyMinted = await hasMinted(CREDDD_GENESIS_TOKEN_ID, frameData.fid);
+
+  if (alreadyMinted) {
+    const custodyAddress = await getCustodyAddress(frameData.fid);
+    return c.res({
+      image: (
+        <div
+          style={{
+            color: TEXT_COLOR,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            paddingLeft: 20,
+            paddingRight: 20,
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: 40,
+          }}
+        >
+          Already minted
+        </div>
+      ),
+      intents: [
+        <Button.Link href={`https://zora.co/${custodyAddress}`}>
+          View on Zora
+        </Button.Link>,
+      ],
+    });
+  }
+
   const canMint = await isEligible(frameData.fid);
 
   if (canMint) {
@@ -82,7 +131,7 @@ app.frame('/check', async c => {
           You are eligible to mint.
         </div>
       ),
-      intents: [<Button action="/mint">Mint</Button>],
+      intents: [<Button>Mint</Button>],
     });
   } else {
     return c.res({
@@ -131,8 +180,22 @@ app.frame('/mint', async c => {
   // The NFT will be minted to this address.
   const custodyAddress = await getCustodyAddress(frameData.fid);
 
-  // Mint the NFT to the custody address.
-  await adminMint(custodyAddress);
+  // Check if the NFT has already been minted
+  const alreadyMinted = await hasMinted(CREDDD_GENESIS_TOKEN_ID, frameData.fid);
+
+  // Mint the NFT if it has not been minted already.
+  if (!alreadyMinted) {
+    // Mint the NFT to the custody address.
+    await adminMint(custodyAddress);
+
+    // Save the mint log.
+    await prisma.mintLog.create({
+      data: {
+        tokenId: CREDDD_GENESIS_TOKEN_ID,
+        fid: frameData.fid,
+      },
+    });
+  }
 
   return c.res({
     image: (
