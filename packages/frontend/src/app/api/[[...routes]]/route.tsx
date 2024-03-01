@@ -148,7 +148,7 @@ app.frame('/check', async c => {
         </div>
       ),
       intents: [
-        <Button.Link href="https://creddd.xyz">Add credddd</Button.Link>,
+        <Button.Link href="https://creddd.xyz">Add creddd</Button.Link>,
       ],
     });
   }
