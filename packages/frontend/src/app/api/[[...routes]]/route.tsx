@@ -142,9 +142,7 @@ app.frame('/check', async c => {
           }}
         >
           No creddd found.
-          <br /> Add creddd to your Farcaster account to
-          <br />
-          become eligible to mint.
+          <br /> Add creddd to your Farcaster account to mint.
         </div>
       ),
       intents: [
