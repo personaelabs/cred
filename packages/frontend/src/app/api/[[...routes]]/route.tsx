@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 /** @jsxImportSource frog/jsx */
 import { Button, Frog } from 'frog';
-import { handle } from 'frog/next';
+import { handle } from 'frog/vercel';
 import prisma from '@/lib/prisma';
 import { adminMint } from '@/lib/zora/zora';
 import { getCustodyAddress } from '@/lib/neynar';
@@ -30,7 +30,7 @@ const app = new Frog({
   basePath: '/api',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: 'silent',
+  verify: true,
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: process.env.VERCEL_ENV !== 'production',
@@ -92,11 +92,7 @@ app.frame('/', c => {
  * otherwise renders a "Add creddd" button.
  */
 app.frame('/check', async c => {
-  const { frameData, verified } = c;
-
-  if (!verified) {
-    throw new Error('Not verified');
-  }
+  const { frameData } = c;
 
   console.log('check fid', frameData?.fid);
 
@@ -172,11 +168,7 @@ app.frame('/check', async c => {
  * and render a "View on Zora" button.
  */
 app.frame('/mint', async c => {
-  const { frameData, verified } = c;
-
-  if (!verified) {
-    throw new Error('Not verified');
-  }
+  const { frameData } = c;
 
   console.log('mint fid', frameData?.fid);
 
@@ -234,11 +226,7 @@ app.frame('/mint', async c => {
  * Render the about page.
  */
 app.frame('/about', async c => {
-  const { frameData, verified } = c;
-
-  if (!verified) {
-    throw new Error('Not verified');
-  }
+  const { frameData } = c;
 
   console.log('about fid', frameData?.fid);
 
