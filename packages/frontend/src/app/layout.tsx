@@ -10,6 +10,7 @@ import DesktopFooter from '@/components/DesktopFooter';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import Header from '@/components/Header';
+import { usePathname } from 'next/navigation';
 
 const config = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -23,6 +24,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const isUserProfilePage = /\/user\//.test(pathname);
+
+  const showComingSoon =
+    process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' && !isUserProfilePage;
+
   return (
     <html lang="en">
       <head>
@@ -43,12 +51,20 @@ export default function RootLayout({
         <UserProvider>
           <AuthKitProvider config={config}>
             <ThemeProvider attribute="class" defaultTheme="dark">
-              <Header></Header>
-              <div className="flex flex-row justify-center w-full">
-                <div className="w-full flex flex-col">{children}</div>
-              </div>
-              <MobileFooter></MobileFooter>
-              <DesktopFooter></DesktopFooter>
+              {showComingSoon ? (
+                <div className="h-[100vh] flex flex-col justify-center items-center text-lg text-primary">
+                  Coming soon...
+                </div>
+              ) : (
+                <>
+                  <Header></Header>
+                  <div className="flex flex-row justify-center w-full">
+                    <div className="w-full flex flex-col">{children}</div>
+                  </div>
+                  <MobileFooter></MobileFooter>
+                  <DesktopFooter></DesktopFooter>
+                </>
+              )}
             </ThemeProvider>
           </AuthKitProvider>
         </UserProvider>
