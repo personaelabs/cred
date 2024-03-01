@@ -70,7 +70,6 @@ const hasMinted = async (tokenId: number, fid: number) => {
 
 app.frame('/', c => {
   return c.res({
-    action: '/check',
     image: (
       <div
         style={{
@@ -228,7 +227,11 @@ app.frame('/mint', async c => {
  * Render the about page.
  */
 app.frame('/about', async c => {
-  const { frameData } = c;
+  const { frameData, req } = c;
+
+  const body = await req.json();
+  console.log('frameUrl ', body);
+  console.log('req.url', req.url);
 
   console.log('about fid', frameData?.fid);
 
