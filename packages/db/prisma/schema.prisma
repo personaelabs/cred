@@ -23,13 +23,15 @@ model ProcessedCast {
 }
 
 model FidAttestation {
-  fid         Int
-  attestation Bytes
-  signInSig   Bytes
-  treeId      Int
-  MerkleTree  MerkleTree @relation(fields: [treeId], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  fid           Int
+  attestation   Bytes
+  signInSig     Bytes
+  treeId        Int
+  MerkleTree    MerkleTree   @relation(fields: [treeId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  MerkleTree2   MerkleTree2? @relation(fields: [merkleTree2Id], references: [id])
+  merkleTree2Id Int?
 
   @@id([fid, treeId])
 }
@@ -52,6 +54,20 @@ model MerkleTree {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   merkleProofs   MerkleProof[]
+  FidAttestation FidAttestation[]
+
+  @@unique([merkleRoot, groupId, blockNumber])
+}
+
+model MerkleTree2 {
+  id             Int              @id @default(autoincrement())
+  merkleRoot     String
+  Group          Group            @relation(fields: [groupId], references: [id])
+  groupId        Int
+  blockNumber    BigInt
+  layers         Bytes[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   FidAttestation FidAttestation[]
 
   @@unique([merkleRoot, groupId, blockNumber])
@@ -81,6 +97,7 @@ model Group {
   updatedAt DateTime @updatedAt
 
   merkleTrees MerkleTree[]
+  MerkleTree2 MerkleTree2[]
 }
 
 enum ContractType {

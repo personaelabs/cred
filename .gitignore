@@ -10,3 +10,6 @@ addr_membership.r1cs
 
 .DS_Store
 .eslintcache
+
+/db/
+!./packages/db

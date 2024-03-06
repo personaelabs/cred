@@ -1,3 +1,3 @@
 [workspace]
-members = ["packages/circuit", "packages/merkle-tree-rs"]
+members = ["packages/circuit", "packages/merkle-tree-rs", "packages/indexer-rs"]
 resolver = "2"
