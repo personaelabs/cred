@@ -92,7 +92,7 @@ app.frame('/', c => {
           fontSize: 60,
         }}
       >
-        creddd genesis - you must have creddd on this farcaster account to mint
+        mint creddd genesis
       </div>
     ),
     intents: [
