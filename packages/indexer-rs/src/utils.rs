@@ -1,3 +1,5 @@
+use crate::rocksdb_key::{KeyType, RocksDbKey};
+use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
 
 /// Convert a serde_json Value to u64 by parsing it as a hex string
@@ -10,16 +12,27 @@ pub fn value_to_u32(value: &Value) -> u32 {
     u32::from_str_radix(value.as_str().unwrap().trim_start_matches("0x"), 16).unwrap()
 }
 
-/// Get the block number from a RocksDB key
-pub fn get_block_num_from_key(key: &[u8]) -> u64 {
-    let mut block_num_bytes = [0; 8];
-    block_num_bytes.copy_from_slice(&key[2..10]);
-    u64::from_be_bytes(block_num_bytes)
-}
+pub fn get_latest_synched_block_num(db: &DB, event_id: u16, contract_id: u16) -> Option<u64> {
+    let mut start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
 
-/// Get the contract id from a RocksDB key
-pub fn get_contract_id_from_key(key: &[u8]) -> u16 {
-    let mut contract_id_bytes = [0; 2];
-    contract_id_bytes.copy_from_slice(&key[0..2]);
-    u16::from_be_bytes(contract_id_bytes)
+    start_key.block_num = Some(u64::MAX);
+    start_key.log_index = Some(u32::MAX);
+    start_key.tx_index = Some(u32::MAX);
+
+    let mut iterator = db.iterator(IteratorMode::From(
+        &start_key.to_bytes(),
+        rocksdb::Direction::Reverse,
+    ));
+
+    let key = iterator.next().unwrap().unwrap().0;
+    let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
+
+    if key.key_type != KeyType::SyncLog
+        || key.event_id != event_id
+        || key.contract_id != contract_id
+    {
+        None
+    } else {
+        Some(key.block_num.unwrap())
+    }
 }

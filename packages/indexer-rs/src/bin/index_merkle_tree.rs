@@ -1,11 +1,12 @@
 use colored::*;
 use futures::future::join_all;
-use indexer_rs::contracts::get_contracts;
+use indexer_rs::contract::{get_contracts, Contract};
 use indexer_rs::processors::early_holders::EarlyHolderIndexer;
 use indexer_rs::processors::whales::WhaleIndexer;
 use indexer_rs::processors::GroupIndexer;
-use indexer_rs::utils::get_block_num_from_key;
-use indexer_rs::{transfer_event, Contract, TransferEvent, ROCKSDB_PATH};
+use indexer_rs::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID};
+use indexer_rs::{transfer_event, TransferEvent, ROCKSDB_PATH};
+use log::{error, info};
 use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::{IteratorMode, Options, ReadOptions, DB};
@@ -22,26 +23,28 @@ async fn index_groups_for_contract(
     contract: Contract,
 ) -> Result<(), tokio_postgres::Error> {
     let handle = tokio::task::spawn(async move {
+        // TODO: Index based on the target groups
+
         // Initialize the indexers
         let mut early_holder_indexer =
             EarlyHolderIndexer::new(contract.clone(), pg_client.clone(), db.clone());
 
-        let mut whale_indexer = WhaleIndexer::new(contract.clone(), pg_client.clone(), db.clone());
+        let mut whale_indexer = WhaleIndexer::new(contract.clone(), pg_client.clone());
 
         // Initialize the groups
         early_holder_indexer.init_group().await?;
         whale_indexer.init_group().await?;
 
-        // The iterator prefix is the contract id in 2 bytes
-        let iterator_prefix = &contract.id.to_be_bytes()[2..];
-
         // Initialize the RocksDB iterator that starts from the first log for `contract.id`
         let mut iterator_ops = ReadOptions::default();
         iterator_ops.set_async_io(true);
 
+        let start_key =
+            RocksDbKey::new_start_key(KeyType::EventLog, ERC20_TRANSFER_EVENT_ID, contract.id);
+
         // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
         let iterator = db.iterator_opt(
-            IteratorMode::From(iterator_prefix, rocksdb::Direction::Forward),
+            IteratorMode::From(&start_key.to_bytes(), rocksdb::Direction::Forward),
             iterator_ops,
         );
 
@@ -51,7 +54,12 @@ async fn index_groups_for_contract(
         let mut last_block_num = None;
         for item in iterator {
             let (key, value) = item.unwrap();
-            if key.starts_with(iterator_prefix) {
+            let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
+
+            if key.key_type == KeyType::EventLog
+                && key.contract_id == contract.id
+                && key.event_id == ERC20_TRANSFER_EVENT_ID
+            {
                 // Decode the log.  // The log is in protobuf.
                 let decoded =
                     transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
@@ -67,18 +75,16 @@ async fn index_groups_for_contract(
                 if !whale_indexer_err {
                     whale_indexer_err = whale_indexer.process_log(&log).is_err();
                     if whale_indexer_err {
-                        println!("Error processing logs for contract");
+                        error!("Error processing logs for contract");
                     }
                 }
             } else {
-                last_block_num = Some(get_block_num_from_key(&key));
-                // If the key doesn't start with the prefix, we stop the iteration
-                // as that means we have iterated through all the logs for `contract.id`
+                last_block_num = Some(key.block_num.unwrap());
                 break;
             }
         }
 
-        println!(
+        info!(
             "${} {} {:?}",
             contract.symbol.to_uppercase(),
             "Processed logs for contract in ".green(),
@@ -94,7 +100,7 @@ async fn index_groups_for_contract(
 
             whale_indexer.save_tree(last_block_num as i64).await?;
 
-            println!(
+            info!(
                 "${} {} {:?}",
                 contract.symbol.to_uppercase(),
                 "Saved trees for contract in ".blue(),
@@ -138,7 +144,7 @@ async fn index_merkle_trees(
             )
             .await;
             if result.is_err() {
-                println!("Error {:?}", result);
+                error!("Error {:?}", result);
             }
 
             result
@@ -150,7 +156,7 @@ async fn index_merkle_trees(
     let start_time = Instant::now();
     // Run the indexing jobs concurrently
     join_all(indexing_jobs).await;
-    println!("Indexing took {:?}", start_time.elapsed());
+    info!("Indexing took {:?}", start_time.elapsed());
 
     Ok(())
 }
@@ -174,7 +180,7 @@ async fn main() -> Result<(), Error> {
     // so spawn it off to run on its own.
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
+            error!("connection error: {}", e);
         }
     });
 

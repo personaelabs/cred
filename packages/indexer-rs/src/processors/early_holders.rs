@@ -1,7 +1,8 @@
 use crate::{
+    contract::Contract,
     processors::{upsert_group, GroupIndexer},
     tree::save_tree,
-    Contract, TransferEvent,
+    TransferEvent,
 };
 use std::{collections::HashSet, sync::Arc};
 

@@ -1,5 +1,5 @@
 use crate::tree::save_tree;
-use crate::{Contract, TransferEvent};
+use crate::{contract::Contract, TransferEvent};
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
 use std::io::Error;
@@ -19,25 +19,19 @@ pub struct WhaleIndexer {
     total_supply: BigUint,
     whale_threshold: BigUint,
     pg_client: Arc<tokio_postgres::Client>,
-    rocksdb_client: Arc<rocksdb::DB>,
     whales: HashSet<[u8; 20]>,
     contract: Contract,
     group_id: Option<i32>,
 }
 
 impl WhaleIndexer {
-    pub fn new(
-        contract: Contract,
-        pg_client: Arc<tokio_postgres::Client>,
-        rocksdb_client: Arc<rocksdb::DB>,
-    ) -> Self {
+    pub fn new(contract: Contract, pg_client: Arc<tokio_postgres::Client>) -> Self {
         WhaleIndexer {
             balances: HashMap::new(),
             total_supply: BigUint::from(0u32),
             whale_threshold: BigUint::from(0u32),
             whales: HashSet::new(),
             pg_client,
-            rocksdb_client,
             contract,
             group_id: None,
         }

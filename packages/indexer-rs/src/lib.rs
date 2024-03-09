@@ -1,23 +1,15 @@
-use eth_rpc::Chain;
 use num_bigint::BigUint;
 
-pub mod contracts;
+pub mod contract;
 pub mod eth_rpc;
+pub mod log_sync_engine;
+pub mod logger;
 pub mod processors;
+pub mod rocksdb_key;
 pub mod tree;
 pub mod utils;
 
 pub const ROCKSDB_PATH: &str = "./db";
-
-#[derive(Debug, Clone)]
-pub struct Contract {
-    pub id: i32,
-    pub address: String,
-    pub chain: Chain,
-    pub name: String,
-    pub symbol: String,
-    pub deployed_block: i64,
-}
 
 #[derive(Debug, Clone)]
 pub struct TransferEvent {

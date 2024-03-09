@@ -22,7 +22,6 @@ pub async fn save_tree(
     mut addresses: Vec<[u8; 20]>,
     block_number: i64,
 ) -> Result<(), tokio_postgres::Error> {
-    println!("addresses {}", addresses.len());
     addresses.sort();
 
     let mut tree = MerkleTree::<Fq, TREE_WIDTH>::new(secp256k1_w3());

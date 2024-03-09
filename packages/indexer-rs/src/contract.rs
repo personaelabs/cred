@@ -1,11 +1,31 @@
-use crate::{eth_rpc::Chain, Contract};
+use crate::eth_rpc::Chain;
+use postgres_types::{FromSql, ToSql};
+
+#[derive(Debug, Clone, FromSql, ToSql)]
+#[postgres(name = "ContractType")]
+pub enum ContractType {
+    ERC20,
+    ERC721,
+    Other,
+}
+
+#[derive(Debug, Clone)]
+pub struct Contract {
+    pub id: u16,
+    pub address: String,
+    pub chain: Chain,
+    pub contract_type: ContractType,
+    pub name: String,
+    pub symbol: String,
+    pub deployed_block: u64,
+}
 
 /// Get all contracts from the postgres
 pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> {
     // Get all contracts from the storage
     let result = pg_clinet
         .query(
-            r#"SELECT "id", "address", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
+            r#"SELECT "id", "address", "type", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
             &[],
         )
         .await
@@ -20,6 +40,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             let symbol: String = row.get("symbol");
             let chain: String = row.get("chain");
             let contract_deployed_block: i64 = row.get("deployedBlock");
+            let contract_type: ContractType = row.get("type");
 
             // Convert the chain string to Chain enum
             let chain = match chain.as_str() {
@@ -31,12 +52,13 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             };
 
             Contract {
-                id: contract_id,
+                id: contract_id as u16,
                 address: contract_address,
                 chain,
                 name: name.clone(),
                 symbol: symbol.clone(),
-                deployed_block: contract_deployed_block,
+                deployed_block: contract_deployed_block as u64,
+                contract_type,
             }
         })
         .collect();
