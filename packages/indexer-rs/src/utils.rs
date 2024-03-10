@@ -1,6 +1,23 @@
-use crate::rocksdb_key::{KeyType, RocksDbKey};
+use core::panic;
+
+use crate::{
+    contract::Contract,
+    eth_rpc::{Chain, EthRpcClient},
+    log_sync_engine::CHUNK_SIZE,
+    rocksdb_key::{KeyType, RocksDbKey},
+};
 use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
+use tokio::sync::Semaphore;
+
+pub fn get_chain_block_time(chain: Chain) -> u64 {
+    match chain {
+        Chain::Mainnet => 12,
+        Chain::Arbitrum => 1,
+        Chain::Optimism => 2,
+        Chain::Base => 2,
+    }
+}
 
 /// Convert a serde_json Value to u64 by parsing it as a hex string
 pub fn value_to_u64(value: &Value) -> u64 {
@@ -12,27 +29,95 @@ pub fn value_to_u32(value: &Value) -> u32 {
     u32::from_str_radix(value.as_str().unwrap().trim_start_matches("0x"), 16).unwrap()
 }
 
-pub fn get_latest_synched_block_num(db: &DB, event_id: u16, contract_id: u16) -> Option<u64> {
-    let mut start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
+/// Get the latest synched chunk
+pub fn get_latest_synched_chunk(
+    rocksdb_client: &DB,
+    event_id: u16,
+    contract_id: u16,
+) -> Option<u64> {
+    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
 
-    start_key.block_num = Some(u64::MAX);
-    start_key.log_index = Some(u32::MAX);
-    start_key.tx_index = Some(u32::MAX);
-
-    let mut iterator = db.iterator(IteratorMode::From(
+    let iterator = rocksdb_client.iterator(IteratorMode::From(
         &start_key.to_bytes(),
-        rocksdb::Direction::Reverse,
+        rocksdb::Direction::Forward,
     ));
 
-    let key = iterator.next().unwrap().unwrap().0;
-    let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
+    let mut latest_chunk = None;
+    for item in iterator {
+        let (key_bytes, _value) = item.unwrap();
 
-    if key.key_type != KeyType::SyncLog
-        || key.event_id != event_id
-        || key.contract_id != contract_id
-    {
-        None
+        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
+
+        if key.key_type != KeyType::SyncLog
+            || key.event_id != event_id
+            || key.contract_id != contract_id
+        {
+            break;
+        }
+
+        latest_chunk = key.chunk_num;
+    }
+
+    latest_chunk
+}
+
+/// Check if there are any missing chunks in the sync log for a given event and contract
+pub fn missing_chunk_exists(db: &DB, event_id: u16, contract_id: u16) -> bool {
+    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
+
+    let iterator = db.iterator(IteratorMode::From(
+        &start_key.to_bytes(),
+        rocksdb::Direction::Forward,
+    ));
+
+    for (expected_chunk_num, item) in iterator.enumerate() {
+        let key = item.unwrap().0;
+        let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
+
+        if key.key_type != KeyType::SyncLog
+            || key.event_id != event_id
+            || key.contract_id != contract_id
+        {
+            break;
+        }
+
+        if key.chunk_num != Some(expected_chunk_num as u64) {
+            return true;
+        }
+    }
+
+    false
+}
+
+pub fn get_contract_total_chunks(latest_block: u64, contract: &Contract) -> u64 {
+    f64::ceil(((latest_block - contract.deployed_block) as f64) / CHUNK_SIZE as f64) as u64
+}
+
+pub async fn is_event_logs_ready(
+    db: &DB,
+    eth_client: &EthRpcClient,
+    event_id: u16,
+    contract: &Contract,
+) -> Result<bool, surf::Error> {
+    let semaphore = Semaphore::new(1);
+    let block_num = eth_client
+        .get_block_number(&semaphore, contract.chain)
+        .await?;
+
+    let total_chunks = get_contract_total_chunks(block_num, contract);
+
+    let max_synched_chunk = get_latest_synched_chunk(db, event_id, contract.id);
+
+    let max_synched_chunk = match max_synched_chunk {
+        Some(max_synched_chunk) => max_synched_chunk,
+        None => return Ok(false),
+    };
+
+    let missing_chunk_exists = missing_chunk_exists(&db, event_id, contract.id);
+
+    if (total_chunks - 1) == max_synched_chunk && !missing_chunk_exists {
+        Ok(true)
     } else {
-        Some(key.block_num.unwrap())
+        Ok(false)
     }
 }

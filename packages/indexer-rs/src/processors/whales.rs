@@ -1,4 +1,7 @@
+use crate::eth_rpc::EthRpcClient;
+use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use crate::tree::save_tree;
+use crate::utils::is_event_logs_ready;
 use crate::{contract::Contract, TransferEvent};
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
@@ -15,30 +18,44 @@ pub fn get_whale_handle(contract_name: &str) -> String {
 }
 
 pub struct WhaleIndexer {
+    eth_client: Arc<EthRpcClient>,
     balances: HashMap<[u8; 20], BigUint>,
     total_supply: BigUint,
     whale_threshold: BigUint,
     pg_client: Arc<tokio_postgres::Client>,
+    rocksdb_client: Arc<rocksdb::DB>,
     whales: HashSet<[u8; 20]>,
     contract: Contract,
     group_id: Option<i32>,
 }
 
 impl WhaleIndexer {
-    pub fn new(contract: Contract, pg_client: Arc<tokio_postgres::Client>) -> Self {
+    pub fn new(
+        contract: Contract,
+        pg_client: Arc<tokio_postgres::Client>,
+        rocksdb_client: Arc<rocksdb::DB>,
+        eth_client: Arc<EthRpcClient>,
+    ) -> Self {
         WhaleIndexer {
             balances: HashMap::new(),
             total_supply: BigUint::from(0u32),
             whale_threshold: BigUint::from(0u32),
             whales: HashSet::new(),
             pg_client,
+            rocksdb_client,
             contract,
             group_id: None,
+            eth_client,
         }
     }
 }
 
+#[async_trait::async_trait]
 impl GroupIndexer for WhaleIndexer {
+    fn group_name(&self) -> String {
+        "Whale".to_string()
+    }
+
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
         let handle = format!("whale-{}", self.contract.name.to_lowercase());
         let display_name = format!("{} whale", self.contract.symbol.clone().to_uppercase());
@@ -47,6 +64,17 @@ impl GroupIndexer for WhaleIndexer {
         self.group_id = Some(group_id);
 
         Ok(())
+    }
+
+    /// Returns true if the logs which the indexer depends on are ready
+    async fn is_ready(&self) -> Result<bool, surf::Error> {
+        is_event_logs_ready(
+            &self.rocksdb_client,
+            &self.eth_client,
+            ERC20_TRANSFER_EVENT_ID,
+            &self.contract,
+        )
+        .await
     }
 
     fn process_log(&mut self, log: &TransferEvent) -> Result<(), Error> {

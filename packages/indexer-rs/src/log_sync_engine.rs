@@ -13,11 +13,10 @@ use rocksdb::{IteratorMode, WriteBatch};
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
-use std::thread;
 use std::time::Instant;
 use tokio::sync::Semaphore;
 
-const CHUNK_SIZE: u64 = 2000;
+pub const CHUNK_SIZE: u64 = 2000;
 
 pub struct LogSyncEngine {
     semaphore: Arc<Semaphore>,
@@ -300,8 +299,12 @@ impl LogSyncEngine {
                 .await;
 
             if latest_block.is_err() {
-                error!("Error: {:?}", latest_block.err().unwrap());
-                thread::sleep(std::time::Duration::from_secs(1));
+                error!(
+                    "${} get_block_number Error: {:?}",
+                    self.contract.symbol.to_uppercase(),
+                    latest_block.err().unwrap()
+                );
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                 continue;
             }
 

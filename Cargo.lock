@@ -2378,6 +2378,7 @@ checksum = "ce23b50ad8242c51a442f3ff322d56b02f08852c77e4c0b4d3fd684abc89c683"
 name = "indexer-rs"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "backoff",
  "bytes 1.5.0",
  "colored",

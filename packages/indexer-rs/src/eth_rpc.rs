@@ -1,8 +1,8 @@
 use serde_json::{json, Value};
+use std::env;
 use std::env::VarError;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::{env, thread};
 use tokio::sync::Semaphore;
 
 const NUM_MAINNET_NODES: u32 = 10;
@@ -84,6 +84,10 @@ impl EthRpcClient {
             .get_endpoint(chain)
             .unwrap();
 
+        let permit = semaphore.acquire().await.unwrap();
+        let delay = rand::random::<u64>() % 500;
+        tokio::time::sleep(Duration::from_millis(delay)).await;
+
         let mut res = self
             .client
             .post(url)
@@ -94,10 +98,6 @@ impl EthRpcClient {
                 "id": 0,
             }))?
             .await?;
-
-        let permit = semaphore.acquire().await.unwrap();
-        let delay = rand::random::<u64>() % 100;
-        thread::sleep(Duration::from_millis(delay));
 
         let body_str = res.body_string().await?;
 
@@ -149,8 +149,8 @@ impl EthRpcClient {
 
         let permit = semaphore.acquire().await.unwrap();
 
-        let delay = rand::random::<u64>() % 100;
-        thread::sleep(Duration::from_millis(delay));
+        let delay = rand::random::<u64>() % 500;
+        tokio::time::sleep(Duration::from_millis(delay)).await;
 
         let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
 

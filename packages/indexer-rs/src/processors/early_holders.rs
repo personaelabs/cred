@@ -1,7 +1,10 @@
 use crate::{
     contract::Contract,
+    eth_rpc::EthRpcClient,
     processors::{upsert_group, GroupIndexer},
+    rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     tree::save_tree,
+    utils::is_event_logs_ready,
     TransferEvent,
 };
 use std::{collections::HashSet, sync::Arc};
@@ -13,6 +16,7 @@ pub struct EarlyHolderIndexer {
     pub group_id: Option<i32>,
     pub pg_client: Arc<tokio_postgres::Client>,
     pub rocksdb_client: Arc<rocksdb::DB>,
+    pub eth_client: Arc<EthRpcClient>,
 }
 
 impl EarlyHolderIndexer {
@@ -20,6 +24,7 @@ impl EarlyHolderIndexer {
         contract: Contract,
         pg_client: Arc<tokio_postgres::Client>,
         rocksdb_client: Arc<rocksdb::DB>,
+        eth_client: Arc<EthRpcClient>,
     ) -> Self {
         EarlyHolderIndexer {
             unique_holders: HashSet::new(),
@@ -28,15 +33,30 @@ impl EarlyHolderIndexer {
             group_id: None,
             pg_client,
             rocksdb_client,
+            eth_client,
         }
     }
 }
 
+#[async_trait::async_trait]
 impl GroupIndexer for EarlyHolderIndexer {
+    fn group_name(&self) -> String {
+        "Early holder".to_string()
+    }
+
     fn process_log(&mut self, log: &TransferEvent) -> Result<(), std::io::Error> {
         self.unique_holders.insert(log.to);
-
         Ok(())
+    }
+
+    async fn is_ready(&self) -> Result<bool, surf::Error> {
+        is_event_logs_ready(
+            &self.rocksdb_client,
+            &self.eth_client,
+            ERC20_TRANSFER_EVENT_ID,
+            &self.contract,
+        )
+        .await
     }
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
