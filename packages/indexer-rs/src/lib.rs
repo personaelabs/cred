@@ -2,6 +2,7 @@ use num_bigint::BigUint;
 
 pub mod contract;
 pub mod eth_rpc;
+pub mod event;
 pub mod log_sync_engine;
 pub mod logger;
 pub mod processors;
@@ -18,8 +19,12 @@ pub struct TransferEvent {
     pub value: BigUint,
 }
 
-pub mod transfer_event {
-    include!(concat!(env!("OUT_DIR"), "/transfer_event.rs"));
+pub mod erc20_transfer_event {
+    include!(concat!(env!("OUT_DIR"), "/erc20_transfer_event.rs"));
+}
+
+pub mod erc721_transfer_event {
+    include!(concat!(env!("OUT_DIR"), "/erc721_transfer_event.rs"));
 }
 
 pub mod merkle_proof {

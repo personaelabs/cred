@@ -1,13 +1,11 @@
 use crate::contract::{Contract, ContractType};
 use crate::eth_rpc::EthRpcClient;
+use crate::event::event_log_to_key_value;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
-use crate::transfer_event;
-use crate::utils::{value_to_u32, value_to_u64};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
 use log::{debug, error, info};
-use prost::Message;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rocksdb::{IteratorMode, WriteBatch};
 use serde_json::Value;
@@ -17,6 +15,8 @@ use std::time::Instant;
 use tokio::sync::Semaphore;
 
 pub const CHUNK_SIZE: u64 = 2000;
+const TRANSFER_EVENT_SIG: &str =
+    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 pub struct LogSyncEngine {
     semaphore: Arc<Semaphore>,
@@ -97,36 +97,8 @@ impl LogSyncEngine {
             .par_iter()
             .flat_map(|logs_batch| {
                 logs_batch.par_iter().map(|log| {
-                    let log_index = value_to_u32(&log["logIndex"]);
-                    let tx_index = value_to_u32(&log["transactionIndex"]);
-                    let block_number = value_to_u64(&log["blockNumber"]);
-                    let value = hex::decode(log["data"].as_str().unwrap().trim_start_matches("0x"))
-                        .unwrap();
-
-                    let topics = &log["topics"].as_array().unwrap();
-
-                    let from = &topics[1].as_str().unwrap();
-                    let to = &topics[2].as_str().unwrap();
-
-                    let from = hex::decode(&from[from.len() - 40..]).unwrap();
-                    let to = hex::decode(&to[to.len() - 40..]).unwrap();
-
-                    let key = RocksDbKey {
-                        key_type: KeyType::EventLog,
-                        event_id: self.event_id,
-                        contract_id: self.contract.id,
-                        block_num: Some(block_number),
-                        log_index: Some(log_index),
-                        tx_index: Some(tx_index),
-                        chunk_num: None,
-                    };
-
-                    let transfer_event = transfer_event::Erc20TransferEvent { from, to, value };
-
-                    let mut value = Vec::new();
-                    transfer_event.encode(&mut value).unwrap();
-
-                    (key.to_bytes().to_vec(), value)
+                    let (key, event) = event_log_to_key_value(log, self.event_id, self.contract.id);
+                    (key.to_bytes().to_vec(), event)
                 })
             })
             .collect();
@@ -198,7 +170,7 @@ impl LogSyncEngine {
                     &self.semaphore,
                     self.contract.chain,
                     &self.contract.address,
-                    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                    TRANSFER_EVENT_SIG,
                     &batch,
                 )
                 .await;

@@ -1,5 +1,3 @@
-use core::panic;
-
 use crate::{
     contract::Contract,
     eth_rpc::{Chain, EthRpcClient},

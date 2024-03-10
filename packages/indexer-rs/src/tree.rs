@@ -6,7 +6,7 @@ use crate::processors::early_holders::EarlyHolderIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID};
-use crate::{transfer_event, TransferEvent};
+use crate::{erc20_transfer_event, TransferEvent};
 use colored::*;
 use futures::future::join_all;
 use log::{error, info};
@@ -117,7 +117,8 @@ pub async fn index_groups_for_contract(
             {
                 // Decode the log.  The log is in protobuf.
                 let decoded =
-                    transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
+                    erc20_transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value))
+                        .unwrap();
 
                 let log = TransferEvent {
                     from: decoded.from.try_into().unwrap(),
