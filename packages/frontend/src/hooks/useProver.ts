@@ -28,7 +28,7 @@ interface Prover {
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const getMerkleTree2 = async (
+const getMerkleTree = async (
   groupId: number
 ): Promise<{
   treeId: number;
@@ -134,7 +134,7 @@ const useProver = () => {
         description: 'This may take a minute...',
       });
 
-      const { treeId, merkleTree } = await getMerkleTree2(groupId);
+      const { treeId, merkleTree } = await getMerkleTree(groupId);
 
       const { s, r, v } = hexToSignature(sig);
       const isYOdd = calculateSigRecovery(v);

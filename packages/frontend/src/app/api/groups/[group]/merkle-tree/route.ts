@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const merkleTreeSelect = {
   id: true,
   treeProtoBuf: true,
-} satisfies Prisma.MerkleTree2Select;
+} satisfies Prisma.MerkleTreeSelect;
 
 // Get merkle tree and its merkle proofs
 export async function GET(
@@ -42,7 +42,7 @@ export async function GET(
   }
 
   // Get the latest merkle tree from the database
-  const merkleTree = await prisma.merkleTree2.findFirst({
+  const merkleTree = await prisma.merkleTree.findFirst({
     select: merkleTreeSelect,
     where: {
       groupId: group.id,

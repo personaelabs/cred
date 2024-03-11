@@ -324,7 +324,7 @@ pub async fn save_tree(
 
     // Save the tree to the database
     let statement = r#"
-        INSERT INTO "MerkleTree2" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "updatedAt")
+        INSERT INTO "MerkleTree" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "updatedAt")
         VALUES ($1, $2, $3, $4, NOW())
         ON CONFLICT ("groupId", "blockNumber", "merkleRoot") DO NOTHING"#;
 

@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
   const merkleRootBytes = await circuit.get_merkle_root(proofBytes);
   const merkleRoot = bytesToHex(merkleRootBytes);
 
-  const merkleTreeInDb = await prisma.merkleTree2.findUnique({
+  const merkleTreeInDb = await prisma.merkleTree.findUnique({
     where: {
       id: body.treeId,
     },
