@@ -92,12 +92,12 @@ app.frame('/', c => {
           fontSize: 60,
         }}
       >
-        Mint the creddd genesis NFT
+        mint creddd genesis
       </div>
     ),
     intents: [
-      <Button value="check">Check eligibility</Button>,
-      <Button value="about">About</Button>,
+      <Button value="check">check eligibility</Button>,
+      <Button value="about">about</Button>,
     ],
   });
 });
@@ -128,12 +128,12 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          Already minted
+          already minted
         </div>
       ),
       intents: [
         <Button.Link href={`https://zora.co/${custodyAddress}`}>
-          View on Zora
+          view on Zora
         </Button.Link>,
       ],
     });
@@ -153,11 +153,11 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          Creddd found! <br />
-          You are eligible to mint.
+          creddd found! <br />
+          you are eligible to mint.
         </div>
       ),
-      intents: [<Button value="mint">Mint</Button>],
+      intents: [<Button value="mint">mint</Button>],
     });
   } else {
     return c.res({
@@ -168,13 +168,14 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          No creddd found.
-          <br /> Add creddd to your Farcaster account to mint.
+          no creddd found.
+          <br />
+          add creddd to your Farcaster account to mint.
         </div>
       ),
       intents: [
-        <Button.Reset>Back</Button.Reset>,
-        <Button.Link href="https://creddd.xyz">Add creddd</Button.Link>,
+        <Button.Reset>back</Button.Reset>,
+        <Button.Link href="https://creddd.xyz">add creddd</Button.Link>,
       ],
     });
   }
@@ -228,12 +229,12 @@ const mintFrame = async (c: any) => {
           fontSize: 40,
         }}
       >
-        Minted!
+        minted!
       </div>
     ),
     intents: [
       <Button.Link href={`https://zora.co/${custodyAddress}`}>
-        View on Zora
+        view on Zora
       </Button.Link>,
     ],
   });
@@ -258,17 +259,17 @@ const aboutFrame = async (c: any) => {
           fontSize: 36,
         }}
       >
-        creddd is a protocol for attaching onchain reputation to your everyday
-        identity.
+        creddd is a protocol for attaching onchain reputation to your online
+        identities.
         <br />
-        It uses a privacy technology called “zero-knowledge proofs” to prove
-        your reputation while obscuring your full onchain activity.
+        it uses zero-knowledge proofs to prove your reputation while obscuring
+        your full onchain activity.
       </div>
     ),
     intents: [
-      <Button.Reset>Back</Button.Reset>,
+      <Button.Reset>back</Button.Reset>,
       <Button.Link href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20">
-        Read more
+        read more
       </Button.Link>,
     ],
   });
