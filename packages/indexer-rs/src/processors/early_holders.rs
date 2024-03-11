@@ -4,8 +4,7 @@ use crate::{
     processors::{upsert_group, GroupIndexer},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     tree::save_tree,
-    utils::is_event_logs_ready,
-    TransferEvent,
+    utils::{decode_erc20_transfer_event, is_event_logs_ready},
 };
 use std::{collections::HashSet, sync::Arc};
 
@@ -44,7 +43,9 @@ impl GroupIndexer for EarlyHolderIndexer {
         "Early holder".to_string()
     }
 
-    fn process_log(&mut self, log: &TransferEvent) -> Result<(), std::io::Error> {
+    fn process_log(&mut self, log: &[u8]) -> Result<(), std::io::Error> {
+        let log = decode_erc20_transfer_event(log);
+
         if !self.unique_holders.contains(&log.to) {
             self.unique_holders.insert(log.to);
             self.ordered_holders.push(log.to);
@@ -70,7 +71,8 @@ impl GroupIndexer for EarlyHolderIndexer {
             self.contract.symbol.clone().to_uppercase()
         );
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle).await?;
+        let group_id =
+            upsert_group(&self.pg_client, &display_name, &handle, "early-holder").await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -90,13 +92,7 @@ impl GroupIndexer for EarlyHolderIndexer {
             .collect();
 
         if let Some(group_id) = self.group_id {
-            save_tree(
-                group_id,
-                self.pg_client.clone(),
-                early_holders,
-                block_number,
-            )
-            .await?;
+            save_tree(group_id, &self.pg_client, early_holders, block_number).await?;
         } else {
             panic!("Group ID not set");
         }

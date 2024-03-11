@@ -1,21 +1,17 @@
 use crate::{
     contract::Contract,
-    eth_rpc::{Chain, EthRpcClient},
+    erc20_transfer_event, erc721_transfer_event,
+    eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
     rocksdb_key::{KeyType, RocksDbKey},
+    ERC20TransferEvent, ERC721TransferEvent,
 };
+use num_bigint::BigUint;
+use prost::Message;
 use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
+use std::io::Cursor;
 use tokio::sync::Semaphore;
-
-pub fn get_chain_block_time(chain: Chain) -> u64 {
-    match chain {
-        Chain::Mainnet => 12,
-        Chain::Arbitrum => 1,
-        Chain::Optimism => 2,
-        Chain::Base => 2,
-    }
-}
 
 /// Convert a serde_json Value to u64 by parsing it as a hex string
 pub fn value_to_u64(value: &Value) -> u64 {
@@ -117,5 +113,27 @@ pub async fn is_event_logs_ready(
         Ok(true)
     } else {
         Ok(false)
+    }
+}
+
+pub fn decode_erc20_transfer_event(value: &[u8]) -> ERC20TransferEvent {
+    let decoded =
+        erc20_transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
+
+    ERC20TransferEvent {
+        from: decoded.from.try_into().unwrap(),
+        to: decoded.to.try_into().unwrap(),
+        value: BigUint::from_bytes_be(&decoded.value),
+    }
+}
+
+pub fn decode_erc721_transfer_event(value: &[u8]) -> ERC721TransferEvent {
+    let decoded =
+        erc721_transfer_event::Erc721TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
+
+    ERC721TransferEvent {
+        from: decoded.from.try_into().unwrap(),
+        to: decoded.to.try_into().unwrap(),
+        token_id: BigUint::from_bytes_be(&decoded.token_id),
     }
 }

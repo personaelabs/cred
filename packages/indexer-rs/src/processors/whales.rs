@@ -1,8 +1,8 @@
+use crate::contract::Contract;
 use crate::eth_rpc::EthRpcClient;
 use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use crate::tree::save_tree;
-use crate::utils::is_event_logs_ready;
-use crate::{contract::Contract, TransferEvent};
+use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready};
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
 use std::io::Error;
@@ -60,7 +60,7 @@ impl GroupIndexer for WhaleIndexer {
         let handle = format!("whale-{}", self.contract.name.to_lowercase());
         let display_name = format!("{} whale", self.contract.symbol.clone().to_uppercase());
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle).await?;
+        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "whale").await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -77,7 +77,9 @@ impl GroupIndexer for WhaleIndexer {
         .await
     }
 
-    fn process_log(&mut self, log: &TransferEvent) -> Result<(), Error> {
+    fn process_log(&mut self, log: &[u8]) -> Result<(), Error> {
+        let log = decode_erc20_transfer_event(log);
+
         if log.value == BigUint::from(0u8) {
             return Ok(());
         }
@@ -130,7 +132,7 @@ impl GroupIndexer for WhaleIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                self.pg_client.clone(),
+                &self.pg_client,
                 self.whales.clone().into_iter().collect(),
                 block_number,
             )

@@ -65,12 +65,24 @@ model MerkleTree2 {
   Group          Group            @relation(fields: [groupId], references: [id])
   groupId        Int
   blockNumber    BigInt
-  layers         Bytes[]
+  treeProtoBuf   Bytes
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   FidAttestation FidAttestation[]
 
   @@unique([merkleRoot, groupId, blockNumber])
+}
+
+model MerkleTreeLeaf {
+  id          Int    @id @default(autoincrement())
+  groupId     Int
+  blockNumber BigInt
+  address     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([groupId, blockNumber, address])
 }
 
 model MerkleProof {

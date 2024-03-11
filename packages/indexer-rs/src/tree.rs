@@ -1,13 +1,12 @@
 extern crate merkle_tree as merkle_tree_lib;
 use crate::contract::Contract;
 use crate::eth_rpc::EthRpcClient;
-use crate::merkle_tree_proto;
+use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::processors::all_holders::AllHoldersIndexer;
 use crate::processors::early_holders::EarlyHolderIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
-use crate::{erc20_transfer_event, TransferEvent};
 use colored::*;
 use futures::future::join_all;
 use log::{error, info};
@@ -20,8 +19,7 @@ use prost::Message;
 use rocksdb::{IteratorMode, ReadOptions, DB};
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::{io::Cursor, time::Instant};
-
+use std::time::Instant;
 const TREE_DEPTH: usize = 18;
 const TREE_WIDTH: usize = 3;
 
@@ -35,6 +33,7 @@ async fn process_event_logs(
     event_id: u16,
     indexers: &mut Vec<Box<dyn GroupIndexer>>,
 ) {
+    let start = Instant::now();
     // Initialize the RocksDB iterator that starts from the first log for `contract.id`
     let mut iterator_ops = ReadOptions::default();
     iterator_ops.set_async_io(true);
@@ -58,23 +57,13 @@ async fn process_event_logs(
             && key.contract_id == contract.id
             && key.event_id == event_id
         {
-            // Decode the log.  The log is in protobuf.
-            let decoded =
-                erc20_transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
-
-            let log = TransferEvent {
-                from: decoded.from.try_into().unwrap(),
-                to: decoded.to.try_into().unwrap(),
-                value: BigUint::from_bytes_be(&decoded.value),
-            };
-
             // Run the log through the indexers
             for (i, indexer) in indexers.iter_mut().enumerate() {
                 if errored_indexers.contains(&i) {
                     continue;
                 }
 
-                let result = indexer.process_log(&log);
+                let result = indexer.process_log(&value);
                 if let Err(err) = result {
                     error!(
                         "${} {} Error processing logs for contract {:?}",
@@ -92,6 +81,12 @@ async fn process_event_logs(
             break;
         }
     }
+
+    info!(
+        "${} Iterated through logs in {:?}",
+        contract.symbol.to_uppercase(),
+        start.elapsed()
+    );
 
     if let Some(latest_block_num) = latest_block_num {
         let save_trees_start = Instant::now();
@@ -115,6 +110,11 @@ async fn process_event_logs(
                 save_trees_start.elapsed()
             );
         }
+    } else {
+        error!(
+            "${} No logs found for contract",
+            contract.symbol.to_uppercase()
+        );
     }
 }
 
@@ -196,6 +196,7 @@ pub async fn index_groups_for_contract(
         }
 
         // Initialize the groups
+        let start = Instant::now();
         let init_group_results =
             join_all(indexers.iter_mut().flat_map(|(_event_id, event_indexers)| {
                 event_indexers
@@ -204,6 +205,13 @@ pub async fn index_groups_for_contract(
                     .collect::<Vec<_>>()
             }))
             .await;
+
+        println!(
+            "${} {} {:?}",
+            contract.symbol.to_uppercase(),
+            "Initialized groups in ".green(),
+            start.elapsed()
+        );
 
         // Check if there are any errors in the initialization
         let error_exists = init_group_results.iter().any(|result| result.is_err());
@@ -242,17 +250,26 @@ pub async fn index_groups_for_contract(
 
 pub async fn save_tree(
     group_id: i32,
-    pg_client: Arc<tokio_postgres::Client>,
+    pg_client: &tokio_postgres::Client,
     mut addresses: Vec<[u8; 20]>,
     block_number: i64,
 ) -> Result<(), tokio_postgres::Error> {
     addresses.sort();
 
+    if block_number != 0 && addresses.len() < 100 {
+        info!("Not enough addresses to build a tree for {}", group_id);
+        return Ok(());
+    }
+
     let mut tree = MerkleTree::<Fq, TREE_WIDTH>::new(secp256k1_w3());
 
     let leaves = &addresses
         .iter()
-        .map(|chunk| Fq::from(BigUint::from_bytes_be(chunk)))
+        .map(|chunk| {
+            let mut address = [0u8; 32];
+            address[12..].copy_from_slice(chunk);
+            Fq::from(BigUint::from_bytes_be(&address))
+        })
         .collect::<Vec<Fq>>();
 
     // Pad the leaves to equal the size of the tree
@@ -273,38 +290,80 @@ pub async fn save_tree(
         precomputed.push(hash);
     }
 
-    let layers_bytes: Vec<Vec<u8>> = tree
+    let layers: Vec<MerkleTreeLayer> = tree
         .layers
         .iter()
         .enumerate()
-        .map(|(i, layer): (usize, &Vec<Fq>)| {
-            let layer_precomputed = precomputed[i];
+        .map(|(layer_i, layer): (usize, &Vec<Fq>)| {
+            let nodes_proto = layer
+                .iter()
+                .filter(|fe| **fe != precomputed[layer_i])
+                .enumerate()
+                .map(|(i, fe)| {
+                    let mut node = fe.into_bigint().to_bytes_be();
 
-            let non_zero_nodes = layer.iter().filter(|fe| **fe != layer_precomputed).copied();
+                    if layer_i == 0 {
+                        node = node[12..].to_vec();
+                    }
 
-            let nodes_proto = non_zero_nodes
-                .map(|fe| merkle_tree_proto::MerkleTreeNode {
-                    node: fe.0.to_bytes_be(),
+                    merkle_tree_proto::MerkleTreeNode {
+                        node,
+                        index: i as u32,
+                    }
                 })
                 .collect::<Vec<merkle_tree_proto::MerkleTreeNode>>();
 
-            let layer_proto = merkle_tree_proto::MerkleTreeLayer { nodes: nodes_proto };
-
-            layer_proto.encode_to_vec()
+            merkle_tree_proto::MerkleTreeLayer { nodes: nodes_proto }
         })
         .collect();
 
+    let tree_protobuf = merkle_tree_proto::MerkleTree { layers };
+    let tree_bytes = tree_protobuf.encode_to_vec();
+
+    println!("tree bytes: {}", tree_bytes.len());
+
     // Save the tree to the database
     let statement = r#"
-        INSERT INTO "MerkleTree2" ("groupId", "blockNumber", "merkleRoot", "layers", "updatedAt")
+        INSERT INTO "MerkleTree2" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "updatedAt")
         VALUES ($1, $2, $3, $4, NOW())
         ON CONFLICT ("groupId", "blockNumber", "merkleRoot") DO NOTHING"#;
 
     pg_client
         .query(
             statement,
-            &[&group_id, &block_number, &merkle_root_hex, &layers_bytes],
+            &[&group_id, &block_number, &merkle_root_hex, &tree_bytes],
         )
+        .await?;
+
+    // Save the leaves to the database
+    let mut statement = r#"
+        INSERT INTO "MerkleTreeLeaf" ("groupId", "blockNumber", "address", "updatedAt")
+        VALUES
+       "#
+    .to_string();
+
+    for address in &addresses {
+        let address_hex = format!("0x{}", hex::encode(address.clone()));
+        statement += format!(
+            "({}, {}, '{}', NOW()),",
+            group_id, block_number, address_hex
+        )
+        .as_str();
+    }
+
+    statement.pop(); // Remove the trailing comma
+
+    statement += r#"ON CONFLICT ("groupId", "blockNumber", "address") DO NOTHING"#;
+
+    pg_client.query(statement.as_str(), &[]).await?;
+
+    // Delete all past leaves
+    let statement = r#"
+        DELETE FROM "MerkleTreeLeaf" WHERE "groupId" = $1 AND "blockNumber" < $2
+       "#;
+
+    pg_client
+        .query(statement, &[&group_id, &block_number])
         .await?;
 
     Ok(())

@@ -4,7 +4,6 @@ import * as Comlink from 'comlink';
 import { useEffect } from 'react';
 import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
 import { WalletClient } from 'viem';
-import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
 import {
   calculateSigRecovery,
   concatUint8Arrays,
@@ -21,57 +20,86 @@ import {
 } from 'viem';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
+import { MerkleTree } from '@/proto/merkle_tree_pb';
+import { PRECOMPUTED_HASHES } from '@/lib/utils';
 
 interface Prover {
   prepare(): Promise<void>;
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const getMerkleTree = async (groupId: number): Promise<MerkleTreeSelect> => {
-  let skip = 0;
-  const take = 30000;
+const getMerkleTree2 = async (
+  groupId: number
+): Promise<{
+  treeId: number;
+  merkleTree: MerkleTree;
+}> => {
+  const response = await fetch(`/api/groups/${groupId}/merkle-tree`);
 
-  let merkleTree: MerkleTreeSelect | null = null;
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const searchParams = new URLSearchParams();
-    searchParams.set('skip', skip.toString());
-    searchParams.set('take', take.toString());
-    const response = await fetch(
-      `/api/groups/${groupId}/merkle-proofs?${searchParams.toString()}`
-    );
-
-    if (!response.ok) {
-      await captureFetchError(response);
-      throw new Error('Failed to fetch merkle tree');
-    }
-
-    console.log('Fetched merkle tree', skip);
-
-    // If the response is 204, then there are no more records to fetch
-    if (response.status === 204) {
-      break;
-    }
-
-    const tree = (await response.json()) as MerkleTreeSelect;
-
-    if (!merkleTree) {
-      merkleTree = tree;
-    } else {
-      merkleTree.merkleProofs.push(...tree.merkleProofs);
-    }
-
-    skip += take;
-  }
-
-  if (!merkleTree) {
+  if (!response.ok) {
+    await captureFetchError(response);
     throw new Error('Failed to fetch merkle tree');
   }
 
-  console.log('Fetched merkle tree', merkleTree.merkleProofs.length);
+  const responseBuf = await response.arrayBuffer();
 
-  return merkleTree;
+  const treeId = Buffer.from(responseBuf.slice(0, 4)).readUInt32BE();
+  const merkleTreeBytes = responseBuf.slice(4, responseBuf.byteLength);
+
+  const merkleTree = MerkleTree.deserializeBinary(
+    new Uint8Array(merkleTreeBytes)
+  );
+
+  return { treeId, merkleTree };
+};
+
+const getMerkleProof = (merkleTree: MerkleTree, address: Hex) => {
+  const layers = merkleTree.getLayersList();
+  const treeDepth = layers.length;
+
+  // Get the leaves of the tree
+  const leaves = layers[0].getNodesList();
+
+  // Convert the address to a buffer
+  const addressBuffer = fromHexString(address, 20);
+
+  // Find the leaf index
+  let leafIndex = leaves.findIndex(leaf => {
+    const leafBytes = leaf.getNode_asU8();
+    return addressBuffer.equals(Buffer.from(leafBytes));
+  });
+
+  if (leafIndex === -1) {
+    return null;
+  }
+
+  // Get the merkle proof
+  const siblings = [];
+  const pathIndices = [];
+
+  for (let i = 0; i < treeDepth - 1; i++) {
+    const layer = layers[i];
+    const siblingIndex = leafIndex % 2 === 0 ? leafIndex + 1 : leafIndex - 1;
+
+    const sibling =
+      (layer
+        .getNodesList()
+        .find(node => node.getIndex() === siblingIndex)
+        ?.getNode() as Uint8Array) || PRECOMPUTED_HASHES[i];
+
+    siblings.push(sibling);
+    pathIndices.push(leafIndex & 1);
+
+    leafIndex = Math.floor(leafIndex / 2);
+  }
+
+  const root = layers[treeDepth - 1].getNodesList()[0].getNode_asU8();
+
+  return {
+    root,
+    path: siblings.map(sibling => toHexString(sibling)),
+    pathIndices,
+  };
 };
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
@@ -106,16 +134,14 @@ const useProver = () => {
         description: 'This may take a minute...',
       });
 
-      const merkleTree = await getMerkleTree(groupId);
+      const { treeId, merkleTree } = await getMerkleTree2(groupId);
 
       const { s, r, v } = hexToSignature(sig);
       const isYOdd = calculateSigRecovery(v);
 
       const msgHash = hashMessage(message);
 
-      const merkleProof = merkleTree.merkleProofs.find(
-        proof => proof.address === address.toLowerCase()
-      );
+      const merkleProof = getMerkleProof(merkleTree, address);
 
       if (!merkleProof) {
         throw new Error('Merkle proof not found');
@@ -147,7 +173,7 @@ const useProver = () => {
             return buf;
           })
         ),
-        root: hexToBytes(merkleTree.merkleRoot as Hex),
+        root: merkleProof.root,
         signInSigS: hexToBytes(signInSigS),
       };
 
@@ -169,23 +195,10 @@ const useProver = () => {
           custody: siwfResponse.custody!,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
-          treeId: merkleTree.id,
+          treeId,
           issuedAt: issuedAt[0],
         };
       }
-
-      /*
-      console.log(siwfResponse.message);
-      return {
-        proof: '0x0',
-        signInSigS: siwfResponse.signature!,
-        custody: siwfResponse.custody!,
-        signInSigNonce: siwfResponse.nonce,
-        fid: user.fid,
-        treeId: 0,
-        //        issuedAt: buildSignInMessage(siwfResponse.message)
-      };
-      */
 
       return null;
     } else {

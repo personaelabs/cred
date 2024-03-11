@@ -13,10 +13,17 @@ pub mod utils;
 pub const ROCKSDB_PATH: &str = "./db";
 
 #[derive(Debug, Clone)]
-pub struct TransferEvent {
+pub struct ERC20TransferEvent {
     pub from: [u8; 20],
     pub to: [u8; 20],
     pub value: BigUint,
+}
+
+#[derive(Debug, Clone)]
+pub struct ERC721TransferEvent {
+    pub from: [u8; 20],
+    pub to: [u8; 20],
+    pub token_id: BigUint,
 }
 
 pub mod erc20_transfer_event {
