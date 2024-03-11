@@ -15,6 +15,7 @@ pub struct Contract {
     pub address: String,
     pub chain: Chain,
     pub contract_type: ContractType,
+    pub target_groups: Vec<String>,
     pub name: String,
     pub symbol: String,
     pub deployed_block: u64,
@@ -25,7 +26,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
     // Get all contracts from the storage
     let result = pg_clinet
         .query(
-            r#"SELECT "id", "address", "type", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
+            r#"SELECT "id", "address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
             &[],
         )
         .await
@@ -41,6 +42,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             let chain: String = row.get("chain");
             let contract_deployed_block: i64 = row.get("deployedBlock");
             let contract_type: ContractType = row.get("type");
+            let target_groups: Vec<String> = row.get("targetGroups");
 
             // Convert the chain string to Chain enum
             let chain = match chain.as_str() {
@@ -59,6 +61,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
                 symbol: symbol.clone(),
                 deployed_block: contract_deployed_block as u64,
                 contract_type,
+                target_groups,
             }
         })
         .collect();

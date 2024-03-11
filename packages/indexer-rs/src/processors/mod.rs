@@ -1,6 +1,7 @@
 #![allow(async_fn_in_trait)]
 use crate::TransferEvent;
 pub mod early_holders;
+pub mod all_holders;
 pub mod whales;
 
 pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds

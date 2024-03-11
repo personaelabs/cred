@@ -2,16 +2,15 @@ use crate::{
     contract::Contract,
     eth_rpc::EthRpcClient,
     processors::{upsert_group, GroupIndexer},
-    rocksdb_key::ERC20_TRANSFER_EVENT_ID,
+    rocksdb_key::ERC721_TRANSFER_EVENT_ID,
     tree::save_tree,
     utils::is_event_logs_ready,
     TransferEvent,
 };
 use std::{collections::HashSet, sync::Arc};
 
-pub struct EarlyHolderIndexer {
+pub struct AllHoldersIndexer {
     pub unique_holders: HashSet<[u8; 20]>,
-    pub ordered_holders: Vec<[u8; 20]>,
     pub contract: Contract,
     pub group_id: Option<i32>,
     pub pg_client: Arc<tokio_postgres::Client>,
@@ -19,16 +18,15 @@ pub struct EarlyHolderIndexer {
     pub eth_client: Arc<EthRpcClient>,
 }
 
-impl EarlyHolderIndexer {
+impl AllHoldersIndexer {
     pub fn new(
         contract: Contract,
         pg_client: Arc<tokio_postgres::Client>,
         rocksdb_client: Arc<rocksdb::DB>,
         eth_client: Arc<EthRpcClient>,
     ) -> Self {
-        EarlyHolderIndexer {
+        AllHoldersIndexer {
             unique_holders: HashSet::new(),
-            ordered_holders: Vec::new(),
             contract,
             group_id: None,
             pg_client,
@@ -39,17 +37,13 @@ impl EarlyHolderIndexer {
 }
 
 #[async_trait::async_trait]
-impl GroupIndexer for EarlyHolderIndexer {
+impl GroupIndexer for AllHoldersIndexer {
     fn group_name(&self) -> String {
-        "Early holder".to_string()
+        "All holders".to_string()
     }
 
     fn process_log(&mut self, log: &TransferEvent) -> Result<(), std::io::Error> {
-        if !self.unique_holders.contains(&log.to) {
-            self.unique_holders.insert(log.to);
-            self.ordered_holders.push(log.to);
-        }
-
+        self.unique_holders.insert(log.to);
         Ok(())
     }
 
@@ -57,18 +51,15 @@ impl GroupIndexer for EarlyHolderIndexer {
         is_event_logs_ready(
             &self.rocksdb_client,
             &self.eth_client,
-            ERC20_TRANSFER_EVENT_ID,
+            ERC721_TRANSFER_EVENT_ID,
             &self.contract,
         )
         .await
     }
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
-        let handle = format!("early-holder-{}", self.contract.name.to_lowercase());
-        let display_name = format!(
-            "Early {} holder",
-            self.contract.symbol.clone().to_uppercase()
-        );
+        let handle = format!("{}-all-holders", self.contract.name.to_lowercase());
+        let display_name = format!("{} holders", self.contract.symbol.clone().to_uppercase());
 
         let group_id = upsert_group(&self.pg_client, &display_name, &handle).await?;
         self.group_id = Some(group_id);
@@ -77,23 +68,11 @@ impl GroupIndexer for EarlyHolderIndexer {
     }
 
     async fn save_tree(&self, block_number: i64) -> Result<(), tokio_postgres::Error> {
-        let total_holders = self.unique_holders.len();
-
-        // Get the first 5% of the holders
-        let earliness_threshold = total_holders / 20;
-
-        let early_holders = self
-            .ordered_holders
-            .iter()
-            .take(earliness_threshold)
-            .copied()
-            .collect();
-
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
                 self.pg_client.clone(),
-                early_holders,
+                self.unique_holders.clone().into_iter().collect(),
                 block_number,
             )
             .await?;
