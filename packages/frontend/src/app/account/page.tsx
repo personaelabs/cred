@@ -110,7 +110,16 @@ export default function AccountPage() {
           <div className="flex flex-col gap-[14px]">
             <div className="opacity-80 text-center">
               {eligibleGroups.length === 0 ? (
-                <>No creddd found for connected wallets</>
+                <>
+                  No creddd found for connected wallet. See{' '}
+                  <Link
+                    href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20#7e3c04c26d0547f2a7bf102ee9b2b0f8"
+                    target="_blank"
+                  >
+                    here
+                  </Link>{' '}
+                  for currently available creddd.
+                </>
               ) : (
                 <>Found the following creddd:</>
               )}
