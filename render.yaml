@@ -63,5 +63,5 @@ databases:
   - name: cred
     databaseName: cred
     region: oregon
-    plan: free
+    plan: pro
     postgresMajorVersion: 15
