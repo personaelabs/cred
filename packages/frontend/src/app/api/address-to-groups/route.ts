@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
     SELECT
       address,
-      ARRAY_AGG("groupId") AS "groups"
+      ARRAY_AGG("MerkleTree"."groupId") AS "groups"
     FROM
       "MerkleTreeLeaf"
+      LEFT JOIN "MerkleTree" ON "MerkleTreeLeaf"."treeId" = "MerkleTree".id
     GROUP BY
       address
       OFFSET ${skip}

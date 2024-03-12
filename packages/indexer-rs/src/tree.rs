@@ -7,6 +7,7 @@ use crate::processors::early_holders::EarlyHolderIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
+use crate::GroupType;
 use colored::*;
 use futures::future::join_all;
 use log::{error, info};
@@ -250,13 +251,14 @@ pub async fn index_groups_for_contract(
 
 pub async fn save_tree(
     group_id: i32,
+    group_type: GroupType,
     pg_client: &tokio_postgres::Client,
     mut addresses: Vec<[u8; 20]>,
     block_number: i64,
 ) -> Result<(), tokio_postgres::Error> {
     addresses.sort();
 
-    if block_number != 0 && addresses.len() < 100 {
+    if group_type == GroupType::Onchain && addresses.len() < 100 {
         info!("Not enough addresses to build a tree for {}", group_id);
         return Ok(());
     }
@@ -322,49 +324,80 @@ pub async fn save_tree(
 
     println!("tree bytes: {}", tree_bytes.len());
 
+    // Check if the tree already exists for the given group and block number
+    let statement = r#"
+        SELECT "id" FROM "MerkleTree"
+        WHERE "groupId" = $1 AND "blockNumber" = $2
+        "#;
+
+    let tree_exists = pg_client
+        .query_opt(statement, &[&group_id, &block_number])
+        .await?;
+
+    if tree_exists.is_some() {
+        info!(
+            "Tree already exists for group {} and block {}",
+            group_id, block_number
+        );
+        return Ok(());
+    }
+
     // Save the tree to the database
     let statement = r#"
         INSERT INTO "MerkleTree" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "updatedAt")
         VALUES ($1, $2, $3, $4, NOW())
-        ON CONFLICT ("groupId", "blockNumber", "merkleRoot") DO NOTHING"#;
+        ON CONFLICT ("groupId", "blockNumber") DO NOTHING
+        RETURNING "id"
+        "#;
 
-    pg_client
-        .query(
+    let upsert_tree_result = pg_client
+        .query_one(
             statement,
             &[&group_id, &block_number, &merkle_root_hex, &tree_bytes],
         )
         .await?;
 
+    let tree_id: i32 = upsert_tree_result.get(0);
+
     // Save the leaves to the database
     let mut statement = r#"
-        INSERT INTO "MerkleTreeLeaf" ("groupId", "blockNumber", "address", "updatedAt")
+        INSERT INTO "MerkleTreeLeaf" ("treeId", "address", "updatedAt")
         VALUES
        "#
     .to_string();
 
     for address in &addresses {
         let address_hex = format!("0x{}", hex::encode(address.clone()));
-        statement += format!(
-            "({}, {}, '{}', NOW()),",
-            group_id, block_number, address_hex
-        )
-        .as_str();
+        statement += format!("({}, '{}', NOW()),", tree_id, address_hex).as_str();
     }
 
     statement.pop(); // Remove the trailing comma
 
-    statement += r#"ON CONFLICT ("groupId", "blockNumber", "address") DO NOTHING"#;
+    statement += r#"ON CONFLICT ("treeId", "address") DO NOTHING"#;
 
     pg_client.query(statement.as_str(), &[]).await?;
 
-    // Delete all past leaves
+    // Get all past trees
     let statement = r#"
-        DELETE FROM "MerkleTreeLeaf" WHERE "groupId" = $1 AND "blockNumber" < $2
-       "#;
+        SELECT "id" FROM "MerkleTree"
+        WHERE "groupId" = $1 AND "id" != $2
+       "#
+    .to_string();
 
-    pg_client
-        .query(statement, &[&group_id, &block_number])
+    let old_trees = pg_client
+        .query(statement.as_str(), &[&group_id, &tree_id])
         .await?;
+
+    // Delete all the leaves for the old trees
+    for row in old_trees {
+        let tree_id: i32 = row.get(0);
+        let statement = r#"
+            DELETE FROM "MerkleTreeLeaf"
+            WHERE "treeId" = $1
+            "#;
+
+        pg_client.query(statement, &[&tree_id]).await?;
+    }
 
     Ok(())
 }

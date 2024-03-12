@@ -3,6 +3,7 @@ use crate::eth_rpc::EthRpcClient;
 use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use crate::tree::save_tree;
 use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready};
+use crate::GroupType;
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
 use std::io::Error;
@@ -132,6 +133,7 @@ impl GroupIndexer for WhaleIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
+                GroupType::Onchain,
                 &self.pg_client,
                 self.whales.clone().into_iter().collect(),
                 block_number,

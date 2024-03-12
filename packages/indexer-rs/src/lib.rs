@@ -12,6 +12,12 @@ pub mod utils;
 
 pub const ROCKSDB_PATH: &str = "./db";
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GroupType {
+    Offchain,
+    Onchain,
+}
+
 #[derive(Debug, Clone)]
 pub struct ERC20TransferEvent {
     pub from: [u8; 20],

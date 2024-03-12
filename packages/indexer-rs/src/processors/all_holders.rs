@@ -5,6 +5,7 @@ use crate::{
     rocksdb_key::ERC721_TRANSFER_EVENT_ID,
     tree::save_tree,
     utils::{decode_erc721_transfer_event, is_event_logs_ready},
+    GroupType,
 };
 use std::{collections::HashSet, sync::Arc};
 
@@ -70,6 +71,7 @@ impl GroupIndexer for AllHoldersIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
+                GroupType::Onchain,
                 &self.pg_client,
                 self.unique_holders.clone().into_iter().collect(),
                 block_number,

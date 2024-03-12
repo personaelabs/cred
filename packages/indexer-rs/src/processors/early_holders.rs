@@ -5,6 +5,7 @@ use crate::{
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     tree::save_tree,
     utils::{decode_erc20_transfer_event, is_event_logs_ready},
+    GroupType,
 };
 use std::{collections::HashSet, sync::Arc};
 
@@ -92,7 +93,14 @@ impl GroupIndexer for EarlyHolderIndexer {
             .collect();
 
         if let Some(group_id) = self.group_id {
-            save_tree(group_id, &self.pg_client, early_holders, block_number).await?;
+            save_tree(
+                group_id,
+                GroupType::Onchain,
+                &self.pg_client,
+                early_holders,
+                block_number,
+            )
+            .await?;
         } else {
             panic!("Group ID not set");
         }

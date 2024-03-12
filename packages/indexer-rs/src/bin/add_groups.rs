@@ -1,4 +1,4 @@
-use indexer_rs::{processors::upsert_group, tree::save_tree};
+use indexer_rs::{processors::upsert_group, tree::save_tree, GroupType};
 use log::error;
 use std::env;
 use tokio_postgres::NoTls;
@@ -12,6 +12,7 @@ struct Group {
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
     if env::var("RENDER").is_err() {
         dotenv::from_filename(format!("{}/.env", env::var("CARGO_MANIFEST_DIR").unwrap())).ok();
         dotenv::dotenv().ok();
@@ -58,8 +59,31 @@ async fn main() {
             })
             .collect::<Vec<[u8; 20]>>();
 
-        save_tree(group_id, &mut client, addresses, 0)
+        // For static groups, we need to increment the block number for each new tree
+        let latest_group_tree = client
+            .query_opt(
+                r#"SELECT "id", "blockNumber" FROM "MerkleTree" WHERE "groupId" = $1 ORDER BY "blockNumber" DESC LIMIT 1"#,
+                &[&group_id],
+            )
             .await
             .unwrap();
+
+        let mut block_number = 0;
+
+        // If there is a latest group tree, increment the block number
+        if let Some(row) = latest_group_tree {
+            let latest_block_number: i64 = row.get(1);
+            block_number = latest_block_number + 1;
+        }
+
+        save_tree(
+            group_id,
+            GroupType::Offchain,
+            &mut client,
+            addresses,
+            block_number,
+        )
+        .await
+        .unwrap();
     }
 }
