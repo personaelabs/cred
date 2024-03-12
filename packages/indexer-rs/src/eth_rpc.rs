@@ -1,8 +1,9 @@
 use serde_json::{json, Value};
 use std::env;
 use std::env::VarError;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::Mutex;
 use tokio::sync::Semaphore;
 
 const NUM_MAINNET_NODES: u32 = 10;
@@ -77,12 +78,9 @@ impl EthRpcClient {
         semaphore: &Semaphore,
         chain: Chain,
     ) -> Result<u64, surf::Error> {
-        let url = self
-            .load_balancer
-            .lock()
-            .unwrap()
-            .get_endpoint(chain)
-            .unwrap();
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
 
         let permit = semaphore.acquire().await.unwrap();
         let delay = rand::random::<u64>() % 500;
@@ -120,12 +118,9 @@ impl EthRpcClient {
         event_signature: &str,
         batch_options: &[[u64; 2]],
     ) -> Result<Value, surf::Error> {
-        let url = self
-            .load_balancer
-            .lock()
-            .unwrap()
-            .get_endpoint(chain)
-            .unwrap();
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
 
         let mut json_body = vec![];
 
