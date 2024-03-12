@@ -243,7 +243,7 @@ impl LogSyncEngine {
             block_num: None,
             log_index: None,
             tx_index: None,
-            chunk_num: Some(chunks[0]),
+            chunk_num: Some(0),
         };
 
         // Mark chunks as synched
@@ -253,11 +253,13 @@ impl LogSyncEngine {
         }
 
         self.rocksdb_client.write(batch).unwrap();
-        info!(
-            "${} Synched chunk: {}",
-            self.contract.symbol.to_uppercase(),
-            chunks[0]
-        );
+        if !chunks.is_empty() {
+            info!(
+                "${} Synched chunk: {}",
+                self.contract.symbol.to_uppercase(),
+                chunks[0]
+            );
+        }
     }
 
     pub async fn sync(self) {
