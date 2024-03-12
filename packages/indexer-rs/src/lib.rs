@@ -1,6 +1,7 @@
 use num_bigint::BigUint;
 
 pub mod contract;
+pub mod contracts;
 pub mod eth_rpc;
 pub mod event;
 pub mod log_sync_engine;
