@@ -20,7 +20,7 @@ ALTER TABLE "MerkleTree2" DROP CONSTRAINT "MerkleTree2_groupId_fkey";
 ALTER TABLE "FidAttestation" DROP COLUMN "merkleTree2Id";
 
 -- AlterTable
-ALTER TABLE "MerkleTree" ADD COLUMN     "treeProtoBuf" BYTEA NOT NULL;
+ALTER TABLE "MerkleTree" ADD COLUMN     "treeProtoBuf" BYTEA NULL;
 
 -- DropTable
 DROP TABLE "MerkleProof";
