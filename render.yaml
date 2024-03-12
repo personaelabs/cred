@@ -6,6 +6,7 @@ services:
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
+    preDeployCommand: cargo run --release --bin populate
     rootDir: ./
     buildFilter:
       paths:
