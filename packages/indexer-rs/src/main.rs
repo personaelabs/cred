@@ -1,3 +1,4 @@
+use env_logger::{Builder, Target};
 use futures::future::join_all;
 use futures::join;
 use indexer_rs::eth_rpc::EthRpcClient;
@@ -23,6 +24,9 @@ async fn main() {
     } else {
         dotenv::dotenv().ok();
     }
+
+    let mut builder = Builder::from_default_env();
+    builder.target(Target::Stdout);
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // Connect to the database.
