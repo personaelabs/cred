@@ -1,7 +1,26 @@
-FROM rust:1.76.0
+FROM node:18.17.0 
 
 WORKDIR /usr/src/app
 
+# Install pnpm
+RUN npm install -g pnpm
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Make sure Rust is in the PATH
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY pnpm-workspace.yaml .
+
+COPY packages/db/package.json packages/db/package.json
+
+# Install dependencies
+RUN pnpm i
+
+COPY packages/db packages/db
 COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
