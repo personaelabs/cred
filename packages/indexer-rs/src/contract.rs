@@ -21,6 +21,37 @@ pub struct Contract {
     pub deployed_block: u64,
 }
 
+pub async fn upsert_contract(
+    pg_client: &tokio_postgres::Client,
+    contract: &Contract,
+) -> Result<(), tokio_postgres::Error> {
+    let chain = match contract.chain {
+        Chain::Mainnet => "Ethereum",
+        Chain::Optimism => "OP Mainnet",
+        Chain::Base => "Base",
+        Chain::Arbitrum => "Arbitrum One",
+    };
+
+    pg_client
+        .execute(
+            r#"INSERT INTO "Contract" ("address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock", "updatedAt")
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+            ON CONFLICT ("address", "chain") DO UPDATE SET "address" = $1, "type" = $2, "targetGroups" = $3, "name" = $4, "symbol" = $5, "chain" = $6, "deployedBlock" = $7"#,
+            &[
+                &contract.address,
+                &contract.contract_type,
+                &contract.target_groups,
+                &contract.name,
+                &contract.symbol,
+                &chain,
+                &(contract.deployed_block as i64) ,
+            ],
+        )
+        .await?;
+
+    Ok(())
+}
+
 /// Get all contracts from the postgres
 pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> {
     // Get all contracts from the storage
