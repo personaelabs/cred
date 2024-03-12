@@ -6,7 +6,7 @@ services:
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
-    preDeployCommand: pnpm -F db migrate:prod && cargo run --release --bin populate
+    preDeployCommand: sh ./predeploy.sh
     rootDir: ./
     buildFilter:
       paths:
