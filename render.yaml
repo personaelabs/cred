@@ -20,6 +20,7 @@ services:
         fromDatabase:
           name: cred
           property: connectionString
+      - fromGroup: cred
     disk:
       name: db
       mountPath: /usr/src/app/db      
