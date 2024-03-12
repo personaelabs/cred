@@ -63,6 +63,17 @@ export async function GET(
     );
   }
 
+  if (!merkleTree.treeProtoBuf) {
+    return Response.json(
+      {
+        error: 'Merkle tree is empty',
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+
   const treeId = merkleTree.id;
 
   const treeIdBuff = Buffer.alloc(4);
