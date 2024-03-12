@@ -3,11 +3,10 @@ services:
   - type: worker
     name: cred-indexer
     plan: pro plus
-    runtime: rust
+    runtime: docker
     region: oregon
+    dockerfilePath: ./Dockerfile.indexer
     rootDir: ./
-    buildCommand: "cargo build --release --bin indexer-rs" 
-    startCommand: "cargo run --release --bin indexer-rs"
     buildFilter:
       paths:
         - packages/indexer-rs/**
@@ -27,7 +26,7 @@ services:
       - fromGroup: cred
     disk:
       name: db
-      mountPath: /db      
+      mountPath: /usr/src/app/db      
 
       
 databases:
