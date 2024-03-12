@@ -16,6 +16,7 @@ use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
 use merkle_tree_lib::tree::MerkleTree;
 use num_bigint::BigUint;
+use num_format::{Locale, ToFormattedString};
 use prost::Message;
 use rocksdb::{IteratorMode, ReadOptions, DB};
 use std::collections::HashMap;
@@ -322,7 +323,10 @@ pub async fn save_tree(
     let tree_protobuf = merkle_tree_proto::MerkleTree { layers };
     let tree_bytes = tree_protobuf.encode_to_vec();
 
-    println!("tree bytes: {}", tree_bytes.len());
+    info!(
+        "Tree protobuf: {}B",
+        tree_bytes.len().to_formatted_string(&Locale::en)
+    );
 
     // Check if the tree already exists for the given group and block number
     let statement = r#"
