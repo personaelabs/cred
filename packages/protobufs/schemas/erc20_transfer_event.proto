@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package erc20_transfer_event;
+
+message ERC20TransferEvent {
+    bytes from = 1;
+    bytes to = 2;
+    bytes value = 3;
+}
+

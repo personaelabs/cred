@@ -14,43 +14,17 @@ export async function GET(req: NextRequest) {
   const take = parseInt(req.nextUrl.searchParams.get('take') || '50000');
 
   const result = await prisma.$queryRaw<AddressToGroupsQueryResult[]>`
-    WITH large_enough_trees AS (
-      SELECT
-        "treeId"
-      FROM
-        "MerkleProof"
-      GROUP BY
-        "treeId"
-      HAVING
-        count(*) > 100
-    ),
-    static_trees AS (
-      SELECT
-        "MerkleTree".id
-      FROM
-        "MerkleTree"
-      LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
-    WHERE
-      "Group".TYPE = 'static'
-    )
     SELECT
-      "MerkleProof".address, ARRAY_AGG("Group".id) AS "groups"
+      address,
+      ARRAY_AGG("MerkleTree"."groupId") AS "groups"
     FROM
-      "MerkleProof"
-      LEFT JOIN "MerkleTree" ON "MerkleProof"."treeId" = "MerkleTree".id
-      LEFT JOIN "Group" ON "Group".id = "MerkleTree"."groupId"
-    WHERE
-      "MerkleTree".id IN(
-        SELECT
-          "treeId" FROM large_enough_trees)
-      OR "MerkleTree".id in(
-        SELECT
-          "id" FROM static_trees)
-        GROUP BY
-	"MerkleProof".address
-    OFFSET ${skip}
-    LIMIT ${take}
-  `;
+      "MerkleTreeLeaf"
+      LEFT JOIN "MerkleTree" ON "MerkleTreeLeaf"."treeId" = "MerkleTree".id
+    GROUP BY
+      address
+      OFFSET ${skip}
+      LIMIT ${take}
+    `;
 
   if (result.length === 0) {
     // Return a 204 No Content response if there are no results

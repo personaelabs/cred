@@ -49,26 +49,25 @@ model MerkleTree {
   Group          Group            @relation(fields: [groupId], references: [id])
   groupId        Int
   blockNumber    BigInt
+  treeProtoBuf   Bytes?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  merkleProofs   MerkleProof[]
   FidAttestation FidAttestation[]
+  MerkleTreeLeaf MerkleTreeLeaf[]
 
-  @@unique([merkleRoot, groupId, blockNumber])
+  @@unique([groupId, blockNumber])
 }
 
-model MerkleProof {
+model MerkleTreeLeaf {
+  id         Int        @id @default(autoincrement())
+  address    String
+  treeId     Int
+  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  address     String
-  path        String[]
-  pathIndices Int[]
-
-  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
-  treeId     Int
-
-  @@id([treeId, address])
+  @@unique([treeId, address])
 }
 
 model Group {
