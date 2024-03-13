@@ -9,6 +9,7 @@ use log::error;
 use rocksdb::{Options, DB};
 use std::env;
 use std::sync::Arc;
+use tokio::sync::Semaphore;
 use tokio_postgres::NoTls;
 
 #[tokio::main]
@@ -68,13 +69,17 @@ async fn main() {
 
     let mut indexing_jobs = vec![];
 
+    let indexing_permits = Arc::new(Semaphore::new(5));
+
     for contract in contracts.clone() {
         let rocksdb_client = rocksdb_client.clone();
         let eth_client = eth_client.clone();
         let pg_client = pg_client.clone();
+        let indexing_permits = indexing_permits.clone();
 
         let job = tokio::spawn(async move {
             index_groups_for_contract(
+                indexing_permits,
                 pg_client.clone(),
                 rocksdb_client.clone(),
                 eth_client.clone(),

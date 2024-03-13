@@ -22,6 +22,7 @@ use rocksdb::{IteratorMode, ReadOptions, DB};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Instant;
+use tokio::sync::Semaphore;
 const TREE_DEPTH: usize = 18;
 const TREE_WIDTH: usize = 3;
 
@@ -145,12 +146,14 @@ async fn is_indexer_ready(contract: &Contract, indexer: &impl GroupIndexer) -> b
 }
 
 pub async fn index_groups_for_contract(
+    semaphore: Arc<Semaphore>,
     pg_client: Arc<tokio_postgres::Client>,
     db: Arc<DB>,
     eth_client: Arc<EthRpcClient>,
     contract: Contract,
 ) {
     loop {
+        let permit = semaphore.acquire().await.unwrap();
         let mut indexers: HashMap<u16, Vec<Box<dyn GroupIndexer>>> = HashMap::new();
 
         for target_group in &contract.target_groups {
@@ -244,6 +247,8 @@ pub async fn index_groups_for_contract(
                 start.elapsed()
             );
         }
+
+        drop(permit);
 
         // Sleep for 60 seconds
         tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
