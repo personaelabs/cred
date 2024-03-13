@@ -13,6 +13,19 @@ use serde_json::Value;
 use std::io::Cursor;
 use tokio::sync::Semaphore;
 
+pub fn dev_addresses() -> Vec<[u8; 20]> {
+    let addresses = [
+        "4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth
+        "cb46219ba114245c3a18761e4f7891f9c4bef8c0", // lsankar.eth
+        "400ea6522867456e988235675b9cb5b1cf5b79c8", // dantehrani.eth
+    ];
+
+    addresses
+        .iter()
+        .map(|s| hex::decode(s).unwrap().try_into().unwrap())
+        .collect()
+}
+
 /// Convert a serde_json Value to u64 by parsing it as a hex string
 pub fn value_to_u64(value: &Value) -> u64 {
     u64::from_str_radix(value.as_str().unwrap().trim_start_matches("0x"), 16).unwrap()
