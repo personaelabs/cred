@@ -57,7 +57,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
     // Get all contracts from the storage
     let result = pg_clinet
         .query(
-            r#"SELECT "id", "address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock" FROM "Contract" where "type" = 'ERC721' LIMIT 3"#,
+            r#"SELECT "id", "address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
             &[],
         )
         .await
