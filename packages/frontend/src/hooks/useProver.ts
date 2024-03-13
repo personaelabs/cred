@@ -64,14 +64,16 @@ const getMerkleProof = (merkleTree: MerkleTree, address: Hex) => {
   const addressBuffer = fromHexString(address, 20);
 
   // Find the leaf index
-  let leafIndex = leaves.findIndex(leaf => {
+  const leafNode = leaves.find(leaf => {
     const leafBytes = leaf.getNode_asU8();
     return addressBuffer.equals(Buffer.from(leafBytes));
   });
 
-  if (leafIndex === -1) {
+  if (!leafNode) {
     return null;
   }
+
+  let leafIndex = leafNode.getIndex();
 
   // Get the merkle proof
   const siblings = [];

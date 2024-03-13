@@ -300,18 +300,21 @@ pub async fn save_tree(
         .map(|(layer_i, layer): (usize, &Vec<Fq>)| {
             let nodes_proto = layer
                 .iter()
-                .filter(|fe| **fe != precomputed[layer_i])
                 .enumerate()
-                .map(|(i, fe)| {
+                .flat_map(|(i, fe)| {
                     let mut node = fe.into_bigint().to_bytes_be();
 
-                    if layer_i == 0 {
-                        node = node[12..].to_vec();
-                    }
+                    if *fe == precomputed[layer_i] {
+                        None
+                    } else {
+                        if layer_i == 0 {
+                            node = node[12..].to_vec();
+                        }
 
-                    merkle_tree_proto::MerkleTreeNode {
-                        node,
-                        index: i as u32,
+                        Some(merkle_tree_proto::MerkleTreeNode {
+                            node,
+                            index: i as u32,
+                        })
                     }
                 })
                 .collect::<Vec<merkle_tree_proto::MerkleTreeNode>>();
