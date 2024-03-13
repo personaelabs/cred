@@ -59,7 +59,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             id: 0,
             address: "0x60E4d786628Fea6478F785A6d7e704777c86a7c6".to_string(),
             symbol: "MAYC".to_string(),
-            name: "Mutant Ape Yacht Club:".to_string(),
+            name: "Mutant Ape Yacht Club".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13117018,
             target_groups: vec!["allHolders".to_string()],
