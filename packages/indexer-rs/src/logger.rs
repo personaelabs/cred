@@ -3,6 +3,7 @@ use crate::{
     rocksdb_key::{KeyType, RocksDbKey},
 };
 use core::panic;
+use log::error;
 use num_format::{Locale, ToFormattedString};
 use rocksdb::DB;
 use std::{collections::HashMap, sync::Arc};
@@ -70,16 +71,16 @@ pub fn count_synched_logs(contracts: Vec<Contract>, rocksdb_conn: Arc<DB>) {
     sorted_synched_logs_counts.sort_by(|a, b| b.1 .0.cmp(&a.1 .0));
 
     for (contract, (count, latest_block)) in sorted_synched_logs_counts {
-        let contract_symbol = contracts
-            .iter()
-            .find(|c| c.id == contract)
-            .unwrap()
-            .symbol
-            .to_uppercase();
+        let contract_symbol = contracts.iter().find(|c| c.id == contract);
+
+        if contract_symbol.is_none() {
+            error!("Contract not found for id: {}", contract);
+            continue;
+        }
 
         println!(
             "${}: {} ({})",
-            contract_symbol,
+            contract_symbol.unwrap().symbol.to_uppercase(),
             count.to_formatted_string(&Locale::en),
             latest_block
         );
