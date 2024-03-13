@@ -145,8 +145,6 @@ const useProver = () => {
 
       const merkleProof = getMerkleProof(merkleTree, address);
 
-      console.log('merkleProof', merkleProof);
-
       if (!merkleProof) {
         throw new Error('Merkle proof not found');
       }
