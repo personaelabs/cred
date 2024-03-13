@@ -2,34 +2,21 @@ use indexer_rs::contract::get_contracts;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::logger::count_synched_logs;
+use indexer_rs::postgres::init_postgres;
 use indexer_rs::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use indexer_rs::rocksdb_key::ERC721_TRANSFER_EVENT_ID;
+use indexer_rs::utils::dotenv_config;
 use indexer_rs::utils::is_event_logs_ready;
 use indexer_rs::ROCKSDB_PATH;
-use log::error;
 use rocksdb::Options;
 use rocksdb::DB;
-use std::env;
 use std::sync::Arc;
-use tokio_postgres::NoTls;
 
 #[tokio::main]
 async fn main() -> Result<(), tokio_postgres::Error> {
-    if env::var("RENDER").is_err() {
-        dotenv::from_filename(format!("{}/.env", env::var("CARGO_MANIFEST_DIR").unwrap())).ok();
-        dotenv::dotenv().ok();
-    }
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    dotenv_config();
 
-    // Connect to the database.
-    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
-    // The connection object performs the actual communication with the database,
-    // so spawn it off to run on its own.
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            error!("connection error: {}", e);
-        }
-    });
+    let client = init_postgres().await;
 
     // Get contracts from the database
     let contracts = get_contracts(&client).await;

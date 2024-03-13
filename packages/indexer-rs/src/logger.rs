@@ -8,38 +8,6 @@ use num_format::{Locale, ToFormattedString};
 use rocksdb::DB;
 use std::{collections::HashMap, sync::Arc};
 
-pub fn count_synced_chunks(rocksdb_conn: Arc<DB>) -> usize {
-    let start_key = RocksDbKey {
-        key_type: KeyType::SyncLog,
-        event_id: 0,
-        contract_id: 0,
-        block_num: None,
-        tx_index: None,
-        log_index: None,
-        chunk_num: Some(0),
-    };
-
-    let iterator = rocksdb_conn.iterator(rocksdb::IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
-
-    let mut count = 0;
-    for item in iterator {
-        let (key_bytes, _value) = item.unwrap();
-
-        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
-
-        if key.key_type != KeyType::SyncLog {
-            panic!("Invalid key type");
-        }
-
-        count += 1;
-    }
-
-    count
-}
-
 pub fn count_synched_logs(contracts: Vec<Contract>, rocksdb_conn: Arc<DB>) {
     let mut synched_logs_counts = HashMap::<u16, (usize, usize)>::new();
 

@@ -1,39 +1,18 @@
-use std::env;
-
 use indexer_rs::{
     contract::{upsert_contract, Contract, ContractType},
     eth_rpc::Chain,
+    postgres::init_postgres,
+    utils::{dotenv_config, is_prod},
 };
-use log::error;
-use tokio_postgres::NoTls;
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
-
-    // The "RENDER" environment variable is set in the render environment
-    let is_render = env::var("RENDER").is_ok();
-    if !is_render {
-        // Load .env file in development
-        dotenv::from_filename(format!("{}/.env", env::var("CARGO_MANIFEST_DIR").unwrap())).ok();
-        dotenv::dotenv().ok();
-    }
-
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
-    let is_pull_request = env::var("IS_PULL_REQUEST").is_ok_and(|val| val == "true");
+    dotenv_config();
 
     // Only run this script in development or in a pull request (i.e. preview environment)
-    if is_pull_request || !is_render {
+    if !is_prod() {
         // Connect to the database.
-        let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await.unwrap();
-        // The connection object performs the actual communication with the database,
-        // so spawn it off to run on its own.
-        tokio::spawn(async move {
-            if let Err(e) = connection.await {
-                error!("connection error: {}", e);
-            }
-        });
+        let client = init_postgres().await;
 
         let contracts = [
             Contract {
