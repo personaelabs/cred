@@ -1,6 +1,6 @@
 use crate::contract::{Contract, ContractType};
 use crate::eth_rpc::EthRpcClient;
-use crate::event::event_log_to_key_value;
+use crate::event::{event_log_to_key_value, parse_erc20_event_log, parse_erc721_event_log};
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
 use colored::*;
 use core::panic;
@@ -24,6 +24,7 @@ pub struct LogSyncEngine {
     contract: Contract,
     event_id: u16,
     rocksdb_client: Arc<rocksdb::DB>,
+    log_parser: fn(&Value) -> Vec<u8>,
 }
 
 impl LogSyncEngine {
@@ -39,6 +40,13 @@ impl LogSyncEngine {
             _ => panic!("Invalid contract type"),
         };
 
+        // Select the log parser based on the contract type
+        let log_parser = match contract.contract_type {
+            ContractType::ERC20 => parse_erc20_event_log,
+            ContractType::ERC721 => parse_erc721_event_log,
+            _ => panic!("Invalid contract type"),
+        };
+
         let semaphore = Arc::new(Semaphore::new(30));
 
         Self {
@@ -47,6 +55,7 @@ impl LogSyncEngine {
             contract,
             event_id,
             rocksdb_client,
+            log_parser,
         }
     }
 
@@ -97,7 +106,13 @@ impl LogSyncEngine {
             .par_iter()
             .flat_map(|logs_batch| {
                 logs_batch.par_iter().map(|log| {
-                    let (key, event) = event_log_to_key_value(log, self.event_id, self.contract.id);
+                    let (key, event) = event_log_to_key_value(
+                        log,
+                        self.event_id,
+                        self.contract.id,
+                        self.log_parser,
+                    );
+
                     (key.to_bytes().to_vec(), event)
                 })
             })

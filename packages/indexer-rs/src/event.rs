@@ -1,12 +1,13 @@
 use crate::{
     erc20_transfer_event, erc721_transfer_event,
-    rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID},
+    rocksdb_key::{KeyType, RocksDbKey},
     utils::{value_to_u32, value_to_u64},
 };
 use prost::Message;
 use serde_json::Value;
 
-fn parse_erc20_event_log(log: &Value) -> Vec<u8> {
+/// Parse JSON log to ERC20 transfer event data and encode it to Protocol Buffer bytes
+pub fn parse_erc20_event_log(log: &Value) -> Vec<u8> {
     let topics = &log["topics"].as_array().unwrap();
 
     let from = &topics[1].as_str().unwrap();
@@ -25,7 +26,8 @@ fn parse_erc20_event_log(log: &Value) -> Vec<u8> {
     value
 }
 
-fn parse_erc721_event_log(log: &Value) -> Vec<u8> {
+/// Parse JSON log to ERC721 transfer event data and encode it to Protocol Buffer bytes
+pub fn parse_erc721_event_log(log: &Value) -> Vec<u8> {
     let topics = &log["topics"].as_array().unwrap();
 
     let from = &topics[1].as_str().unwrap();
@@ -49,6 +51,7 @@ pub fn event_log_to_key_value(
     log: &Value,
     event_id: u16,
     contract_id: u16,
+    parser: fn(&Value) -> Vec<u8>,
 ) -> (RocksDbKey, Vec<u8>) {
     let log_index = value_to_u32(&log["logIndex"]);
     let tx_index = value_to_u32(&log["transactionIndex"]);
@@ -64,15 +67,5 @@ pub fn event_log_to_key_value(
         chunk_num: None,
     };
 
-    match event_id {
-        ERC20_TRANSFER_EVENT_ID => {
-            let transfer_event = parse_erc20_event_log(log);
-            (key, transfer_event)
-        }
-        ERC721_TRANSFER_EVENT_ID => {
-            let transfer_event = parse_erc721_event_log(log);
-            (key, transfer_event)
-        }
-        _ => panic!("Unknown event id: {}", event_id),
-    }
+    (key, parser(log))
 }
