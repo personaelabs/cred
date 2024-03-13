@@ -10,8 +10,31 @@ use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
-use std::io::Cursor;
+use std::{env, io::Cursor};
 use tokio::sync::Semaphore;
+
+/// Return true if the environment is production
+pub fn is_prod() -> bool {
+    let is_render = env::var("RENDER").is_ok_and(|var| var == "true");
+    let is_pull_request = env::var("IS_PULL_REQUEST").is_ok_and(|val| val == "true");
+
+    is_render && !is_pull_request
+}
+
+/// Load environment variables from .env file in development environment
+pub fn dotenv_config() {
+    env_logger::init();
+
+    let is_render = env::var("RENDER").is_ok();
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR");
+    if !is_render && manifest_dir.is_ok() {
+        // Call dotenv in non-render environment
+        dotenv::from_filename(format!("{}/.env", manifest_dir.unwrap())).ok();
+        dotenv::dotenv().ok();
+    } else {
+        dotenv::dotenv().ok();
+    }
+}
 
 /// Convert a serde_json Value to u64 by parsing it as a hex string
 pub fn value_to_u64(value: &Value) -> u64 {

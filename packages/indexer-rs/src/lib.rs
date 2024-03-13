@@ -6,6 +6,7 @@ pub mod eth_rpc;
 pub mod event;
 pub mod log_sync_engine;
 pub mod logger;
+pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
