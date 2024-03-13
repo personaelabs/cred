@@ -85,6 +85,7 @@ model Group {
 enum ContractType {
   ERC20
   ERC721
+  Punk
   Other
 }
 

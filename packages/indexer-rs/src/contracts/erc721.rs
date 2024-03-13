@@ -7,6 +7,16 @@ pub fn erc721_contracts() -> Vec<Contract> {
     vec![
         Contract {
             id: 0,
+            address: "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb".to_string(),
+            symbol: "PUNK".to_string(),
+            name: "CRYPTOPUNKS".to_string(),
+            chain: Chain::Mainnet,
+            deployed_block: 3914495,
+            target_groups: vec!["allHolders".to_string()],
+            contract_type: ContractType::Punk,
+        },
+        Contract {
+            id: 0,
             address: "0x5Af0D9827E0c53E4799BB226655A1de152A425a5".to_string(),
             symbol: "MIL".to_string(),
             name: "Milady".to_string(),

@@ -6,6 +6,7 @@ use postgres_types::{FromSql, ToSql};
 pub enum ContractType {
     ERC20,
     ERC721,
+    Punk,
     Other,
 }
 

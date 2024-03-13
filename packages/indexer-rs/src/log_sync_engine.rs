@@ -1,6 +1,9 @@
 use crate::contract::{Contract, ContractType};
 use crate::eth_rpc::EthRpcClient;
-use crate::event::{event_log_to_key_value, parse_erc20_event_log, parse_erc721_event_log};
+use crate::event::{
+    event_log_to_key_value, parse_erc20_event_log, parse_erc721_event_log,
+    parse_punk_transfer_event_log,
+};
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
 use colored::*;
 use core::panic;
@@ -37,6 +40,7 @@ impl LogSyncEngine {
         let event_id = match contract.contract_type {
             ContractType::ERC20 => ERC20_TRANSFER_EVENT_ID,
             ContractType::ERC721 => ERC721_TRANSFER_EVENT_ID,
+            ContractType::Punk => ERC721_TRANSFER_EVENT_ID,
             _ => panic!("Invalid contract type"),
         };
 
@@ -44,6 +48,7 @@ impl LogSyncEngine {
         let log_parser = match contract.contract_type {
             ContractType::ERC20 => parse_erc20_event_log,
             ContractType::ERC721 => parse_erc721_event_log,
+            ContractType::Punk => parse_punk_transfer_event_log,
             _ => panic!("Invalid contract type"),
         };
 

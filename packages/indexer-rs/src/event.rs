@@ -46,6 +46,27 @@ pub fn parse_erc721_event_log(log: &Value) -> Vec<u8> {
     value
 }
 
+/// Parse JSON log to Punk transfer event data and encode it to Protocol Buffer bytes
+pub fn parse_punk_transfer_event_log(log: &Value) -> Vec<u8> {
+    let topics = &log["topics"].as_array().unwrap();
+
+    let from = &topics[1].as_str().unwrap();
+    let to = &topics[2].as_str().unwrap();
+
+    let from = hex::decode(&from[from.len() - 40..]).unwrap();
+    let to = hex::decode(&to[to.len() - 40..]).unwrap();
+
+    let token_id = hex::decode(log["data"].as_str().unwrap().trim_start_matches("0x")).unwrap();
+
+    // We use the same struct as ERC721 transfer event for Punk transfer event
+    let transfer_event = erc721_transfer_event::Erc721TransferEvent { from, to, token_id };
+
+    let mut value = Vec::new();
+    transfer_event.encode(&mut value).unwrap();
+
+    value
+}
+
 /// Parse JSON log to event data and rocksdb key so that it can be stored in the database.
 pub fn event_log_to_key_value(
     log: &Value,

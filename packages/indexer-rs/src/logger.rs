@@ -2,7 +2,6 @@ use crate::{
     contract::Contract,
     rocksdb_key::{KeyType, RocksDbKey},
 };
-use core::panic;
 use log::error;
 use num_format::{Locale, ToFormattedString};
 use rocksdb::DB;
