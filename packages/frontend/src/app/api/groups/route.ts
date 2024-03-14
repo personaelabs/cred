@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 const groupSelect = {
   id: true,
   displayName: true,
+  type: true,
 } satisfies Prisma.GroupSelect;
 
 export type GroupSelect = Prisma.GroupGetPayload<{
