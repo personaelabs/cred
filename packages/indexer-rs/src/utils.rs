@@ -11,7 +11,6 @@ use prost::Message;
 use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
 use std::{env, io::Cursor};
-use tokio::sync::Semaphore;
 
 pub fn dev_addresses() -> Vec<[u8; 20]> {
     let addresses = [
@@ -128,10 +127,7 @@ pub async fn is_event_logs_ready(
     event_id: u16,
     contract: &Contract,
 ) -> Result<bool, surf::Error> {
-    let semaphore = Semaphore::new(1);
-    let block_num = eth_client
-        .get_block_number(&semaphore, contract.chain)
-        .await?;
+    let block_num = eth_client.get_block_number(contract.chain).await?;
 
     let total_chunks = get_contract_total_chunks(block_num, contract);
 

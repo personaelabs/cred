@@ -8,6 +8,8 @@ use tokio::sync::Semaphore;
 
 const NUM_MAINNET_NODES: u32 = 10;
 
+pub static PERMITS: Semaphore = Semaphore::const_new(100);
+
 #[derive(Debug, Copy, Clone)]
 pub enum Chain {
     Mainnet,
@@ -73,16 +75,13 @@ impl EthRpcClient {
         }
     }
 
-    pub async fn get_block_number(
-        &self,
-        semaphore: &Semaphore,
-        chain: Chain,
-    ) -> Result<u64, surf::Error> {
+    pub async fn get_block_number(&self, chain: Chain) -> Result<u64, surf::Error> {
         let mut load_balancer = self.load_balancer.lock().await;
         let url = load_balancer.get_endpoint(chain).unwrap();
         drop(load_balancer);
 
-        let permit = semaphore.acquire().await.unwrap();
+        let permit = PERMITS.acquire().await.unwrap();
+
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
 
@@ -112,7 +111,6 @@ impl EthRpcClient {
 
     pub async fn get_logs_batch(
         &self,
-        semaphore: &Semaphore,
         chain: Chain,
         address: &str,
         event_signature: &str,
@@ -142,7 +140,7 @@ impl EthRpcClient {
             }));
         }
 
-        let permit = semaphore.acquire().await.unwrap();
+        let permit = PERMITS.acquire().await.unwrap();
 
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
