@@ -80,10 +80,10 @@ impl EthRpcClient {
         let url = load_balancer.get_endpoint(chain).unwrap();
         drop(load_balancer);
 
-        let permit = PERMITS.acquire().await.unwrap();
-
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
 
         let mut res = self
             .client
@@ -140,10 +140,10 @@ impl EthRpcClient {
             }));
         }
 
-        let permit = PERMITS.acquire().await.unwrap();
-
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
 
         let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
 
