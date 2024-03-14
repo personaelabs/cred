@@ -68,8 +68,8 @@ const WalletView: React.FC<WalletViewProps> = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-row items-center justify-center gap-[20px] w-[350px]">
-        <div className="text-center w-[200px]">{group.displayName}</div>
+      <div className="flex flex-row items-center justify-center gap-[20px] w-[450px]">
+        <div className="text-center w-[300px]">{group.displayName}</div>
         <div className="w-[85px] text-center">
           <Button
             onClick={() => addGroup(walletAddr, group.id)}
