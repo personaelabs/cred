@@ -11,13 +11,17 @@ pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
 pub mod utils;
+use postgres_types::{FromSql, ToSql};
 
 pub const ROCKSDB_PATH: &str = "./db";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[postgres(name = "GroupType")]
 pub enum GroupType {
-    Offchain,
-    Onchain,
+    Static,
+    EarlyHolder,
+    Whale,
+    AllHolders,
 }
 
 #[derive(Debug, Clone)]

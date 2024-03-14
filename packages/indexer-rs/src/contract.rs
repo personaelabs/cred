@@ -1,7 +1,7 @@
 use crate::eth_rpc::Chain;
 use postgres_types::{FromSql, ToSql};
 
-#[derive(Debug, Clone, FromSql, ToSql)]
+#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "ContractType")]
 pub enum ContractType {
     ERC20,

@@ -6,7 +6,7 @@ use indexer_rs::{
 struct Group {
     handle: &'static str,
     display_name: &'static str,
-    group_type: &'static str,
+    group_type: GroupType,
     addresses: Vec<&'static str>,
 }
 
@@ -19,7 +19,7 @@ async fn main() {
     let groups = vec![Group {
         handle: "creddd-team",
         display_name: "creddd team",
-        group_type: "static",
+        group_type: GroupType::Static,
         addresses: vec![
             "0x4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth
             "0xcb46219ba114245c3a18761e4f7891f9c4bef8c0", // lsankar.eth
@@ -65,7 +65,7 @@ async fn main() {
 
         save_tree(
             group_id,
-            GroupType::Offchain,
+            GroupType::Static,
             &client,
             addresses,
             block_number,

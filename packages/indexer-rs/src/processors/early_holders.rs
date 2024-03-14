@@ -72,7 +72,13 @@ impl GroupIndexer for EarlyHolderIndexer {
             self.contract.symbol.clone().to_uppercase()
         );
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "earlyHolder").await?;
+        let group_id = upsert_group(
+            &self.pg_client,
+            &display_name,
+            &handle,
+            GroupType::EarlyHolder,
+        )
+        .await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -94,7 +100,7 @@ impl GroupIndexer for EarlyHolderIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                GroupType::Onchain,
+                GroupType::EarlyHolder,
                 &self.pg_client,
                 early_holders,
                 block_number,

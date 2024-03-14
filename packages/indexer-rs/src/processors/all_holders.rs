@@ -61,7 +61,13 @@ impl GroupIndexer for AllHoldersIndexer {
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
         let handle = format!("{}-all-holders", self.contract.name.to_lowercase());
         let display_name = format!("{} historical holder", self.contract.name.clone());
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "allHolders").await?;
+        let group_id = upsert_group(
+            &self.pg_client,
+            &display_name,
+            &handle,
+            GroupType::AllHolders,
+        )
+        .await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -71,7 +77,7 @@ impl GroupIndexer for AllHoldersIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                GroupType::Onchain,
+                GroupType::AllHolders,
                 &self.pg_client,
                 self.unique_holders.clone().into_iter().collect(),
                 block_number,

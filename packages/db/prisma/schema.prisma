@@ -71,10 +71,11 @@ model MerkleTreeLeaf {
 }
 
 model Group {
-  id          Int     @id @default(autoincrement())
-  handle      String  @unique
+  id          Int        @id @default(autoincrement())
+  handle      String     @unique
   displayName String
   type        String?
+  typeId      GroupType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,6 +88,13 @@ enum ContractType {
   ERC721
   Punk
   Other
+}
+
+enum GroupType {
+  Static
+  EarlyHolder
+  Whale
+  AllHolders
 }
 
 model Contract {
