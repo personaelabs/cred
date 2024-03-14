@@ -3,6 +3,7 @@ use indexer_rs::{
     eth_rpc::Chain,
     postgres::init_postgres,
     utils::{dotenv_config, is_prod},
+    GroupType,
 };
 
 #[tokio::main]
@@ -22,7 +23,7 @@ async fn main() {
                 symbol: "pika".to_string(),
                 name: "Pikaboss".to_string(),
                 deployed_block: 16628745,
-                target_groups: vec!["earlyHolder".to_string(), "whale".to_string()],
+                target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
                 contract_type: ContractType::ERC20,
             },
             Contract {
@@ -32,7 +33,7 @@ async fn main() {
                 symbol: "KIBSHI".to_string(),
                 name: "KiboShib".to_string(),
                 deployed_block: 16140853,
-                target_groups: vec!["earlyHolder".to_string(), "whale".to_string()],
+                target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
                 contract_type: ContractType::ERC20,
             },
             Contract {
@@ -42,7 +43,7 @@ async fn main() {
                 name: "Milady".to_string(),
                 chain: Chain::Mainnet,
                 deployed_block: 13090020,
-                target_groups: vec!["allHolders".to_string()],
+                target_groups: vec![GroupType::AllHolders],
                 contract_type: ContractType::ERC721,
             },
         ];

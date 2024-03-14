@@ -98,16 +98,17 @@ enum GroupType {
 }
 
 model Contract {
-  id            Int          @id @default(autoincrement())
-  address       String
-  name          String
-  type          ContractType
-  deployedBlock BigInt
-  symbol        String?
-  targetGroups  String[]
-  chain         String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id             Int          @id @default(autoincrement())
+  address        String
+  name           String
+  type           ContractType
+  deployedBlock  BigInt
+  symbol         String?
+  targetGroups   String[]
+  targetGroupIds GroupType[]
+  chain          String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([address, chain])
 }

@@ -159,8 +159,8 @@ pub async fn index_groups_for_contract(
         let mut indexers: HashMap<u16, Vec<Box<dyn GroupIndexer>>> = HashMap::new();
 
         for target_group in &contract.target_groups {
-            match target_group.as_str() {
-                "earlyHolder" => {
+            match target_group {
+                GroupType::EarlyHolder => {
                     let early_holder_indexer = EarlyHolderIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -172,7 +172,7 @@ pub async fn index_groups_for_contract(
                         erc20_indexers.push(Box::new(early_holder_indexer));
                     }
                 }
-                "whale" => {
+                GroupType::Whale => {
                     let whale_indexer = WhaleIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -184,7 +184,7 @@ pub async fn index_groups_for_contract(
                         erc20_indexers.push(Box::new(whale_indexer));
                     }
                 }
-                "allHolders" => {
+                GroupType::AllHolders => {
                     let all_holder_indexer = AllHoldersIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -197,7 +197,7 @@ pub async fn index_groups_for_contract(
                     }
                 }
                 _ => {
-                    error!("Unknown target group {}", target_group);
+                    error!("Unknown target group {:?}", target_group);
                 }
             }
         }
