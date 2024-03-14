@@ -68,7 +68,7 @@ impl GroupIndexer for EarlyHolderIndexer {
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
         let handle = format!("early-holder-{}", self.contract.name.to_lowercase());
         let display_name = format!(
-            "Early {} holder",
+            "Early ${} holder",
             self.contract.symbol.clone().to_uppercase()
         );
 
