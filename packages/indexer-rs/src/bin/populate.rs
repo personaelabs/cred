@@ -1,5 +1,6 @@
 use indexer_rs::{
     contract::{upsert_contract, Contract, ContractType},
+    contracts::{erc20::erc20_contracts, erc721::erc721_contracts},
     eth_rpc::Chain,
     postgres::init_postgres,
     utils::{dotenv_config, is_prod},
@@ -10,11 +11,22 @@ use indexer_rs::{
 async fn main() {
     dotenv_config();
 
-    // Only run this script in development or in a pull request (i.e. preview environment)
-    if !is_prod() {
-        // Connect to the database.
-        let client = init_postgres().await;
+    // Connect to the database.
+    let client = init_postgres().await;
 
+    if is_prod() {
+        // Populate all contracts in production.
+
+        let mut contracts = vec![];
+
+        contracts.extend(erc721_contracts().iter().cloned());
+        contracts.extend(erc20_contracts().iter().cloned());
+
+        for contract in contracts {
+            upsert_contract(&client, &contract).await.unwrap();
+        }
+    } else {
+        // Only populate few small contracts in development and preview environments.
         let contracts = [
             Contract {
                 id: 0,
@@ -51,20 +63,5 @@ async fn main() {
         for contract in &contracts {
             upsert_contract(&client, contract).await.unwrap();
         }
-
-        /*
-        let group_id = upsert_group(
-            &client,
-            &"dev".to_string(),
-            &"dev".to_string(),
-            &"static".to_string(),
-        )
-        .await
-        .unwrap();
-
-        save_tree(group_id, &client, vec![], 0).await.unwrap();
-         */
-
-        // TODO: Upsert some dummy FID attestations
     }
 }
