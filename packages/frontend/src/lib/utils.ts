@@ -140,7 +140,7 @@ export const getCredddDescription = (
   groupType: string
 ): string | null => {
   switch (groupType) {
-    case 'all-holders': {
+    case 'allHolders': {
       const tokenName = groupHandle.replaceAll('historical holder', '').trim();
       return `This indicates that you held at least 1 of ${tokenName} at any point in time in the past.`;
     }
@@ -148,7 +148,7 @@ export const getCredddDescription = (
       const tokenName = groupHandle.replaceAll('whale', '').trim();
       return `This indicates that at some point in time you held >0.1% of the outstanding supply of $${tokenName}. `;
     }
-    case 'early-holder': {
+    case 'earlyHolder': {
       const tokenName = groupHandle
         .replaceAll('Early', '')
         .replaceAll('holder', '')

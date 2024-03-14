@@ -15,14 +15,12 @@ use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
 use std::time::Instant;
-use tokio::sync::Semaphore;
 
 pub const CHUNK_SIZE: u64 = 2000;
 const TRANSFER_EVENT_SIG: &str =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 pub struct LogSyncEngine {
-    semaphore: Arc<Semaphore>,
     eth_client: Arc<EthRpcClient>,
     contract: Contract,
     event_id: u16,
@@ -52,10 +50,7 @@ impl LogSyncEngine {
             _ => panic!("Invalid contract type"),
         };
 
-        let semaphore = Arc::new(Semaphore::new(30));
-
         Self {
-            semaphore,
             eth_client,
             contract,
             event_id,
@@ -187,7 +182,6 @@ impl LogSyncEngine {
             let result = self
                 .eth_client
                 .get_logs_batch(
-                    &self.semaphore,
                     self.contract.chain,
                     &self.contract.address,
                     TRANSFER_EVENT_SIG,
@@ -287,10 +281,7 @@ impl LogSyncEngine {
 
         // Start the background sync loop
         loop {
-            let latest_block = self
-                .eth_client
-                .get_block_number(&self.semaphore, self.contract.chain)
-                .await;
+            let latest_block = self.eth_client.get_block_number(self.contract.chain).await;
 
             if latest_block.is_err() {
                 error!(
