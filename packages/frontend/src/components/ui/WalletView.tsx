@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { mainnet } from 'viem/chains';
 import useProver from '@/hooks/useProver';
 import { GroupSelect } from '@/app/api/groups/route';
-import { captureFetchError, postJSON } from '@/lib/utils';
-import { Check, Loader2 } from 'lucide-react';
+import { captureFetchError, getCredddDescription, postJSON } from '@/lib/utils';
+import { Check, Info, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 // Assuming demoSignMessage is defined elsewhere and imported
 // import { demoSignMessage } from 'wherever-this-function-is-defined';
@@ -66,10 +67,26 @@ const WalletView: React.FC<WalletViewProps> = ({
     setIsAdding(false);
   };
 
+  const credddDescription = group.type
+    ? getCredddDescription(group.displayName, group.type)
+    : null;
+
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-row items-center justify-center gap-[20px] w-[350px]">
-        <div className="text-center w-[200px]">{group.displayName}</div>
+      <div className="flex flex-row items-center justify-center gap-[20px] w-[450px]">
+        <div className="flex flex-row items-center">
+          <div className="text-center w-[300px]">{group.displayName}</div>
+          {credddDescription ? (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger>
+                <Info className="w-4 h-4 ml-2"></Info>
+              </TooltipTrigger>
+              <TooltipContent>{credddDescription}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <></>
+          )}
+        </div>
         <div className="w-[85px] text-center">
           <Button
             onClick={() => addGroup(walletAddr, group.id)}

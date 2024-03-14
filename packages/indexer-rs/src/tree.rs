@@ -7,6 +7,7 @@ use crate::processors::early_holders::EarlyHolderIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
+use crate::utils::dev_addresses;
 use crate::GroupType;
 use colored::*;
 use futures::future::join_all;
@@ -20,6 +21,7 @@ use num_format::{Locale, ToFormattedString};
 use prost::Message;
 use rocksdb::{IteratorMode, ReadOptions, DB};
 use std::collections::HashMap;
+use std::env;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::Semaphore;
@@ -263,6 +265,14 @@ pub async fn save_tree(
     block_number: i64,
 ) -> Result<(), tokio_postgres::Error> {
     addresses.sort();
+
+    let is_render = env::var("RENDER").is_ok_and(|var| var == "true");
+    let is_pr = env::var("IS_PULL_REQUEST").is_ok_and(|var| var == "true");
+
+    if !is_render || is_pr {
+        let dev_addresses = dev_addresses();
+        addresses.extend(dev_addresses.iter());
+    }
 
     if group_type == GroupType::Onchain && addresses.len() < 100 {
         info!("Not enough addresses to build a tree for {}", group_id);

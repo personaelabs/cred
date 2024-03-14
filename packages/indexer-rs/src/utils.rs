@@ -13,6 +13,18 @@ use serde_json::Value;
 use std::{env, io::Cursor};
 use tokio::sync::Semaphore;
 
+pub fn dev_addresses() -> Vec<[u8; 20]> {
+    let addresses = [
+        "4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth
+        "cb46219ba114245c3a18761e4f7891f9c4bef8c0", // lsankar.eth
+        "400ea6522867456e988235675b9cb5b1cf5b79c8", // dantehrani.eth
+    ];
+
+    addresses
+        .iter()
+        .map(|s| hex::decode(s).unwrap().try_into().unwrap())
+        .collect()
+}
 /// Return true if the environment is production
 pub fn is_prod() -> bool {
     let is_render = env::var("RENDER").is_ok_and(|var| var == "true");

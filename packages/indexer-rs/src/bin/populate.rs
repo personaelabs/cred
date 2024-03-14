@@ -35,6 +35,16 @@ async fn main() {
                 target_groups: vec!["earlyHolder".to_string(), "whale".to_string()],
                 contract_type: ContractType::ERC20,
             },
+            Contract {
+                id: 0,
+                address: "0x5Af0D9827E0c53E4799BB226655A1de152A425a5".to_string(),
+                symbol: "MIL".to_string(),
+                name: "Milady".to_string(),
+                chain: Chain::Mainnet,
+                deployed_block: 13090020,
+                target_groups: vec!["allHolders".to_string()],
+                contract_type: ContractType::ERC721,
+            },
         ];
 
         for contract in &contracts {

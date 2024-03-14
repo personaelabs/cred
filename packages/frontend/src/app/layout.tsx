@@ -6,6 +6,7 @@ import MobileFooter from '@/components/MobileFooter';
 import { Toaster } from '@/components/ui/sonner';
 import { UserProvider } from '@/context/UserContext';
 import DesktopFooter from '@/components/DesktopFooter';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
@@ -40,18 +41,20 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background overflow-y-hidden">
-        <UserProvider>
-          <AuthKitProvider config={config}>
-            <ThemeProvider attribute="class" defaultTheme="dark">
-              <Header></Header>
-              <div className="flex flex-row justify-center w-full">
-                <div className="w-full flex flex-col">{children}</div>
-              </div>
-              <MobileFooter></MobileFooter>
-              <DesktopFooter></DesktopFooter>
-            </ThemeProvider>
-          </AuthKitProvider>
-        </UserProvider>
+        <TooltipProvider>
+          <UserProvider>
+            <AuthKitProvider config={config}>
+              <ThemeProvider attribute="class" defaultTheme="dark">
+                <Header></Header>
+                <div className="flex flex-row justify-center w-full">
+                  <div className="w-full flex flex-col">{children}</div>
+                </div>
+                <MobileFooter></MobileFooter>
+                <DesktopFooter></DesktopFooter>
+              </ThemeProvider>
+            </AuthKitProvider>
+          </UserProvider>
+        </TooltipProvider>
         <Toaster richColors></Toaster>
       </body>
     </html>

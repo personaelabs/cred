@@ -132,6 +132,34 @@ export const captureFetchError = async (response: Response) => {
   Sentry.captureException(new Error(JSON.stringify(error)));
 };
 
+/**
+ * Returns a description of the creddd from the group type and handle
+ */
+export const getCredddDescription = (
+  groupHandle: string,
+  groupType: string
+): string | null => {
+  switch (groupType) {
+    case 'all-holders': {
+      const tokenName = groupHandle.replaceAll('historical holder', '').trim();
+      return `This indicates that you held at least 1 of ${tokenName} at any point in time in the past.`;
+    }
+    case 'whale': {
+      const tokenName = groupHandle.replaceAll('whale', '').trim();
+      return `This indicates that at some point in time you held >0.1% of the outstanding supply of $${tokenName}. `;
+    }
+    case 'early-holder': {
+      const tokenName = groupHandle
+        .replaceAll('Early', '')
+        .replaceAll('holder', '')
+        .trim();
+      return `This indicates that you were in the first 5% of addresses that ever traded, bought, or otherwise interacted with $${tokenName}.`;
+    }
+    default:
+      return '';
+  }
+};
+
 export const PRECOMPUTED_HASHES = [
   [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

@@ -59,7 +59,7 @@ impl GroupIndexer for WhaleIndexer {
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
         let handle = format!("whale-{}", self.contract.name.to_lowercase());
-        let display_name = format!("{} whale", self.contract.symbol.clone().to_uppercase());
+        let display_name = format!("${} whale", self.contract.symbol.clone().to_uppercase());
 
         let group_id = upsert_group(&self.pg_client, &display_name, &handle, "whale").await?;
         self.group_id = Some(group_id);

@@ -6,6 +6,7 @@ use postgres_types::{FromSql, ToSql};
 pub enum ContractType {
     ERC20,
     ERC721,
+    Punk,
     Other,
 }
 
@@ -38,7 +39,7 @@ pub async fn upsert_contract(
             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
             ON CONFLICT ("address", "chain") DO UPDATE SET "address" = $1, "type" = $2, "targetGroups" = $3, "name" = $4, "symbol" = $5, "chain" = $6, "deployedBlock" = $7"#,
             &[
-                &contract.address,
+                &contract.address.to_lowercase(),
                 &contract.contract_type,
                 &contract.target_groups,
                 &contract.name,
