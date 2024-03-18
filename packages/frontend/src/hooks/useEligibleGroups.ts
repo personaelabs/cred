@@ -16,13 +16,8 @@ import { MerkleTree } from '@/proto/merkle_tree_pb';
  * @param groupId The ID of the group
  * @returns The tree ID and the Merkle tree protobuf
  */
-const getMerkleTree = async (
-  groupId: number
-): Promise<{
-  treeId: number;
-  merkleTree: MerkleTree;
-}> => {
-  const response = await fetch(`/api/groups/${groupId}/merkle-tree`);
+const getMerkleTree = async (treeId: number): Promise<MerkleTree> => {
+  const response = await fetch(`/api/trees-protobufs/${treeId}`);
 
   if (!response.ok) {
     await captureFetchError(response);
@@ -31,14 +26,13 @@ const getMerkleTree = async (
 
   const responseBuf = await response.arrayBuffer();
 
-  const treeId = Buffer.from(responseBuf.slice(0, 4)).readUInt32BE();
   const merkleTreeBytes = responseBuf.slice(4, responseBuf.byteLength);
 
   const merkleTree = MerkleTree.deserializeBinary(
     new Uint8Array(merkleTreeBytes)
   );
 
-  return { treeId, merkleTree };
+  return merkleTree;
 };
 
 /**
@@ -126,13 +120,13 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
   const searchEligibleGroups = useCallback(async () => {
     // Search for the eligible groups once the addresses and groups are available
     if (addresses && addresses.length > 0 && merkleTrees) {
+      setEligibleGroups(null);
+
       // @ts-ignore
       const circuit = await import('circuit-web');
       circuit.init_panic_hook();
 
-      const _eligibleGroups = [];
-      // We use a set to track unique groups
-      const uniqueGroups = new Set<number>();
+      const bloomFilterMatched = [];
 
       for (const address of addresses) {
         for (const merkleTree of merkleTrees) {
@@ -161,33 +155,40 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
 
             if (isMember) {
               const group = merkleTree.Group;
-              // Get the merkle tree for the group
-              const treeProtoBuf = await getMerkleTree(group.id);
-
-              // Try getting the merkle proof for the address
-              const merkleProof = getMerkleProof(
-                treeProtoBuf.merkleTree,
-                address
-              );
-
-              if (merkleProof) {
-                if (!uniqueGroups.has(group.id)) {
-                  uniqueGroups.add(group.id);
-                  _eligibleGroups.push({
-                    ...group,
-                    address,
-                    merkleProof,
-                    treeId: merkleTree.id,
-                  });
-                }
-              } else {
-                // Bloom filter false positives
-                console.log('Bloom filter false positive');
-              }
+              bloomFilterMatched.push({
+                ...group,
+                address,
+                treeId: merkleTree.id,
+              });
             }
           }
         }
       }
+
+      const _eligibleGroups = (
+        await Promise.all(
+          Array.from(bloomFilterMatched).map(async matched => {
+            const treeProtoBuf = await getMerkleTree(matched.treeId);
+
+            // Try getting the merkle proof for the address
+            const merkleProof = getMerkleProof(treeProtoBuf, matched.address);
+
+            if (merkleProof === null) {
+              console.log('Bloom filter false positive');
+              return null;
+            }
+            return {
+              ...matched,
+              merkleProof,
+            };
+          })
+        )
+      )
+        .filter(eligibleGroup => eligibleGroup !== null)
+        // Filter out same group with different address
+        .filter(
+          (v, i, a) => a.findIndex(t => t?.id === v?.id) === i
+        ) as EligibleGroup[];
 
       setEligibleGroups(_eligibleGroups);
     }
