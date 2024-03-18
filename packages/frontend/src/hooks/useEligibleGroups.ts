@@ -125,7 +125,7 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
 
   const searchEligibleGroups = useCallback(async () => {
     // Search for the eligible groups once the addresses and groups are available
-    if (addresses && merkleTrees) {
+    if (addresses && addresses.length > 0 && merkleTrees) {
       // @ts-ignore
       const circuit = await import('circuit-web');
       circuit.init_panic_hook();
