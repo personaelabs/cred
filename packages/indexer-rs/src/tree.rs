@@ -367,8 +367,7 @@ pub async fn save_tree(
         return Ok(());
     }
 
-    let num_items = addresses.len();
-    let mut bloom = Bloom::new_for_fp_rate(num_items, BLOOM_FILTER_FP_RATE);
+    let mut bloom = Bloom::new_for_fp_rate(addresses.len(), BLOOM_FILTER_FP_RATE);
 
     let sip_keys = bloom
         .sip_keys()
