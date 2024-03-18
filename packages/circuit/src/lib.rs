@@ -194,7 +194,6 @@ pub fn get_sign_in_sig(creddd_proof: &[u8]) -> Vec<u8> {
 }
 
 #[wasm_bindgen]
-
 pub fn bloom_check(
     bytes: &[u8],
     bitmap_bits: u64,
@@ -202,40 +201,20 @@ pub fn bloom_check(
     sip_keys_bytes: &[u8],
     item: &[u8],
 ) -> bool {
-    let mut sip_keys = vec![];
+    let sip_keys = [
+        (
+            u64::from_be_bytes(sip_keys_bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(sip_keys_bytes[8..16].try_into().unwrap()),
+        ),
+        (
+            u64::from_be_bytes(sip_keys_bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(sip_keys_bytes[24..32].try_into().unwrap()),
+        ),
+    ];
 
-    web_sys::console::log_1(&JsValue::from_str(&bytes[0].to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&bitmap_bits.to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&k_num.to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&bytes.len().to_string()));
+    let bloom = Bloom::from_existing(bytes, bitmap_bits, k_num, sip_keys);
 
-    let sip_key_1 = (
-        u64::from_be_bytes(sip_keys_bytes[0..8].try_into().unwrap()),
-        u64::from_be_bytes(sip_keys_bytes[8..16].try_into().unwrap()),
-    );
-    sip_keys.push(sip_key_1);
-
-    let sip_key_2 = (
-        u64::from_be_bytes(sip_keys_bytes[16..24].try_into().unwrap()),
-        u64::from_be_bytes(sip_keys_bytes[24..32].try_into().unwrap()),
-    );
-    sip_keys.push(sip_key_2);
-
-    web_sys::console::log_1(&JsValue::from_str(&sip_key_1.0.to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&sip_key_1.1.to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&sip_key_2.0.to_string()));
-    web_sys::console::log_1(&JsValue::from_str(&sip_key_2.1.to_string()));
-
-    let bloom: Bloom<[u8; 20]> =
-        Bloom::from_existing(bytes, bitmap_bits, k_num, sip_keys.try_into().unwrap());
-
-    let check2 = bloom.check(&[
-        64, 14, 166, 82, 40, 103, 69, 110, 152, 130, 53, 103, 91, 156, 181, 177, 207, 91, 121, 200,
-    ]);
-
-    web_sys::console::log_1(&JsValue::from_bool(check2));
-
-    bloom.check(&item.try_into().unwrap())
+    bloom.check(item)
 }
 
 #[cfg(test)]

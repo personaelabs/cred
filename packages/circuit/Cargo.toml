@@ -17,8 +17,9 @@ num-bigint = "0.4.4"
 sapir = { git = "https://github.com/personaelabs/sapir", features = [
     "profiler",
 ], branch = "main" }
-wasm-bindgen = "0.2.87"
-bloomfilter = "1.0.13"
+wasm-bindgen = "0.2.92"
+bloomfilter = { git = "https://github.com/DanTehrani/rust-bloom-filter.git", rev = "a1a622518d4e2334ad2451c71355d7b12d7caa35" }
+hex = "0.4.3"
 
 [dev-dependencies]
 ethers = "2.0.10"

@@ -452,6 +452,9 @@ export function secp256k1_get_proofs(leaf_bytes, depth) {
   }
 }
 
+export const __wbg_now_077e852c2458b4d1 =
+  typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
+
 export function __wbindgen_string_new(arg0, arg1) {
   const ret = getStringFromWasm0(arg0, arg1);
   return addHeapObject(ret);
@@ -460,9 +463,6 @@ export function __wbindgen_string_new(arg0, arg1) {
 export function __wbindgen_object_drop_ref(arg0) {
   takeObject(arg0);
 }
-
-export const __wbg_now_077e852c2458b4d1 =
-  typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
 
 export function __wbg_log_79d3c56888567995(arg0) {
   console.log(getObject(arg0));

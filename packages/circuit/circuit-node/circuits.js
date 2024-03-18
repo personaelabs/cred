@@ -448,6 +448,9 @@ module.exports.secp256k1_get_proofs = function (leaf_bytes, depth) {
   }
 };
 
+module.exports.__wbg_now_077e852c2458b4d1 =
+  typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
+
 module.exports.__wbindgen_string_new = function (arg0, arg1) {
   const ret = getStringFromWasm0(arg0, arg1);
   return addHeapObject(ret);
@@ -456,9 +459,6 @@ module.exports.__wbindgen_string_new = function (arg0, arg1) {
 module.exports.__wbindgen_object_drop_ref = function (arg0) {
   takeObject(arg0);
 };
-
-module.exports.__wbg_now_077e852c2458b4d1 =
-  typeof Date.now == 'function' ? Date.now : notDefined('Date.now');
 
 module.exports.__wbg_log_79d3c56888567995 = function (arg0) {
   console.log(getObject(arg0));
