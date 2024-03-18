@@ -658,6 +658,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bloomfilter"
+version = "1.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b64d54e47a7f4fd723f082e8f11429f3df6ba8adaeca355a76556f9f0602bbcf"
+dependencies = [
+ "bit-vec",
+ "getrandom 0.2.12",
+ "siphasher 1.0.0",
+]
+
+[[package]]
 name = "bs58"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -816,6 +827,7 @@ dependencies = [
  "ark-secq256k1",
  "ark-serialize",
  "ark-std",
+ "bloomfilter",
  "ethers",
  "num-bigint",
  "sapir",
@@ -2380,6 +2392,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "backoff",
+ "bloomfilter",
  "bytes 1.5.0",
  "colored",
  "dotenv",
@@ -2746,7 +2759,7 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 [[package]]
 name = "merkle-tree"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/merkle-tree?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
+source = "git+https://github.com/personaelabs/merkle-tree.git?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
 dependencies = [
  "ark-ff",
  "ark-secp256k1",
@@ -3177,7 +3190,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6796ad771acdc0123d2a88dc428b5e38ef24456743ddb1744ed628f9815c096"
 dependencies = [
- "siphasher",
+ "siphasher 0.3.11",
 ]
 
 [[package]]
@@ -3186,7 +3199,7 @@ version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90fcb95eef784c2ac79119d1dd819e162b5da872ce6f3c3abe1e8ca1c082f72b"
 dependencies = [
- "siphasher",
+ "siphasher 0.3.11",
 ]
 
 [[package]]
@@ -3292,7 +3305,7 @@ dependencies = [
 [[package]]
 name = "poseidon"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/poseidon?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
+source = "git+https://github.com/personaelabs/poseidon.git?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
 dependencies = [
  "ark-ff",
  "ark-serialize",
@@ -3915,7 +3928,7 @@ dependencies = [
 [[package]]
 name = "sapir"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/sapir?branch=main#512a958c067b3114ad7b21c0d1d725e99e11dbc0"
+source = "git+https://github.com/personaelabs/sapir?branch=main#ffc822ea03569fef22d9606b94bc548fc10b096d"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -3924,7 +3937,7 @@ dependencies = [
  "console_error_panic_hook",
  "getrandom 0.2.12",
  "hex",
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree?branch=main)",
+ "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree.git?branch=main)",
  "merlin",
  "num-bigint",
  "num-traits",
@@ -4210,6 +4223,12 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
+name = "siphasher"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54ac45299ccbd390721be55b412d41931911f654fa99e2cb8bfb57184b2061fe"
 
 [[package]]
 name = "slab"
