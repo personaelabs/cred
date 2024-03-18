@@ -161,6 +161,8 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
                 treeId: merkleTree.id,
               });
             }
+          } else {
+            console.log('Bloom filter not available');
           }
         }
       }
