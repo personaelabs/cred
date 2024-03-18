@@ -74,7 +74,7 @@ const WalletView: React.FC<WalletViewProps> = ({
         <div className="flex flex-row items-center">
           <div className="text-center w-[300px]">{group.displayName}</div>
           {credddDescription ? (
-            <Tooltip delayDuration={0}>
+            <Tooltip delayDuration={200}>
               <TooltipTrigger>
                 <Info className="w-4 h-4 ml-2"></Info>
               </TooltipTrigger>
