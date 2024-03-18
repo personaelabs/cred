@@ -256,7 +256,7 @@ pub async fn index_groups_for_contract(
         drop(permit);
 
         // Sleep for 60 seconds
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
     }
 }
 
