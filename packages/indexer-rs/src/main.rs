@@ -16,8 +16,6 @@ async fn main() {
 
     let pg_client = init_postgres().await;
     let contracts = get_contracts(&pg_client).await;
-    let eth_client = Arc::new(EthRpcClient::new());
-    /*
 
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
@@ -41,11 +39,6 @@ async fn main() {
 
         sync_jobs.push(job);
     }
-     */
-
-    let rocksdb_options = Options::default();
-    let rocksdb_client =
-        Arc::new(DB::open_for_read_only(&rocksdb_options, ROCKSDB_PATH, false).unwrap());
 
     let mut indexing_jobs = vec![];
 
@@ -72,6 +65,5 @@ async fn main() {
     }
 
     // Run the sync and indexing jobs concurrently
-    // join!(join_all(sync_jobs), join_all(indexing_jobs));
-    join_all(indexing_jobs).await;
+    join!(join_all(sync_jobs), join_all(indexing_jobs));
 }
