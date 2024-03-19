@@ -1,4 +1,4 @@
-use crate::{eth_rpc::Chain, GroupType};
+use crate::{eth_rpc::Chain, BlockNum, ContractId, GroupType};
 use postgres_types::{FromSql, ToSql};
 
 #[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
@@ -12,14 +12,14 @@ pub enum ContractType {
 
 #[derive(Debug, Clone)]
 pub struct Contract {
-    pub id: u16,
+    pub id: ContractId,
     pub address: String,
     pub chain: Chain,
     pub contract_type: ContractType,
     pub target_groups: Vec<GroupType>,
     pub name: String,
     pub symbol: String,
-    pub deployed_block: u64,
+    pub deployed_block: BlockNum,
 }
 
 pub async fn upsert_contract(
@@ -86,7 +86,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             };
 
             Contract {
-                id: contract_id as u16,
+                id: contract_id as ContractId,
                 address: contract_address,
                 chain,
                 name: name.clone(),

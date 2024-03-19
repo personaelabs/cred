@@ -97,7 +97,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "trump".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x761d38e5ddf6ccf6cf7c55759d5210750b5d60f3".to_string(),
             name: "Dogelon Mars".to_string(),
@@ -107,7 +107,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "elon".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x12970e6868f88f6557b76120662c1b3e50a646bf".to_string(),
             name: "Milady Meme Coin".to_string(),
@@ -117,7 +117,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "ladys".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x72e4f9f808c49a2a61de9c5896298920dc4eeea9".to_string(),
             name: "HarryPotterObamaSonic10Inu (ETH)".to_string(),
@@ -127,7 +127,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "bitcoin".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xc5fb36dd2fb59d3b98deff88425a3f425ee469ed".to_string(),
             name: "Dejitaru Tsuka".to_string(),
@@ -137,7 +137,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "tsuka".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x27c70cd1946795b66be9d954418546998b546634".to_string(),
             name: "Doge Killer".to_string(),
@@ -147,7 +147,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "leash".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xbaac2b4491727d78d2b78815144570b9f2fe8899".to_string(),
             name: "The Doge NFT".to_string(),
@@ -157,7 +157,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "dog".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xa2b4c0af19cc16a6cfacce81f192b024d625817d".to_string(),
             name: "Kishu Inu".to_string(),
@@ -167,7 +167,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "kishu".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xa35923162c49cf95e6bf26623385eb431ad920d3".to_string(),
             name: "Turbo".to_string(),
@@ -177,7 +177,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "turbo".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x7f792db54b0e580cdc755178443f0430cf799aca".to_string(),
             name: "Volt Inu".to_string(),
@@ -187,7 +187,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "volt".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x5026f006b85729a8b14553fae6af249ad16c9aab".to_string(),
             name: "Wojak".to_string(),
@@ -197,7 +197,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "wojak".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xba386a4ca26b85fd057ab1ef86e3dc7bdeb5ce70".to_string(),
             name: "Jesus Coin".to_string(),
@@ -207,7 +207,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "jesus".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x562e362876c8aee4744fc2c6aac8394c312d215d".to_string(),
             name: "Optimus AI".to_string(),
@@ -217,7 +217,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "opti".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x43d7e65b8ff49698d9550a7f315c87e67344fb59".to_string(),
             name: "Shiba Saga".to_string(),
@@ -227,7 +227,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "shia".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x9e20461bc2c4c980f62f1b279d71734207a6a356".to_string(),
             name: "OmniCat".to_string(),
@@ -237,7 +237,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "omni".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x7d8146cf21e8d7cbe46054e01588207b51198729".to_string(),
             name: "BOB Token".to_string(),
@@ -247,7 +247,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "bob".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xa71d0588eaf47f12b13cf8ec750430d21df04974".to_string(),
             name: "Shiba Predator".to_string(),
@@ -257,7 +257,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "qom".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x6bc40d4099f9057b23af309c08d935b890d7adc0".to_string(),
             name: "SnailBrook".to_string(),
@@ -267,7 +267,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "snail".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x32b86b99441480a7e5bd3a26c124ec2373e3f015".to_string(),
             name: "Bad Idea AI".to_string(),
@@ -277,7 +277,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "bad".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xf05897cfe3ce9bbbfe0751cbe6b1b2c686848dcb".to_string(),
             name: "CateCoin".to_string(),
@@ -287,7 +287,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "cate".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xb62e45c3df611dce236a6ddc7a493d79f9dfadef".to_string(),
             name: "Wall Street Memes".to_string(),
@@ -297,7 +297,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "wsm".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x61a35258107563f6b6f102ae25490901c8760b12".to_string(),
             name: "Kitty Inu".to_string(),
@@ -307,7 +307,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "kitty".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xafcdd4f666c84fed1d8bd825aa762e3714f652c9".to_string(),
             name: "Vita Inu".to_string(),
@@ -317,7 +317,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "vinu".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xfad45e47083e4607302aa43c65fb3106f1cd7607".to_string(),
             name: "Hoge Finance".to_string(),
@@ -327,7 +327,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "hoge".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed".to_string(),
             name: "Degen".to_string(),
@@ -337,7 +337,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "degen".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x8ed97a637a790be1feff5e888d43629dc05408f6".to_string(),
             name: "Non-Playable Coin".to_string(),
@@ -347,7 +347,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "npc".to_string(),
         },
         Contract {
-            id: 30,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x4200000000000000000000000000000000000042".to_string(),
             name: "OP".to_string(),
@@ -357,7 +357,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "op".to_string(),
         },
         Contract {
-            id: 10,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xaaee1a9723aadb7afa2810263653a34ba2c21c7a".to_string(),
             name: "Mog Coin".to_string(),
@@ -367,7 +367,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "mog".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984".to_string(),
             name: "Uniswap".to_string(),
@@ -377,7 +377,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "uni".to_string(),
         },
         Contract {
-            id: 20,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x470c8950c0c3aa4b09654bc73b004615119a44b5".to_string(),
             name: "Kizuna".to_string(),
@@ -387,7 +387,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "kizuna".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2".to_string(),
             name: "MKR".to_string(),
@@ -397,7 +397,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "mkr".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xd8fa690304d2b2824d918c0c7376e2823704557a".to_string(),
             name: "SquidGrow".to_string(),
@@ -407,7 +407,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "squidgrow".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x49642110b712c1fd7261bc074105e9e44676c68f".to_string(),
             name: "DinoLFG".to_string(),
@@ -417,7 +417,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "dino".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x12b6893ce26ea6341919fe289212ef77e51688c8".to_string(),
             name: "Tamadoge".to_string(),
@@ -427,7 +427,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "tama".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xdfdb7f72c1f195c5951a234e8db9806eb0635346".to_string(),
             name: "Feisty Doge NFT".to_string(),
@@ -437,7 +437,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "nfd".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x7b744eea1deca2f1b7b31f15ba036fa1759452d7".to_string(),
             name: "El Hippo".to_string(),
@@ -447,7 +447,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "hipp".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xff836a5821e69066c87e268bc51b849fab94240c".to_string(),
             name: "Real Smurf Cat".to_string(),
@@ -457,7 +457,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "шайлушай".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x2598c30330d5771ae9f983979209486ae26de875".to_string(),
             name: "Any Inu".to_string(),
@@ -467,7 +467,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "ai".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xfb130d93e49dca13264344966a611dc79a456bc5".to_string(),
             name: "DogeGF".to_string(),
@@ -477,7 +477,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "dogegf".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x0d505c03d30e65f6e9b4ef88855a47a89e4b7676".to_string(),
             name: "Zoomer".to_string(),
@@ -487,7 +487,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "zoomer".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xf538296e7dd856af7044deec949489e2f25705bc".to_string(),
             name: "Illumicati".to_string(),
@@ -497,7 +497,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "milk".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x005d1123878fc55fbd56b54c73963b234a64af3c".to_string(),
             name: "Kiba Inu".to_string(),
@@ -507,7 +507,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "kiba".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x8ee325ae3e54e83956ef2d5952d3c8bc1fa6ec27".to_string(),
             name: "Fable Of The Dragon".to_string(),
@@ -517,7 +517,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "tyrant".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x514910771af9ca656af840dff83e8264ecf986ca".to_string(),
             name: "LINK".to_string(),
@@ -527,7 +527,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "link".to_string(),
         },
         Contract {
-            id: 50,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x912ce59144191c1204e64559fe8253a0e49e6548".to_string(),
             name: "ARB".to_string(),
@@ -537,7 +537,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "arb".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x76e222b07c53d28b89b0bac18602810fc22b49a8".to_string(),
             name: "Joe Coin".to_string(),
@@ -547,7 +547,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "joe".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x03049b395147713ae53c0617093675b4b86dde78".to_string(),
             name: "BobaCat".to_string(),
@@ -557,7 +557,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "psps".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xa9d54f37ebb99f83b603cc95fc1a5f3907aaccfd".to_string(),
             name: "Pikaboss".to_string(),
@@ -567,7 +567,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "pika".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x02e7f808990638e9e67e1f00313037ede2362361".to_string(),
             name: "KiboShib".to_string(),
@@ -577,7 +577,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "KIBSHI".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3".to_string(),
             name: "Ondo".to_string(),
@@ -587,7 +587,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "ondo".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x58cb30368ceb2d194740b144eab4c2da8a917dcb".to_string(),
             name: "Zyncoin".to_string(),
@@ -597,7 +597,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "zyn".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xe3dbc4f88eaa632ddf9708732e2832eeaa6688ab".to_string(),
             name: "Arbius".to_string(),
@@ -607,17 +607,17 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "aius".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44".to_string(),
             name: "Wrapped TAO".to_string(),
-            deployed_block: 16521600,
+            deployed_block: 1652160,
             chain: Chain::Mainnet,
             target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
             symbol: "wTAO".to_string(),
         },
         Contract {
-            id: 40,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x5a98fcbea516cf06857215779fd812ca3bef1b32".to_string(),
             name: "Lido".to_string(),
@@ -627,7 +627,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "ldo".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xb8a87405d9a4f2f866319b77004e88dff66c0d92".to_string(),
             name: "Sora".to_string(),
@@ -637,7 +637,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "sora".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x24fcfc492c1393274b6bcd568ac9e225bec93584".to_string(),
             name: "Heroes of Mavia".to_string(),
@@ -647,7 +647,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "mavia".to_string(),
         },
         Contract {
-            id: 60,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x710287d1d39dcf62094a83ebb3e736e79400068a".to_string(),
             name: "enqAI".to_string(),
@@ -657,7 +657,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "enqai".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x15e6e0d4ebeac120f9a97e71faa6a0235b85ed12".to_string(),
             name: "SatoshiVM".to_string(),
@@ -667,7 +667,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "savm".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x163f8c2467924be0ae7b5347228cabf260318753".to_string(),
             name: "Worldcoin".to_string(),
@@ -677,7 +677,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "wld".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0xf4fbc617a5733eaaf9af08e1ab816b103388d8b6".to_string(),
             name: "Glow".to_string(),
@@ -687,7 +687,7 @@ pub fn erc20_contracts() -> Vec<Contract> {
             symbol: "glw-beta".to_string(),
         },
         Contract {
-            id: 70,
+            id: 0,
             contract_type: ContractType::ERC20,
             address: "0x38e68a37e401f7271568cecaac63c6b1e19130b4".to_string(),
             name: "Banana".to_string(),

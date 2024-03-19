@@ -1,6 +1,6 @@
 use indexer_rs::{
     postgres::init_postgres, processors::upsert_group, tree::save_tree, utils::dotenv_config,
-    GroupType,
+    Address, GroupType,
 };
 
 struct Group {
@@ -44,7 +44,7 @@ async fn main() {
                 let address = address.trim_start_matches("0x");
                 hex::decode(address).unwrap().try_into().unwrap()
             })
-            .collect::<Vec<[u8; 20]>>();
+            .collect::<Vec<Address>>();
 
         // For static groups, we need to increment the block number for each new tree
         let latest_group_tree = client

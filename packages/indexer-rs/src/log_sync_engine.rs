@@ -5,6 +5,7 @@ use crate::event::{
     parse_punk_transfer_event_log,
 };
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
+use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
@@ -17,13 +18,15 @@ use std::sync::Arc;
 use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
+
 const TRANSFER_EVENT_SIG: &str =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
+/// A struct to sync all logs of a particular contract event
 pub struct LogSyncEngine {
     eth_client: Arc<EthRpcClient>,
     contract: Contract,
-    event_id: u16,
+    event_id: EventId,
     rocksdb_client: Arc<rocksdb::DB>,
     log_parser: fn(&Value) -> Vec<u8>,
 }
@@ -60,7 +63,7 @@ impl LogSyncEngine {
     }
 
     /// Search for chunks that aren't synched yet
-    fn search_missing_chunks(&self) -> Vec<u64> {
+    fn search_missing_chunks(&self) -> Vec<ChunkNum> {
         let start_key = RocksDbKey {
             key_type: KeyType::SyncLog,
             event_id: self.event_id,
@@ -90,8 +93,8 @@ impl LogSyncEngine {
                 break;
             }
 
-            if key.chunk_num.unwrap() != expected_chunk_num as u64 {
-                missing_chunks.push(expected_chunk_num as u64);
+            if key.chunk_num.unwrap() != expected_chunk_num as ChunkNum {
+                missing_chunks.push(expected_chunk_num as ChunkNum);
             }
         }
 
@@ -126,7 +129,7 @@ impl LogSyncEngine {
     }
 
     /// Get the latest synched chunk
-    fn get_latest_synched_chunk(&self) -> u64 {
+    fn get_latest_synched_chunk(&self) -> ChunkNum {
         let start_key =
             RocksDbKey::new_start_key(KeyType::SyncLog, self.event_id, self.contract.id);
 
@@ -155,7 +158,7 @@ impl LogSyncEngine {
     }
 
     /// Sync logs in the given chunks (i.e. block ranges)
-    async fn sync_chunks(&self, chunks: Vec<u64>, latest_block: u64) {
+    async fn sync_chunks(&self, chunks: Vec<ChunkNum>, latest_block: BlockNum) {
         // Block ranges to fetch logs.
         // We use batch requests to fetch logs in parallel.
         let mut block_ranges = vec![];
@@ -312,7 +315,7 @@ impl LogSyncEngine {
             let mut jobs = vec![];
 
             loop {
-                let chunks = (chunks_from..chunks_to).collect::<Vec<u64>>();
+                let chunks = (chunks_from..chunks_to).collect::<Vec<ChunkNum>>();
 
                 let job = self.sync_chunks(chunks, latest_block);
                 jobs.push(job);

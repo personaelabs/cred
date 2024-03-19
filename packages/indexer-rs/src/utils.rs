@@ -4,17 +4,18 @@ use crate::{
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
     rocksdb_key::{KeyType, RocksDbKey},
-    ERC20TransferEvent, ERC721TransferEvent,
+    BlockNum, ChunkNum, ERC20TransferEvent, ERC721TransferEvent,
 };
+use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
 use std::{env, io::Cursor};
 
-pub const MINTER_ADDRESS: [u8; 20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+pub const MINTER_ADDRESS: Address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-pub fn dev_addresses() -> Vec<[u8; 20]> {
+pub fn dev_addresses() -> Vec<Address> {
     let addresses = [
         "4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth
         "cb46219ba114245c3a18761e4f7891f9c4bef8c0", // lsankar.eth
@@ -62,9 +63,9 @@ pub fn value_to_u32(value: &Value) -> u32 {
 /// Get the latest synched chunk
 pub fn get_latest_synched_chunk(
     rocksdb_client: &DB,
-    event_id: u16,
-    contract_id: u16,
-) -> Option<u64> {
+    event_id: EventId,
+    contract_id: ContractId,
+) -> Option<ChunkNum> {
     let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
 
     let iterator = rocksdb_client.iterator(IteratorMode::From(
@@ -92,7 +93,7 @@ pub fn get_latest_synched_chunk(
 }
 
 /// Check if there are any missing chunks in the sync log for a given event and contract
-pub fn missing_chunk_exists(db: &DB, event_id: u16, contract_id: u16) -> bool {
+pub fn missing_chunk_exists(db: &DB, event_id: EventId, contract_id: ContractId) -> bool {
     let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
 
     let iterator = db.iterator(IteratorMode::From(
@@ -111,7 +112,7 @@ pub fn missing_chunk_exists(db: &DB, event_id: u16, contract_id: u16) -> bool {
             break;
         }
 
-        if key.chunk_num != Some(expected_chunk_num as u64) {
+        if key.chunk_num != Some(expected_chunk_num as ChunkNum) {
             return true;
         }
     }
@@ -119,14 +120,14 @@ pub fn missing_chunk_exists(db: &DB, event_id: u16, contract_id: u16) -> bool {
     false
 }
 
-pub fn get_contract_total_chunks(latest_block: u64, contract: &Contract) -> u64 {
+pub fn get_contract_total_chunks(latest_block: BlockNum, contract: &Contract) -> u64 {
     f64::ceil(((latest_block - contract.deployed_block) as f64) / CHUNK_SIZE as f64) as u64
 }
 
 pub async fn is_event_logs_ready(
     db: &DB,
     eth_client: &EthRpcClient,
-    event_id: u16,
+    event_id: EventId,
     contract: &Contract,
 ) -> Result<bool, surf::Error> {
     let block_num = eth_client.get_block_number(contract.chain).await?;

@@ -5,13 +5,13 @@ use crate::{
     rocksdb_key::{RocksDbKey, ERC20_TRANSFER_EVENT_ID},
     tree::save_tree,
     utils::{decode_erc20_transfer_event, is_event_logs_ready},
-    GroupType,
+    Address, GroupType,
 };
 use std::{collections::HashSet, sync::Arc};
 
 pub struct EarlyHolderIndexer {
-    pub unique_holders: HashSet<[u8; 20]>,
-    pub ordered_holders: Vec<[u8; 20]>,
+    pub unique_holders: HashSet<Address>,
+    pub ordered_holders: Vec<Address>,
     pub contract: Contract,
     pub group_id: Option<i32>,
     pub pg_client: Arc<tokio_postgres::Client>,
@@ -40,8 +40,15 @@ impl EarlyHolderIndexer {
 
 #[async_trait::async_trait]
 impl GroupIndexer for EarlyHolderIndexer {
-    fn group_name(&self) -> String {
-        "Early holder".to_string()
+    fn group_handle(&self) -> String {
+        format!("early-holder-{}", self.contract.name.to_lowercase())
+    }
+
+    fn display_name(&self) -> String {
+        format!(
+            "Early ${} holder",
+            self.contract.symbol.clone().to_uppercase()
+        )
     }
 
     fn process_log(&mut self, _key: RocksDbKey, log: &[u8]) -> Result<(), std::io::Error> {
@@ -66,11 +73,8 @@ impl GroupIndexer for EarlyHolderIndexer {
     }
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
-        let handle = format!("early-holder-{}", self.contract.name.to_lowercase());
-        let display_name = format!(
-            "Early ${} holder",
-            self.contract.symbol.clone().to_uppercase()
-        );
+        let handle = self.group_handle();
+        let display_name = self.display_name();
 
         let group_id = upsert_group(
             &self.pg_client,

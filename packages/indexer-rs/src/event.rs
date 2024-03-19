@@ -3,6 +3,7 @@ use crate::{
     rocksdb_key::{KeyType, RocksDbKey},
     utils::{value_to_u32, value_to_u64},
 };
+use crate::{ContractId, EventId};
 use prost::Message;
 use serde_json::Value;
 
@@ -70,8 +71,8 @@ pub fn parse_punk_transfer_event_log(log: &Value) -> Vec<u8> {
 /// Parse JSON log to event data and rocksdb key so that it can be stored in the database.
 pub fn event_log_to_key_value(
     log: &Value,
-    event_id: u16,
-    contract_id: u16,
+    event_id: EventId,
+    contract_id: ContractId,
     parser: fn(&Value) -> Vec<u8>,
 ) -> (RocksDbKey, Vec<u8>) {
     let log_index = value_to_u32(&log["logIndex"]);

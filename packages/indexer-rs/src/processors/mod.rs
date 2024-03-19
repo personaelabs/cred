@@ -13,7 +13,9 @@ pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds
 /// A trait for a group indexer
 pub trait GroupIndexer: Send + Sync {
     /// Returns the name of the group
-    fn group_name(&self) -> String;
+    fn group_handle(&self) -> String;
+    /// Returns the display name of the group
+    fn display_name(&self) -> String;
     /// Initializes the group
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error>;
     /// Returns true if the logs which the indexer depends on are ready
