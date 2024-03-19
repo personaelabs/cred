@@ -167,30 +167,26 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
         }
       }
 
-      const _eligibleGroups = (
-        await Promise.all(
-          Array.from(bloomFilterMatched).map(async matched => {
-            const treeProtoBuf = await getMerkleTree(matched.treeId);
+      const _eligibleGroups: EligibleGroup[] = [];
+      for (const matched of bloomFilterMatched) {
+        const treeProtoBuf = await getMerkleTree(matched.treeId);
 
-            // Try getting the merkle proof for the address
-            const merkleProof = getMerkleProof(treeProtoBuf, matched.address);
+        // Try getting the merkle proof for the address
+        const merkleProof = getMerkleProof(treeProtoBuf, matched.address);
 
-            if (merkleProof === null) {
-              console.log('Bloom filter false positive');
-              return null;
-            }
-            return {
+        if (merkleProof === null) {
+          console.log('Bloom filter false positive');
+        } else {
+          if (!_eligibleGroups.some(t => t.id === matched.id)) {
+            _eligibleGroups.push({
               ...matched,
               merkleProof,
-            };
-          })
-        )
-      )
-        .filter(eligibleGroup => eligibleGroup !== null)
-        // Filter out same group with different address
-        .filter(
-          (v, i, a) => a.findIndex(t => t?.id === v?.id) === i
-        ) as EligibleGroup[];
+            });
+          } else {
+            console.log(`Duplicate group: ${matched.id}`);
+          }
+        }
+      }
 
       setEligibleGroups(_eligibleGroups);
     }
