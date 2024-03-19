@@ -34,6 +34,11 @@ export type MerkleTreeSelect = Prisma.MerkleTreeGetPayload<{
 export async function GET(_req: NextRequest) {
   const merkleTrees = await prisma.merkleTree.findMany({
     select: merkleTreeSelect,
+    where: {
+      bloomFilter: {
+        not: null,
+      },
+    },
   });
 
   const groupIdToLatestTree = new Map<number, MerkleTreeSelect>();
