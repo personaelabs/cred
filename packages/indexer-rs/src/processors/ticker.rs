@@ -118,10 +118,6 @@ impl GroupIndexer for TickerIndexer {
         let holders_at_block = self
             .balances
             .iter()
-            .map(|(holder, balance)| {
-                println!("Holder: {:?}, Balance: {:?}", hex::encode(holder), balance);
-                (holder, balance)
-            })
             .filter(|(_, balance)| **balance > BigUint::from(0u8))
             .map(|(holder, _balance)| *holder)
             .collect::<Vec<[u8; 20]>>();
