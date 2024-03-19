@@ -696,5 +696,15 @@ pub fn erc20_contracts() -> Vec<Contract> {
             target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
             symbol: "banana".to_string(),
         },
+        Contract {
+            id: 0,
+            address: "0xa0c05e2eed05912d9eb76d466167628e8024a708".to_string(),
+            symbol: "ticker".to_string(),
+            name: "Ticker".to_string(),
+            chain: Chain::Base,
+            deployed_block: 11962318,
+            target_groups: vec![GroupType::Ticker],
+            contract_type: ContractType::ERC20,
+        },
     ]
 }
