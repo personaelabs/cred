@@ -425,6 +425,7 @@ pub async fn save_tree(
         ON CONFLICT ("groupId", "blockNumber") DO NOTHING
         "#;
 
+    let start = Instant::now();
     pg_client
         .query(
             statement,
@@ -440,6 +441,32 @@ pub async fn save_tree(
             ],
         )
         .await?;
+
+    info!(
+        "Saved tree for group {} and block {} in {:?}",
+        group_id,
+        block_number,
+        start.elapsed()
+    );
+
+    // Set bloom filter and the tree body to null for older trees
+
+    let statement = r#"
+        UPDATE "MerkleTree" SET "bloomFilter" = NULL, "treeProtoBuf" = NULL
+        WHERE "groupId" = $1 AND "blockNumber" < $2
+        "#;
+
+    let start = Instant::now();
+    pg_client
+        .query(statement, &[&group_id, &(block_number - 100)])
+        .await?;
+
+    info!(
+        "Nullified old trees for group {} and block {} in {:?}",
+        group_id,
+        block_number,
+        start.elapsed()
+    );
 
     Ok(())
 }
