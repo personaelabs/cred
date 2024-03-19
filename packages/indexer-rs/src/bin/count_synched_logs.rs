@@ -1,50 +1,48 @@
-use indexer_rs::contract::get_contracts;
-use indexer_rs::contract::ContractType;
-use indexer_rs::eth_rpc::EthRpcClient;
-use indexer_rs::logger::count_synched_logs;
-use indexer_rs::postgres::init_postgres;
-use indexer_rs::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
-use indexer_rs::rocksdb_key::ERC721_TRANSFER_EVENT_ID;
+use indexer_rs::rocksdb_key::KeyType;
+use indexer_rs::rocksdb_key::RocksDbKey;
 use indexer_rs::utils::dotenv_config;
-use indexer_rs::utils::is_event_logs_ready;
 use indexer_rs::ROCKSDB_PATH;
 use rocksdb::Options;
 use rocksdb::DB;
+use std::env;
 use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<(), tokio_postgres::Error> {
     dotenv_config();
 
-    let client = init_postgres().await;
+    let args: Vec<String> = env::args().collect();
 
-    // Get contracts from the database
-    let contracts = get_contracts(&client).await;
+    let contract_id = args[1].parse::<u16>().unwrap();
+    let event_id = args[2].parse::<u16>().unwrap();
 
     let db_options = Options::default();
     let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
 
-    let eth_client = Arc::new(EthRpcClient::new());
+    let start_key = RocksDbKey::new_start_key(KeyType::EventLog, event_id, contract_id);
 
-    for contract in &contracts {
-        let event_id = match contract.contract_type {
-            ContractType::ERC20 => ERC20_TRANSFER_EVENT_ID,
-            ContractType::ERC721 => ERC721_TRANSFER_EVENT_ID,
-            _ => panic!("Invalid contract type"),
-        };
+    let iterator = rocksdb_conn.iterator(rocksdb::IteratorMode::From(
+        &start_key.to_bytes(),
+        rocksdb::Direction::Forward,
+    ));
 
-        let synched = is_event_logs_ready(&rocksdb_conn, &eth_client, event_id, contract)
-            .await
-            .unwrap();
+    let mut count = 0;
+    for item in iterator {
+        let (key_bytes, _value) = item.unwrap();
 
-        if synched {
-            println!("{} synched", contract.symbol.to_uppercase());
-        } else {
-            println!("{} waiting", contract.symbol.to_uppercase(),);
+        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
+
+        if key.key_type != KeyType::EventLog
+            || key.event_id != event_id
+            || key.contract_id != contract_id
+        {
+            break;
         }
+
+        count += 1;
     }
 
-    count_synched_logs(contracts, rocksdb_conn);
+    println!("count: {}", count);
 
     Ok(())
 }
