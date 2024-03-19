@@ -23,13 +23,13 @@ const BLOCK_NUM_BEGIN: usize = CONTRACT_ID_END;
 const BLOCK_NUM_BYTES: usize = 8;
 const BLOCK_NUM_END: usize = BLOCK_NUM_BEGIN + BLOCK_NUM_BYTES;
 
-const LOG_INDEX_BEGIN: usize = BLOCK_NUM_END;
-const LOG_INDEX_BYTES: usize = 4;
-const LOG_INDEX_END: usize = LOG_INDEX_BEGIN + LOG_INDEX_BYTES;
-
-const TX_INDEX_BEGIN: usize = LOG_INDEX_END;
+const TX_INDEX_BEGIN: usize = BLOCK_NUM_END;
 const TX_INDEX_BYTES: usize = 4;
 const TX_INDEX_END: usize = TX_INDEX_BEGIN + TX_INDEX_BYTES;
+
+const LOG_INDEX_BEGIN: usize = TX_INDEX_END;
+const LOG_INDEX_BYTES: usize = 4;
+const LOG_INDEX_END: usize = LOG_INDEX_BEGIN + LOG_INDEX_BYTES;
 
 const CHUNK_NUM_BEGIN: usize = CONTRACT_ID_END;
 const CHUNK_NUM_BYTES: usize = 8;
@@ -97,8 +97,8 @@ impl RocksDbKey {
 
         if let Some(chunk_num) = self.chunk_num {
             key.extend_from_slice(&chunk_num.to_be_bytes());
-            key.extend_from_slice(&[0; LOG_INDEX_BYTES]);
             key.extend_from_slice(&[0; TX_INDEX_BYTES]);
+            key.extend_from_slice(&[0; LOG_INDEX_BYTES]);
         }
 
         if let Some(block_num) = self.block_num {
