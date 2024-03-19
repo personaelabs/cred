@@ -155,6 +155,9 @@ export const getCredddDescription = (
         .trim();
       return `This indicates that you were in the first 5% of addresses that ever traded, bought, or otherwise interacted with $${tokenName}.`;
     }
+    case 'ticker': {
+      return `This indicates that you controlled wallets with >0 $ticker balance when $ticker dev rugged.`;
+    }
     default:
       return '';
   }
