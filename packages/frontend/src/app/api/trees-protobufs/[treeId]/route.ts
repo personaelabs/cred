@@ -1,64 +1,36 @@
 export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
-const merkleTreeSelect = {
-  id: true,
-  treeProtoBuf: true,
-} satisfies Prisma.MerkleTreeSelect;
-
-// Get merkle tree and its merkle proofs
 export async function GET(
   _req: NextRequest,
   {
     params,
   }: {
     params: {
-      group: string;
+      treeId: string;
     };
   }
 ) {
-  const groupId = Number(params.group);
+  const id = Number(params.treeId);
 
-  const group = await prisma.group.findUnique({
+  const merkleTree = await prisma.merkleTree.findUnique({
     select: {
       id: true,
+      treeProtoBuf: true,
     },
     where: {
-      id: groupId,
-    },
-  });
-
-  if (!group) {
-    return Response.json(
-      {
-        error: 'Group not found',
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  // Get the latest merkle tree from the database
-  const merkleTree = await prisma.merkleTree.findFirst({
-    select: merkleTreeSelect,
-    where: {
-      groupId: group.id,
-    },
-    orderBy: {
-      blockNumber: 'desc',
+      id,
     },
   });
 
   if (!merkleTree) {
     return Response.json(
       {
-        error: 'Merkle tree not found',
+        error: 'Merkle Tree not found',
       },
       {
-        status: 500,
+        status: 400,
       }
     );
   }
