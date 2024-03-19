@@ -15,6 +15,11 @@ async fn main() -> Result<(), tokio_postgres::Error> {
 
     let contract_id = args[1].parse::<u16>().unwrap();
     let event_id = args[2].parse::<u16>().unwrap();
+    let to_block = if args.len() > 3 {
+        Some(args[3].parse::<u64>().unwrap())
+    } else {
+        None
+    };
 
     let db_options = Options::default();
     let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
@@ -31,6 +36,12 @@ async fn main() -> Result<(), tokio_postgres::Error> {
         let (key_bytes, _value) = item.unwrap();
 
         let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
+
+        if let Some(to_block) = to_block {
+            if key.block_num.unwrap() > to_block {
+                break;
+            }
+        }
 
         if key.key_type != KeyType::EventLog
             || key.event_id != event_id
