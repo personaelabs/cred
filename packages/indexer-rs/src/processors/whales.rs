@@ -59,13 +59,8 @@ impl GroupIndexer for WhaleIndexer {
         let handle = format!("whale-{}", self.contract.name.to_lowercase());
         let display_name = format!("${} whale", self.contract.symbol.clone().to_uppercase());
 
-        let group_id = upsert_group(
-            &self.pg_client,
-            &display_name,
-            &handle,
-            GroupType::EarlyHolder,
-        )
-        .await?;
+        let group_id =
+            upsert_group(&self.pg_client, &display_name, &handle, GroupType::Whale).await?;
         self.group_id = Some(group_id);
 
         Ok(())
