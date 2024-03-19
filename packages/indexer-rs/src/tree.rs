@@ -12,7 +12,7 @@ use crate::utils::dev_addresses;
 use crate::GroupType;
 use colored::*;
 use futures::future::join_all;
-use log::{error, info};
+use log::{error, info, warn};
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
 use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
@@ -98,7 +98,17 @@ async fn process_event_logs(
         let save_trees_start = Instant::now();
 
         // Run `save_tree` for each indexer
-        for indexer in indexers {
+        for (i, indexer) in indexers.iter().enumerate() {
+            if errored_indexers.contains(&i) {
+                // Skip the saving tree if the indexer errored
+                warn!(
+                    "${} Skipping saving tree for '{}' due to previous error",
+                    contract.symbol.to_uppercase(),
+                    indexer.group_name()
+                );
+                continue;
+            }
+
             let result = indexer.save_tree(latest_block_num as i64).await;
             if let Err(err) = result {
                 error!(
