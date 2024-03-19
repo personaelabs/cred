@@ -50,6 +50,10 @@ model MerkleTree {
   groupId        Int
   blockNumber    BigInt
   treeProtoBuf   Bytes?
+  bloomFilter    Bytes?
+  bloomSipKeys   Bytes[]
+  bloomNumHashes Int?
+  bloomNumBits   Int?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   FidAttestation FidAttestation[]

@@ -658,6 +658,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bloomfilter"
+version = "1.0.13"
+source = "git+https://github.com/DanTehrani/rust-bloom-filter.git?rev=a1a622518d4e2334ad2451c71355d7b12d7caa35#a1a622518d4e2334ad2451c71355d7b12d7caa35"
+dependencies = [
+ "bit-vec",
+ "getrandom 0.2.12",
+ "siphasher 1.0.0",
+]
+
+[[package]]
 name = "bs58"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -816,7 +826,9 @@ dependencies = [
  "ark-secq256k1",
  "ark-serialize",
  "ark-std",
+ "bloomfilter",
  "ethers",
+ "hex",
  "num-bigint",
  "sapir",
  "wasm-bindgen",
@@ -2380,6 +2392,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "backoff",
+ "bloomfilter",
  "bytes 1.5.0",
  "colored",
  "dotenv",
@@ -2746,7 +2759,7 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 [[package]]
 name = "merkle-tree"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/merkle-tree?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
+source = "git+https://github.com/personaelabs/merkle-tree.git?branch=main#23e55dc239f33754ecaa72bf6e360be6d74da886"
 dependencies = [
  "ark-ff",
  "ark-secp256k1",
@@ -3177,7 +3190,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6796ad771acdc0123d2a88dc428b5e38ef24456743ddb1744ed628f9815c096"
 dependencies = [
- "siphasher",
+ "siphasher 0.3.11",
 ]
 
 [[package]]
@@ -3186,7 +3199,7 @@ version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90fcb95eef784c2ac79119d1dd819e162b5da872ce6f3c3abe1e8ca1c082f72b"
 dependencies = [
- "siphasher",
+ "siphasher 0.3.11",
 ]
 
 [[package]]
@@ -3292,7 +3305,7 @@ dependencies = [
 [[package]]
 name = "poseidon"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/poseidon?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
+source = "git+https://github.com/personaelabs/poseidon.git?branch=main#133d535faadac705480f2f08a0ba9f61adf0d2b8"
 dependencies = [
  "ark-ff",
  "ark-serialize",
@@ -3915,7 +3928,7 @@ dependencies = [
 [[package]]
 name = "sapir"
 version = "0.1.0"
-source = "git+https://github.com/personaelabs/sapir?branch=main#512a958c067b3114ad7b21c0d1d725e99e11dbc0"
+source = "git+https://github.com/personaelabs/sapir?branch=main#e41418ad1abaa657d386d6e15a2cf171bd067e2e"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -3924,7 +3937,7 @@ dependencies = [
  "console_error_panic_hook",
  "getrandom 0.2.12",
  "hex",
- "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree?branch=main)",
+ "merkle-tree 0.1.0 (git+https://github.com/personaelabs/merkle-tree.git?branch=main)",
  "merlin",
  "num-bigint",
  "num-traits",
@@ -4210,6 +4223,12 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
+name = "siphasher"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54ac45299ccbd390721be55b412d41931911f654fa99e2cb8bfb57184b2061fe"
 
 [[package]]
 name = "slab"
@@ -5072,9 +5091,9 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.91"
+version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1e124130aee3fb58c5bdd6b639a0509486b0338acaaae0c84a5124b0f588b7f"
+checksum = "4be2531df63900aeb2bca0daaaddec08491ee64ceecbee5076636a3b026795a8"
 dependencies = [
  "cfg-if",
  "wasm-bindgen-macro",
@@ -5082,9 +5101,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-backend"
-version = "0.2.91"
+version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9e7e1900c352b609c8488ad12639a311045f40a35491fb69ba8c12f758af70b"
+checksum = "614d787b966d3989fa7bb98a654e369c762374fd3213d212cfc0251257e747da"
 dependencies = [
  "bumpalo",
  "log",
@@ -5109,9 +5128,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.91"
+version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b30af9e2d358182b5c7449424f017eba305ed32a7010509ede96cdc4696c46ed"
+checksum = "a1f8823de937b71b9460c0c34e25f3da88250760bec0ebac694b49997550d726"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -5119,9 +5138,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.91"
+version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "642f325be6301eb8107a83d12a8ac6c1e1c54345a7ef1a9261962dfefda09e66"
+checksum = "e94f17b526d0a461a191c78ea52bbce64071ed5c04c9ffe424dcb38f74171bb7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5132,9 +5151,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.91"
+version = "0.2.92"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f186bd2dcf04330886ce82d6f33dd75a7bfcf69ecf5763b89fcde53b6ac9838"
+checksum = "af190c94f2773fdb3729c55b007a722abb5384da03bc0986df4c289bf5567e96"
 
 [[package]]
 name = "web-sys"

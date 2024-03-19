@@ -5,19 +5,16 @@ import { Hex, createWalletClient, custom } from 'viem';
 import { Button } from '@/components/ui/button';
 import { mainnet } from 'viem/chains';
 import useProver from '@/hooks/useProver';
-import { GroupSelect } from '@/app/api/groups/route';
 import { captureFetchError, getCredddDescription, postJSON } from '@/lib/utils';
 import { Check, Info, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
-
-// Assuming demoSignMessage is defined elsewhere and imported
-// import { demoSignMessage } from 'wherever-this-function-is-defined';
+import { EligibleGroup } from '@/app/types';
 
 interface WalletViewProps {
   walletAddr: string;
-  group: GroupSelect;
+  group: EligibleGroup;
   added: boolean;
   afterAdd: () => void;
 }
@@ -29,20 +26,20 @@ const WalletView: React.FC<WalletViewProps> = ({
 }) => {
   const { refetchUser } = useUser();
   const [isAdding, setIsAdding] = useState(false);
-  const prover = useProver();
+  const prover = useProver(group);
   const [added, setAdded] = useState(props.added);
 
-  const addGroup = async (addr: string, groupId: number) => {
+  const addGroup = async () => {
     // Viem!
     const client = createWalletClient({
-      account: addr as Hex,
+      account: walletAddr as Hex,
       chain: mainnet,
       // @ts-ignore
       transport: custom(window.ethereum),
     });
 
     setIsAdding(true);
-    const proof = await prover.prove(addr as Hex, client, groupId);
+    const proof = await prover.prove(client);
 
     if (proof) {
       const response = await postJSON({
@@ -77,7 +74,7 @@ const WalletView: React.FC<WalletViewProps> = ({
         <div className="flex flex-row items-center">
           <div className="text-center w-[300px]">{group.displayName}</div>
           {credddDescription ? (
-            <Tooltip delayDuration={0}>
+            <Tooltip delayDuration={200}>
               <TooltipTrigger>
                 <Info className="w-4 h-4 ml-2"></Info>
               </TooltipTrigger>
@@ -88,10 +85,7 @@ const WalletView: React.FC<WalletViewProps> = ({
           )}
         </div>
         <div className="w-[85px] text-center">
-          <Button
-            onClick={() => addGroup(walletAddr, group.id)}
-            disabled={isAdding || added}
-          >
+          <Button onClick={addGroup} disabled={isAdding || added}>
             {isAdding ? (
               <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
             ) : (
