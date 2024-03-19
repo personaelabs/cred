@@ -1,7 +1,10 @@
 #![allow(async_fn_in_trait)]
+
+use crate::rocksdb_key::RocksDbKey;
 pub mod early_holders;
 pub mod all_holders;
 pub mod whales;
+pub mod ticker;
 
 pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds
 
@@ -15,7 +18,7 @@ pub trait GroupIndexer: Send + Sync {
     /// Returns true if the logs which the indexer depends on are ready
     async fn is_ready(&self) -> Result<bool, surf::Error> ;
     /// Processes a log and updates the indexer's state
-    fn process_log(&mut self, log: &[u8]) -> Result<(), std::io::Error>;
+    fn process_log(&mut self, key: RocksDbKey, log: &[u8]) -> Result<(), std::io::Error>;
     /// Save a Merkle tree for the current state of the indexer
     async fn save_tree(&self, block_number: i64) -> Result<(), tokio_postgres::Error>;
 }

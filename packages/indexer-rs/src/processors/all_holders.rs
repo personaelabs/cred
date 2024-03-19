@@ -2,7 +2,7 @@ use crate::{
     contract::Contract,
     eth_rpc::EthRpcClient,
     processors::{upsert_group, GroupIndexer},
-    rocksdb_key::ERC721_TRANSFER_EVENT_ID,
+    rocksdb_key::{RocksDbKey, ERC721_TRANSFER_EVENT_ID},
     tree::save_tree,
     utils::{decode_erc721_transfer_event, is_event_logs_ready},
     GroupType,
@@ -42,7 +42,7 @@ impl GroupIndexer for AllHoldersIndexer {
         "All holders".to_string()
     }
 
-    fn process_log(&mut self, log: &[u8]) -> Result<(), std::io::Error> {
+    fn process_log(&mut self, _key: RocksDbKey, log: &[u8]) -> Result<(), std::io::Error> {
         let log = decode_erc721_transfer_event(log);
         self.unique_holders.insert(log.to);
         Ok(())

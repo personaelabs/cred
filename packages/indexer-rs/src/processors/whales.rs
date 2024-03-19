@@ -1,8 +1,8 @@
 use crate::contract::Contract;
 use crate::eth_rpc::EthRpcClient;
-use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
+use crate::rocksdb_key::{RocksDbKey, ERC20_TRANSFER_EVENT_ID};
 use crate::tree::save_tree;
-use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready};
+use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS};
 use crate::GroupType;
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
@@ -11,8 +11,6 @@ use std::io::ErrorKind;
 use std::sync::Arc;
 
 use super::{upsert_group, GroupIndexer};
-
-const MINTER_ADDRESS: [u8; 20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 pub fn get_whale_handle(contract_name: &str) -> String {
     format!("whale-{}", contract_name.to_lowercase())
@@ -78,7 +76,7 @@ impl GroupIndexer for WhaleIndexer {
         .await
     }
 
-    fn process_log(&mut self, log: &[u8]) -> Result<(), Error> {
+    fn process_log(&mut self, _key: RocksDbKey, log: &[u8]) -> Result<(), Error> {
         let log = decode_erc20_transfer_event(log);
 
         if log.value == BigUint::from(0u8) {

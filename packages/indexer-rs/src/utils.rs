@@ -12,6 +12,8 @@ use rocksdb::{IteratorMode, DB};
 use serde_json::Value;
 use std::{env, io::Cursor};
 
+pub const MINTER_ADDRESS: [u8; 20] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 pub fn dev_addresses() -> Vec<[u8; 20]> {
     let addresses = [
         "4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth

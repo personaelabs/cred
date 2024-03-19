@@ -4,6 +4,7 @@ use crate::eth_rpc::EthRpcClient;
 use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::processors::all_holders::AllHoldersIndexer;
 use crate::processors::early_holders::EarlyHolderIndexer;
+use crate::processors::ticker::TickerIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
@@ -11,7 +12,7 @@ use crate::utils::dev_addresses;
 use crate::GroupType;
 use colored::*;
 use futures::future::join_all;
-use log::{error, info};
+use log::{error, info, warn};
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
 use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
@@ -68,7 +69,7 @@ async fn process_event_logs(
                     continue;
                 }
 
-                let result = indexer.process_log(&value);
+                let result = indexer.process_log(key, &value);
                 if let Err(err) = result {
                     error!(
                         "${} {} Error processing logs for contract {:?}",
@@ -97,7 +98,17 @@ async fn process_event_logs(
         let save_trees_start = Instant::now();
 
         // Run `save_tree` for each indexer
-        for indexer in indexers {
+        for (i, indexer) in indexers.iter().enumerate() {
+            if errored_indexers.contains(&i) {
+                // Skip the saving tree if the indexer errored
+                warn!(
+                    "${} Skipping saving tree for '{}' due to previous error",
+                    contract.symbol.to_uppercase(),
+                    indexer.group_name()
+                );
+                continue;
+            }
+
             let result = indexer.save_tree(latest_block_num as i64).await;
             if let Err(err) = result {
                 error!(
@@ -194,6 +205,18 @@ pub async fn index_groups_for_contract(
                     if is_indexer_ready(&contract, &all_holder_indexer).await {
                         let erc721_indexers = indexers.entry(ERC721_TRANSFER_EVENT_ID).or_default();
                         erc721_indexers.push(Box::new(all_holder_indexer));
+                    }
+                }
+                "ticker" => {
+                    let ticker_indexer = TickerIndexer::new(
+                        contract.clone(),
+                        pg_client.clone(),
+                        db.clone(),
+                        eth_client.clone(),
+                    );
+                    if is_indexer_ready(&contract, &ticker_indexer).await {
+                        let erc20_indexers = indexers.entry(ERC20_TRANSFER_EVENT_ID).or_default();
+                        erc20_indexers.push(Box::new(ticker_indexer));
                     }
                 }
                 _ => {
