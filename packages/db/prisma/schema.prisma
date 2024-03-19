@@ -95,6 +95,7 @@ enum GroupType {
   EarlyHolder
   Whale
   AllHolders
+  Ticker
 }
 
 model Contract {

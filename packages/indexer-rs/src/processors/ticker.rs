@@ -108,7 +108,8 @@ impl GroupIndexer for TickerIndexer {
         let handle = "ticker-rug-survivor".to_string();
         let display_name = "$ticker rug survivor".to_string();
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "ticker").await?;
+        let group_id =
+            upsert_group(&self.pg_client, &display_name, &handle, GroupType::Ticker).await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -125,7 +126,7 @@ impl GroupIndexer for TickerIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                GroupType::Onchain,
+                GroupType::Ticker,
                 &self.pg_client,
                 holders_at_block,
                 block_number,

@@ -207,7 +207,7 @@ pub async fn index_groups_for_contract(
                         erc721_indexers.push(Box::new(all_holder_indexer));
                     }
                 }
-                "ticker" => {
+                GroupType::Ticker => {
                     let ticker_indexer = TickerIndexer::new(
                         contract.clone(),
                         pg_client.clone(),

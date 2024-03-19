@@ -22,6 +22,7 @@ pub enum GroupType {
     EarlyHolder,
     Whale,
     AllHolders,
+    Ticker
 }
 
 #[derive(Debug, Clone)]
