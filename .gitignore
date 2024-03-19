@@ -12,4 +12,5 @@ addr_membership.r1cs
 .eslintcache
 
 /db/
+/checkpoint/
 !./packages/db
