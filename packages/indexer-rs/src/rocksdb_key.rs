@@ -1,7 +1,7 @@
 pub const ERC20_TRANSFER_EVENT_ID: u16 = 1;
 pub const ERC721_TRANSFER_EVENT_ID: u16 = 2;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KeyType {
     EventLog = 1,
     SyncLog = 2,
@@ -42,7 +42,7 @@ const KEY_BYTES: usize = KEY_TYPE_BYTES
     + LOG_INDEX_BYTES
     + TX_INDEX_BYTES;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct RocksDbKey {
     pub key_type: KeyType,
     pub event_id: u16,
