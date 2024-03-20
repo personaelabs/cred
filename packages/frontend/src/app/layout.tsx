@@ -39,6 +39,11 @@ export default function RootLayout({
           sizes="16x16"
           href="/favicon-16x16.png"
         />
+        <script
+          defer
+          data-domain="creddd.xyz"
+          src="https://plausible.io/js/script.js"
+        ></script>
       </head>
       <body className="bg-background overflow-y-hidden">
         <TooltipProvider>

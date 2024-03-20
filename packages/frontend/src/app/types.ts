@@ -1,5 +1,5 @@
 import { Hex } from 'viem';
-import { GroupSelect } from './api/groups/route';
+import { MerkleTreeSelect } from './api/trees/route';
 
 /**
  * Witness to pass to the prover
@@ -35,6 +35,14 @@ export interface NeynarUserResponse {
   pfp_url: string;
 }
 
-export type EligibleGroup = {
+export interface MerkleProof {
+  root: Uint8Array;
+  path: Hex[];
+  pathIndices: number[];
+}
+
+export type EligibleGroup = MerkleTreeSelect['Group'] & {
   address: Hex;
-} & GroupSelect;
+  merkleProof: MerkleProof;
+  treeId: number;
+};

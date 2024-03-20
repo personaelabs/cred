@@ -50,24 +50,15 @@ model MerkleTree {
   groupId        Int
   blockNumber    BigInt
   treeProtoBuf   Bytes?
+  bloomFilter    Bytes?
+  bloomSipKeys   Bytes[]
+  bloomNumHashes Int?
+  bloomNumBits   Int?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   FidAttestation FidAttestation[]
-  MerkleTreeLeaf MerkleTreeLeaf[]
 
   @@unique([groupId, blockNumber])
-}
-
-model MerkleTreeLeaf {
-  id         Int        @id @default(autoincrement())
-  address    String
-  treeId     Int
-  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([treeId, address])
 }
 
 model Group {

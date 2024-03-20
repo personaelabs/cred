@@ -5,6 +5,7 @@ use crate::utils::{efficient_ecdsa, verify_efficient_ecdsa};
 use ark_ff::BigInteger;
 use ark_secp256k1::{Affine, Fq, Fr};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use bloomfilter::Bloom;
 use eth_membership::{eth_membership, to_cs_field, TREE_DEPTH};
 use num_bigint::BigUint;
 use sapir::constraint_system::ConstraintSystem;
@@ -190,6 +191,30 @@ pub fn get_msg_hash(creddd_proof: &[u8]) -> Vec<u8> {
 pub fn get_sign_in_sig(creddd_proof: &[u8]) -> Vec<u8> {
     let creddd_proof = MembershipProof::deserialize_compressed(creddd_proof).unwrap();
     creddd_proof.sign_in_sig.into_bigint().to_bytes_be()
+}
+
+#[wasm_bindgen]
+pub fn bloom_check(
+    bytes: &[u8],
+    bitmap_bits: u64,
+    k_num: u32,
+    sip_keys_bytes: &[u8],
+    item: &[u8],
+) -> bool {
+    let sip_keys = [
+        (
+            u64::from_be_bytes(sip_keys_bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(sip_keys_bytes[8..16].try_into().unwrap()),
+        ),
+        (
+            u64::from_be_bytes(sip_keys_bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(sip_keys_bytes[24..32].try_into().unwrap()),
+        ),
+    ];
+
+    let bloom = Bloom::from_existing(bytes, bitmap_bits, k_num, sip_keys);
+
+    bloom.check(item)
 }
 
 #[cfg(test)]

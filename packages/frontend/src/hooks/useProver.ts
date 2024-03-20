@@ -2,13 +2,16 @@
 
 import * as Comlink from 'comlink';
 import { useEffect } from 'react';
-import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
+import {
+  EligibleGroup,
+  FidAttestationRequestBody,
+  WitnessInput,
+} from '@/app/types';
 import { WalletClient } from 'viem';
 import {
   calculateSigRecovery,
   concatUint8Arrays,
   fromHexString,
-  captureFetchError,
   toHexString,
 } from '@/lib/utils';
 import {
@@ -20,95 +23,20 @@ import {
 } from 'viem';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
-import { MerkleTree } from '@/proto/merkle_tree_pb';
-import { PRECOMPUTED_HASHES } from '@/lib/utils';
 
 interface Prover {
   prepare(): Promise<void>;
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const getMerkleTree = async (
-  groupId: number
-): Promise<{
-  treeId: number;
-  merkleTree: MerkleTree;
-}> => {
-  const response = await fetch(`/api/groups/${groupId}/merkle-tree`);
-
-  if (!response.ok) {
-    await captureFetchError(response);
-    throw new Error('Failed to fetch merkle tree');
-  }
-
-  const responseBuf = await response.arrayBuffer();
-
-  const treeId = Buffer.from(responseBuf.slice(0, 4)).readUInt32BE();
-  const merkleTreeBytes = responseBuf.slice(4, responseBuf.byteLength);
-
-  const merkleTree = MerkleTree.deserializeBinary(
-    new Uint8Array(merkleTreeBytes)
-  );
-
-  return { treeId, merkleTree };
-};
-
-const getMerkleProof = (merkleTree: MerkleTree, address: Hex) => {
-  const layers = merkleTree.getLayersList();
-  const treeDepth = layers.length;
-
-  // Get the leaves of the tree
-  const leaves = layers[0].getNodesList();
-
-  // Convert the address to a buffer
-  const addressBuffer = fromHexString(address, 20);
-
-  // Find the leaf index
-  const leafNode = leaves.find(leaf => {
-    const leafBytes = leaf.getNode_asU8();
-    return addressBuffer.equals(Buffer.from(leafBytes));
-  });
-
-  if (!leafNode) {
-    return null;
-  }
-
-  let leafIndex = leafNode.getIndex();
-
-  // Get the merkle proof
-  const siblings = [];
-  const pathIndices = [];
-
-  for (let i = 0; i < treeDepth - 1; i++) {
-    const layer = layers[i];
-    const siblingIndex = leafIndex % 2 === 0 ? leafIndex + 1 : leafIndex - 1;
-
-    const sibling =
-      (layer
-        .getNodesList()
-        .find(node => node.getIndex() === siblingIndex)
-        ?.getNode() as Uint8Array) || PRECOMPUTED_HASHES[i];
-
-    siblings.push(sibling);
-    pathIndices.push(leafIndex & 1);
-
-    leafIndex = Math.floor(leafIndex / 2);
-  }
-
-  const root = layers[treeDepth - 1].getNodesList()[0].getNode_asU8();
-
-  return {
-    root,
-    path: siblings.map(sibling => toHexString(sibling)),
-    pathIndices,
-  };
-};
-
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 let prover: Comlink.Remote<Prover>;
-const useProver = () => {
+
+const useProver = (eligibleGroup: EligibleGroup) => {
   const { user, siwfResponse } = useUser();
+
+  const { address, merkleProof } = eligibleGroup;
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
@@ -117,9 +45,7 @@ const useProver = () => {
   }, []);
 
   const prove = async (
-    address: Hex,
-    client: WalletClient,
-    groupId: number
+    client: WalletClient
   ): Promise<FidAttestationRequestBody | null> => {
     if (prover && user?.fid && siwfResponse) {
       const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
@@ -136,18 +62,10 @@ const useProver = () => {
         description: 'This may take a minute...',
       });
 
-      const { treeId, merkleTree } = await getMerkleTree(groupId);
-
       const { s, r, v } = hexToSignature(sig);
       const isYOdd = calculateSigRecovery(v);
 
       const msgHash = hashMessage(message);
-
-      const merkleProof = getMerkleProof(merkleTree, address);
-
-      if (!merkleProof) {
-        throw new Error('Merkle proof not found');
-      }
 
       if (!siwfResponse.signature) {
         throw new Error('SIWF response signature not found');
@@ -197,7 +115,7 @@ const useProver = () => {
           custody: siwfResponse.custody!,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
-          treeId,
+          treeId: eligibleGroup.treeId,
           issuedAt: issuedAt[0],
         };
       }

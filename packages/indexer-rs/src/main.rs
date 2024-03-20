@@ -1,4 +1,3 @@
-use env_logger::{Builder, Target};
 use futures::future::join_all;
 use futures::join;
 use indexer_rs::eth_rpc::EthRpcClient;
@@ -14,9 +13,6 @@ use tokio::sync::Semaphore;
 #[tokio::main]
 async fn main() {
     dotenv_config();
-
-    let mut builder = Builder::from_default_env();
-    builder.target(Target::Stdout);
 
     let pg_client = init_postgres().await;
     let contracts = get_contracts(&pg_client).await;
