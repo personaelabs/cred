@@ -30,7 +30,7 @@ use tokio::sync::Semaphore;
 
 const TREE_DEPTH: usize = 18;
 const TREE_WIDTH: usize = 3;
-const BLOOM_FILTER_FP_RATE: f64 = 0.05;
+const BLOOM_FILTER_FP_RATE: f64 = 0.005;
 
 fn to_hex(fe: Fq) -> String {
     format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
