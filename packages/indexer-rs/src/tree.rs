@@ -1,5 +1,6 @@
 extern crate merkle_tree as merkle_tree_lib;
 use crate::contract::Contract;
+use crate::contract_event_iterator::ContractEventIterator;
 use crate::eth_rpc::EthRpcClient;
 use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::processors::all_holders::AllHoldersIndexer;
@@ -7,7 +8,7 @@ use crate::processors::early_holders::EarlyHolderIndexer;
 use crate::processors::ticker::TickerIndexer;
 use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
-use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
+use crate::rocksdb_key::{ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
 use crate::utils::dev_addresses;
 use crate::{Address, EventId, GroupType};
 use bloomfilter::Bloom;
@@ -43,52 +44,35 @@ async fn process_event_logs(
     indexers: &mut Vec<Box<dyn GroupIndexer>>,
 ) {
     let start = Instant::now();
-    // Initialize the RocksDB iterator that starts from the first log for `contract.id`
-    let mut iterator_ops = ReadOptions::default();
-    iterator_ops.set_async_io(true);
-
-    let start_key = RocksDbKey::new_start_key(KeyType::EventLog, event_id, contract.id);
-
-    // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
-    let iterator = db.iterator_opt(
-        IteratorMode::From(&start_key.to_bytes(), rocksdb::Direction::Forward),
-        iterator_ops,
-    );
 
     let mut latest_block_num = None;
 
     let mut errored_indexers = vec![];
-    for item in iterator {
-        let (key, value) = item.unwrap();
-        let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
 
-        if key.key_type == KeyType::EventLog
-            && key.contract_id == contract.id
-            && key.event_id == event_id
-        {
-            // Run the log through the indexers
-            for (i, indexer) in indexers.iter_mut().enumerate() {
-                if errored_indexers.contains(&i) {
-                    continue;
-                }
+    // Initialize an iterator that iterates through the logs for the contract event
+    let iterator = ContractEventIterator::new(db, event_id, contract.id);
 
-                let result = indexer.process_log(key, &value);
-                if let Err(err) = result {
-                    error!(
-                        "${} {} Error processing logs for contract {:?}",
-                        contract.symbol.to_uppercase(),
-                        indexer.group_handle(),
-                        err
-                    );
-
-                    errored_indexers.push(i);
-                }
+    for (key, value) in iterator {
+        // Run the log through the indexers
+        for (i, indexer) in indexers.iter_mut().enumerate() {
+            if errored_indexers.contains(&i) {
+                continue;
             }
 
-            latest_block_num = Some(key.block_num.unwrap());
-        } else {
-            break;
+            let result = indexer.process_log(key, &value);
+            if let Err(err) = result {
+                error!(
+                    "${} {} Error processing logs for contract {:?}",
+                    contract.symbol.to_uppercase(),
+                    indexer.group_handle(),
+                    err
+                );
+
+                errored_indexers.push(i);
+            }
         }
+
+        latest_block_num = Some(key.block_num.unwrap());
     }
 
     info!(

@@ -122,10 +122,11 @@ impl GroupIndexer for EarlyHolderIndexer {
 mod test {
     use super::*;
     use crate::{
-        log_sync_engine::LogSyncEngine, postgres::init_postgres, rocksdb_key::KeyType,
-        test_utils::erc20_test_contract, utils::dotenv_config, ROCKSDB_PATH,
+        contract_event_iterator::ContractEventIterator, log_sync_engine::LogSyncEngine,
+        postgres::init_postgres, test_utils::erc20_test_contract, utils::dotenv_config,
+        ROCKSDB_PATH,
     };
-    use rocksdb::{IteratorMode, Options, DB};
+    use rocksdb::{Options, DB};
 
     #[tokio::test]
     async fn test_early_holders_indexer() {
@@ -158,10 +159,6 @@ mod test {
         let contract_sync_engine = LogSyncEngine::new(eth_client, contract.clone(), db.clone());
         contract_sync_engine.sync_to_block(to_block).await;
 
-        // Initialize the RocksDB iterator that starts from the first log for `contract.id`
-        let start_key =
-            RocksDbKey::new_start_key(KeyType::EventLog, ERC20_TRANSFER_EVENT_ID, contract.id);
-
         let mut indexer = EarlyHolderIndexer::new(
             contract.clone(),
             pg_client,
@@ -169,23 +166,9 @@ mod test {
             Arc::new(EthRpcClient::new()),
         );
 
-        // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
-        let iterator = db.iterator(IteratorMode::From(
-            &start_key.to_bytes(),
-            rocksdb::Direction::Forward,
-        ));
+        let iterator = ContractEventIterator::new(&db, ERC20_TRANSFER_EVENT_ID, contract.id);
 
-        for item in iterator {
-            let (key, value) = item.unwrap();
-            let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
-
-            if key.key_type != KeyType::EventLog
-                || key.contract_id != contract.id
-                || key.event_id != ERC20_TRANSFER_EVENT_ID
-            {
-                break;
-            }
-
+        for (key, value) in iterator {
             indexer.process_log(key, &value).unwrap();
         }
 

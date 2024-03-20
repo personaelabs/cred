@@ -1,5 +1,6 @@
 use crate::{
     contract::Contract,
+    contract_event_iterator::ContractEventIterator,
     erc20_transfer_event, erc721_transfer_event,
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
@@ -179,26 +180,10 @@ pub fn count_synched_logs(
     contract_id: ContractId,
     to_block: Option<BlockNum>,
 ) -> i32 {
-    let start_key = RocksDbKey::new_start_key(KeyType::EventLog, event_id, contract_id);
-
-    let iterator = rocksdb_conn.iterator(rocksdb::IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
+    let iterator = ContractEventIterator::new(rocksdb_conn, event_id, contract_id);
 
     let mut count = 0;
-    for item in iterator {
-        let (key_bytes, _value) = item.unwrap();
-
-        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
-
-        if key.key_type != KeyType::EventLog
-            || key.event_id != event_id
-            || key.contract_id != contract_id
-        {
-            break;
-        }
-
+    for (key, _value) in iterator {
         if let Some(to_block) = to_block {
             if key.block_num.unwrap() > to_block {
                 break;
