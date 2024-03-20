@@ -70,10 +70,6 @@ pub mod erc721_transfer_event {
     include!(concat!(env!("OUT_DIR"), "/erc721_transfer_event.rs"));
 }
 
-pub mod merkle_proof {
-    include!(concat!(env!("OUT_DIR"), "/merkle_proof.rs"));
-}
-
 pub mod merkle_tree_proto {
     include!(concat!(env!("OUT_DIR"), "/merkle_tree_proto.rs"));
 }

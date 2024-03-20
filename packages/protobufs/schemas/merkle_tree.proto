@@ -15,3 +15,7 @@ message MerkleTree {
     repeated MerkleTreeLayer layers = 1;
 }
 
+message MerkleTreeList {
+    repeated MerkleTree trees = 1;
+}
+
