@@ -105,3 +105,36 @@ export namespace MerkleTree {
     layersList: Array<MerkleTreeLayer.AsObject>;
   };
 }
+
+export class MerkleTreeList extends jspb.Message {
+  clearTreesList(): void;
+  getTreesList(): Array<MerkleTree>;
+  setTreesList(value: Array<MerkleTree>): void;
+  addTrees(value?: MerkleTree, index?: number): MerkleTree;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): MerkleTreeList.AsObject;
+  static toObject(
+    includeInstance: boolean,
+    msg: MerkleTreeList
+  ): MerkleTreeList.AsObject;
+  static extensions: { [key: number]: jspb.ExtensionFieldInfo<jspb.Message> };
+  static extensionsBinary: {
+    [key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>;
+  };
+  static serializeBinaryToWriter(
+    message: MerkleTreeList,
+    writer: jspb.BinaryWriter
+  ): void;
+  static deserializeBinary(bytes: Uint8Array): MerkleTreeList;
+  static deserializeBinaryFromReader(
+    message: MerkleTreeList,
+    reader: jspb.BinaryReader
+  ): MerkleTreeList;
+}
+
+export namespace MerkleTreeList {
+  export type AsObject = {
+    treesList: Array<MerkleTree.AsObject>;
+  };
+}
