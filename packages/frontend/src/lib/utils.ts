@@ -143,21 +143,21 @@ export const getCredddDescription = (
   switch (groupType) {
     case GroupType.AllHolders: {
       const tokenName = groupHandle.replaceAll('historical holder', '').trim();
-      return `This indicates that you held at least 1 of ${tokenName} at any point in time in the past.`;
+      return `This indicates the user held at least 1 of ${tokenName} at any point in time in the past.`;
     }
     case GroupType.Whale: {
       const tokenName = groupHandle.replaceAll('whale', '').trim();
-      return `This indicates that at some point in time you held >0.1% of the outstanding supply of $${tokenName}. `;
+      return `This indicates that at some point in time the user held >0.1% of the outstanding supply of $${tokenName}. `;
     }
     case GroupType.EarlyHolder: {
       const tokenName = groupHandle
         .replaceAll('Early', '')
         .replaceAll('holder', '')
         .trim();
-      return `This indicates that you were in the first 5% of addresses that ever traded, bought, or otherwise interacted with $${tokenName}.`;
+      return `This indicates the user was in the first 5% of addresses that ever traded, bought, or otherwise interacted with $${tokenName}.`;
     }
     case GroupType.Ticker: {
-      return `This indicates that you controlled wallets with >0 $ticker balance when $ticker dev rugged.`;
+      return `This indicates the user controlled wallets with >0 $ticker balance when $ticker dev rugged.`;
     }
     default:
       return '';
