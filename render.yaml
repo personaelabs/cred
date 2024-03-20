@@ -3,6 +3,7 @@ services:
   - type: worker
     name: credbot
     plan: pro
+    previewPlan: starter
     runtime: node
     region: oregon
     buildCommand: pnpm i && pnpm -F db migrate:prod
@@ -27,6 +28,7 @@ services:
   - type: worker
     name: cred-indexer
     plan: pro plus
+    previewPlan: starter
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
@@ -47,12 +49,12 @@ services:
       - fromGroup: cred
     disk:
       name: db
-      mountPath: /usr/src/app/db      
+      mountPath: /usr/src/app/db
 
-      
 databases:
   - name: cred
     databaseName: cred
     region: oregon
     plan: pro
+    previewPlan: starter
     postgresMajorVersion: 15

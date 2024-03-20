@@ -100,6 +100,7 @@ impl GroupIndexer for AllHoldersIndexer {
 mod test {
     use super::*;
     use crate::{
+        contract_event_iterator::ContractEventIterator,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
         rocksdb_key::KeyType,
@@ -140,37 +141,15 @@ mod test {
 
         let eth_client = Arc::new(EthRpcClient::new());
 
-        let contract_sync_engine = LogSyncEngine::new(eth_client, contract.clone(), db.clone());
+        let contract_sync_engine =
+            LogSyncEngine::new(eth_client.clone(), contract.clone(), db.clone());
         contract_sync_engine.sync_to_block(to_block).await;
 
-        // Initialize the RocksDB iterator that starts from the first log for `contract.id`
-        let start_key =
-            RocksDbKey::new_start_key(KeyType::EventLog, ERC721_TRANSFER_EVENT_ID, contract.id);
+        let iterator = ContractEventIterator::new(&db, ERC721_TRANSFER_EVENT_ID, contract.id);
 
-        let mut indexer = AllHoldersIndexer::new(
-            contract.clone(),
-            pg_client,
-            db.clone(),
-            Arc::new(EthRpcClient::new()),
-        );
+        let mut indexer = AllHoldersIndexer::new(contract, pg_client, db.clone(), eth_client);
 
-        // Initialize the RocksDB prefix iterator (i.e. the iterator starts from key [contract_id, 0, 0, 0, 0,  ... 0])
-        let iterator = db.iterator(IteratorMode::From(
-            &start_key.to_bytes(),
-            rocksdb::Direction::Forward,
-        ));
-
-        for item in iterator {
-            let (key, value) = item.unwrap();
-            let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
-
-            if key.key_type != KeyType::EventLog
-                || key.contract_id != contract.id
-                || key.event_id != ERC721_TRANSFER_EVENT_ID
-            {
-                break;
-            }
-
+        for (key, value) in iterator {
             indexer.process_log(key, &value).unwrap();
         }
 
