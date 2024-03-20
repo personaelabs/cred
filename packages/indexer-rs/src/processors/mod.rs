@@ -1,5 +1,6 @@
 #![allow(async_fn_in_trait)]
 
+use crate::GroupType;
 use crate::rocksdb_key::RocksDbKey;
 pub mod early_holders;
 pub mod all_holders;
@@ -12,7 +13,9 @@ pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds
 /// A trait for a group indexer
 pub trait GroupIndexer: Send + Sync {
     /// Returns the name of the group
-    fn group_name(&self) -> String;
+    fn group_handle(&self) -> String;
+    /// Returns the display name of the group
+    fn display_name(&self) -> String;
     /// Initializes the group
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error>;
     /// Returns true if the logs which the indexer depends on are ready
@@ -28,14 +31,14 @@ pub async fn upsert_group(
     pg_client: &tokio_postgres::Client,
     display_name: &String,
     handle: &String,
-    group_type: &str,
+    group_type: GroupType,
 ) -> Result<i32, tokio_postgres::Error> {
     let result = 
             pg_client
             .query_one(
                 r#"
-            INSERT INTO "Group" ("displayName", "handle", "type", "updatedAt") VALUES ($1, $2, $3, NOW())
-            ON CONFLICT ("handle") DO UPDATE SET "displayName" = $1
+            INSERT INTO "Group" ("displayName", "handle", "typeId", "updatedAt") VALUES ($1, $2, $3, NOW())
+            ON CONFLICT ("handle") DO UPDATE SET "displayName" = $1, "updatedAt" = NOW(), "typeId" = $3
             RETURNING id
         "#,
                 &[&display_name, &handle, &group_type],

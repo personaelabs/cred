@@ -10,26 +10,55 @@ pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
 pub mod utils;
+use postgres_types::{FromSql, ToSql};
+
+// Define the types for the RocksDB key and value
+
+/// ID of a contract event
+pub type EventId = u16;
+
+/// Contract id defined in the Postgres database
+pub type ContractId = u16;
+
+/// A chunk number is a number that represents a range of 2000 blocks.
+/// It's counted from the block the contract was deployed. (Chunk numbers are contract specific)
+pub type ChunkNum = u64;
+
+/// Block number
+pub type BlockNum = u64;
+
+/// Index of a log in a block
+pub type LogIndex = u32;
+
+/// Index of a transaction in a block
+pub type TxIndex = u32;
+
+/// 20byte Ethereum address
+pub type Address = [u8; 20];
 
 pub const ROCKSDB_PATH: &str = "./db";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[postgres(name = "GroupType")]
 pub enum GroupType {
-    Offchain,
-    Onchain,
+    Static,
+    EarlyHolder,
+    Whale,
+    AllHolders,
+    Ticker,
 }
 
 #[derive(Debug, Clone)]
 pub struct ERC20TransferEvent {
-    pub from: [u8; 20],
-    pub to: [u8; 20],
+    pub from: Address,
+    pub to: Address,
     pub value: BigUint,
 }
 
 #[derive(Debug, Clone)]
 pub struct ERC721TransferEvent {
-    pub from: [u8; 20],
-    pub to: [u8; 20],
+    pub from: Address,
+    pub to: Address,
     pub token_id: BigUint,
 }
 

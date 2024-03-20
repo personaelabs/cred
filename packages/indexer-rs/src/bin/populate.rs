@@ -1,19 +1,32 @@
 use indexer_rs::{
     contract::{upsert_contract, Contract, ContractType},
+    contracts::{erc20::erc20_contracts, erc721::erc721_contracts},
     eth_rpc::Chain,
     postgres::init_postgres,
     utils::{dotenv_config, is_prod},
+    GroupType,
 };
 
 #[tokio::main]
 async fn main() {
     dotenv_config();
 
-    // Only run this script in development or in a pull request (i.e. preview environment)
-    if !is_prod() {
-        // Connect to the database.
-        let client = init_postgres().await;
+    // Connect to the database.
+    let client = init_postgres().await;
 
+    if is_prod() {
+        // Populate all contracts in production.
+
+        let mut contracts = vec![];
+
+        contracts.extend(erc721_contracts().iter().cloned());
+        contracts.extend(erc20_contracts().iter().cloned());
+
+        for contract in contracts {
+            upsert_contract(&client, &contract).await.unwrap();
+        }
+    } else {
+        // Only populate few small contracts in development and preview environments.
         let contracts = [
             Contract {
                 id: 0,
@@ -22,7 +35,7 @@ async fn main() {
                 symbol: "pika".to_string(),
                 name: "Pikaboss".to_string(),
                 deployed_block: 16628745,
-                target_groups: vec!["earlyHolder".to_string(), "whale".to_string()],
+                target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
                 contract_type: ContractType::ERC20,
             },
             Contract {
@@ -32,7 +45,7 @@ async fn main() {
                 symbol: "KIBSHI".to_string(),
                 name: "KiboShib".to_string(),
                 deployed_block: 16140853,
-                target_groups: vec!["earlyHolder".to_string(), "whale".to_string()],
+                target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
                 contract_type: ContractType::ERC20,
             },
             Contract {
@@ -42,28 +55,23 @@ async fn main() {
                 name: "Milady".to_string(),
                 chain: Chain::Mainnet,
                 deployed_block: 13090020,
-                target_groups: vec!["allHolders".to_string()],
+                target_groups: vec![GroupType::AllHolders],
                 contract_type: ContractType::ERC721,
+            },
+            Contract {
+                id: 0,
+                address: "0xa0c05e2eed05912d9eb76d466167628e8024a708".to_string(),
+                symbol: "ticker".to_string(),
+                name: "Ticker".to_string(),
+                chain: Chain::Base,
+                deployed_block: 11962318,
+                target_groups: vec![GroupType::Ticker],
+                contract_type: ContractType::ERC20,
             },
         ];
 
         for contract in &contracts {
             upsert_contract(&client, contract).await.unwrap();
         }
-
-        /*
-        let group_id = upsert_group(
-            &client,
-            &"dev".to_string(),
-            &"dev".to_string(),
-            &"static".to_string(),
-        )
-        .await
-        .unwrap();
-
-        save_tree(group_id, &client, vec![], 0).await.unwrap();
-         */
-
-        // TODO: Upsert some dummy FID attestations
     }
 }

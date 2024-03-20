@@ -9,7 +9,7 @@ use crate::processors::whales::WhaleIndexer;
 use crate::processors::GroupIndexer;
 use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
 use crate::utils::dev_addresses;
-use crate::GroupType;
+use crate::{Address, EventId, GroupType};
 use bloomfilter::Bloom;
 use colored::*;
 use futures::future::join_all;
@@ -39,7 +39,7 @@ fn to_hex(fe: Fq) -> String {
 async fn process_event_logs(
     db: &DB,
     contract: &Contract,
-    event_id: u16,
+    event_id: EventId,
     indexers: &mut Vec<Box<dyn GroupIndexer>>,
 ) {
     let start = Instant::now();
@@ -77,7 +77,7 @@ async fn process_event_logs(
                     error!(
                         "${} {} Error processing logs for contract {:?}",
                         contract.symbol.to_uppercase(),
-                        indexer.group_name(),
+                        indexer.group_handle(),
                         err
                     );
 
@@ -107,7 +107,7 @@ async fn process_event_logs(
                 warn!(
                     "${} Skipping saving tree for '{}' due to previous error",
                     contract.symbol.to_uppercase(),
-                    indexer.group_name()
+                    indexer.group_handle()
                 );
                 continue;
             }
@@ -117,7 +117,7 @@ async fn process_event_logs(
                 error!(
                     "${} {} Error saving tree for contract {:?}",
                     contract.symbol.to_uppercase(),
-                    indexer.group_name(),
+                    indexer.group_handle(),
                     err
                 );
             }
@@ -125,7 +125,7 @@ async fn process_event_logs(
             info!(
                 "${} Saved tree for '{}' in {:?}",
                 contract.symbol.to_uppercase(),
-                indexer.group_name(),
+                indexer.group_handle(),
                 save_trees_start.elapsed()
             );
         }
@@ -146,7 +146,7 @@ async fn is_indexer_ready(contract: &Contract, indexer: &impl GroupIndexer) -> b
             info!(
                 "${} Indexer for '{}' is waiting...",
                 contract.symbol.to_uppercase(),
-                indexer.group_name()
+                indexer.group_handle()
             );
             false
         }
@@ -154,7 +154,7 @@ async fn is_indexer_ready(contract: &Contract, indexer: &impl GroupIndexer) -> b
         error!(
             "${} {} Error checking if indexer is ready {}",
             contract.symbol.to_uppercase(),
-            indexer.group_name(),
+            indexer.group_handle(),
             is_indexer_ready.unwrap_err()
         );
         false
@@ -170,11 +170,11 @@ pub async fn index_groups_for_contract(
 ) {
     loop {
         let permit = semaphore.acquire().await.unwrap();
-        let mut indexers: HashMap<u16, Vec<Box<dyn GroupIndexer>>> = HashMap::new();
+        let mut indexers: HashMap<EventId, Vec<Box<dyn GroupIndexer>>> = HashMap::new();
 
         for target_group in &contract.target_groups {
-            match target_group.as_str() {
-                "earlyHolder" => {
+            match target_group {
+                GroupType::EarlyHolder => {
                     let early_holder_indexer = EarlyHolderIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -186,7 +186,7 @@ pub async fn index_groups_for_contract(
                         erc20_indexers.push(Box::new(early_holder_indexer));
                     }
                 }
-                "whale" => {
+                GroupType::Whale => {
                     let whale_indexer = WhaleIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -198,7 +198,7 @@ pub async fn index_groups_for_contract(
                         erc20_indexers.push(Box::new(whale_indexer));
                     }
                 }
-                "allHolders" => {
+                GroupType::AllHolders => {
                     let all_holder_indexer = AllHoldersIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -210,7 +210,7 @@ pub async fn index_groups_for_contract(
                         erc721_indexers.push(Box::new(all_holder_indexer));
                     }
                 }
-                "ticker" => {
+                GroupType::Ticker => {
                     let ticker_indexer = TickerIndexer::new(
                         contract.clone(),
                         pg_client.clone(),
@@ -223,7 +223,7 @@ pub async fn index_groups_for_contract(
                     }
                 }
                 _ => {
-                    error!("Unknown target group {}", target_group);
+                    error!("Unknown target group {:?}", target_group);
                 }
             }
         }
@@ -287,7 +287,7 @@ pub async fn save_tree(
     group_id: i32,
     group_type: GroupType,
     pg_client: &tokio_postgres::Client,
-    mut addresses: Vec<[u8; 20]>,
+    mut addresses: Vec<Address>,
     block_number: i64,
 ) -> Result<(), tokio_postgres::Error> {
     addresses.sort();
@@ -300,7 +300,9 @@ pub async fn save_tree(
         addresses.extend(dev_addresses.iter());
     }
 
-    if group_type == GroupType::Onchain && addresses.len() < 100 {
+    // If the group type is not static and the number of addresses is less than 100,
+    // then we skip building the tree since the anonymity set is too small
+    if group_type != GroupType::Static && addresses.len() < 100 {
         info!("Not enough addresses to build a tree for {}", group_id);
         return Ok(());
     }

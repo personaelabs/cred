@@ -3,7 +3,7 @@ use crate::eth_rpc::EthRpcClient;
 use crate::rocksdb_key::{RocksDbKey, ERC20_TRANSFER_EVENT_ID};
 use crate::tree::save_tree;
 use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS};
-use crate::GroupType;
+use crate::{Address, GroupType};
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
 use std::io::Error;
@@ -18,12 +18,12 @@ pub fn get_whale_handle(contract_name: &str) -> String {
 
 pub struct WhaleIndexer {
     eth_client: Arc<EthRpcClient>,
-    balances: HashMap<[u8; 20], BigUint>,
+    balances: HashMap<Address, BigUint>,
     total_supply: BigUint,
     whale_threshold: BigUint,
     pg_client: Arc<tokio_postgres::Client>,
     rocksdb_client: Arc<rocksdb::DB>,
-    whales: HashSet<[u8; 20]>,
+    whales: HashSet<Address>,
     contract: Contract,
     group_id: Option<i32>,
 }
@@ -51,21 +51,25 @@ impl WhaleIndexer {
 
 #[async_trait::async_trait]
 impl GroupIndexer for WhaleIndexer {
-    fn group_name(&self) -> String {
-        "Whale".to_string()
+    fn group_handle(&self) -> String {
+        format!("whale-{}", self.contract.name.to_lowercase())
+    }
+
+    fn display_name(&self) -> String {
+        format!("${} whale", self.contract.symbol.clone().to_uppercase())
     }
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
-        let handle = format!("whale-{}", self.contract.name.to_lowercase());
-        let display_name = format!("${} whale", self.contract.symbol.clone().to_uppercase());
+        let handle = self.group_handle();
+        let display_name = self.display_name();
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "whale").await?;
+        let group_id =
+            upsert_group(&self.pg_client, &display_name, &handle, GroupType::Whale).await?;
         self.group_id = Some(group_id);
 
         Ok(())
     }
 
-    /// Returns true if the logs which the indexer depends on are ready
     async fn is_ready(&self) -> Result<bool, surf::Error> {
         is_event_logs_ready(
             &self.rocksdb_client,
@@ -131,7 +135,7 @@ impl GroupIndexer for WhaleIndexer {
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                GroupType::Onchain,
+                GroupType::Whale,
                 &self.pg_client,
                 self.whales.clone().into_iter().collect(),
                 block_number,

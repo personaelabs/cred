@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex } from 'viem';
 import * as Sentry from '@sentry/nextjs';
+import { GroupType } from '@prisma/client';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -137,25 +138,25 @@ export const captureFetchError = async (response: Response) => {
  */
 export const getCredddDescription = (
   groupHandle: string,
-  groupType: string
+  groupType: GroupType | null
 ): string | null => {
   switch (groupType) {
-    case 'allHolders': {
+    case GroupType.AllHolders: {
       const tokenName = groupHandle.replaceAll('historical holder', '').trim();
       return `This indicates that you held at least 1 of ${tokenName} at any point in time in the past.`;
     }
-    case 'whale': {
+    case GroupType.Whale: {
       const tokenName = groupHandle.replaceAll('whale', '').trim();
       return `This indicates that at some point in time you held >0.1% of the outstanding supply of $${tokenName}. `;
     }
-    case 'earlyHolder': {
+    case GroupType.EarlyHolder: {
       const tokenName = groupHandle
         .replaceAll('Early', '')
         .replaceAll('holder', '')
         .trim();
       return `This indicates that you were in the first 5% of addresses that ever traded, bought, or otherwise interacted with $${tokenName}.`;
     }
-    case 'ticker': {
+    case GroupType.Ticker: {
       return `This indicates that you controlled wallets with >0 $ticker balance when $ticker dev rugged.`;
     }
     default:

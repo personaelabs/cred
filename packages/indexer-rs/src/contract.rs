@@ -1,7 +1,7 @@
-use crate::eth_rpc::Chain;
+use crate::{eth_rpc::Chain, BlockNum, ContractId, GroupType};
 use postgres_types::{FromSql, ToSql};
 
-#[derive(Debug, Clone, FromSql, ToSql)]
+#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "ContractType")]
 pub enum ContractType {
     ERC20,
@@ -12,14 +12,14 @@ pub enum ContractType {
 
 #[derive(Debug, Clone)]
 pub struct Contract {
-    pub id: u16,
+    pub id: ContractId,
     pub address: String,
     pub chain: Chain,
     pub contract_type: ContractType,
-    pub target_groups: Vec<String>,
+    pub target_groups: Vec<GroupType>,
     pub name: String,
     pub symbol: String,
-    pub deployed_block: u64,
+    pub deployed_block: BlockNum,
 }
 
 pub async fn upsert_contract(
@@ -35,9 +35,9 @@ pub async fn upsert_contract(
 
     pg_client
         .execute(
-            r#"INSERT INTO "Contract" ("address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock", "updatedAt")
-            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-            ON CONFLICT ("address", "chain") DO UPDATE SET "address" = $1, "type" = $2, "targetGroups" = $3, "name" = $4, "symbol" = $5, "chain" = $6, "deployedBlock" = $7"#,
+            r#"INSERT INTO "Contract" ("address", "type", "targetGroupIds", "name", "symbol", "chain", "deployedBlock",  "updatedAt")
+            VALUES ($1, $2, $3, $4, $5, $6, $7,  NOW())
+            ON CONFLICT ("address", "chain") DO UPDATE SET "address" = $1, "type" = $2, "targetGroupIds" = $3, "name" = $4, "symbol" = $5, "chain" = $6, "deployedBlock" = $7"#,
             &[
                 &contract.address.to_lowercase(),
                 &contract.contract_type,
@@ -58,7 +58,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
     // Get all contracts from the storage
     let result = pg_clinet
         .query(
-            r#"SELECT "id", "address", "type", "targetGroups", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
+            r#"SELECT "id", "address", "type", "targetGroupIds", "name", "symbol", "chain", "deployedBlock" FROM "Contract""#,
             &[],
         )
         .await
@@ -74,7 +74,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             let chain: String = row.get("chain");
             let contract_deployed_block: i64 = row.get("deployedBlock");
             let contract_type: ContractType = row.get("type");
-            let target_groups: Vec<String> = row.get("targetGroups");
+            let target_groups: Vec<GroupType> = row.get("targetGroupIds");
 
             // Convert the chain string to Chain enum
             let chain = match chain.as_str() {
@@ -86,7 +86,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
             };
 
             Contract {
-                id: contract_id as u16,
+                id: contract_id as ContractId,
                 address: contract_address,
                 chain,
                 name: name.clone(),

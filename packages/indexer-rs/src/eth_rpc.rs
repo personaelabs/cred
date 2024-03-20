@@ -1,3 +1,4 @@
+use crate::BlockNum;
 use serde_json::{json, Value};
 use std::env;
 use std::env::VarError;
@@ -18,6 +19,7 @@ pub enum Chain {
     Arbitrum,
 }
 
+/// A load balances to distribute requests across multiple Alchemy nodes
 struct LoadBalancer {
     next_client_index: u32,
 }
@@ -51,6 +53,7 @@ impl LoadBalancer {
     }
 }
 
+/// A client for interacting with the Ethereum JSON-RPC API
 pub struct EthRpcClient {
     client: Arc<surf::Client>,
     load_balancer: Arc<Mutex<LoadBalancer>>,
@@ -75,15 +78,16 @@ impl EthRpcClient {
         }
     }
 
-    pub async fn get_block_number(&self, chain: Chain) -> Result<u64, surf::Error> {
+    /// Get the latest block number for a chain
+    pub async fn get_block_number(&self, chain: Chain) -> Result<BlockNum, surf::Error> {
         let mut load_balancer = self.load_balancer.lock().await;
         let url = load_balancer.get_endpoint(chain).unwrap();
         drop(load_balancer);
 
-        let permit = PERMITS.acquire().await.unwrap();
-
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
 
         let mut res = self
             .client
@@ -114,12 +118,14 @@ impl EthRpcClient {
         Ok(finalized_block)
     }
 
+    /// Get logs for a contract event in batch
+    /// - `batch_options`: An array of `[fromBlock, toBlock]` options
     pub async fn get_logs_batch(
         &self,
         chain: Chain,
         address: &str,
         event_signature: &str,
-        batch_options: &[[u64; 2]],
+        batch_options: &[[BlockNum; 2]],
     ) -> Result<Value, surf::Error> {
         let mut load_balancer = self.load_balancer.lock().await;
         let url = load_balancer.get_endpoint(chain).unwrap();
@@ -145,10 +151,10 @@ impl EthRpcClient {
             }));
         }
 
-        let permit = PERMITS.acquire().await.unwrap();
-
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
 
         let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
 
@@ -157,8 +163,5 @@ impl EthRpcClient {
         let body_str = res.body_string().await?;
 
         Ok(serde_json::from_str(&body_str).unwrap())
-
-        // Parse the response
-        //        result.json().await
     }
 }

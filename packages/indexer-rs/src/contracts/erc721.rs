@@ -1,6 +1,7 @@
 use crate::{
     contract::{Contract, ContractType},
     eth_rpc::Chain,
+    GroupType,
 };
 
 pub fn erc721_contracts() -> Vec<Contract> {
@@ -12,7 +13,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "CRYPTOPUNKS".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 3914495,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::Punk,
         },
         Contract {
@@ -22,7 +23,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Milady".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13090020,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -32,7 +33,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Azuki".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13975838,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -42,7 +43,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Pudgy Penguins".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 12876179,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -52,7 +53,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Nouns".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 12985438,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -62,7 +63,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Bored Ape Yacht Club".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 12985438,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -72,7 +73,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Mutant Ape Yacht Club".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13117018,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -82,7 +83,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "DeGods".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 16940173,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -92,7 +93,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Doodles".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13430097,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -102,7 +103,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Chronophotograph".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 17160816,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -112,7 +113,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Meebits".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 12358080,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -122,7 +123,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "The187".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 17052667,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -132,7 +133,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Terraforms".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13823015,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -142,7 +143,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Remilio".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 15323174,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
         Contract {
@@ -152,7 +153,7 @@ pub fn erc721_contracts() -> Vec<Contract> {
             name: "Crypto: The Game Players".to_string(),
             chain: Chain::Base,
             deployed_block: 11088633,
-            target_groups: vec!["allHolders".to_string()],
+            target_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::ERC721,
         },
     ]

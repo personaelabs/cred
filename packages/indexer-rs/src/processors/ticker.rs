@@ -7,18 +7,18 @@ use crate::{
     rocksdb_key::{RocksDbKey, ERC20_TRANSFER_EVENT_ID},
     tree::save_tree,
     utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
-    GroupType,
+    Address, BlockNum, GroupType, TxIndex,
 };
 use std::io::Error;
 use std::io::ErrorKind;
 use std::{collections::HashMap, sync::Arc};
 
 // The block num and index of transaction: https://basescan.org/tx/0x3122445f0240df9530c8a360fb7631ad5aca4e24503e8856b9aedae05dab830c
-const TO_BLOCK_NUMBER: u64 = 11968043;
-const TO_TX_INDEX: u32 = 26;
+const TO_BLOCK_NUMBER: BlockNum = 11968043;
+const TO_TX_INDEX: TxIndex = 26;
 
 pub struct TickerIndexer {
-    balances: HashMap<[u8; 20], BigUint>,
+    balances: HashMap<Address, BigUint>,
     pub contract: Contract,
     pub group_id: Option<i32>,
     pub pg_client: Arc<tokio_postgres::Client>,
@@ -46,7 +46,11 @@ impl TickerIndexer {
 
 #[async_trait::async_trait]
 impl GroupIndexer for TickerIndexer {
-    fn group_name(&self) -> String {
+    fn group_handle(&self) -> String {
+        "ticker-rug-survivor".to_string()
+    }
+
+    fn display_name(&self) -> String {
         "$ticker rug survivor".to_string()
     }
 
@@ -105,10 +109,11 @@ impl GroupIndexer for TickerIndexer {
     }
 
     async fn init_group(&mut self) -> Result<(), tokio_postgres::Error> {
-        let handle = "ticker-rug-survivor".to_string();
-        let display_name = "$ticker rug survivor".to_string();
+        let handle = self.group_handle();
+        let display_name = self.display_name();
 
-        let group_id = upsert_group(&self.pg_client, &display_name, &handle, "ticker").await?;
+        let group_id =
+            upsert_group(&self.pg_client, &display_name, &handle, GroupType::Ticker).await?;
         self.group_id = Some(group_id);
 
         Ok(())
@@ -120,12 +125,12 @@ impl GroupIndexer for TickerIndexer {
             .iter()
             .filter(|(_, balance)| **balance > BigUint::from(0u8))
             .map(|(holder, _balance)| *holder)
-            .collect::<Vec<[u8; 20]>>();
+            .collect::<Vec<Address>>();
 
         if let Some(group_id) = self.group_id {
             save_tree(
                 group_id,
-                GroupType::Onchain,
+                GroupType::Ticker,
                 &self.pg_client,
                 holders_at_block,
                 block_number,
