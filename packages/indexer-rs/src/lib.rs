@@ -10,6 +10,10 @@ pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
 pub mod utils;
+
+#[cfg(test)]
+pub mod test_utils;
+
 use postgres_types::{FromSql, ToSql};
 
 // Define the types for the RocksDB key and value
