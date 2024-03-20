@@ -12,6 +12,7 @@ const selectAttestation = {
         select: {
           id: true,
           handle: true,
+          typeId: true,
           displayName: true,
         },
       },
@@ -19,7 +20,7 @@ const selectAttestation = {
   },
 } satisfies Prisma.FidAttestationSelect;
 
-type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
+export type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
   select: typeof selectAttestation;
 }>;
 
