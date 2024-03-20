@@ -18,7 +18,10 @@ interface CredddBadgeProps {
 const CredddBadge = (props: CredddBadgeProps) => {
   const { group } = props;
 
-  const credddDescription = getCredddDescription(group.handle, group.typeId);
+  const credddDescription = getCredddDescription(
+    group.displayName,
+    group.typeId
+  );
 
   return (
     <div className="flex flex-row items-center">
