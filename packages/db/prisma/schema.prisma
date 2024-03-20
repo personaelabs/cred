@@ -62,11 +62,10 @@ model MerkleTree {
 }
 
 model Group {
-  id          Int        @id @default(autoincrement())
-  handle      String     @unique
+  id          Int       @id @default(autoincrement())
+  handle      String    @unique
   displayName String
-  type        String?
-  typeId      GroupType?
+  typeId      GroupType
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,7 +95,6 @@ model Contract {
   type           ContractType
   deployedBlock  BigInt
   symbol         String?
-  targetGroups   String[]
   targetGroupIds GroupType[]
   chain          String
   createdAt      DateTime     @default(now())
