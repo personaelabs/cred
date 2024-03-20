@@ -143,7 +143,7 @@ export const getCredddDescription = (
   switch (groupType) {
     case GroupType.AllHolders: {
       const tokenName = groupName.replaceAll('historical holder', '').trim();
-      return `This indicates the user held at least 1 of ${tokenName} at any point in time in the past.`;
+      return `This indicates the user held at least 1 ${tokenName} at any point in time in the past.`;
     }
     case GroupType.Whale: {
       const tokenName = groupName.replaceAll('whale', '').trim();
