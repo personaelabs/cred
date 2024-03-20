@@ -64,8 +64,8 @@ const WalletView: React.FC<WalletViewProps> = ({
     setIsAdding(false);
   };
 
-  const credddDescription = group.type
-    ? getCredddDescription(group.displayName, group.type)
+  const credddDescription = group.typeId
+    ? getCredddDescription(group.displayName, group.typeId)
     : null;
 
   return (

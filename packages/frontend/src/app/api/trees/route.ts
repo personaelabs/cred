@@ -21,7 +21,7 @@ const merkleTreeSelect = {
     select: {
       id: true,
       displayName: true,
-      type: true,
+      typeId: true,
     },
   },
 } satisfies Prisma.MerkleTreeSelect;
