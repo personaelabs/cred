@@ -130,6 +130,7 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
       // Mapping of tree IDs to the addresses that matched the bloom filter
       const bloomFilterMatchedTrees = new Map<number, Hex[]>();
 
+      // Fill `bloomFilterMatchedTrees`
       for (const address of addresses) {
         for (const merkleTree of merkleTrees) {
           if (

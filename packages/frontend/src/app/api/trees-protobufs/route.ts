@@ -57,10 +57,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Sort the trees by the order of the provided ids
+  const sortedMerkleTrees = merkleTrees.sort((a, b) => {
+    return ids.indexOf(a.id) - ids.indexOf(b.id);
+  });
+
   const treeBuffers = [];
 
   // Check the validity of each tree and add them to the list
-  for (const tree of merkleTrees) {
+  for (const tree of sortedMerkleTrees) {
     if (!tree.treeProtoBuf) {
       return Response.json(
         {
