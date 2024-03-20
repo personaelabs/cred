@@ -90,8 +90,8 @@ impl EthRpcClient {
             .post(url)
             .body_json(&json!({
                 "jsonrpc": "2.0",
-                "method": "eth_blockNumber",
-                "params": [],
+                "method": "eth_getBlockByNumber",
+                "params": ["finalized", false],
                 "id": 0,
             }))?
             .await?;
@@ -102,11 +102,16 @@ impl EthRpcClient {
 
         drop(permit);
 
-        Ok(u64::from_str_radix(
-            body["result"].as_str().unwrap().trim_start_matches("0x"),
+        let finalized_block = u64::from_str_radix(
+            body["result"]["number"]
+                .as_str()
+                .unwrap()
+                .trim_start_matches("0x"),
             16,
         )
-        .unwrap())
+        .unwrap();
+
+        Ok(finalized_block)
     }
 
     pub async fn get_logs_batch(
