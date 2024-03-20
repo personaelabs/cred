@@ -13,4 +13,5 @@ addr_membership.r1cs
 
 /db/
 /checkpoint/
+packages/indexer-rs/db
 !./packages/db

@@ -37,7 +37,7 @@ pub fn is_prod() -> bool {
 
 /// Load environment variables from .env file in development environment
 pub fn dotenv_config() {
-    env_logger::init();
+    let _ = env_logger::try_init();
 
     let is_render = env::var("RENDER").is_ok();
     let manifest_dir = env::var("CARGO_MANIFEST_DIR");
@@ -170,4 +170,43 @@ pub fn decode_erc721_transfer_event(value: &[u8]) -> ERC721TransferEvent {
         to: decoded.to.try_into().unwrap(),
         token_id: BigUint::from_bytes_be(&decoded.token_id),
     }
+}
+
+/// Count the number of synched logs for a given contract event
+pub fn count_synched_logs(
+    rocksdb_conn: &DB,
+    event_id: EventId,
+    contract_id: ContractId,
+    to_block: Option<BlockNum>,
+) -> i32 {
+    let start_key = RocksDbKey::new_start_key(KeyType::EventLog, event_id, contract_id);
+
+    let iterator = rocksdb_conn.iterator(rocksdb::IteratorMode::From(
+        &start_key.to_bytes(),
+        rocksdb::Direction::Forward,
+    ));
+
+    let mut count = 0;
+    for item in iterator {
+        let (key_bytes, _value) = item.unwrap();
+
+        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
+
+        if key.key_type != KeyType::EventLog
+            || key.event_id != event_id
+            || key.contract_id != contract_id
+        {
+            break;
+        }
+
+        if let Some(to_block) = to_block {
+            if key.block_num.unwrap() > to_block {
+                break;
+            }
+        }
+
+        count += 1;
+    }
+
+    count
 }
