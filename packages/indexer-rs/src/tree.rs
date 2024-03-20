@@ -22,7 +22,7 @@ use merkle_tree_lib::tree::MerkleTree;
 use num_bigint::BigUint;
 use num_format::{Locale, ToFormattedString};
 use prost::Message;
-use rocksdb::{IteratorMode, ReadOptions, DB};
+use rocksdb::DB;
 use std::collections::HashMap;
 use std::env;
 use std::sync::Arc;
@@ -212,46 +212,38 @@ pub async fn index_groups_for_contract(
             }
         }
 
-        // Initialize the groups
-        let start = Instant::now();
-        let init_group_results =
-            join_all(indexers.iter_mut().flat_map(|(_event_id, event_indexers)| {
-                event_indexers
-                    .iter_mut()
-                    .map(|indexer| indexer.init_group())
-                    .collect::<Vec<_>>()
-            }))
-            .await;
-
-        println!(
-            "${} {} {:?}",
-            contract.symbol.to_uppercase(),
-            "Initialized groups in ".green(),
-            start.elapsed()
-        );
-
-        // Check if there are any errors in the initialization
-        let error_exists = init_group_results.iter().any(|result| result.is_err());
-        if error_exists {
-            // Sleep for 5 seconds and try again
-            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-            continue;
-        }
-
-        let start = Instant::now();
-        let erc20_indexers = indexers.get_mut(&ERC20_TRANSFER_EVENT_ID);
-
-        if let Some(erc20_indexers) = erc20_indexers {
-            process_event_logs(&db, &contract, ERC20_TRANSFER_EVENT_ID, erc20_indexers).await;
-        }
-
-        let erc721_indexers = indexers.get_mut(&ERC721_TRANSFER_EVENT_ID);
-
-        if let Some(erc721_indexers) = erc721_indexers {
-            process_event_logs(&db, &contract, ERC721_TRANSFER_EVENT_ID, erc721_indexers).await;
-        }
-
         if !indexers.is_empty() {
+            // Initialize the groups
+            let init_group_results =
+                join_all(indexers.iter_mut().flat_map(|(_event_id, event_indexers)| {
+                    event_indexers
+                        .iter_mut()
+                        .map(|indexer| indexer.init_group())
+                        .collect::<Vec<_>>()
+                }))
+                .await;
+
+            // Check if there are any errors in the initialization
+            let error_exists = init_group_results.iter().any(|result| result.is_err());
+            if error_exists {
+                // Sleep for 5 seconds and try again
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                continue;
+            }
+
+            let start = Instant::now();
+            let erc20_indexers = indexers.get_mut(&ERC20_TRANSFER_EVENT_ID);
+
+            if let Some(erc20_indexers) = erc20_indexers {
+                process_event_logs(&db, &contract, ERC20_TRANSFER_EVENT_ID, erc20_indexers).await;
+            }
+
+            let erc721_indexers = indexers.get_mut(&ERC721_TRANSFER_EVENT_ID);
+
+            if let Some(erc721_indexers) = erc721_indexers {
+                process_event_logs(&db, &contract, ERC721_TRANSFER_EVENT_ID, erc721_indexers).await;
+            }
+
             info!(
                 "${} {} {:?}",
                 contract.symbol.to_uppercase(),
@@ -263,7 +255,7 @@ pub async fn index_groups_for_contract(
         drop(permit);
 
         // Sleep for 60 seconds
-        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     }
 }
 
@@ -287,7 +279,7 @@ pub async fn save_tree(
     // If the group type is not static and the number of addresses is less than 100,
     // then we skip building the tree since the anonymity set is too small
     if group_type != GroupType::Static && addresses.len() < 100 {
-        info!("Not enough addresses to build a tree for {}", group_id);
+        warn!("Not enough addresses to build a tree for {}", group_id);
         return Ok(());
     }
 
@@ -352,11 +344,6 @@ pub async fn save_tree(
 
     let tree_protobuf = merkle_tree_proto::MerkleTree { layers };
     let tree_bytes = tree_protobuf.encode_to_vec();
-
-    info!(
-        "Tree protobuf: {}B",
-        tree_bytes.len().to_formatted_string(&Locale::en)
-    );
 
     // Check if the tree already exists for the given group and block number
     let statement = r#"
