@@ -96,7 +96,7 @@ const getMerkleProof = (
 /**
  *  Get the eligible groups for a set of addresses
  */
-const useEligibleGroups = (addresses: Hex[] | null) => {
+const useEligibleGroups = (addresses: Hex[] | undefined) => {
   const [merkleTrees, setMerkleTrees] = useState<MerkleTreeSelect[] | null>(
     null
   );

@@ -14,14 +14,15 @@ import { AuthKitProvider } from '@farcaster/auth-kit';
 import Header from '@/components/Header';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { mainnet } from 'viem/chains';
+import { MediaQueryProvider } from '@/context/MediaQueryContext';
 
 const queryClient = new QueryClient();
 
 const wagmicConfig = getDefaultConfig({
-  appName: 'Nouns Nymz',
-  projectId: '564add972ca30e293482fd9361543d69',
+  appName: 'creddd',
+  projectId: '2ea91e648a2198845fee3ea267ff37dc',
   chains: [mainnet],
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  ssr: true,
 });
 
 const config = {
@@ -60,25 +61,27 @@ export default function RootLayout({
       <body className="bg-background overflow-y-hidden">
         <WagmiProvider config={wagmicConfig}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider>
+            <RainbowKitProvider modalSize="wide">
               <TooltipProvider>
-                <UserProvider>
-                  <AuthKitProvider config={config}>
-                    <ThemeProvider attribute="class" defaultTheme="dark">
-                      <Header></Header>
-                      <div className="flex flex-row justify-center w-full">
-                        <div className="w-full flex flex-col">{children}</div>
-                      </div>
-                      <MobileFooter></MobileFooter>
-                      <DesktopFooter></DesktopFooter>
-                    </ThemeProvider>
-                  </AuthKitProvider>
-                </UserProvider>
+                <MediaQueryProvider>
+                  <UserProvider>
+                    <AuthKitProvider config={config}>
+                      <ThemeProvider attribute="class" defaultTheme="dark">
+                        <Header></Header>
+                        <div className="flex flex-row justify-center w-full">
+                          <div className="w-full flex flex-col">{children}</div>
+                        </div>
+                        <MobileFooter></MobileFooter>
+                        <DesktopFooter></DesktopFooter>
+                      </ThemeProvider>
+                    </AuthKitProvider>
+                  </UserProvider>
+                </MediaQueryProvider>
               </TooltipProvider>
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
-        <Toaster richColors></Toaster>
+        <Toaster richColors expand></Toaster>
       </body>
     </html>
   );
