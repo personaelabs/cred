@@ -136,11 +136,13 @@ export default function AccountPage() {
       for (const address of accounts) {
         toast.info(`Connected to ${trimAddress(address)}`, {
           closeButton: true,
+          duration: 2000,
         });
       }
     } else {
       toast.info(`Connected to ${accounts.length} addresses`, {
         closeButton: true,
+        duration: 2000,
       });
     }
   }, [accounts]);
@@ -149,6 +151,7 @@ export default function AccountPage() {
     if (connector?.name) {
       toast.success(`Connected to ${connector.name}`, {
         closeButton: true,
+        duration: 2000,
       });
     }
   }, [connector?.name]);
