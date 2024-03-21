@@ -63,6 +63,11 @@ const useProver = (eligibleGroup: EligibleGroup) => {
       });
 
       const { s, r, v } = hexToSignature(sig);
+
+      if (!v) {
+        throw new Error('Signature recovery value not found');
+      }
+
       const isYOdd = calculateSigRecovery(v);
 
       const msgHash = hashMessage(message);
