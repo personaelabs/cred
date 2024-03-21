@@ -239,7 +239,7 @@ export default function AccountPage() {
                 <></>
               )}
               <Button variant="link" onClick={switchAccounts}>
-                Search accounts
+                Search other accounts
               </Button>
               <div className="flex flex-row items-center gap-[12px]">
                 <div className="text-sm">
