@@ -164,6 +164,10 @@ export const getCredddDescription = (
   }
 };
 
+export const trimAddress = (address: Hex) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 export const PRECOMPUTED_HASHES = [
   [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

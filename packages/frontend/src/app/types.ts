@@ -46,3 +46,24 @@ export type EligibleGroup = MerkleTreeSelect['Group'] & {
   merkleProof: MerkleProof;
   treeId: number;
 };
+
+/**
+ * EIP-6963: Represents the assets needed to display a wallet
+ */
+interface EIP6963ProviderInfo {
+  uuid: string;
+  name: string;
+  icon: string;
+  rdns: string;
+}
+
+interface EIP6963ProviderDetail {
+  info: EIP6963ProviderInfo;
+  provider: any;
+}
+
+// EIP-6963 Announce Event dispatched by a Wallet
+export interface EIP6963AnnounceProviderEvent extends CustomEvent {
+  type: 'eip6963:announceProvider';
+  detail: EIP6963ProviderDetail;
+}

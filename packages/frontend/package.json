@@ -21,7 +21,9 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@rainbow-me/rainbowkit": "^2.0.2",
     "@sentry/nextjs": "^7.101.1",
+    "@tanstack/react-query": "^5.28.4",
     "axios": "^1.6.0",
     "circuit-node": "../circuit/circuit-node",
     "circuit-web": "../circuit/circuit-web",
@@ -41,7 +43,8 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-protoc-gen": "^0.15.0",
     "vaul": "^0.8.0",
-    "viem": "^1.21.4"
+    "viem": "^2.8.14",
+    "wagmi": "^2.5.11"
   },
   "devDependencies": {
     "@sentry/utils": "^7.101.1",
