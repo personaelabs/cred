@@ -22,5 +22,5 @@ bloomfilter = { git = "https://github.com/DanTehrani/rust-bloom-filter.git", rev
 hex = "0.4.3"
 
 [dev-dependencies]
-ethers = "2.0.10"
+ethers = { version = "2.0.10", default-features = false }
 ark-std = "0.4.0"

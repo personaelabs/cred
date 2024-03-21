@@ -1,5 +1,6 @@
 use crate::{
     contract::Contract,
+    contract_event_iterator::ContractEventIterator,
     erc20_transfer_event, erc721_transfer_event,
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
@@ -37,7 +38,7 @@ pub fn is_prod() -> bool {
 
 /// Load environment variables from .env file in development environment
 pub fn dotenv_config() {
-    env_logger::init();
+    let _ = env_logger::try_init();
 
     let is_render = env::var("RENDER").is_ok();
     let manifest_dir = env::var("CARGO_MANIFEST_DIR");
@@ -170,4 +171,27 @@ pub fn decode_erc721_transfer_event(value: &[u8]) -> ERC721TransferEvent {
         to: decoded.to.try_into().unwrap(),
         token_id: BigUint::from_bytes_be(&decoded.token_id),
     }
+}
+
+/// Count the number of synched logs for a given contract event
+pub fn count_synched_logs(
+    rocksdb_conn: &DB,
+    event_id: EventId,
+    contract_id: ContractId,
+    to_block: Option<BlockNum>,
+) -> i32 {
+    let iterator = ContractEventIterator::new(rocksdb_conn, event_id, contract_id);
+
+    let mut count = 0;
+    for (key, _value) in iterator {
+        if let Some(to_block) = to_block {
+            if key.block_num.unwrap() > to_block {
+                break;
+            }
+        }
+
+        count += 1;
+    }
+
+    count
 }

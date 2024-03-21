@@ -95,3 +95,67 @@ impl GroupIndexer for AllHoldersIndexer {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{
+        contract_event_iterator::ContractEventIterator,
+        log_sync_engine::LogSyncEngine,
+        postgres::init_postgres,
+        rocksdb_key::KeyType,
+        test_utils::{delete_all, erc721_test_contract},
+        utils::dotenv_config,
+        ROCKSDB_PATH,
+    };
+    use rocksdb::{IteratorMode, Options, DB};
+
+    #[tokio::test]
+    async fn test_all_holders_indexer() {
+        dotenv_config();
+
+        // Use a different path for the test db to avoid conflicts with the main db
+        const TEST_ROCKSDB_PATH: &str = "test_all_holders_indexer";
+
+        let mut rocksdb_options = Options::default();
+        rocksdb_options.create_if_missing(true);
+
+        let db = Arc::new(
+            DB::open(
+                &rocksdb_options,
+                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
+            )
+            .unwrap(),
+        );
+
+        // Delete all records from the test db
+        delete_all(&db);
+
+        let pg_client = init_postgres().await;
+
+        let contract = erc721_test_contract();
+
+        // Hardcoded to the latest block number at the time of writing this test,
+        // so we can hardcode other values as well.
+        let to_block = 19473397;
+
+        let eth_client = Arc::new(EthRpcClient::new());
+
+        let contract_sync_engine =
+            LogSyncEngine::new(eth_client.clone(), contract.clone(), db.clone());
+        contract_sync_engine.sync_to_block(to_block).await;
+
+        let iterator = ContractEventIterator::new(&db, ERC721_TRANSFER_EVENT_ID, contract.id);
+
+        let mut indexer = AllHoldersIndexer::new(contract, pg_client, db.clone(), eth_client);
+
+        for (key, value) in iterator {
+            indexer.process_log(key, &value).unwrap();
+        }
+
+        let expected_unique_holders = 203;
+
+        // 1. Check that the indexer has the expected number of unique holders
+        assert_eq!(indexer.unique_holders.len(), expected_unique_holders);
+    }
+}

@@ -1,6 +1,7 @@
 use num_bigint::BigUint;
 
 pub mod contract;
+pub mod contract_event_iterator;
 pub mod contracts;
 pub mod eth_rpc;
 pub mod event;
@@ -10,6 +11,10 @@ pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
 pub mod utils;
+
+#[cfg(test)]
+pub mod test_utils;
+
 use postgres_types::{FromSql, ToSql};
 
 // Define the types for the RocksDB key and value
