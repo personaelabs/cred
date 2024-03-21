@@ -85,7 +85,7 @@ export default function AccountPage() {
       throw new Error("Can't switch wallets without a connector.");
     }
 
-    if (connector.id === 'io.metamask') {
+    if (connector.id === 'metaMask' || connector.id === 'io.metamask') {
       await disconnectAsync();
 
       // If we are connected to metamask, we can disconnect by revoking permissions
@@ -100,7 +100,7 @@ export default function AccountPage() {
       });
 
       // Request accounts again
-      const accounts = await metamaskProvider.request({
+      await metamaskProvider.request({
         method: 'eth_requestAccounts',
         params: [
           {
@@ -108,8 +108,6 @@ export default function AccountPage() {
           },
         ],
       });
-
-      setAccounts(accounts);
     } else {
       const isWalletConnect =
         connector.id === 'walletConnect' || connector.type === 'walletConnect';
@@ -158,9 +156,13 @@ export default function AccountPage() {
   // Set the `accounts` when they are found
   useEffect(() => {
     if (addresses) {
-      setAccounts(addresses as Hex[]);
+      // Update `accounts`, only if the addresses are different.
+      // This is to prevent unnecessary re-renders
+      if (addresses.some((address, i) => address !== accounts[i])) {
+        setAccounts(addresses as Hex[]);
+      }
     }
-  }, [addresses]);
+  }, [accounts, addresses]);
 
   const addedGroups =
     user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
