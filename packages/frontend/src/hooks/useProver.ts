@@ -7,7 +7,6 @@ import {
   FidAttestationRequestBody,
   WitnessInput,
 } from '@/app/types';
-import { WalletClient } from 'viem';
 import {
   calculateSigRecovery,
   concatUint8Arrays,
@@ -23,6 +22,7 @@ import {
 } from 'viem';
 import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
+import { Connector, useSignMessage } from 'wagmi';
 
 interface Prover {
   prepare(): Promise<void>;
@@ -37,6 +37,7 @@ const useProver = (eligibleGroup: EligibleGroup) => {
   const { user, siwfResponse } = useUser();
 
   const { address, merkleProof } = eligibleGroup;
+  const { signMessageAsync } = useSignMessage();
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
@@ -45,7 +46,7 @@ const useProver = (eligibleGroup: EligibleGroup) => {
   }, []);
 
   const prove = async (
-    client: WalletClient
+    connector: Connector
   ): Promise<FidAttestationRequestBody | null> => {
     if (prover && user?.fid && siwfResponse) {
       const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
@@ -53,9 +54,10 @@ const useProver = (eligibleGroup: EligibleGroup) => {
       await prover.prepare();
 
       // Sign message with the source key
-      const sig = await client.signMessage({
+      const sig = await signMessageAsync({
         message,
         account: address,
+        connector,
       });
 
       toast('Adding creddd...', {

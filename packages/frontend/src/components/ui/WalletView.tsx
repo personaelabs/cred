@@ -1,9 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-
-import { Hex, createWalletClient, custom } from 'viem';
 import { Button } from '@/components/ui/button';
-import { mainnet } from 'viem/chains';
 import useProver from '@/hooks/useProver';
 import { captureFetchError, getCredddDescription, postJSON } from '@/lib/utils';
 import { Check, Info, Loader2 } from 'lucide-react';
@@ -11,16 +8,17 @@ import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 import { EligibleGroup } from '@/app/types';
+import { Connector } from 'wagmi';
 
 interface WalletViewProps {
-  walletAddr: string;
+  connector: Connector;
   group: EligibleGroup;
   added: boolean;
   afterAdd: () => void;
 }
 
 const WalletView: React.FC<WalletViewProps> = ({
-  walletAddr,
+  connector,
   group,
   ...props
 }) => {
@@ -30,16 +28,8 @@ const WalletView: React.FC<WalletViewProps> = ({
   const [added, setAdded] = useState(props.added);
 
   const addGroup = async () => {
-    // Viem!
-    const client = createWalletClient({
-      account: walletAddr as Hex,
-      chain: mainnet,
-      // @ts-ignore
-      transport: custom(window.ethereum),
-    });
-
     setIsAdding(true);
-    const proof = await prover.prove(client);
+    const proof = await prover.prove(connector);
 
     if (proof) {
       const response = await postJSON({

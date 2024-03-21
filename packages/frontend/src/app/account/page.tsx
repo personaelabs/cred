@@ -223,7 +223,7 @@ export default function AccountPage() {
             <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
               {eligibleGroups.map((group, i) => (
                 <WalletView
-                  walletAddr={group.address}
+                  connector={connector}
                   group={group}
                   added={addedGroups.some(g => g === group.id)}
                   key={i}
