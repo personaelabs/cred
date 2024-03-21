@@ -20,12 +20,21 @@ const selectAttestation = {
   },
 } satisfies Prisma.FidAttestationSelect;
 
+const selectMintLog = {
+  tokenId: true,
+} satisfies Prisma.MintLogSelect;
+
 export type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
   select: typeof selectAttestation;
 }>;
 
+export type MintLogSelect = Prisma.MintLogGetPayload<{
+  select: typeof selectMintLog;
+}>;
+
 export type GetUserResponse = NeynarUserResponse & {
   fidAttestations: FidAttestationSelect[];
+  mints: MintLogSelect[];
 };
 
 /**
@@ -51,6 +60,14 @@ export async function GET(
     },
   });
 
+  // Get mints for the FID
+  const mints = await prisma.mintLog.findMany({
+    select: selectMintLog,
+    where: {
+      fid,
+    },
+  });
+
   // Filter out dev groups in production
   if (process.env.VERCEL_ENV === 'production') {
     fidAttestations = fidAttestations.filter(
@@ -71,6 +88,7 @@ export async function GET(
   // Return user data and attestations
   return Response.json({
     ...user,
+    mints,
     fidAttestations,
   });
 }

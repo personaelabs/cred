@@ -10,6 +10,7 @@ import useEligibleGroups from '@/hooks/useEligibleGroups';
 import { Hex } from 'viem';
 import { Loader2 } from 'lucide-react';
 import MintInstructionModal from '@/components/MintInstructionModal';
+import { toast } from 'sonner';
 
 export default function AccountPage() {
   const [accounts, setAccounts] = useState<Hex[]>([]);
@@ -130,7 +131,15 @@ export default function AccountPage() {
                   added={addedGroups.some(g => g === group.id)}
                   key={i}
                   afterAdd={() => {
-                    setIsMintInstructionModalOpen(true);
+                    // Open mint instruction modal if user hasn't yet
+                    if (user && user.mints.length == 0) {
+                      setIsMintInstructionModalOpen(true);
+                    } else {
+                      toast.success('creddd added', {
+                        duration: 5000,
+                        closeButton: true,
+                      });
+                    }
                   }}
                 />
               ))}
