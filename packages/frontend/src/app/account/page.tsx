@@ -170,8 +170,10 @@ export default function AccountPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh]">
-        <div className="text-[24px]">Add creddd to your Farcaster account</div>
+      <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh] px-4">
+        <div className="text-[16px] md:text-[24px]">
+          Add creddd to your Farcaster account
+        </div>
 
         {!!user && (
           <div className="flex flex-col items-center gap-y-[20px]">
@@ -195,7 +197,10 @@ export default function AccountPage() {
         ) : isSearching ? (
           <div className="flex flex-row items-center">
             <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
-            Searching for creddd (this could take a moment...)
+            <div className="text-center">
+              <div>Searching for creddd</div>
+              <div>(this could take a moment...)</div>
+            </div>
           </div>
         ) : !isSearching ? (
           <div className="flex flex-col gap-[14px]">
@@ -243,7 +248,7 @@ export default function AccountPage() {
               <Button variant="link" onClick={switchAccounts}>
                 Search other accounts
               </Button>
-              <div className="flex flex-row items-center gap-[12px]">
+              <div className="flex flex-row items-center gap-[6px] md:gap-[12px]">
                 <div className="text-sm">
                   Connected to{' '}
                   <span className="font-bold">{connector?.name}</span>
