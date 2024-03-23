@@ -35,7 +35,7 @@ const ExplorePage = () => {
   }, [groupsByType, searchTerm]);
 
   return (
-    <div className="m-auto flex flex-col items-center mt-4 gap-[64px] w-[340px]  md:w-[800px]">
+    <div className="m-auto flex flex-col items-center justify-center mt-4 gap-[64px] w-[340px]  md:w-[800px]">
       <div className="flex flex-col items-center gap-[12px]">
         <div className="text-xl">All creddd</div>
         <Input
@@ -47,9 +47,9 @@ const ExplorePage = () => {
           value={searchTerm}
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[96px] gap-y-[36px] overflow-y-scroll h-[320px]">
-        {filteredGroupsByType ? (
-          Array.from(filteredGroupsByType.keys()).map(groupType => (
+      {filteredGroupsByType ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[96px] gap-y-[36px] overflow-y-scroll h-[320px]">
+          {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
               <div className="underline">{getGroupTypeTitle(groupType)}</div>
               <div className="flex flex-col gap-2  opacity-80">
@@ -58,11 +58,11 @@ const ExplorePage = () => {
                 ))}
               </div>
             </div>
-          ))
-        ) : (
-          <Loader2 className="animate-spin w-4 h-4" />
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <Loader2 className="animate-spin w-4 h-4" color="hsl(var(--primary))" />
+      )}
     </div>
   );
 };
