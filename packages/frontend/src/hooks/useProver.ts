@@ -20,9 +20,9 @@ import {
   hexToCompactSignature,
   hexToSignature,
 } from 'viem';
-import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
 import { Connector, useSignMessage } from 'wagmi';
+import { useAddingCredddModal } from '@/context/AddingCredddModalContext';
 
 interface Prover {
   prepare(): Promise<void>;
@@ -38,6 +38,7 @@ const useProver = (eligibleGroup: EligibleGroup) => {
 
   const { address, merkleProof } = eligibleGroup;
   const { signMessageAsync } = useSignMessage();
+  const { setIsOpen: setIsAddingCredddModalOpen } = useAddingCredddModal();
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
@@ -60,9 +61,9 @@ const useProver = (eligibleGroup: EligibleGroup) => {
         connector,
       });
 
-      toast('Adding creddd...', {
-        description: 'This may take a minute...',
-      });
+      // The user has signed the message so we open
+      // the "Adding Creddd" modal
+      setIsAddingCredddModalOpen(true);
 
       const { s, r, v } = hexToSignature(sig);
 

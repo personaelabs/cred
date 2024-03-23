@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 import { EligibleGroup } from '@/app/types';
 import { Connector } from 'wagmi';
+import { useAddingCredddModal } from '@/context/AddingCredddModalContext';
 
 interface WalletViewProps {
   connector: Connector;
@@ -23,9 +24,10 @@ const WalletView: React.FC<WalletViewProps> = ({
   ...props
 }) => {
   const { refetchUser } = useUser();
-  const [isAdding, setIsAdding] = useState(false);
+  const { setIsOpen: setIsAddingCredddModalOpen } = useAddingCredddModal();
   const prover = useProver(group);
   const [added, setAdded] = useState(props.added);
+  const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const addGroup = async () => {
     setIsAdding(true);
@@ -39,6 +41,10 @@ const WalletView: React.FC<WalletViewProps> = ({
       });
 
       if (response.ok) {
+        // Close the "Adding Creddd" modal
+        setIsAddingCredddModalOpen(false);
+
+        setIsAdding(false);
         setAdded(true);
         refetchUser();
         props.afterAdd();
@@ -51,7 +57,7 @@ const WalletView: React.FC<WalletViewProps> = ({
       }
     }
 
-    setIsAdding(false);
+    setIsAddingCredddModalOpen(false);
   };
 
   const credddDescription = group.typeId
