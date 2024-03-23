@@ -6,9 +6,12 @@ import { GroupType } from '@prisma/client';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GroupSelect } from '../api/groups/route';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const ExplorePage = () => {
   const { groupsByType } = useGroups();
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -48,7 +51,7 @@ const ExplorePage = () => {
         />
       </div>
       {filteredGroupsByType ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[96px] gap-y-[36px] overflow-y-scroll h-[320px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[96px] gap-y-[36px] overflow-y-scroll max-h-[320px]">
           {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
               <div className="underline">{getGroupTypeTitle(groupType)}</div>
@@ -63,6 +66,16 @@ const ExplorePage = () => {
       ) : (
         <Loader2 className="animate-spin w-4 h-4" color="hsl(var(--primary))" />
       )}
+      <div>
+        <Button
+          variant="link"
+          onClick={() => {
+            router.push('/');
+          }}
+        >
+          Search my creddd
+        </Button>
+      </div>
     </div>
   );
 };
