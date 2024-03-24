@@ -4,6 +4,10 @@ import { Button, Frog } from 'frog';
 import { handle } from 'frog/vercel';
 import prisma from '@/lib/prisma';
 
+import Airtable from 'airtable';
+
+const airtableBase = new Airtable().base('appoHYfCi7PTuuHP8');
+
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
   color: TEXT_COLOR,
@@ -51,16 +55,19 @@ const hasCreddd = async (fid: number) => {
 app.frame('/', async c => {
   const { buttonValue, frameData } = c;
 
+  let fid;
   if (!frameData) {
-    throw new Error('No frame data');
+    fid = 54; // lakshman, for debugging
+  } else {
+    fid = frameData.fid;
   }
 
   // NOTE: handle RSVP
   if (buttonValue === 'yes' || buttonValue === 'no') {
-    return rsvpedFrame(c);
+    return rsvpedFrame(fid, buttonValue, c);
   }
 
-  const eligible = await hasCreddd(frameData.fid);
+  const eligible = await hasCreddd(fid);
   if (eligible) {
     return rsvpFrame(c);
   } else {
@@ -68,8 +75,26 @@ app.frame('/', async c => {
   }
 });
 
-const rsvpedFrame = async (c: any) => {
-  // NOTE: we'll enable multi-RSVP
+const rsvpedFrame = async (fid: number, response: string, c: any) => {
+  // update airtable
+  airtableBase('rsvp').update(
+    [
+      {
+        id: 'recGyNwgzxsBHMTkm',
+        fields: {
+          fid: fid.toString(),
+          response,
+        },
+      },
+    ],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return;
+      }
+    }
+  );
+
   return c.res({
     action: '/',
     image: (
@@ -98,8 +123,8 @@ const rsvpFrame = async (c: any) => {
           fontSize: 40,
         }}
       >
-        you are invited to a secret event at farcon. <br />
-        the evening of 5/4 at a (to be disclosed) location. <br />
+        you`re invited to a secret event at farcon. <br />
+        evening of 5/4 at a (to be disclosed) location. <br />
         will you be there?
       </div>
     ),

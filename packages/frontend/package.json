@@ -24,6 +24,7 @@
     "@rainbow-me/rainbowkit": "^2.0.2",
     "@sentry/nextjs": "^7.101.1",
     "@tanstack/react-query": "^5.28.4",
+    "airtable": "^0.12.2",
     "axios": "^1.6.0",
     "circuit-node": "../circuit/circuit-node",
     "circuit-web": "../circuit/circuit-web",
