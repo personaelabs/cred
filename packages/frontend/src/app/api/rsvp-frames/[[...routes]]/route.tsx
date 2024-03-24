@@ -4,10 +4,6 @@ import { Button, Frog } from 'frog';
 import { handle } from 'frog/vercel';
 import prisma from '@/lib/prisma';
 
-import Airtable from 'airtable';
-
-const airtableBase = new Airtable().base('appoHYfCi7PTuuHP8');
-
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
   color: TEXT_COLOR,
@@ -77,25 +73,25 @@ app.frame('/', async c => {
   }
 });
 
+const event = 'farcon-creddd';
+
 const rsvpedFrame = async (fid: number, response: string, c: any) => {
-  // update airtable
-  airtableBase('rsvp').update(
-    [
-      {
-        id: 'recGyNwgzxsBHMTkm',
-        fields: {
-          fid: fid.toString(),
-          response,
-        },
+  prisma.eventRSVPs.upsert({
+    where: {
+      event_fid: {
+        event,
+        fid,
       },
-    ],
-    function (err) {
-      if (err) {
-        console.error(err);
-        throw err;
-      }
-    }
-  );
+    },
+    update: {
+      attending: response === 'yes',
+    },
+    create: {
+      event,
+      fid,
+      attending: response === 'yes',
+    },
+  });
 
   return c.res({
     action: '/',
