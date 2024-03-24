@@ -15,6 +15,7 @@ import Header from '@/components/Header';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { mainnet } from 'viem/chains';
 import { MediaQueryProvider } from '@/context/MediaQueryContext';
+import { AddingCredddModalProvider } from '@/context/AddingCredddModalContext';
 
 const queryClient = new QueryClient();
 
@@ -64,18 +65,22 @@ export default function RootLayout({
             <RainbowKitProvider modalSize="wide">
               <TooltipProvider>
                 <MediaQueryProvider>
-                  <UserProvider>
-                    <AuthKitProvider config={config}>
-                      <ThemeProvider attribute="class" defaultTheme="dark">
-                        <Header></Header>
-                        <div className="flex flex-row justify-center w-full">
-                          <div className="w-full flex flex-col">{children}</div>
-                        </div>
-                        <MobileFooter></MobileFooter>
-                        <DesktopFooter></DesktopFooter>
-                      </ThemeProvider>
-                    </AuthKitProvider>
-                  </UserProvider>
+                  <AddingCredddModalProvider>
+                    <UserProvider>
+                      <AuthKitProvider config={config}>
+                        <ThemeProvider attribute="class" defaultTheme="dark">
+                          <Header></Header>
+                          <div className="flex flex-row justify-center w-full">
+                            <div className="w-full flex flex-col">
+                              {children}
+                            </div>
+                          </div>
+                          <MobileFooter></MobileFooter>
+                          <DesktopFooter></DesktopFooter>
+                        </ThemeProvider>
+                      </AuthKitProvider>
+                    </UserProvider>
+                  </AddingCredddModalProvider>
                 </MediaQueryProvider>
               </TooltipProvider>
             </RainbowKitProvider>
