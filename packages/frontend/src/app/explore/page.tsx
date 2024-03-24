@@ -1,8 +1,7 @@
 'use client';
 import { Input } from '@/components/ui/input';
 import useGroups from '@/hooks/useGroups';
-import { getCredddDescription, getGroupTypeTitle } from '@/lib/utils';
-import { GroupType } from '@prisma/client';
+import { getCredddDescription } from '@/lib/utils';
 import { Info, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GroupSelect } from '../api/groups/route';
@@ -26,7 +25,7 @@ const ExplorePage = () => {
 
   useEffect(() => {
     if (groupsByType) {
-      const filteredGroupsByType = new Map<GroupType, GroupSelect[]>();
+      const filteredGroupsByType = new Map<string, GroupSelect[]>();
 
       for (const [groupType, groups] of Array.from(groupsByType)) {
         const filteredGroups = groups.filter(group =>
@@ -59,7 +58,7 @@ const ExplorePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-[96px] gap-y-[36px] overflow-y-scroll max-h-[320px]">
           {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
-              <div className="underline">{getGroupTypeTitle(groupType)}</div>
+              <div className="underline">{groupType}</div>
               <div className="flex flex-col gap-3  opacity-80">
                 {filteredGroupsByType.get(groupType)!.map(group => {
                   const credddDescription = getCredddDescription(

@@ -1,13 +1,12 @@
 import { GroupSelect } from '@/app/api/groups/route';
-import { captureFetchError } from '@/lib/utils';
-import { GroupType } from '@prisma/client';
+import { captureFetchError, getGroupTypeTitle } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 const useGroups = () => {
-  // Map of GroupType to GroupSelect[]
+  // Map of group type name to GroupSelect[]
   const [groupsByType, setGroupsByType] =
-    useState<Map<GroupType, GroupSelect[]>>();
+    useState<Map<string, GroupSelect[]>>();
 
   useEffect(() => {
     (async () => {
@@ -17,16 +16,22 @@ const useGroups = () => {
       if (response.ok) {
         const data = (await response.json()) as GroupSelect[];
 
-        const _groupsByType = new Map<GroupType, GroupSelect[]>();
+        const _groupsByType = new Map<string, GroupSelect[]>();
         for (const group of data) {
-          if (_groupsByType.has(group.typeId)) {
-            _groupsByType.get(group.typeId)!.push(group);
+          const groupType = getGroupTypeTitle(group.typeId);
+          if (_groupsByType.has(groupType)) {
+            _groupsByType.get(groupType)!.push(group);
           } else {
-            _groupsByType.set(group.typeId, [group]);
+            _groupsByType.set(groupType, [group]);
           }
         }
 
-        setGroupsByType(_groupsByType);
+        // Sort by number of groups in each group type
+        const sortedGroupsByType = new Map(
+          Array.from(_groupsByType).sort(([, a], [, b]) => b.length - a.length)
+        );
+
+        setGroupsByType(sortedGroupsByType);
       } else {
         toast.error('Failed to fetch groups');
         await captureFetchError(response);
