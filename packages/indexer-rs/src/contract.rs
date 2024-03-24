@@ -1,11 +1,12 @@
 use crate::{eth_rpc::Chain, BlockNum, ContractId, GroupType};
 use postgres_types::{FromSql, ToSql};
 
-#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "ContractType")]
 pub enum ContractType {
     ERC20,
     ERC721,
+    ERC1155,
     Punk,
     Other,
 }

@@ -1,10 +1,14 @@
 use crate::contract::{Contract, ContractType};
 use crate::eth_rpc::EthRpcClient;
 use crate::event::{
-    event_log_to_key_value, parse_erc20_event_log, parse_erc721_event_log,
+    event_log_to_key_value, parse_erc1155_transfer_batch_event_log,
+    parse_erc1155_transfer_single_event_log, parse_erc20_event_log, parse_erc721_event_log,
     parse_punk_transfer_event_log,
 };
-use crate::rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID};
+use crate::rocksdb_key::{
+    KeyType, RocksDbKey, ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID,
+    ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID,
+};
 use crate::utils::get_latest_synched_chunk;
 use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
@@ -23,11 +27,18 @@ pub const CHUNK_SIZE: u64 = 2000;
 const TRANSFER_EVENT_SIG: &str =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
+const ERC1155_TRANSFER_BATCH_SIG: &str =
+    "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
+
+const ERC1155_TRANSFER_SINGLE_SIG: &str =
+    "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62";
+
 /// A struct to sync all logs of a particular contract event
 pub struct LogSyncEngine {
     eth_client: Arc<EthRpcClient>,
     contract: Contract,
     event_id: EventId,
+    event_sig: &'static str,
     rocksdb_client: Arc<rocksdb::DB>,
     log_parser: fn(&Value) -> Vec<u8>,
 }
@@ -36,28 +47,37 @@ impl LogSyncEngine {
     pub fn new(
         eth_client: Arc<EthRpcClient>,
         contract: Contract,
+        event_id: EventId,
         rocksdb_client: Arc<rocksdb::DB>,
     ) -> Self {
-        // Determine the event_id form `contract.type`
-        let event_id = match contract.contract_type {
-            ContractType::ERC20 => ERC20_TRANSFER_EVENT_ID,
-            ContractType::ERC721 => ERC721_TRANSFER_EVENT_ID,
-            ContractType::Punk => ERC721_TRANSFER_EVENT_ID,
-            _ => panic!("Invalid contract type"),
+        // Determine the event signature from the event_id
+        let event_sig = match event_id {
+            ERC20_TRANSFER_EVENT_ID => TRANSFER_EVENT_SIG,
+            ERC721_TRANSFER_EVENT_ID => TRANSFER_EVENT_SIG,
+            ERC1155_TRANSFER_SINGLE_EVENT_ID => ERC1155_TRANSFER_SINGLE_SIG,
+            ERC1155_TRANSFER_BATCH_EVENT_ID => ERC1155_TRANSFER_BATCH_SIG,
+            _ => panic!("Invalid event_id"),
         };
 
-        // Select the log parser based on the contract type
-        let log_parser = match contract.contract_type {
-            ContractType::ERC20 => parse_erc20_event_log,
-            ContractType::ERC721 => parse_erc721_event_log,
-            ContractType::Punk => parse_punk_transfer_event_log,
-            _ => panic!("Invalid contract type"),
+        // Select the log parser based on the contract type and event_id
+        let log_parser = match (contract.contract_type, event_id) {
+            (ContractType::ERC20, ERC20_TRANSFER_EVENT_ID) => parse_erc20_event_log,
+            (ContractType::ERC721, ERC721_TRANSFER_EVENT_ID) => parse_erc721_event_log,
+            (ContractType::Punk, ERC721_TRANSFER_EVENT_ID) => parse_punk_transfer_event_log,
+            (ContractType::ERC1155, ERC1155_TRANSFER_SINGLE_EVENT_ID) => {
+                parse_erc1155_transfer_single_event_log
+            }
+            (ContractType::ERC1155, ERC1155_TRANSFER_BATCH_EVENT_ID) => {
+                parse_erc1155_transfer_batch_event_log
+            }
+            _ => panic!("Invalid contract type and event_id combination"),
         };
 
         Self {
             eth_client,
             contract,
             event_id,
+            event_sig,
             rocksdb_client,
             log_parser,
         }
@@ -164,7 +184,7 @@ impl LogSyncEngine {
                 .get_logs_batch(
                     self.contract.chain,
                     &self.contract.address,
-                    TRANSFER_EVENT_SIG,
+                    self.event_sig,
                     &batch,
                 )
                 .await;
@@ -389,8 +409,12 @@ mod test {
         // so we can hardcode other values as well.
         let to_block = 19473397;
 
-        let contract_sync_engine =
-            LogSyncEngine::new(eth_client, contract.clone(), rocksdb_client.clone());
+        let contract_sync_engine = LogSyncEngine::new(
+            eth_client,
+            contract.clone(),
+            ERC20_TRANSFER_EVENT_ID,
+            rocksdb_client.clone(),
+        );
         contract_sync_engine.sync_to_block(to_block).await;
 
         // 1. Check that the number of synched logs is equal to the expected count

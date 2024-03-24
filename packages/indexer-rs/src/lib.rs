@@ -10,6 +10,7 @@ pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
 pub mod tree;
+pub mod tree_sync_engine;
 pub mod utils;
 
 #[cfg(test)]
@@ -43,7 +44,32 @@ pub type Address = [u8; 20];
 
 pub const ROCKSDB_PATH: &str = "./db";
 
-#[derive(Debug, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[derive(Debug)]
+pub enum Error {
+    RocksDB(rocksdb::Error),
+    Postgres(tokio_postgres::Error),
+    Std(std::io::Error),
+}
+
+impl From<rocksdb::Error> for Error {
+    fn from(e: rocksdb::Error) -> Self {
+        Error::RocksDB(e)
+    }
+}
+
+impl From<tokio_postgres::Error> for Error {
+    fn from(e: tokio_postgres::Error) -> Self {
+        Error::Postgres(e)
+    }
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::Std(e)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
     Static,
@@ -67,12 +93,31 @@ pub struct ERC721TransferEvent {
     pub token_id: BigUint,
 }
 
+#[derive(Debug, Clone)]
+pub struct ERC1155TransferSingleEvent {
+    pub from: Address,
+    pub to: Address,
+    pub id: BigUint,
+}
+
+#[derive(Debug, Clone)]
+pub struct ERC1155TransferBatchEvent {
+    pub from: Address,
+    pub to: Address,
+    pub ids: Vec<BigUint>,
+    pub values: Vec<BigUint>,
+}
+
 pub mod erc20_transfer_event {
     include!(concat!(env!("OUT_DIR"), "/erc20_transfer_event.rs"));
 }
 
 pub mod erc721_transfer_event {
     include!(concat!(env!("OUT_DIR"), "/erc721_transfer_event.rs"));
+}
+
+pub mod erc1155_transfer_event {
+    include!(concat!(env!("OUT_DIR"), "/erc1155_transfer_event.rs"));
 }
 
 pub mod merkle_tree_proto {

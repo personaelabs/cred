@@ -2,6 +2,8 @@ use crate::{BlockNum, ChunkNum, ContractId, EventId, LogIndex, TxIndex};
 
 pub const ERC20_TRANSFER_EVENT_ID: EventId = 1;
 pub const ERC721_TRANSFER_EVENT_ID: EventId = 2;
+pub const ERC1155_TRANSFER_SINGLE_EVENT_ID: EventId = 3;
+pub const ERC1155_TRANSFER_BATCH_EVENT_ID: EventId = 4;
 
 /// Type of a RocksDB key
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]

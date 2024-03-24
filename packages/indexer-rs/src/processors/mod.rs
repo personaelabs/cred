@@ -1,7 +1,11 @@
 #![allow(async_fn_in_trait)]
 
-use crate::GroupType;
-use crate::rocksdb_key::RocksDbKey;
+use std::collections::HashSet;
+use std::io::Error;
+use std::sync::Arc;
+use crate::eth_rpc::{Chain, EthRpcClient};
+use crate::{Address, BlockNum, GroupType};
+
 pub mod early_holders;
 pub mod all_holders;
 pub mod whales;
@@ -12,18 +16,22 @@ pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds
 #[async_trait::async_trait]
 /// A trait for a group indexer
 pub trait GroupIndexer: Send + Sync {
-    /// Returns the name of the group
-    fn group_handle(&self) -> String;
-    /// Returns the display name of the group
-    fn display_name(&self) -> String;
-    /// Initializes the group
-    async fn init_group(&mut self) -> Result<(), tokio_postgres::Error>;
+    /// Returns the group id
+    /// TODO: Return the `Group` struct once the indexer is refactored to hold it.
+    fn group_id(&self) -> i32;
+    /// Returns the chain the logs the indexer depends on are on
+    fn chain(&self) -> Chain;
     /// Returns true if the logs which the indexer depends on are ready
     async fn is_ready(&self) -> Result<bool, surf::Error> ;
-    /// Processes a log and updates the indexer's state
-    fn process_log(&mut self, key: RocksDbKey, log: &[u8]) -> Result<(), std::io::Error>;
-    /// Save a Merkle tree for the current state of the indexer
-    async fn save_tree(&self, block_number: i64) -> Result<(), tokio_postgres::Error>;
+    /// Return all members
+    fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error>;
+}
+
+#[derive(Clone)]
+pub struct IndexerResources {
+    pub pg_client:Arc<tokio_postgres::Client>,
+    pub rocksdb_client: Arc<rocksdb::DB>,
+    pub eth_client: Arc<EthRpcClient>,
 }
 
 /// Upsert a group
