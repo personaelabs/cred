@@ -156,7 +156,12 @@ mod test {
 
         let eth_client = Arc::new(EthRpcClient::new());
 
-        let contract_sync_engine = LogSyncEngine::new(eth_client, contract.clone(), db.clone());
+        let contract_sync_engine = LogSyncEngine::new(
+            eth_client,
+            contract.clone(),
+            ERC20_TRANSFER_EVENT_ID,
+            db.clone(),
+        );
         contract_sync_engine.sync_to_block(to_block).await;
 
         let mut indexer = EarlyHolderIndexer::new(

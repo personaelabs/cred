@@ -1,11 +1,12 @@
 use crate::{
     contract::Contract,
     contract_event_iterator::ContractEventIterator,
-    erc20_transfer_event, erc721_transfer_event,
+    erc1155_transfer_event, erc20_transfer_event, erc721_transfer_event,
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
     rocksdb_key::{KeyType, RocksDbKey},
-    BlockNum, ChunkNum, ERC20TransferEvent, ERC721TransferEvent,
+    BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
+    ERC721TransferEvent,
 };
 use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
@@ -151,6 +152,7 @@ pub async fn is_event_logs_ready(
     }
 }
 
+/// Decode ERC20 transfer protobuf bytes to ERC20TransferEvent
 pub fn decode_erc20_transfer_event(value: &[u8]) -> ERC20TransferEvent {
     let decoded =
         erc20_transfer_event::Erc20TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
@@ -162,6 +164,7 @@ pub fn decode_erc20_transfer_event(value: &[u8]) -> ERC20TransferEvent {
     }
 }
 
+/// Decode ERC721 transfer protobuf bytes to ERC721TransferEvent
 pub fn decode_erc721_transfer_event(value: &[u8]) -> ERC721TransferEvent {
     let decoded =
         erc721_transfer_event::Erc721TransferEvent::decode(&mut Cursor::new(&value)).unwrap();
@@ -170,6 +173,39 @@ pub fn decode_erc721_transfer_event(value: &[u8]) -> ERC721TransferEvent {
         from: decoded.from.try_into().unwrap(),
         to: decoded.to.try_into().unwrap(),
         token_id: BigUint::from_bytes_be(&decoded.token_id),
+    }
+}
+
+pub fn decode_erc1155_transfer_single_event(value: &[u8]) -> ERC1155TransferSingleEvent {
+    let decoded =
+        erc1155_transfer_event::Erc1155TransferSingleEvent::decode(&mut Cursor::new(&value))
+            .unwrap();
+
+    ERC1155TransferSingleEvent {
+        from: decoded.from.try_into().unwrap(),
+        to: decoded.to.try_into().unwrap(),
+        id: BigUint::from_bytes_be(&decoded.id),
+    }
+}
+
+pub fn decode_erc1155_transfer_batch_event(value: &[u8]) -> ERC1155TransferBatchEvent {
+    let decoded =
+        erc1155_transfer_event::Erc1155TransferBatchEvent::decode(&mut Cursor::new(&value))
+            .unwrap();
+
+    ERC1155TransferBatchEvent {
+        from: decoded.from.try_into().unwrap(),
+        to: decoded.to.try_into().unwrap(),
+        ids: decoded
+            .ids
+            .iter()
+            .map(|id| BigUint::from_bytes_be(id))
+            .collect(),
+        values: decoded
+            .values
+            .iter()
+            .map(|value| BigUint::from_bytes_be(value))
+            .collect(),
     }
 }
 

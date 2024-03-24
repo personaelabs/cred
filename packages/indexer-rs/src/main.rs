@@ -1,8 +1,13 @@
 use futures::future::join_all;
 use futures::join;
+use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::log_sync_engine::LogSyncEngine;
 use indexer_rs::postgres::init_postgres;
+use indexer_rs::rocksdb_key::{
+    ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID, ERC20_TRANSFER_EVENT_ID,
+    ERC721_TRANSFER_EVENT_ID,
+};
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::ROCKSDB_PATH;
 use indexer_rs::{contract::get_contracts, tree::index_groups_for_contract};
@@ -33,8 +38,29 @@ async fn main() {
         let eth_client = eth_client.clone();
 
         let job = tokio::spawn(async move {
-            let contract_sync_engine = LogSyncEngine::new(eth_client, contract, rocksdb_client);
-            contract_sync_engine.sync().await;
+            // Determine the event_ids to sync from `contract.type`
+            let event_id = match contract.contract_type {
+                ContractType::ERC20 => vec![ERC20_TRANSFER_EVENT_ID],
+                ContractType::ERC721 => vec![ERC721_TRANSFER_EVENT_ID],
+                ContractType::Punk => vec![ERC721_TRANSFER_EVENT_ID],
+                ContractType::ERC1155 => vec![
+                    ERC1155_TRANSFER_SINGLE_EVENT_ID,
+                    ERC1155_TRANSFER_BATCH_EVENT_ID,
+                ],
+                _ => panic!("Invalid contract type"),
+            };
+
+            // Run the sync job for each event_id
+            join_all(event_id.iter().map(|event_id| async {
+                let contract_sync_engine = LogSyncEngine::new(
+                    eth_client.clone(),
+                    contract.clone(),
+                    *event_id,
+                    rocksdb_client.clone(),
+                );
+                contract_sync_engine.sync().await;
+            }))
+            .await;
         });
 
         sync_jobs.push(job);

@@ -141,8 +141,12 @@ mod test {
 
         let eth_client = Arc::new(EthRpcClient::new());
 
-        let contract_sync_engine =
-            LogSyncEngine::new(eth_client.clone(), contract.clone(), db.clone());
+        let contract_sync_engine = LogSyncEngine::new(
+            eth_client.clone(),
+            contract.clone(),
+            ERC721_TRANSFER_EVENT_ID,
+            db.clone(),
+        );
         contract_sync_engine.sync_to_block(to_block).await;
 
         let iterator = ContractEventIterator::new(&db, ERC721_TRANSFER_EVENT_ID, contract.id);

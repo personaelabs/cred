@@ -1,5 +1,5 @@
 use crate::{
-    erc20_transfer_event, erc721_transfer_event,
+    erc1155_transfer_event, erc20_transfer_event, erc721_transfer_event,
     rocksdb_key::{KeyType, RocksDbKey},
     utils::{value_to_u32, value_to_u64},
 };
@@ -64,6 +64,89 @@ pub fn parse_punk_transfer_event_log(log: &Value) -> Vec<u8> {
 
     let mut value = Vec::new();
     transfer_event.encode(&mut value).unwrap();
+
+    value
+}
+
+pub fn parse_erc1155_transfer_batch_event_log(log: &Value) -> Vec<u8> {
+    let topics = &log["topics"].as_array().unwrap();
+
+    let operator = &topics[1].as_str().unwrap();
+    let from = &topics[2].as_str().unwrap();
+    let to = &topics[3].as_str().unwrap();
+
+    let operator = hex::decode(&operator[operator.len() - 40..]).unwrap();
+    let from = hex::decode(&from[from.len() - 40..]).unwrap();
+    let to = hex::decode(&to[to.len() - 40..]).unwrap();
+
+    let data = hex::decode(log["data"].as_str().unwrap().trim_start_matches("0x")).unwrap();
+
+    let data_len = data.len();
+    // First half of "data" field is ids
+    let ids = data[..data_len / 2]
+        .to_vec()
+        .chunks(32)
+        .map(|x| x.to_vec())
+        .collect::<Vec<Vec<u8>>>();
+
+    println!("ids: {:?}", ids);
+
+    // Second half of "data" field is values
+    let values = data[data_len / 2..]
+        .to_vec()
+        .chunks(32)
+        .map(|x| x.to_vec())
+        .collect::<Vec<Vec<u8>>>();
+
+    println!("values: {:?}", values);
+
+    let event = erc1155_transfer_event::Erc1155TransferBatchEvent {
+        operator,
+        from,
+        to,
+        ids,
+        values,
+    };
+
+    let mut value = Vec::new();
+    event.encode(&mut value).unwrap();
+
+    value
+}
+
+/// Parse JSON log to ERC1155 transfer event data and encode it to Protocol Buffer bytes
+pub fn parse_erc1155_transfer_single_event_log(log: &Value) -> Vec<u8> {
+    let topics = &log["topics"].as_array().unwrap();
+
+    let operator = &topics[1].as_str().unwrap();
+    let from = &topics[2].as_str().unwrap();
+    let to = &topics[3].as_str().unwrap();
+
+    println!("operator: {}", operator);
+    println!("from: {}", from);
+    println!("to: {}", to);
+
+    let operator = hex::decode(&operator[operator.len() - 40..]).unwrap();
+    let from = hex::decode(&from[from.len() - 40..]).unwrap();
+    let to = hex::decode(&to[to.len() - 40..]).unwrap();
+
+    let data = hex::decode(log["data"].as_str().unwrap().trim_start_matches("0x")).unwrap();
+
+    // First 32 bytes of "data" field is id
+    let id = data[..32].to_vec();
+    // Next 32 bytes is value
+    let value = data[32..64].to_vec();
+
+    let event = erc1155_transfer_event::Erc1155TransferSingleEvent {
+        operator,
+        from,
+        to,
+        id,
+        value,
+    };
+
+    let mut value = Vec::new();
+    event.encode(&mut value).unwrap();
 
     value
 }
