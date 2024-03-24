@@ -62,6 +62,8 @@ app.frame('/', async c => {
     fid = frameData.fid;
   }
 
+  console.log('fid', fid);
+
   // NOTE: handle RSVP
   if (buttonValue === 'yes' || buttonValue === 'no') {
     return rsvpedFrame(fid, buttonValue, c);
