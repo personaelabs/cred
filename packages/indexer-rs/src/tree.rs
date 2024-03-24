@@ -9,7 +9,6 @@ use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
 use merkle_tree_lib::tree::MerkleTree;
 use num_bigint::BigUint;
-use num_format::{Locale, ToFormattedString};
 use prost::Message;
 use std::env;
 use std::time::Instant;
