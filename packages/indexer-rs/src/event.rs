@@ -89,16 +89,12 @@ pub fn parse_erc1155_transfer_batch_event_log(log: &Value) -> Vec<u8> {
         .map(|x| x.to_vec())
         .collect::<Vec<Vec<u8>>>();
 
-    println!("ids: {:?}", ids);
-
     // Second half of "data" field is values
     let values = data[data_len / 2..]
         .to_vec()
         .chunks(32)
         .map(|x| x.to_vec())
         .collect::<Vec<Vec<u8>>>();
-
-    println!("values: {:?}", values);
 
     let event = erc1155_transfer_event::Erc1155TransferBatchEvent {
         operator,
