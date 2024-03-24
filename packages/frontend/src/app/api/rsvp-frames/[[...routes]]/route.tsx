@@ -84,7 +84,7 @@ const rsvpedFrame = async (response: string, c: any) => {
     throw new Error('No frame data');
   }
 
-  prisma.eventRSVPs.upsert({
+  await prisma.eventRSVPs.upsert({
     where: {
       event_fid: {
         event,
