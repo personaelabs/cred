@@ -168,6 +168,22 @@ export const trimAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
+/**
+ * Returns the title of the group type.
+ */
+export const getGroupTypeTitle = (groupType: GroupType): string => {
+  switch (groupType) {
+    case GroupType.AllHolders:
+      return 'Historical holders';
+    case GroupType.Whale:
+      return 'Whales';
+    case GroupType.EarlyHolder:
+      return 'Early coin holders';
+    default:
+      return 'Others';
+  }
+};
+
 export const PRECOMPUTED_HASHES = [
   [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
