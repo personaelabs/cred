@@ -49,38 +49,46 @@ const hasCreddd = async (fid: number) => {
 };
 
 app.frame('/', async c => {
-  const { buttonValue, frameData } = c;
+  const { buttonValue } = c;
 
-  let fid;
-  if (!frameData) {
-    fid = 54; // lakshman, for debugging
-  } else {
-    fid = frameData.fid;
+  if (buttonValue === 'check') {
+    return rsvpOrGetCredddFrame(c);
   }
 
-  console.log('fid', fid);
-
-  // NOTE: handle RSVP
   if (buttonValue === 'yes' || buttonValue === 'no') {
-    return rsvpedFrame(fid, buttonValue, c);
+    return rsvpedFrame(buttonValue, c);
   }
 
-  const eligible = await hasCreddd(fid);
-  if (eligible) {
-    return rsvpFrame(c);
-  } else {
-    return getCredddFrame(c);
-  }
+  return c.res({
+    action: '/',
+    image: (
+      <div
+        style={{
+          ...CONTAINER_STYLE,
+          fontSize: 60,
+        }}
+      >
+        a secret message for a select few...
+      </div>
+    ),
+    intents: [<Button value="check">check eligibility</Button>],
+  });
 });
 
 const event = 'farcon-creddd';
 
-const rsvpedFrame = async (fid: number, response: string, c: any) => {
-await  prisma.eventRSVPs.upsert({
+const rsvpedFrame = async (response: string, c: any) => {
+  const { frameData } = c;
+
+  if (!frameData) {
+    throw new Error('No frame data');
+  }
+
+  prisma.eventRSVPs.upsert({
     where: {
       event_fid: {
         event,
-        fid,
+        fid: frameData.fid,
       },
     },
     update: {
@@ -88,7 +96,7 @@ await  prisma.eventRSVPs.upsert({
     },
     create: {
       event,
-      fid,
+      fid: frameData.fid,
       attending: response === 'yes',
     },
   });
@@ -110,43 +118,55 @@ await  prisma.eventRSVPs.upsert({
   });
 };
 
-const rsvpFrame = async (c: any) => {
-  // NOTE: we'll enable multi-RSVP. so you can RSVP to overwrite past choice
-  return c.res({
-    action: '/',
-    image: (
-      <div
-        style={{
-          ...CONTAINER_STYLE,
-          fontSize: 40,
-        }}
-      >
-        you`re invited to a secret event at farcon. <br />
-        evening of 5/4 at a (to be disclosed) location. <br />
-        will you be there?
-      </div>
-    ),
+const rsvpOrGetCredddFrame = async (c: any) => {
+  const { frameData } = c;
 
-    intents: [<Button value="yes">yes</Button>, <Button value="no">no</Button>],
-  });
-};
+  if (!frameData) {
+    throw new Error('No frame data');
+  }
 
-const getCredddFrame = async (c: any) => {
-  return c.res({
-    action: '/',
-    image: (
-      <div
-        style={{
-          ...CONTAINER_STYLE,
-          fontSize: 40,
-        }}
-      >
-        no creddd detected <br />
-        add creddd for a secret message <br />
-      </div>
-    ),
-    intents: [<Button.Link href="https://creddd.xyz">add creddd</Button.Link>],
-  });
+  const eligible = await hasCreddd(frameData.fid);
+
+  if (eligible) {
+    return c.res({
+      action: '/',
+      image: (
+        <div
+          style={{
+            ...CONTAINER_STYLE,
+            fontSize: 40,
+          }}
+        >
+          you`re invited to a secret event at farcon. <br />
+          the evening of 5/4 at a (to be disclosed) location. <br />
+          will you be there?
+        </div>
+      ),
+
+      intents: [
+        <Button value="yes">yes</Button>,
+        <Button value="no">no</Button>,
+      ],
+    });
+  } else {
+    return c.res({
+      action: '/',
+      image: (
+        <div
+          style={{
+            ...CONTAINER_STYLE,
+            fontSize: 40,
+          }}
+        >
+          no creddd detected <br />
+          not eligible
+        </div>
+      ),
+      intents: [
+        <Button.Link href="https://creddd.xyz">add creddd</Button.Link>,
+      ],
+    });
+  }
 };
 
 export const GET = handle(app);
