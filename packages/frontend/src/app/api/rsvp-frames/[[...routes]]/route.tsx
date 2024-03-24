@@ -76,7 +76,7 @@ app.frame('/', async c => {
 const event = 'farcon-creddd';
 
 const rsvpedFrame = async (fid: number, response: string, c: any) => {
-  prisma.eventRSVPs.upsert({
+await  prisma.eventRSVPs.upsert({
     where: {
       event_fid: {
         event,
