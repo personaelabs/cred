@@ -73,10 +73,8 @@ const ExplorePage = () => {
                           <TooltipTrigger>
                             <Info className="w-4 h-4 ml-2"></Info>
                           </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            <div className="font-bold z-50 bg-black ">
-                              {credddDescription}
-                            </div>
+                          <TooltipContent side="left" className="max-w-[300px]">
+                            <div>{credddDescription}</div>
                           </TooltipContent>
                         </Tooltip>
                       ) : (
