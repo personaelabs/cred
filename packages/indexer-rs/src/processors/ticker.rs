@@ -120,8 +120,13 @@ impl GroupIndexer for TickerIndexer {
 mod test {
     use super::*;
     use crate::{
-        contracts::erc20::erc20_contracts, eth_rpc::EthRpcClient, log_sync_engine::LogSyncEngine,
-        postgres::init_postgres, test_utils::delete_all, utils::dotenv_config, ROCKSDB_PATH,
+        contracts::erc20::erc20_contracts,
+        eth_rpc::EthRpcClient,
+        log_sync_engine::LogSyncEngine,
+        postgres::init_postgres,
+        test_utils::{delete_all, get_members_from_csv},
+        utils::dotenv_config,
+        ROCKSDB_PATH,
     };
     use rocksdb::{Options, DB};
     use std::sync::Arc;
@@ -180,7 +185,12 @@ mod test {
 
         let members = indexer.get_members(to_block).unwrap();
 
-        let expected_num_members = 4740;
-        assert_eq!(members.len(), expected_num_members);
+        let expected_members = get_members_from_csv("ticker_rug_survivors.csv");
+
+        // Sort the members as `expected_members` is sorted
+        let mut members = members.iter().copied().collect::<Vec<Address>>();
+        members.sort();
+
+        assert_eq!(members, expected_members);
     }
 }

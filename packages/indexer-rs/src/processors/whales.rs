@@ -131,8 +131,12 @@ mod test {
 
     use super::*;
     use crate::{
-        eth_rpc::EthRpcClient, log_sync_engine::LogSyncEngine, postgres::init_postgres,
-        test_utils::erc20_test_contract, utils::dotenv_config, ROCKSDB_PATH,
+        eth_rpc::EthRpcClient,
+        log_sync_engine::LogSyncEngine,
+        postgres::init_postgres,
+        test_utils::{delete_all, erc20_test_contract},
+        utils::dotenv_config,
+        ROCKSDB_PATH,
     };
     use rocksdb::{Options, DB};
 
@@ -153,6 +157,8 @@ mod test {
             )
             .unwrap(),
         );
+
+        delete_all(&db);
 
         let pg_client = init_postgres().await;
 

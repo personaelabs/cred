@@ -145,7 +145,9 @@ mod test {
         eth_rpc::EthRpcClient,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
-        test_utils::{delete_all, erc1155_test_contract, erc721_test_contract},
+        test_utils::{
+            delete_all, erc1155_test_contract, erc721_test_contract, get_members_from_csv,
+        },
         utils::dotenv_config,
         ROCKSDB_PATH,
     };
@@ -200,11 +202,15 @@ mod test {
         let group_id = 1;
         let indexer = AllHoldersIndexer::new(contract.clone(), group_id, resources);
 
-        let expected_num_members = 203;
         let members = indexer.get_members(to_block).unwrap();
 
-        // Check that all unique holders were indexed
-        assert_eq!(members.len(), expected_num_members);
+        let expected_members = get_members_from_csv("the187_historical_holders.csv");
+
+        // Sort the members as `expected_members` is sorted
+        let mut members: Vec<Address> = members.iter().copied().collect();
+        members.sort();
+
+        assert_eq!(members, expected_members);
     }
 
     #[tokio::test]
@@ -264,10 +270,14 @@ mod test {
         let group_id = 1;
         let indexer = AllHoldersIndexer::new(contract.clone(), group_id, resources);
 
-        let expected_num_members = 411;
         let members = indexer.get_members(to_block).unwrap();
 
-        // Check that all unique holders were indexed
-        assert_eq!(members.len(), expected_num_members);
+        let expected_members = get_members_from_csv("crypto_the_game_holders.csv");
+
+        // Sort the members as `expected_members` is sorted
+        let mut members = members.iter().copied().collect::<Vec<Address>>();
+        members.sort();
+
+        assert_eq!(members, expected_members);
     }
 }

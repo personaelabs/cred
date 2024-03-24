@@ -1,11 +1,14 @@
+use std::{env, fs::File};
+
 use rocksdb::{IteratorMode, WriteBatch, DB};
 
 use crate::{
     contract::{Contract, ContractType},
     eth_rpc::Chain,
-    GroupType,
+    Address, GroupType,
 };
 
+/// Get a test ERC20 contract
 pub fn erc20_test_contract() -> Contract {
     Contract {
         id: 0,
@@ -19,6 +22,7 @@ pub fn erc20_test_contract() -> Contract {
     }
 }
 
+/// Get a test ERC721 contract
 pub fn erc721_test_contract() -> Contract {
     Contract {
         id: 0,
@@ -32,6 +36,7 @@ pub fn erc721_test_contract() -> Contract {
     }
 }
 
+/// Get a test ERC1155 contract
 pub fn erc1155_test_contract() -> Contract {
     Contract {
         id: 0,
@@ -56,4 +61,33 @@ pub fn delete_all(rocksdb_client: &DB) {
     }
 
     rocksdb_client.write(batch).unwrap();
+}
+
+pub fn get_members_from_csv(file_name: &str) -> Vec<Address> {
+    let cargo_manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let file = File::open(&format!(
+        "{}/src/test_utils/{}",
+        cargo_manifest_dir, file_name
+    ))
+    .unwrap();
+
+    // Build the CSV reader and iterate over each record.
+    let mut rdr = csv::Reader::from_reader(file);
+
+    let mut addresses = rdr
+        .records()
+        .map(|record| {
+            let record = record.unwrap();
+            let address = record.get(0).unwrap().to_string();
+
+            hex::decode(address.trim_start_matches("0x"))
+                .unwrap()
+                .try_into()
+                .unwrap()
+        })
+        .collect::<Vec<Address>>();
+
+    addresses.sort();
+
+    addresses
 }
