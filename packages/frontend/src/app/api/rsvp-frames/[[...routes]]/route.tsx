@@ -60,13 +60,12 @@ app.frame('/', async c => {
 
   console.log('fid', fid);
 
-  // NOTE: handle RSVP
-  if (buttonValue === 'yes' || buttonValue === 'no') {
-    return rsvpedFrame(fid, buttonValue, c);
-  }
-
   const eligible = await hasCreddd(fid);
   if (eligible) {
+    if (buttonValue === 'yes' || buttonValue === 'no') {
+      return rsvpedFrame(fid, buttonValue, c);
+    }
+
     return rsvpFrame(c);
   } else {
     return getCredddFrame(c);
