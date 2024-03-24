@@ -103,3 +103,16 @@ model Contract {
 
   @@unique([address, chain])
 }
+
+model EventRSVPs {
+  id    Int    @id @default(autoincrement())
+  event String
+  fid   Int
+
+  attending Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([event, fid])
+}
