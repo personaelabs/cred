@@ -1,13 +1,18 @@
 'use client';
 import { Input } from '@/components/ui/input';
 import useGroups from '@/hooks/useGroups';
-import { getGroupTypeTitle } from '@/lib/utils';
+import { getCredddDescription, getGroupTypeTitle } from '@/lib/utils';
 import { GroupType } from '@prisma/client';
-import { Loader2 } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { GroupSelect } from '../api/groups/route';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip';
 
 const ExplorePage = () => {
   const { groupsByType } = useGroups();
@@ -55,10 +60,32 @@ const ExplorePage = () => {
           {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
               <div className="underline">{getGroupTypeTitle(groupType)}</div>
-              <div className="flex flex-col gap-2  opacity-80">
-                {filteredGroupsByType.get(groupType)!.map(group => (
-                  <div key={group.id}>{group.displayName}</div>
-                ))}
+              <div className="flex flex-col gap-3  opacity-80">
+                {filteredGroupsByType.get(groupType)!.map(group => {
+                  const credddDescription = getCredddDescription(
+                    group.displayName,
+                    group.typeId
+                  );
+                  return (
+                    <div key={group.id} className="flex flex-row items-center">
+                      {group.displayName}
+                      {credddDescription ? (
+                        <Tooltip delayDuration={200}>
+                          <TooltipTrigger>
+                            <Info className="w-4 h-4 ml-2"></Info>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            <div className="font-bold z-50 bg-black ">
+                              {credddDescription}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
