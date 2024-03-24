@@ -92,7 +92,7 @@ const rsvpedFrame = async (fid: number, response: string, c: any) => {
     function (err) {
       if (err) {
         console.error(err);
-        return;
+        throw err;
       }
     }
   );
