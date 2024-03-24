@@ -32,6 +32,19 @@ pub fn erc721_test_contract() -> Contract {
     }
 }
 
+pub fn erc1155_test_contract() -> Contract {
+    Contract {
+        id: 0,
+        contract_type: ContractType::ERC1155,
+        address: "0xa41273d9ecce19051e109d87431002fb1404d392".to_string(),
+        name: "Crypto: The Game Players".to_string(),
+        deployed_block: 11088633,
+        chain: Chain::Base,
+        target_groups: vec![GroupType::AllHolders],
+        symbol: "crypto-the-game".to_string(),
+    }
+}
+
 /// Delete all records from a RocksDB database
 pub fn delete_all(rocksdb_client: &DB) {
     let iterator = rocksdb_client.iterator(IteratorMode::Start);

@@ -2,7 +2,7 @@ use rocksdb::{DBIteratorWithThreadMode, IteratorMode, ReadOptions, DB};
 
 use crate::{
     rocksdb_key::{KeyType, RocksDbKey},
-    ContractId, EventId,
+    BlockNum, ContractId, EventId,
 };
 
 /// An iterator over the event logs for a contract.
@@ -10,11 +10,17 @@ use crate::{
 pub struct ContractEventIterator<'a> {
     event_id: EventId,
     contract_id: ContractId,
+    to_block: Option<BlockNum>,
     inner: DBIteratorWithThreadMode<'a, DB>,
 }
 
 impl<'a> ContractEventIterator<'a> {
-    pub fn new(db: &'a DB, event_id: EventId, contract_id: ContractId) -> Self {
+    pub fn new(
+        db: &'a DB,
+        event_id: EventId,
+        contract_id: ContractId,
+        to_block: Option<BlockNum>,
+    ) -> Self {
         // Initialize the RocksDB iterator that starts from the first log for `contract.id`
         let mut iterator_ops = ReadOptions::default();
         iterator_ops.set_async_io(true);
@@ -29,6 +35,7 @@ impl<'a> ContractEventIterator<'a> {
         Self {
             event_id,
             contract_id,
+            to_block,
             inner: iterator,
         }
     }
@@ -48,8 +55,15 @@ impl Iterator for ContractEventIterator<'_> {
                 && key.contract_id == self.contract_id
                 && key.event_id == self.event_id
             {
+                if let Some(to_block) = self.to_block {
+                    if key.block_num.unwrap() > to_block {
+                        return None;
+                    }
+                }
+
                 Some((key, value.to_vec()))
             } else {
+                // Reached the end of the logs for the contract event
                 None
             }
         } else {

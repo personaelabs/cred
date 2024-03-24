@@ -6,7 +6,7 @@ use crate::{
     log_sync_engine::CHUNK_SIZE,
     rocksdb_key::{KeyType, RocksDbKey},
     BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
-    ERC721TransferEvent,
+    ERC721TransferEvent, GroupType,
 };
 use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
@@ -216,18 +216,29 @@ pub fn count_synched_logs(
     contract_id: ContractId,
     to_block: Option<BlockNum>,
 ) -> i32 {
-    let iterator = ContractEventIterator::new(rocksdb_conn, event_id, contract_id);
+    let iterator = ContractEventIterator::new(rocksdb_conn, event_id, contract_id, to_block);
+    iterator.count() as i32
+}
 
-    let mut count = 0;
-    for (key, _value) in iterator {
-        if let Some(to_block) = to_block {
-            if key.block_num.unwrap() > to_block {
-                break;
-            }
-        }
-
-        count += 1;
+pub fn get_handle_from_contract_and_group(contract: &Contract, group_type: GroupType) -> String {
+    match group_type {
+        GroupType::EarlyHolder => format!("early-holder-{}", contract.name.to_lowercase()),
+        GroupType::Whale => format!("whale-{}", contract.name.to_lowercase()),
+        GroupType::AllHolders => format!("{}-all-holders", contract.name.to_lowercase()),
+        GroupType::Ticker => "ticker-rug-survivor".to_string(),
+        _ => panic!("Invalid group type"),
     }
+}
 
-    count
+pub fn get_display_name_from_contract_and_group(
+    contract: &Contract,
+    group_type: GroupType,
+) -> String {
+    match group_type {
+        GroupType::EarlyHolder => format!("Early {} holder", contract.name),
+        GroupType::Whale => format!("{} whale", contract.name),
+        GroupType::AllHolders => format!("{} historical holder", contract.name),
+        GroupType::Ticker => "$ticker rug survivor".to_string(),
+        _ => panic!("Invalid group type"),
+    }
 }

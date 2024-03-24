@@ -122,10 +122,6 @@ pub fn parse_erc1155_transfer_single_event_log(log: &Value) -> Vec<u8> {
     let from = &topics[2].as_str().unwrap();
     let to = &topics[3].as_str().unwrap();
 
-    println!("operator: {}", operator);
-    println!("from: {}", from);
-    println!("to: {}", to);
-
     let operator = hex::decode(&operator[operator.len() - 40..]).unwrap();
     let from = hex::decode(&from[from.len() - 40..]).unwrap();
     let to = hex::decode(&to[to.len() - 40..]).unwrap();
