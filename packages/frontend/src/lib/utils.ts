@@ -174,11 +174,11 @@ export const trimAddress = (address: Hex) => {
 export const getGroupTypeTitle = (groupType: GroupType): string => {
   switch (groupType) {
     case GroupType.AllHolders:
-      return 'Historical holders';
+      return 'Historical NFT Holders';
     case GroupType.Whale:
-      return 'Whales';
+      return 'Token Whales';
     case GroupType.EarlyHolder:
-      return 'Early coin holders';
+      return 'Early Token Holders';
     default:
       return 'Others';
   }
