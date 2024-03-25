@@ -75,9 +75,10 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     const isUserProfilePage = /\/user\//.test(pathname);
     const isExplorePage = /\/explore/.test(pathname);
+    const isLeaderBoardPage = /\/leaderboard/.test(pathname);
 
     // Check login status if this is not a user profile page
-    if (!isUserProfilePage && !isExplorePage) {
+    if (!isUserProfilePage && !isExplorePage && !isLeaderBoardPage) {
       const fid = localStorage.getItem('fid');
       if (fid) {
         fetchUser(parseInt(fid));

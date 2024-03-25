@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const Header = () => {
   return (
-    <div className="h-[110px] w-[100vw] flex flex-row justify-between items-center gap-8 px-[100px]">
+    <div className="h-[80px] w-[100vw] flex flex-row justify-between items-center gap-8 px-[20px] md:px-[100px]">
       <div>
         <Link href="/account">My creddd</Link>
       </div>
