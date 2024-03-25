@@ -217,7 +217,7 @@ impl LogSyncEngine {
                         if needs_retry {
                             error!(
                                 "${} ({}) {} {:?}",
-                                self.contract.symbol.to_uppercase(),
+                                self.contract.name,
                                 batch.len(),
                                 "Error:".red(),
                                 error_msg
@@ -239,11 +239,7 @@ impl LogSyncEngine {
                     }
                 }
                 Err(e) => {
-                    error!(
-                        "${} Error (retrying): {:?}",
-                        self.contract.symbol.to_uppercase(),
-                        e
-                    );
+                    error!("${} Error (retrying): {:?}", self.contract.name, e);
                 }
             }
         }
@@ -268,11 +264,7 @@ impl LogSyncEngine {
 
         self.rocksdb_client.write(batch).unwrap();
         if !chunks.is_empty() {
-            info!(
-                "${} Synched chunk: {}",
-                self.contract.symbol.to_uppercase(),
-                chunks[0]
-            );
+            info!("${} Synched chunk: {}", self.contract.name, chunks[0]);
         }
     }
 
@@ -285,11 +277,7 @@ impl LogSyncEngine {
 
         let mut chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
 
-        debug!(
-            "${} Start from chunk: {}",
-            self.contract.symbol.to_uppercase(),
-            chunks_from
-        );
+        debug!("${} Start from chunk: {}", self.contract.name, chunks_from);
 
         let mut chunks_to = min(chunks_from + batch_size, num_total_chunks);
 
@@ -315,7 +303,7 @@ impl LogSyncEngine {
         join_all(jobs).await;
         info!(
             "Synced ${} in {:?} ({}jobs)",
-            self.contract.symbol.to_uppercase(),
+            self.contract.name,
             start.elapsed(),
             num_jobs
         );
@@ -325,7 +313,7 @@ impl LogSyncEngine {
 
         info!(
             "${} {}: {}",
-            self.contract.symbol.to_uppercase(),
+            self.contract.name,
             "Synching Missing chunks".blue(),
             missing_chunks.len()
         );
@@ -354,7 +342,7 @@ impl LogSyncEngine {
             if latest_block.is_err() {
                 error!(
                     "${} get_block_number Error: {:?}",
-                    self.contract.symbol.to_uppercase(),
+                    self.contract.name,
                     latest_block.err().unwrap()
                 );
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;

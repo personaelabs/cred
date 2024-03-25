@@ -11,7 +11,7 @@ const NUM_MAINNET_NODES: u32 = 10;
 
 pub static PERMITS: Semaphore = Semaphore::const_new(100);
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Chain {
     Mainnet,
     Optimism,

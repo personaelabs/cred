@@ -2,6 +2,7 @@ use crate::{
     contract::Contract,
     contract_event_iterator::ContractEventIterator,
     eth_rpc::Chain,
+    group::Group,
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     utils::{decode_erc20_transfer_event, is_event_logs_ready},
@@ -10,25 +11,24 @@ use crate::{
 use std::{collections::HashSet, io::Error};
 
 pub struct EarlyHolderIndexer {
-    pub contract: Contract,
-    pub group_id: i32,
+    pub group: Group,
     pub resources: IndexerResources,
 }
 
 impl EarlyHolderIndexer {
-    pub fn new(contract: Contract, group_id: i32, resources: IndexerResources) -> Self {
-        EarlyHolderIndexer {
-            contract,
-            group_id,
-            resources,
-        }
+    pub fn new(group: Group, resources: IndexerResources) -> Self {
+        EarlyHolderIndexer { group, resources }
+    }
+
+    fn contract(&self) -> &Contract {
+        &self.group.contract_inputs[0]
     }
 
     fn get_holders(&self, block_number: BlockNum) -> (HashSet<Address>, Vec<Address>) {
         let iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC20_TRANSFER_EVENT_ID,
-            self.contract.id,
+            self.contract().id,
             Some(block_number),
         );
 
@@ -51,12 +51,12 @@ impl EarlyHolderIndexer {
 
 #[async_trait::async_trait]
 impl GroupIndexer for EarlyHolderIndexer {
-    fn group_id(&self) -> i32 {
-        self.group_id
+    fn group(&self) -> &Group {
+        &self.group
     }
 
     fn chain(&self) -> Chain {
-        self.contract.chain
+        self.contract().chain
     }
 
     fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
@@ -81,7 +81,7 @@ impl GroupIndexer for EarlyHolderIndexer {
             &self.resources.rocksdb_client,
             &self.resources.eth_client,
             ERC20_TRANSFER_EVENT_ID,
-            &self.contract,
+            &self.contract(),
         )
         .await
     }
@@ -96,7 +96,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{delete_all, erc20_test_contract},
         utils::dotenv_config,
-        ROCKSDB_PATH,
+        GroupType, ROCKSDB_PATH,
     };
     use rocksdb::{Options, DB};
     use std::sync::Arc;
@@ -145,8 +145,14 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group_id = 1;
-        let indexer = EarlyHolderIndexer::new(contract.clone(), group_id, resources.clone());
+        let group = Group {
+            id: Some(1),
+            name: "Test Group".to_string(),
+            group_type: GroupType::EarlyHolder,
+            contract_inputs: vec![contract.clone()],
+        };
+
+        let indexer = EarlyHolderIndexer::new(group, resources.clone());
 
         let (unique_holders, ordered_holders) = indexer.get_holders(to_block);
 

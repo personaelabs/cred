@@ -2,13 +2,14 @@ use num_bigint::BigUint;
 
 pub mod contract;
 pub mod contract_event_iterator;
-pub mod contracts;
 pub mod eth_rpc;
 pub mod event;
+pub mod group;
 pub mod log_sync_engine;
 pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
+pub mod seeder;
 pub mod tree;
 pub mod tree_sync_engine;
 pub mod utils;
@@ -72,7 +73,7 @@ impl From<std::io::Error> for Error {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
-    Static,
+    CredddTeam,
     EarlyHolder,
     Whale,
     AllHolders,

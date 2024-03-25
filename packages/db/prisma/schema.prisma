@@ -62,15 +62,17 @@ model MerkleTree {
 }
 
 model Group {
-  id          Int       @id @default(autoincrement())
-  handle      String    @unique
-  displayName String
-  typeId      GroupType
+  id             Int       @id
+  displayName    String
+  typeId         GroupType
+  contractInputs Int[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   merkleTrees MerkleTree[]
+
+  @@unique([id, typeId, contractInputs])
 }
 
 enum ContractType {
@@ -82,7 +84,7 @@ enum ContractType {
 }
 
 enum GroupType {
-  Static
+  CredddTeam
   EarlyHolder
   Whale
   AllHolders
@@ -90,18 +92,16 @@ enum GroupType {
 }
 
 model Contract {
-  id             Int          @id @default(autoincrement())
-  address        String
-  name           String
-  type           ContractType
-  deployedBlock  BigInt
-  symbol         String?
-  targetGroupIds GroupType[]
-  chain          String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            Int          @id
+  address       String
+  name          String
+  type          ContractType
+  deployedBlock BigInt
+  chain         String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  @@unique([address, chain])
+  @@unique([id, address, chain])
 }
 
 model EventRSVPs {

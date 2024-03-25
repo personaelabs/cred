@@ -5,7 +5,7 @@ use rocksdb::{IteratorMode, WriteBatch, DB};
 use crate::{
     contract::{Contract, ContractType},
     eth_rpc::Chain,
-    Address, GroupType,
+    Address,
 };
 
 /// Get a test ERC20 contract
@@ -17,8 +17,6 @@ pub fn erc20_test_contract() -> Contract {
         name: "CorgiAI".to_string(),
         deployed_block: 18540899,
         chain: Chain::Mainnet,
-        target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
-        symbol: "corgiai".to_string(),
     }
 }
 
@@ -31,8 +29,6 @@ pub fn erc721_test_contract() -> Contract {
         name: "The187".to_string(),
         deployed_block: 17052667,
         chain: Chain::Mainnet,
-        target_groups: vec![GroupType::AllHolders],
-        symbol: "The187".to_string(),
     }
 }
 
@@ -45,8 +41,6 @@ pub fn erc1155_test_contract() -> Contract {
         name: "Crypto: The Game Players".to_string(),
         deployed_block: 11088633,
         chain: Chain::Base,
-        target_groups: vec![GroupType::AllHolders],
-        symbol: "crypto-the-game".to_string(),
     }
 }
 

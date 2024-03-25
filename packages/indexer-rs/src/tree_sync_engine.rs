@@ -1,5 +1,6 @@
 use crate::{
-    eth_rpc::EthRpcClient, processors::GroupIndexer, tree::save_tree, BlockNum, Error, GroupType,
+    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, BlockNum,
+    Error, GroupType,
 };
 use log::{error, info};
 use std::sync::Arc;
@@ -9,7 +10,7 @@ const INDEXING_INTERVAL_SECS: u64 = 60; // 60 seconds
 
 pub struct TreeSyncEngine {
     pub indexer: Box<dyn GroupIndexer>,
-    pub group_id: i32,
+    pub group: Group,
     pub pg_client: Arc<tokio_postgres::Client>,
     pub rocksdb_client: Arc<rocksdb::DB>,
     pub eth_client: Arc<EthRpcClient>,
@@ -19,7 +20,7 @@ pub struct TreeSyncEngine {
 impl TreeSyncEngine {
     pub fn new(
         indexer: Box<dyn GroupIndexer>,
-        group_id: i32,
+        group: Group,
         pg_client: Arc<tokio_postgres::Client>,
         rocksdb_client: Arc<rocksdb::DB>,
         eth_client: Arc<EthRpcClient>,
@@ -27,7 +28,7 @@ impl TreeSyncEngine {
     ) -> Self {
         TreeSyncEngine {
             indexer,
-            group_id,
+            group,
             pg_client,
             rocksdb_client,
             eth_client,
@@ -41,8 +42,12 @@ impl TreeSyncEngine {
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
         let members = self.indexer.get_members(block_number)?;
 
+        if self.group.id.is_none() {
+            panic!("Group id is not set");
+        }
+
         save_tree(
-            self.group_id,
+            self.group.id.unwrap(),
             GroupType::EarlyHolder,
             &self.pg_client,
             members.iter().copied().collect(),
@@ -59,7 +64,7 @@ impl TreeSyncEngine {
             let permit = self.semaphore.acquire().await;
 
             if permit.is_err() {
-                error!("${} Semaphore acquire error: {:?}", self.group_id, permit);
+                error!("${} Semaphore acquire error: {:?}", self.group.name, permit);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                 continue;
             }
@@ -74,7 +79,7 @@ impl TreeSyncEngine {
                 drop(permit);
                 error!(
                     "${} Error checking if indexer is ready: {:?}",
-                    self.group_id,
+                    self.group.name,
                     is_ready.err().unwrap()
                 );
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
@@ -83,7 +88,7 @@ impl TreeSyncEngine {
 
             if !is_ready.unwrap() {
                 drop(permit);
-                info!("${} Waiting for the indexer...", self.group_id);
+                info!("${} Waiting for the indexer...", self.group.name);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                 continue;
             }
@@ -95,7 +100,7 @@ impl TreeSyncEngine {
                 drop(permit);
                 error!(
                     "${} get_block_number Error: {:?}",
-                    self.group_id,
+                    self.group.name,
                     latest_block.err().unwrap()
                 );
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;
@@ -109,12 +114,12 @@ impl TreeSyncEngine {
 
             match sync_to_block_result {
                 Ok(_) => {
-                    info!("${} Tree synced to block {}", self.group_id, latest_block);
+                    info!("${} Tree synced to block {}", self.group.name, latest_block);
                 }
                 Err(err) => {
                     error!(
                         "${} Error syncing to block {}: {:?}",
-                        self.group_id, latest_block, err
+                        self.group.name, latest_block, err
                     );
                 }
             }
