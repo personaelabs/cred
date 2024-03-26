@@ -6,6 +6,7 @@ use indexer_rs::group::get_groups;
 use indexer_rs::log_sync_engine::LogSyncEngine;
 use indexer_rs::postgres::init_postgres;
 use indexer_rs::processors::all_holders::AllHoldersIndexer;
+use indexer_rs::processors::creddd_team::CredddTeamIndexer;
 use indexer_rs::processors::early_holders::EarlyHolderIndexer;
 use indexer_rs::processors::ticker::TickerIndexer;
 use indexer_rs::processors::whales::WhaleIndexer;
@@ -118,8 +119,10 @@ async fn main() {
                 }
                 GroupType::Whale => Box::new(WhaleIndexer::new(group.clone(), resources.clone())),
                 GroupType::Ticker => Box::new(TickerIndexer::new(group.clone(), resources.clone())),
-
-                _ => panic!("Invalid target group"),
+                GroupType::CredddTeam => {
+                    Box::new(CredddTeamIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::Static => panic!("Static group type is deprecated"),
             };
 
             // Initialize the tree sync engine for the group

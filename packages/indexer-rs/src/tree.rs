@@ -41,6 +41,7 @@ pub async fn save_tree(
     // If the group type is not static and the number of addresses is less than 100,
     // then we skip building the tree since the anonymity set is too small
     if group_type != GroupType::CredddTeam && addresses.len() < 100 {
+        // TODO: Return an error here so that the caller can decide what to do
         warn!("Not enough addresses to build a tree for {}", group_id);
         return Ok(());
     }

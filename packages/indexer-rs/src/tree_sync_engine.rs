@@ -1,6 +1,5 @@
 use crate::{
-    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, BlockNum,
-    Error, GroupType,
+    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, BlockNum, Error,
 };
 use log::{error, info};
 use std::sync::Arc;
@@ -48,7 +47,7 @@ impl TreeSyncEngine {
 
         save_tree(
             self.group.id.unwrap(),
-            GroupType::EarlyHolder,
+            self.group.group_type,
             &self.pg_client,
             members.iter().copied().collect(),
             block_number as i64,
