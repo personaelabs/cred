@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ExplorePage = () => {
   const { groupsByType } = useGroups();
@@ -59,31 +60,40 @@ const ExplorePage = () => {
           {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
               <div className="underline">{groupType}</div>
-              <div className="flex flex-col gap-3  opacity-80">
-                {filteredGroupsByType.get(groupType)!.map(group => {
-                  const credddDescription = getCredddDescription(
-                    group.displayName,
-                    group.typeId
-                  );
-                  return (
-                    <div key={group.id} className="flex flex-row items-center">
-                      {group.displayName}
-                      {credddDescription ? (
-                        <Tooltip delayDuration={200}>
-                          <TooltipTrigger>
-                            <Info className="w-4 h-4 ml-2"></Info>
-                          </TooltipTrigger>
-                          <TooltipContent side="left" className="max-w-[300px]">
-                            <div>{credddDescription}</div>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <></>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+
+              <ScrollArea className="h-72">
+                <div className="flex flex-col gap-3  opacity-80">
+                  {filteredGroupsByType.get(groupType)!.map(group => {
+                    const credddDescription = getCredddDescription(
+                      group.displayName,
+                      group.typeId
+                    );
+                    return (
+                      <div
+                        key={group.id}
+                        className="flex flex-row items-center"
+                      >
+                        {group.displayName}
+                        {credddDescription ? (
+                          <Tooltip delayDuration={200}>
+                            <TooltipTrigger>
+                              <Info className="w-4 h-4 ml-2"></Info>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="left"
+                              className="max-w-[300px]"
+                            >
+                              <div>{credddDescription}</div>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             </div>
           ))}
         </div>
