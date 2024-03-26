@@ -9,7 +9,7 @@ use crate::{
 pub fn get_seed_groups() -> Vec<Group> {
     // We track the group id to assign to each group
     // (Each group should have a unique id)
-    let mut group_id = 100000;
+    let mut group_id = 1000000;
 
     // Vector to hold all groups
     let mut groups = vec![];
