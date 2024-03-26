@@ -55,7 +55,7 @@ const ExplorePage = () => {
         />
       </div>
       {filteredGroupsByType ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[96px] gap-y-[36px] overflow-y-scroll max-h-[320px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[96px] gap-y-[36px]">
           {Array.from(filteredGroupsByType.keys()).map(groupType => (
             <div key={groupType} className="flex flex-col items-center gap-2">
               <div className="underline">{groupType}</div>

@@ -59,7 +59,7 @@ export default function RootLayout({
           src="https://plausible.io/js/script.js"
         ></script>
       </head>
-      <body className="bg-background overflow-y-hidden">
+      <body className="bg-background mb-[70px]">
         <WagmiProvider config={wagmicConfig}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider modalSize="wide">
