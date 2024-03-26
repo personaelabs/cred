@@ -61,7 +61,7 @@ const LeaderBoardPage = () => {
       <div className="flex flex-row w-[270px] md:w-[450px] justify-end">
         <div className="w-[60px] opacity-60 text-center">score</div>
       </div>
-      <div className="overflow-auto mt-[12px] mb-[70px]">
+      <div className="overflow-auto mt-[12px]">
         {leaderBoard ? (
           leaderBoard.map((record, i) => (
             <LeaderBoardRow key={i} record={record} rank={i + 1} />
