@@ -1,4 +1,4 @@
-use crate::{contract::ContractType, eth_rpc::Chain, ContractId};
+use crate::{contract::ContractType, eth_rpc::Chain, ContractId, GroupType};
 
 #[derive(Debug, Clone)]
 pub struct ContractData {
@@ -9,6 +9,10 @@ pub struct ContractData {
     pub deployed_block: u64,
     pub chain: Chain,
     pub symbol: String,
+
+    /// The groups that this contract should be derived from.
+    /// This is only used for groups that are derived from a single contract.
+    pub derive_groups: Vec<GroupType>,
 }
 
 pub fn get_seed_contracts() -> Vec<ContractData> {
@@ -21,6 +25,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 10569013,
             chain: Chain::Mainnet,
             symbol: "shib".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -31,6 +36,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "BONK".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -41,6 +47,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "corgiai".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -51,6 +58,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "pepe".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -61,6 +69,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "floki".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -71,6 +80,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "meme".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -81,6 +91,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "pork".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -91,6 +102,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "babydoge".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -101,6 +113,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "trump".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -111,6 +124,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "elon".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -121,6 +135,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "ladys".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -131,6 +146,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "bitcoin".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -141,6 +157,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "tsuka".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -151,6 +168,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "leash".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -161,6 +179,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "dog".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -171,6 +190,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "kishu".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -181,6 +201,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "turbo".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -191,6 +212,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "volt".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -201,6 +223,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "wojak".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -211,6 +234,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "jesus".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -221,6 +245,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "opti".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -231,6 +256,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "shia".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -241,6 +267,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "omni".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -251,6 +278,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "bob".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -261,6 +289,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "qom".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -271,6 +300,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "snail".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -281,6 +311,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "bad".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -291,6 +322,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "cate".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -301,6 +333,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "wsm".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -311,6 +344,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "kitty".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -321,6 +355,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "vinu".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -331,6 +366,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "hoge".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -341,6 +377,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Base,
 
             symbol: "degen".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -351,6 +388,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "npc".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -361,6 +399,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Optimism,
 
             symbol: "op".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -371,6 +410,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "mog".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -381,6 +421,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "uni".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -391,6 +432,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "kizuna".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -401,6 +443,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "mkr".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -411,6 +454,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "squidgrow".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -421,6 +465,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "dino".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -431,6 +476,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "tama".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -441,6 +487,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "nfd".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -451,6 +498,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "hipp".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -461,6 +509,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "шайлушай".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -471,6 +520,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "ai".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -481,6 +531,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "dogegf".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -491,6 +542,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "zoomer".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -501,6 +553,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "milk".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -511,6 +564,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "kiba".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -521,6 +575,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "tyrant".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -531,6 +586,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "link".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -541,6 +597,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Arbitrum,
 
             symbol: "arb".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -551,6 +608,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "joe".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -561,6 +619,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "psps".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -571,6 +630,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "pika".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -581,6 +641,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "KIBSHI".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -591,6 +652,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "ondo".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -601,6 +663,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "zyn".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -611,6 +674,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "aius".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -621,6 +685,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "wTAO".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -630,6 +695,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 11473216,
             chain: Chain::Mainnet,
             symbol: "ldo".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -640,6 +706,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "sora".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -650,6 +717,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "mavia".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -660,6 +728,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "enqai".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -670,6 +739,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "savm".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -680,6 +750,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "wld".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -690,6 +761,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Mainnet,
 
             symbol: "glw-beta".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -699,6 +771,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 18135851,
             chain: Chain::Mainnet,
             symbol: "banana".to_string(),
+            derive_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
         },
         ContractData {
             id: None,
@@ -708,6 +781,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Base,
             deployed_block: 11962318,
             contract_type: ContractType::ERC20,
+            derive_groups: vec![],
         },
         ContractData {
             id: None,
@@ -716,7 +790,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             name: "CRYPTOPUNKS".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 3914495,
-
+            derive_groups: vec![GroupType::AllHolders],
             contract_type: ContractType::Punk,
         },
         ContractData {
@@ -726,8 +800,8 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             name: "Milady".to_string(),
             chain: Chain::Mainnet,
             deployed_block: 13090020,
-
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -738,6 +812,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 13975838,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -748,6 +823,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 12876179,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -758,6 +834,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 12985438,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -768,6 +845,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 12985438,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -778,6 +856,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 13117018,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -788,6 +867,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 16940173,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -798,6 +878,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 13430097,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -808,6 +889,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 17160816,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -818,6 +900,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 12358080,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -828,6 +911,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 17052667,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -838,6 +922,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 13823015,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -848,6 +933,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             deployed_block: 15323174,
 
             contract_type: ContractType::ERC721,
+            derive_groups: vec![GroupType::AllHolders],
         },
         ContractData {
             id: None,
@@ -857,6 +943,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             chain: Chain::Base,
             deployed_block: 11088633,
             contract_type: ContractType::ERC1155,
+            derive_groups: vec![GroupType::AllHolders],
         },
     ];
 

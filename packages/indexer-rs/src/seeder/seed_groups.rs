@@ -1,5 +1,5 @@
 use crate::{
-    contract::{Contract, ContractType},
+    contract::Contract,
     group::Group,
     seeder::seed_contracts::{get_seed_contracts, ContractData},
     GroupType,
@@ -17,29 +17,29 @@ pub fn get_seed_groups() -> Vec<Group> {
     // Get all seed contracts
     let seed_contracts = get_seed_contracts();
 
-    // Get all erc20 contracts from the seed contracts
-    let erc20_contracts = seed_contracts
+    // Get all contracts to build the early holder groups from
+    let early_holders_contracts = seed_contracts
         .iter()
-        .filter(|c| c.contract_type == ContractType::ERC20)
+        .filter(|c| c.derive_groups.contains(&GroupType::EarlyHolder))
         .cloned()
         .collect::<Vec<_>>();
 
-    // Get all erc721 contracts from the seed contracts
-    let erc721_contracts = seed_contracts
+    // Get all contracts to build the whale groups from
+    let whale_contracts = seed_contracts
         .iter()
-        .filter(|c| c.contract_type == ContractType::ERC721)
+        .filter(|c| c.derive_groups.contains(&GroupType::Whale))
         .cloned()
         .collect::<Vec<ContractData>>();
 
-    // Get all erc1155 contracts from the seed contracts
-    let erc1155_contracts = seed_contracts
+    // Get all contracts to build the all holders groups from
+    let all_holders_contracts = seed_contracts
         .iter()
-        .filter(|c| c.contract_type == ContractType::ERC1155)
+        .filter(|c| c.derive_groups.contains(&GroupType::AllHolders))
         .cloned()
         .collect::<Vec<ContractData>>();
 
-    // Build Early holder groups from the erc20 contracts list
-    for contract in erc20_contracts.clone() {
+    // Build Early holder groups
+    for contract in early_holders_contracts.clone() {
         let name = format!("Early ${} holder", contract.symbol.to_uppercase().clone());
         let contract = Contract::from_contract_data(contract);
         let group = Group {
@@ -52,8 +52,8 @@ pub fn get_seed_groups() -> Vec<Group> {
         group_id += 1;
     }
 
-    // Build Whale groups from the erc20 contracts list
-    for contract in erc20_contracts.clone() {
+    // Build Whale groups
+    for contract in whale_contracts.clone() {
         let name = format!("${} whale", contract.symbol.to_uppercase().clone());
         let contract = Contract::from_contract_data(contract);
         let group = Group {
@@ -66,21 +66,8 @@ pub fn get_seed_groups() -> Vec<Group> {
         group_id += 1;
     }
 
-    // Build All holders groups from the erc721 contracts list
-    for contract in erc721_contracts {
-        let contract = Contract::from_contract_data(contract);
-        let group = Group {
-            id: Some(group_id),
-            name: format!("{} historical holder", contract.name.clone()),
-            group_type: GroupType::AllHolders,
-            contract_inputs: vec![contract],
-        };
-        groups.push(group);
-        group_id += 1;
-    }
-
-    // Build All holders groups from the erc1155 contracts list
-    for contract in erc1155_contracts {
+    // Build All holders groups
+    for contract in all_holders_contracts.clone() {
         let contract = Contract::from_contract_data(contract);
         let group = Group {
             id: Some(group_id),
@@ -93,11 +80,16 @@ pub fn get_seed_groups() -> Vec<Group> {
     }
 
     // Add ticker rug survivor group
+    let ticker_contract = seed_contracts
+        .iter()
+        .find(|c| c.symbol == "ticker")
+        .unwrap()
+        .clone();
     groups.push(Group {
         id: Some(group_id),
         name: "$ticker rug survivor".to_string(),
         group_type: GroupType::Ticker,
-        contract_inputs: vec![],
+        contract_inputs: vec![Contract::from_contract_data(ticker_contract)],
     });
 
     group_id += 1;
