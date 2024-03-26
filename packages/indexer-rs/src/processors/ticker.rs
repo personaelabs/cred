@@ -134,33 +134,16 @@ mod test {
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
         seeder::seed_contracts::get_seed_contracts,
-        test_utils::{delete_all, get_members_from_csv},
+        test_utils::{get_members_from_csv, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType, ROCKSDB_PATH,
+        GroupType,
     };
-    use rocksdb::{Options, DB};
     use std::sync::Arc;
 
     #[tokio::test]
     async fn test_ticker_indexer() {
         dotenv_config();
-
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_ticker_indexer";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        // Delete all records from the test db
-        delete_all(&db);
+        let db = init_test_rocksdb("test_ticker_indexer");
 
         let pg_client = init_postgres().await;
 

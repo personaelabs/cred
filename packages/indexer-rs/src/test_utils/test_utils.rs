@@ -1,12 +1,10 @@
-use std::{env, fs::File};
-
-use rocksdb::{IteratorMode, WriteBatch, DB};
-
 use crate::{
     contract::{Contract, ContractType},
     eth_rpc::Chain,
-    Address,
+    Address, ROCKSDB_PATH,
 };
+use rocksdb::{IteratorMode, Options, WriteBatch, DB};
+use std::{env, fs::File, sync::Arc};
 
 /// Get a test ERC20 contract
 pub fn erc20_test_contract() -> Contract {
@@ -57,9 +55,10 @@ pub fn delete_all(rocksdb_client: &DB) {
     rocksdb_client.write(batch).unwrap();
 }
 
+/// Get a list of addresses from a CSV file
 pub fn get_members_from_csv(file_name: &str) -> Vec<Address> {
     let cargo_manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let file = File::open(&format!(
+    let file = File::open(format!(
         "{}/src/test_utils/{}",
         cargo_manifest_dir, file_name
     ))
@@ -84,4 +83,21 @@ pub fn get_members_from_csv(file_name: &str) -> Vec<Address> {
     addresses.sort();
 
     addresses
+}
+
+/// Initialize a test RocksDB database
+/// - `test_name`: The name of the test. The database will be stored in a directory with this name.
+pub fn init_test_rocksdb(test_name: &str) -> Arc<DB> {
+    let mut rocksdb_options = Options::default();
+    rocksdb_options.create_if_missing(true);
+
+    // We use a different path for the test db to avoid conflicts with the main db
+    let rocksdb_path = format!("{}/{}", ROCKSDB_PATH, test_name);
+
+    let rocksdb_conn = DB::open(&rocksdb_options, rocksdb_path).unwrap();
+
+    // Delete all records from the test db
+    delete_all(&rocksdb_conn);
+
+    Arc::new(rocksdb_conn)
 }

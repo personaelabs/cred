@@ -147,6 +147,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{
             delete_all, erc1155_test_contract, erc721_test_contract, get_members_from_csv,
+            init_test_rocksdb,
         },
         utils::dotenv_config,
         GroupType, ROCKSDB_PATH,
@@ -158,22 +159,7 @@ mod test {
     async fn test_all_holders_erc721_get_members() {
         dotenv_config();
 
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_all_holders_erc721_get_members";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        // Delete all records from the test db
-        delete_all(&db);
+        let db = init_test_rocksdb("test_all_holders_erc721_get_members");
 
         let pg_client = init_postgres().await;
 

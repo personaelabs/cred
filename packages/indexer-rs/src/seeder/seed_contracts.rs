@@ -1,4 +1,4 @@
-use crate::{contract::ContractType, eth_rpc::Chain, utils::is_prod, ContractId};
+use crate::{contract::ContractType, eth_rpc::Chain, ContractId};
 
 #[derive(Debug, Clone)]
 pub struct ContractData {

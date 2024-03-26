@@ -94,6 +94,28 @@ pub fn get_latest_synched_chunk(
     latest_chunk
 }
 
+/// Get get the missing chunks in the sync log for a given event and contract.
+/// - `to_chunk`: Search for missing chunks up to this chunk number
+pub fn search_missing_chunks(
+    rocksdb_client: &DB,
+    event_id: EventId,
+    contract_id: ContractId,
+    to_chunk: ChunkNum,
+) -> Vec<ChunkNum> {
+    let mut missing_chunks = vec![];
+    let mut key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
+
+    for expected_chunk_num in 0..to_chunk {
+        key.chunk_num = Some(expected_chunk_num);
+        let item = rocksdb_client.get_pinned(key.to_bytes()).unwrap();
+        if item.is_none() {
+            missing_chunks.push(expected_chunk_num);
+        }
+    }
+
+    missing_chunks
+}
+
 /// Check if there are any missing chunks in the sync log for a given event and contract
 pub fn missing_chunk_exists(
     db: &DB,
@@ -101,34 +123,8 @@ pub fn missing_chunk_exists(
     contract_id: ContractId,
     latest_chunk: ChunkNum,
 ) -> bool {
-    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
-
-    let iterator = db.iterator(IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
-
-    for (expected_chunk_num, item) in iterator.enumerate() {
-        let key = item.unwrap().0;
-        let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
-
-        if key.key_type != KeyType::SyncLog
-            || key.event_id != event_id
-            || key.contract_id != contract_id
-        {
-            break;
-        }
-
-        if key.chunk_num.unwrap() != latest_chunk {
-            break;
-        }
-
-        if key.chunk_num != Some(expected_chunk_num as ChunkNum) {
-            return true;
-        }
-    }
-
-    false
+    let missing_chunks = search_missing_chunks(db, event_id, contract_id, latest_chunk);
+    !missing_chunks.is_empty()
 }
 
 pub fn get_contract_total_chunks(latest_block: BlockNum, contract: &Contract) -> u64 {
@@ -227,4 +223,108 @@ pub fn count_synched_logs(
 ) -> i32 {
     let iterator = ContractEventIterator::new(rocksdb_conn, event_id, contract_id, to_block);
     iterator.count() as i32
+}
+
+pub fn count_synched_chunks(rocksdb_conn: &DB, event_id: EventId, contract_id: ContractId) -> i32 {
+    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
+
+    let iterator = rocksdb_conn.iterator(IteratorMode::From(
+        &start_key.to_bytes(),
+        rocksdb::Direction::Forward,
+    ));
+
+    let mut count = 0;
+    for item in iterator {
+        let (key, _) = item.unwrap();
+        let rocksdb_key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
+        if rocksdb_key.key_type != KeyType::SyncLog
+            || rocksdb_key.event_id != event_id
+            || rocksdb_key.contract_id != contract_id
+        {
+            break;
+        }
+
+        count += 1;
+    }
+
+    count
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{test_utils::delete_all, utils::dotenv_config, ROCKSDB_PATH};
+    use rocksdb::{Options, DB};
+
+    #[test]
+    fn test_search_missing_chunks() {
+        dotenv_config();
+
+        // Use a different path for the test db to avoid conflicts with the main db
+        const TEST_ROCKSDB_PATH: &str = "test_search_missing_chunks";
+
+        let mut rocksdb_options = Options::default();
+        rocksdb_options.create_if_missing(true);
+
+        let rocksdb_conn = DB::open(
+            &rocksdb_options,
+            format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
+        )
+        .unwrap();
+
+        // Delete all records from the test db
+        delete_all(&rocksdb_conn);
+
+        let event_id = 1;
+        let contract_id = 1;
+        let to_chunk = 30;
+
+        // Case 1.  When there are no records in the sync log
+        let missing_chunks = search_missing_chunks(&rocksdb_conn, event_id, contract_id, to_chunk);
+        let expected_missing_chunks: Vec<ChunkNum> = (0..to_chunk).collect();
+        assert_eq!(expected_missing_chunks, missing_chunks);
+
+        // Case 2. When there are some records up to chunk 9
+        for i in 0..10 {
+            let key = RocksDbKey {
+                key_type: KeyType::SyncLog,
+                event_id,
+                contract_id,
+                chunk_num: Some(i),
+                block_num: None,
+                log_index: None,
+                tx_index: None,
+            };
+
+            rocksdb_conn.put(key.to_bytes(), [1]).unwrap();
+        }
+
+        let missing_chunks = search_missing_chunks(&rocksdb_conn, event_id, contract_id, to_chunk);
+        let expected_missing_chunks: Vec<ChunkNum> = (10..to_chunk).collect();
+        assert_eq!(expected_missing_chunks, missing_chunks);
+
+        // Reset the db
+        delete_all(&rocksdb_conn);
+
+        // Case 3. When there are records from chunk 3 to 15
+        for i in 3..16 {
+            let key = RocksDbKey {
+                key_type: KeyType::SyncLog,
+                event_id,
+                contract_id,
+                chunk_num: Some(i),
+                block_num: None,
+                log_index: None,
+                tx_index: None,
+            };
+
+            rocksdb_conn.put(key.to_bytes(), [1]).unwrap();
+        }
+
+        let missing_chunks = search_missing_chunks(&rocksdb_conn, event_id, contract_id, to_chunk);
+        let expected_missing_chunks: Vec<ChunkNum> = (0..3).chain(16..to_chunk).collect();
+        assert_eq!(expected_missing_chunks, missing_chunks);
+
+        delete_all(&rocksdb_conn);
+    }
 }

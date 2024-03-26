@@ -64,6 +64,11 @@ impl LoadBalancer {
 /// Get the latest block number for a chain
 /// Caches the result for 12 seconds
 async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, surf::Error> {
+    let permit = PERMITS.acquire().await.unwrap();
+
+    let delay = rand::random::<u64>() % 500;
+    tokio::time::sleep(Duration::from_millis(delay)).await;
+
     let mut res = client
         .post(url)
         .body_json(&json!({
@@ -73,6 +78,8 @@ async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, 
             "id": 0,
         }))?
         .await?;
+
+    drop(permit);
 
     let body_str = res.body_string().await?;
 

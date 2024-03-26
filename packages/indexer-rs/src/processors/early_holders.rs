@@ -94,32 +94,17 @@ mod test {
         eth_rpc::EthRpcClient,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
-        test_utils::{delete_all, erc20_test_contract},
+        test_utils::{ erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType, ROCKSDB_PATH,
+        GroupType, 
     };
-    use rocksdb::{Options, DB};
     use std::sync::Arc;
 
     #[tokio::test]
     async fn test_early_holders_indexer() {
         dotenv_config();
 
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_early_holders_indexer";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        delete_all(&db);
+        let db = init_test_rocksdb("test_early_holders_indexer");
 
         let pg_client = init_postgres().await;
 
