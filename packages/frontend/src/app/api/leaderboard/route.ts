@@ -6,8 +6,8 @@ import prisma from '@/lib/prisma';
 
 const leaderBoardData = [
   {
-    fid: 54,
-    score: 16761,
+    fid: 5034,
+    score: 29094,
   },
   {
     fid: 1068,
