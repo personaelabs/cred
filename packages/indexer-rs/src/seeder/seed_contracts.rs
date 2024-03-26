@@ -866,6 +866,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
         contract.id = Some(id);
     });
 
+    /*
     if is_prod() {
         contracts
     } else {
@@ -876,4 +877,7 @@ pub fn get_seed_contracts() -> Vec<ContractData> {
             .filter(|contract| contracts_for_preview.contains(&&contract.symbol[..]))
             .collect()
     }
+     */
+
+    contracts
 }
