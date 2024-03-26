@@ -8,7 +8,6 @@ const Header = () => {
         <Link href="/account">Add creddd</Link>
       </div>
       <div className="flex flex-row gap-8">
-        <Link href="/leaderboard">Creddd 10</Link>
         <Link href="/explore">Explore</Link>
         <Link
           href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20"
