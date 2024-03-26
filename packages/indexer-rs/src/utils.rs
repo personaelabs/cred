@@ -5,13 +5,14 @@ use crate::{
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
     rocksdb_key::{KeyType, RocksDbKey},
+    synched_chunks_iterator::SynchedChunksIterator,
     BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
     ERC721TransferEvent,
 };
 use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
 use prost::Message;
-use rocksdb::{IteratorMode, DB};
+use rocksdb::DB;
 use serde_json::Value;
 use std::{env, io::Cursor};
 
@@ -68,30 +69,8 @@ pub fn get_latest_synched_chunk(
     event_id: EventId,
     contract_id: ContractId,
 ) -> Option<ChunkNum> {
-    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
-
-    let iterator = rocksdb_client.iterator(IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
-
-    let mut latest_chunk = None;
-    for item in iterator {
-        let (key_bytes, _value) = item.unwrap();
-
-        let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
-
-        if key.key_type != KeyType::SyncLog
-            || key.event_id != event_id
-            || key.contract_id != contract_id
-        {
-            break;
-        }
-
-        latest_chunk = key.chunk_num;
-    }
-
-    latest_chunk
+    let iterator = SynchedChunksIterator::new(rocksdb_client, event_id, contract_id);
+    iterator.last()
 }
 
 /// Get get the missing chunks in the sync log for a given event and contract.
@@ -226,28 +205,8 @@ pub fn count_synched_logs(
 }
 
 pub fn count_synched_chunks(rocksdb_conn: &DB, event_id: EventId, contract_id: ContractId) -> i32 {
-    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
-
-    let iterator = rocksdb_conn.iterator(IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
-
-    let mut count = 0;
-    for item in iterator {
-        let (key, _) = item.unwrap();
-        let rocksdb_key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
-        if rocksdb_key.key_type != KeyType::SyncLog
-            || rocksdb_key.event_id != event_id
-            || rocksdb_key.contract_id != contract_id
-        {
-            break;
-        }
-
-        count += 1;
-    }
-
-    count
+    let iterator = SynchedChunksIterator::new(rocksdb_conn, event_id, contract_id);
+    iterator.count() as i32
 }
 
 #[cfg(test)]

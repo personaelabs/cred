@@ -10,6 +10,7 @@ pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
 pub mod seeder;
+pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
 pub mod utils;

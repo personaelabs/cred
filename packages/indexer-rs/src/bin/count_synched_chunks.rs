@@ -1,8 +1,7 @@
-use indexer_rs::rocksdb_key::KeyType;
-use indexer_rs::rocksdb_key::RocksDbKey;
+use indexer_rs::log_sync_engine::CHUNK_SIZE;
+use indexer_rs::utils::count_synched_chunks;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::ROCKSDB_PATH;
-use rocksdb::IteratorMode;
 use rocksdb::Options;
 use rocksdb::DB;
 use std::env;
@@ -20,28 +19,12 @@ async fn main() -> Result<(), tokio_postgres::Error> {
     let db_options = Options::default();
     let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
 
-    let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
+    let count = count_synched_chunks(&rocksdb_conn, event_id, contract_id);
 
-    let iterator = rocksdb_conn.iterator(IteratorMode::From(
-        &start_key.to_bytes(),
-        rocksdb::Direction::Forward,
-    ));
+    let synched_block_num = (count as u64) * CHUNK_SIZE;
 
-    let mut count = 0;
-    for item in iterator {
-        let (key, _) = item.unwrap();
-        let rocksdb_key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
-        if rocksdb_key.key_type != KeyType::SyncLog
-            || rocksdb_key.event_id != event_id
-            || rocksdb_key.contract_id != contract_id
-        {
-            break;
-        }
-
-        count += 1;
-    }
-
-    println!("count: {}", count);
+    println!("Synched chunks: {}", count);
+    println!("Synched blocks: {}", synched_block_num);
 
     Ok(())
 }
