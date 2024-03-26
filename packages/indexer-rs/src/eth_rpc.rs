@@ -4,6 +4,7 @@ use std::env;
 use std::env::VarError;
 use std::sync::Arc;
 use std::time::Duration;
+use std::time::Instant;
 use tokio::sync::Mutex;
 use tokio::sync::Semaphore;
 
@@ -100,11 +101,10 @@ impl EthRpcClient {
             }))?
             .await?;
 
+        drop(permit);
         let body_str = res.body_string().await?;
 
         let body: Value = serde_json::from_str(&body_str).unwrap();
-
-        drop(permit);
 
         let finalized_block = u64::from_str_radix(
             body["result"]["number"]

@@ -95,7 +95,12 @@ pub fn get_latest_synched_chunk(
 }
 
 /// Check if there are any missing chunks in the sync log for a given event and contract
-pub fn missing_chunk_exists(db: &DB, event_id: EventId, contract_id: ContractId) -> bool {
+pub fn missing_chunk_exists(
+    db: &DB,
+    event_id: EventId,
+    contract_id: ContractId,
+    latest_chunk: ChunkNum,
+) -> bool {
     let start_key = RocksDbKey::new_start_key(KeyType::SyncLog, event_id, contract_id);
 
     let iterator = db.iterator(IteratorMode::From(
@@ -111,6 +116,10 @@ pub fn missing_chunk_exists(db: &DB, event_id: EventId, contract_id: ContractId)
             || key.event_id != event_id
             || key.contract_id != contract_id
         {
+            break;
+        }
+
+        if key.chunk_num.unwrap() != latest_chunk {
             break;
         }
 
@@ -143,7 +152,7 @@ pub async fn is_event_logs_ready(
         None => return Ok(false),
     };
 
-    let missing_chunk_exists = missing_chunk_exists(&db, event_id, contract.id);
+    let missing_chunk_exists = missing_chunk_exists(db, event_id, contract.id, total_chunks - 1);
 
     if (total_chunks - 1) == max_synched_chunk && !missing_chunk_exists {
         Ok(true)

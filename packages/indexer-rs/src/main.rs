@@ -1,6 +1,5 @@
 use futures::future::join_all;
 use futures::join;
-use indexer_rs::contract::get_contracts;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::group::get_groups;
@@ -21,7 +20,6 @@ use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
 use rocksdb::{Options, DB};
-use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
@@ -89,7 +87,7 @@ async fn main() {
 
     let mut indexing_jobs = vec![];
 
-    let indexing_permits = Arc::new(Semaphore::new(5));
+    let indexing_permits = Arc::new(Semaphore::new(20));
 
     for group in groups {
         // Initialize indexers for each group

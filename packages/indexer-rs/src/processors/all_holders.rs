@@ -206,7 +206,6 @@ mod test {
             contract_inputs: vec![contract.clone()],
         };
 
-        let group_id = 1;
         let indexer = AllHoldersIndexer::new(group, resources);
 
         let members = indexer.get_members(to_block).unwrap();

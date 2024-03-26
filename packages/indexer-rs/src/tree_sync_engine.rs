@@ -89,7 +89,7 @@ impl TreeSyncEngine {
             if !is_ready.unwrap() {
                 drop(permit);
                 info!("${} Waiting for the indexer...", self.group.name);
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                tokio::time::sleep(std::time::Duration::from_secs(INDEXING_INTERVAL_SECS)).await;
                 continue;
             }
 
