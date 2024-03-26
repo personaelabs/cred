@@ -73,6 +73,7 @@ impl From<std::io::Error> for Error {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
+    Static,
     CredddTeam,
     EarlyHolder,
     Whale,

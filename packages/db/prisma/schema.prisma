@@ -84,6 +84,7 @@ enum ContractType {
 }
 
 enum GroupType {
+  Static
   CredddTeam
   EarlyHolder
   Whale
