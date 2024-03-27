@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
 
-const Header = () => {
+const DesktopHeader = () => {
   return (
-    <div className="h-[80px] w-[100vw] flex flex-row justify-between items-center gap-8 px-[20px] md:px-[100px]">
+    <div className="hidden md:flex h-[80px] w-[100vw] flex-row justify-between items-center gap-8 px-[20px] md:px-[100px]">
       <div>
         <Link href="/account">Add creddd</Link>
       </div>
@@ -20,4 +20,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default DesktopHeader;
