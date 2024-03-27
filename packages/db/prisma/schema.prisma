@@ -47,7 +47,7 @@ model MerkleTree {
   id             Int              @id @default(autoincrement())
   merkleRoot     String
   Group          Group            @relation(fields: [groupId], references: [id])
-  groupId        Int
+  groupId        String
   blockNumber    BigInt
   treeProtoBuf   Bytes?
   bloomFilter    Bytes?
@@ -62,7 +62,7 @@ model MerkleTree {
 }
 
 model Group {
-  id             Int       @id
+  id             String    @id
   displayName    String
   typeId         GroupType
   contractInputs Int[]

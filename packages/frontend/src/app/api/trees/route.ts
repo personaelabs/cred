@@ -41,7 +41,7 @@ export async function GET(_req: NextRequest) {
     },
   });
 
-  const groupIdToLatestTree = new Map<number, MerkleTreeSelect>();
+  const groupIdToLatestTree = new Map<string, MerkleTreeSelect>();
 
   // Only return the latest merkle tree for each group
   for (const merkleTree of merkleTrees) {
