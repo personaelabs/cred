@@ -728,16 +728,6 @@ pub fn erc20_contracts() -> Vec<Contract> {
         },
         Contract {
             id: 0,
-            address: "0x532f27101965dd16442E59d40670FaF5eBB142E4".to_string(),
-            symbol: "BRETT".to_string(),
-            name: "Brett".to_string(),
-            chain: Chain::Base,
-            deployed_block: 10983962,
-            target_groups: vec![GroupType::EarlyHolder, GroupType::Whale],
-            contract_type: ContractType::ERC20,
-        },
-        Contract {
-            id: 0,
             address: "0xF6e932Ca12afa26665dC4dDE7e27be02A7c02e50".to_string(),
             symbol: "MOCHI".to_string(),
             name: "Mochi".to_string(),
