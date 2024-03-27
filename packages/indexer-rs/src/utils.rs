@@ -7,15 +7,16 @@ use crate::{
     rocksdb_key::{KeyType, RocksDbKey},
     synched_chunks_iterator::SynchedChunksIterator,
     BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
-    ERC721TransferEvent,
+    ERC721TransferEvent, GroupType,
 };
 use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::DB;
 use serde_json::Value;
+use sha3::Digest;
+use sha3::Keccak256;
 use std::{env, io::Cursor};
-
 pub const MINTER_ADDRESS: Address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 pub fn dev_addresses() -> Vec<Address> {
@@ -207,6 +208,42 @@ pub fn count_synched_logs(
 pub fn count_synched_chunks(rocksdb_conn: &DB, event_id: EventId, contract_id: ContractId) -> i32 {
     let iterator = SynchedChunksIterator::new(rocksdb_conn, event_id, contract_id);
     iterator.count() as i32
+}
+
+pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String {
+    let mut hasher = Keccak256::new();
+
+    // Write group type
+    match group_type {
+        GroupType::EarlyHolder => {
+            hasher.update(b"EarlyHolder");
+        }
+        GroupType::Whale => {
+            hasher.update(b"Whale");
+        }
+        GroupType::AllHolders => {
+            hasher.update(b"AllHolders");
+        }
+        GroupType::CredddTeam => {
+            hasher.update(b"CredddTeam");
+        }
+        GroupType::Ticker => {
+            hasher.update(b"Ticker");
+        }
+        _ => {
+            panic!("Unsupported group type {:?}", group_type);
+        }
+    }
+
+    // Write contract inputs
+    for input in contract_inputs {
+        hasher.update(input.as_bytes());
+    }
+
+    // Read hash digest and consume hasher
+    let result = hasher.finalize();
+
+    hex::encode(result)
 }
 
 #[cfg(test)]

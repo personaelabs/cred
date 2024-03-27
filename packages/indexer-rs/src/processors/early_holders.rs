@@ -94,9 +94,9 @@ mod test {
         eth_rpc::EthRpcClient,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
-        test_utils::{ erc20_test_contract, init_test_rocksdb},
+        test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType, 
+        GroupType,
     };
     use std::sync::Arc;
 
@@ -130,12 +130,11 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group = Group {
-            id: Some(1),
-            name: "Test Group".to_string(),
-            group_type: GroupType::EarlyHolder,
-            contract_inputs: vec![contract.clone()],
-        };
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::EarlyHolder,
+            vec![contract.clone()],
+        );
 
         let indexer = EarlyHolderIndexer::new(group, resources.clone());
 

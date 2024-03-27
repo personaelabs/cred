@@ -29,7 +29,6 @@ use tokio::sync::Semaphore;
 async fn main() {
     dotenv_config();
 
-    /*
     let pg_client = init_postgres().await;
 
     // Open the RocksDB connection
@@ -145,5 +144,4 @@ async fn main() {
 
     // Run the sync and indexing jobs concurrently
     join!(join_all(sync_jobs), join_all(indexing_jobs));
-     */
 }

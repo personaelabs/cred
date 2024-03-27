@@ -1,21 +1,40 @@
 use crate::{
     contract::{get_contracts, Contract},
-    GroupType,
+    utils::get_group_id,
+    GroupId, GroupType,
 };
 
 #[derive(Debug, Clone)]
 pub struct Group {
-    pub id: Option<i32>,
+    pub id: GroupId,
     pub name: String,
     pub group_type: GroupType,
     pub contract_inputs: Vec<Contract>,
+}
+
+impl Group {
+    pub fn new(name: String, group_type: GroupType, contract_inputs: Vec<Contract>) -> Self {
+        let contract_addresses = contract_inputs
+            .iter()
+            .map(|contract| contract.address.clone())
+            .collect::<Vec<String>>();
+
+        let group_id = get_group_id(group_type, &contract_addresses);
+
+        Group {
+            id: group_id,
+            name,
+            group_type,
+            contract_inputs,
+        }
+    }
 }
 
 /// Upsert a group and return the group id
 pub async fn upsert_group(
     pg_client: &tokio_postgres::Client,
     group: Group,
-) -> Result<i32, tokio_postgres::Error> {
+) -> Result<String, tokio_postgres::Error> {
     let group_contract_inputs: Vec<i32> = group
         .contract_inputs
         .iter()
@@ -30,7 +49,7 @@ pub async fn upsert_group(
             ON CONFLICT ("id", "typeId", "contractInputs") DO UPDATE SET "displayName" = $2, "updatedAt" = NOW()
             RETURNING id
         "#,
-            &[&(group.id.unwrap() as i32), &group.name, &group.group_type, &group_contract_inputs],
+            &[&group.id, &group.name, &group.group_type, &group_contract_inputs],
         )
         .await?;
 
@@ -55,7 +74,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
     let groups = result
         .iter()
         .map(|row| {
-            let group_id: i32 = row.get("id");
+            let group_id: String = row.get("id");
             let group_name: String = row.get("displayName");
             let group_type: GroupType = row.get("typeId");
             let contract_inputs: Vec<i32> = row.get("contractInputs");
@@ -79,7 +98,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
                 .collect();
 
             Group {
-                id: Some(group_id),
+                id: group_id,
                 name: group_name,
                 group_type,
                 contract_inputs,

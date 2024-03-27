@@ -1,7 +1,7 @@
 extern crate merkle_tree as merkle_tree_lib;
 use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::utils::dev_addresses;
-use crate::{Address, GroupType};
+use crate::{Address, GroupId, GroupType};
 use bloomfilter::Bloom;
 use log::{info, warn};
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
@@ -22,7 +22,7 @@ fn to_hex(fe: Fq) -> String {
 }
 
 pub async fn save_tree(
-    group_id: i32,
+    group_id: GroupId,
     group_type: GroupType,
     pg_client: &tokio_postgres::Client,
     mut addresses: Vec<Address>,

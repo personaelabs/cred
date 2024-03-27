@@ -185,12 +185,11 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group = Group {
-            id: Some(1),
-            name: "Test Group".to_string(),
-            group_type: GroupType::AllHolders,
-            contract_inputs: vec![contract.clone()],
-        };
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::AllHolders,
+            vec![contract.clone()],
+        );
 
         let indexer = AllHoldersIndexer::new(group, resources);
 
@@ -259,12 +258,12 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group = Group {
-            id: Some(1),
-            name: "Test Group".to_string(),
-            group_type: GroupType::AllHolders,
-            contract_inputs: vec![contract.clone()],
-        };
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::AllHolders,
+            vec![contract.clone()],
+        );
+
         let indexer = AllHoldersIndexer::new(group, resources);
 
         let members = indexer.get_members(to_block).unwrap();

@@ -170,12 +170,11 @@ mod test {
             eth_client,
         };
 
-        let group = Group {
-            id: Some(1),
-            name: "Test group".to_string(),
-            group_type: GroupType::Whale,
-            contract_inputs: vec![contract.clone()],
-        };
+        let group = Group::new(
+            "Test group".to_string(),
+            GroupType::Whale,
+            vec![contract.clone()],
+        );
 
         let whale_indexer = WhaleIndexer::new(group, resources);
 

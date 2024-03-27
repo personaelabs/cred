@@ -176,12 +176,11 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group = Group {
-            id: Some(1),
-            name: "Test Group".to_string(),
-            contract_inputs: vec![],
-            group_type: GroupType::Ticker,
-        };
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::Ticker,
+            vec![ticker_contract.clone()],
+        );
 
         let indexer = TickerIndexer::new(group, resources.clone());
 

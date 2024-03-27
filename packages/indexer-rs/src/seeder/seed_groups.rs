@@ -2,15 +2,12 @@ use crate::{
     contract::Contract,
     group::Group,
     seeder::seed_contracts::{get_seed_contracts, ContractData},
+    utils::is_prod,
     GroupType,
 };
 
 /// Return all groups to seed the indexer with
 pub fn get_seed_groups() -> Vec<Group> {
-    // We track the group id to assign to each group
-    // (Each group should have a unique id)
-    let mut group_id = 1000000;
-
     // Vector to hold all groups
     let mut groups = vec![];
 
@@ -42,41 +39,27 @@ pub fn get_seed_groups() -> Vec<Group> {
     for contract in early_holders_contracts.clone() {
         let name = format!("Early ${} holder", contract.symbol.to_uppercase().clone());
         let contract = Contract::from_contract_data(contract);
-        let group = Group {
-            id: Some(group_id),
-            name,
-            group_type: GroupType::EarlyHolder,
-            contract_inputs: vec![contract],
-        };
+        let group = Group::new(name, GroupType::EarlyHolder, vec![contract]);
+
         groups.push(group);
-        group_id += 1;
     }
 
     // Build Whale groups
     for contract in whale_contracts.clone() {
         let name = format!("${} whale", contract.symbol.to_uppercase().clone());
         let contract = Contract::from_contract_data(contract);
-        let group = Group {
-            id: Some(group_id),
-            name,
-            group_type: GroupType::Whale,
-            contract_inputs: vec![contract],
-        };
+        let group = Group::new(name, GroupType::Whale, vec![contract]);
+
         groups.push(group);
-        group_id += 1;
     }
 
     // Build All holders groups
     for contract in all_holders_contracts.clone() {
         let contract = Contract::from_contract_data(contract);
-        let group = Group {
-            id: Some(group_id),
-            name: format!("{} historical holder", contract.name.clone()),
-            group_type: GroupType::AllHolders,
-            contract_inputs: vec![contract],
-        };
+        let name = format!("{} historical holder", contract.name.clone());
+        let group = Group::new(name, GroupType::AllHolders, vec![contract]);
+
         groups.push(group);
-        group_id += 1;
     }
 
     // Add ticker rug survivor group
@@ -85,22 +68,42 @@ pub fn get_seed_groups() -> Vec<Group> {
         .find(|c| c.symbol == "ticker")
         .unwrap()
         .clone();
-    groups.push(Group {
-        id: Some(group_id),
-        name: "$ticker rug survivor".to_string(),
-        group_type: GroupType::Ticker,
-        contract_inputs: vec![Contract::from_contract_data(ticker_contract)],
-    });
-
-    group_id += 1;
+    groups.push(Group::new(
+        "$ticker rug survivor".to_string(),
+        GroupType::Ticker,
+        vec![Contract::from_contract_data(ticker_contract)],
+    ));
 
     // Add creddd team group
-    groups.push(Group {
-        id: Some(group_id),
-        name: "creddd team".to_string(),
-        group_type: GroupType::CredddTeam,
-        contract_inputs: vec![],
-    });
+    groups.push(Group::new(
+        "creddd team".to_string(),
+        GroupType::CredddTeam,
+        vec![],
+    ));
 
-    groups
+    if is_prod() {
+        groups
+    } else {
+        // Only return a selected few
+        let preview_group_ids = vec![
+            "f925c0f578b2c6024c5bbb20947e1af3a0eb944e0c309930e3af644ced5200df", // "Early $PIKA holder",
+            "167b42ecc5f95c2c10b5fa08a62929d5e3b4ca43783d96a41e7d014e9d0fd02b", // "$KIBSHI whale",
+            "55830aa86161ab70bfd6a96e2abd3b338f13bb1848565c8a23c7c7317b5864a5", // $ticker rug survivor
+            "0676adf3eb3332e1e2f80daca621727a80f9e1bb793e6864a85656f61489467c",
+        ];
+
+        let mut preview_groups = vec![];
+
+        for preview_group_id in preview_group_ids {
+            let preview_group = groups
+                .iter()
+                .find(|g| g.id == preview_group_id)
+                .unwrap()
+                .clone();
+
+            preview_groups.push(preview_group);
+        }
+
+        preview_groups
+    }
 }

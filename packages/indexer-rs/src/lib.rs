@@ -28,6 +28,8 @@ pub type EventId = u16;
 /// Contract id defined in the Postgres database
 pub type ContractId = u16;
 
+pub type GroupId = String;
+
 /// A chunk number is a number that represents a range of 2000 blocks.
 /// It's counted from the block the contract was deployed. (Chunk numbers are contract specific)
 pub type ChunkNum = u64;

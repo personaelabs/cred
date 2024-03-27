@@ -41,12 +41,8 @@ impl TreeSyncEngine {
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
         let members = self.indexer.get_members(block_number)?;
 
-        if self.group.id.is_none() {
-            panic!("Group id is not set");
-        }
-
         save_tree(
-            self.group.id.unwrap(),
+            self.group.id.clone(),
             self.group.group_type,
             &self.pg_client,
             members.iter().copied().collect(),
