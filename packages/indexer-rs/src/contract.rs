@@ -1,7 +1,8 @@
 use crate::{eth_rpc::Chain, seeder::seed_contracts::ContractData, BlockNum, ContractId};
 use postgres_types::{FromSql, ToSql};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, FromSql, ToSql)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "ContractType")]
 pub enum ContractType {
     ERC20,

@@ -1,6 +1,8 @@
 use crate::BlockNum;
 use cached::proc_macro::cached;
 use cached::TimedSizedCache;
+use serde::Deserialize;
+use serde::Serialize;
 use serde_json::{json, Value};
 use std::env;
 use std::env::VarError;
@@ -13,7 +15,7 @@ const NUM_MAINNET_NODES: u32 = 10;
 
 pub static PERMITS: Semaphore = Semaphore::const_new(100);
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Chain {
     Mainnet,
     Optimism,

@@ -19,6 +19,7 @@ pub mod utils;
 pub mod test_utils;
 
 use postgres_types::{FromSql, ToSql};
+use serde::{Deserialize, Serialize};
 
 // Define the types for the RocksDB key and value
 
@@ -73,7 +74,7 @@ impl From<std::io::Error> for Error {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
     Static,
