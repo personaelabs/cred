@@ -28,14 +28,10 @@ fn calculate_group_score(group_type: GroupType, contract_inputs: &[&str]) -> i64
 
     let contract = contract.unwrap();
 
-    let whale_k = 10i64; // Multiplier for whale groups
-
     match group_type {
-        GroupType::EarlyHolder => contract.fdv_usd.unwrap().round() as i64,
-        GroupType::Whale => (contract.fdv_usd.unwrap().round() as i64)
-            .checked_mul(whale_k)
-            .unwrap(),
-        GroupType::AllHolders => contract.fp_usd.unwrap().round() as i64,
+        GroupType::EarlyHolder => (contract.fdv_usd.unwrap().round() as i64),
+        GroupType::Whale => (contract.fdv_usd.unwrap().round() as i64),
+        GroupType::AllHolders => (contract.fp_usd.unwrap().round() as i64),
         GroupType::Ticker => 0,
         GroupType::CredddTeam => 0,
         _ => panic!("Deprecated group type {:?}", group_type),
