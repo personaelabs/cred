@@ -134,6 +134,36 @@ impl EthRpcClient {
 
     /// Get logs for a contract event in batch
     /// - `batch_options`: An array of `[fromBlock, toBlock]` options
+    pub async fn get_logs(&self, chain: Chain, params: &Value) -> Result<Value, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
+        let delay = rand::random::<u64>() % 500;
+        tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
+
+        let mut res = self
+            .client
+            .post(url)
+            .body_json(&json!({
+                "jsonrpc": "2.0",
+                "method": "eth_getLogs",
+                "params": vec![params],
+                "id": 1,
+            }))?
+            .await?;
+
+        drop(permit);
+
+        let body_str = res.body_string().await?;
+
+        Ok(serde_json::from_str(&body_str).unwrap())
+    }
+
+    /// Get logs for a contract event in batch
+    /// - `batch_options`: An array of `[fromBlock, toBlock]` options
     pub async fn get_logs_batch(
         &self,
         chain: Chain,
@@ -167,6 +197,42 @@ impl EthRpcClient {
 
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
+
+        let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
+
+        drop(permit);
+
+        let body_str = res.body_string().await?;
+
+        Ok(serde_json::from_str(&body_str).unwrap())
+    }
+
+    pub async fn eth_call(
+        &self,
+        chain: Chain,
+        contract_address: &str,
+        func_selector: &str,
+        args: &[u8],
+        block_number: BlockNum,
+    ) -> Result<Value, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
+        let json_body = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_call",
+            "params": [
+                {
+                    "to": contract_address,
+                    "data": format!("0x{}{}", func_selector, hex::encode(args))
+                },
+                format!("0x{:x}", block_number)
+            ],
+            "id": 1
+        });
 
         let permit = PERMITS.acquire().await.unwrap();
 

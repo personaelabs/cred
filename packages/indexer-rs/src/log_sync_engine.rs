@@ -24,13 +24,13 @@ use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
 
-const TRANSFER_EVENT_SIG: &str =
+pub const TRANSFER_EVENT_SIG: &str =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
-const ERC1155_TRANSFER_BATCH_SIG: &str =
+pub const ERC1155_TRANSFER_BATCH_SIG: &str =
     "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
 
-const ERC1155_TRANSFER_SINGLE_SIG: &str =
+pub const ERC1155_TRANSFER_SINGLE_SIG: &str =
     "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62";
 
 /// A struct to sync all logs of a particular contract event

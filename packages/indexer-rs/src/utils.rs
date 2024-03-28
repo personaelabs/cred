@@ -4,6 +4,7 @@ use crate::{
     erc1155_transfer_event, erc20_transfer_event, erc721_transfer_event,
     eth_rpc::EthRpcClient,
     log_sync_engine::CHUNK_SIZE,
+    merkle_tree_proto::MerkleTree,
     rocksdb_key::{KeyType, RocksDbKey},
     synched_chunks_iterator::SynchedChunksIterator,
     BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
@@ -244,6 +245,37 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
     let result = hasher.finalize();
 
     hex::encode(result)
+}
+
+pub async fn get_tree_leaves(
+    client: &tokio_postgres::Client,
+    tree_id: i32,
+) -> Result<Vec<String>, tokio_postgres::Error> {
+    let tree = client
+        .query_one(
+            r#"
+            SELECT
+                "treeProtoBuf"
+            FROM
+                "MerkleTree"
+            WHERE
+                "id" = $1
+            "#,
+            &[&tree_id],
+        )
+        .await?;
+
+    let tree_proto_buf: Vec<u8> = tree.get("treeProtoBuf");
+
+    let merkle_tree = MerkleTree::decode(&tree_proto_buf[..]).unwrap();
+
+    let leaves = merkle_tree.layers[0]
+        .nodes
+        .iter()
+        .map(|node| hex::encode(&node.node))
+        .collect::<Vec<String>>();
+
+    Ok(leaves)
 }
 
 #[cfg(test)]

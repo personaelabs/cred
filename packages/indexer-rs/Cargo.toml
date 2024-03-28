@@ -39,6 +39,7 @@ async-trait = "0.1.77"
 csv = "1.3.0"
 cached = { version = "0.49.2", features = ["async"] }
 sha3 = "0.10.8"
+alloy-json-abi = "0.6.4"
 
 [build-dependencies]
 prost-build = "0.10.1"
