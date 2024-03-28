@@ -31,11 +31,6 @@ async fn main() {
 
     let pg_client = init_postgres().await;
 
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
-    }
-
-    /*
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
     rocksdb_options.create_if_missing(true);
@@ -149,5 +144,4 @@ async fn main() {
 
     // Run the sync and indexing jobs concurrently
     join!(join_all(sync_jobs), join_all(indexing_jobs));
-     */
 }
