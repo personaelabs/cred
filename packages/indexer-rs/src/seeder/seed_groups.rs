@@ -37,7 +37,7 @@ pub fn get_seed_groups() -> Vec<Group> {
 
     // Build Early holder groups
     for contract in early_holders_contracts.clone() {
-        let name = format!("Early ${} holder", contract.symbol.to_uppercase().clone());
+        let name = format!("Early {} holder", contract.name.clone());
         let contract = Contract::from_contract_data(contract);
         let group = Group::new(name, GroupType::EarlyHolder, vec![contract]);
 
@@ -46,7 +46,7 @@ pub fn get_seed_groups() -> Vec<Group> {
 
     // Build Whale groups
     for contract in whale_contracts.clone() {
-        let name = format!("${} whale", contract.symbol.to_uppercase().clone());
+        let name = format!("{} whale", contract.name.clone());
         let contract = Contract::from_contract_data(contract);
         let group = Group::new(name, GroupType::Whale, vec![contract]);
 
@@ -81,7 +81,8 @@ pub fn get_seed_groups() -> Vec<Group> {
         vec![],
     ));
 
-    if is_prod() {
+    //    if is_prod() {
+    if true {
         groups
     } else {
         // Only return a selected few
