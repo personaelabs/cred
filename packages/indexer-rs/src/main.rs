@@ -31,6 +31,10 @@ async fn main() {
 
     let pg_client = init_postgres().await;
 
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+    }
+
     /*
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
