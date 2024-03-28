@@ -103,6 +103,9 @@ const useEligibleGroups = (addresses: Hex[] | undefined) => {
   const [eligibleGroups, setEligibleGroups] = useState<EligibleGroup[] | null>(
     null
   );
+  const [scoreAfterAddingAll, setScoreAfterAddingAll] = useState<bigint | null>(
+    null
+  );
 
   useEffect(() => {
     (async () => {
@@ -232,7 +235,19 @@ const useEligibleGroups = (addresses: Hex[] | undefined) => {
     searchEligibleGroups();
   }, [addresses, searchEligibleGroups]);
 
-  return eligibleGroups;
+  useEffect(() => {
+    if (eligibleGroups) {
+      let score = BigInt(0);
+      for (const group of eligibleGroups) {
+        if (group.score) {
+          score += BigInt(group.score);
+        }
+      }
+      setScoreAfterAddingAll(score);
+    }
+  }, [eligibleGroups]);
+
+  return { eligibleGroups, scoreAfterAddingAll };
 };
 
 export default useEligibleGroups;

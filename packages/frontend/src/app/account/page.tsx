@@ -25,7 +25,9 @@ export default function AccountPage() {
   const { addresses, connector } = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<Hex | null>(null);
   const [metamaskProvider, setMetamaskProvider] = useState<any | null>(null);
-  const eligibleGroups = useEligibleGroups(addresses as Hex[] | undefined);
+  const { eligibleGroups, scoreAfterAddingAll } = useEligibleGroups(
+    addresses as Hex[] | undefined
+  );
   const [isMintInstructionModalOpen, setIsMintInstructionModalOpen] =
     useState<boolean>(false);
   const [isSwitchAccountsModalOpen, setIsSwitchAccountsModalOpen] =
@@ -208,8 +210,16 @@ export default function AccountPage() {
           <>
             {eligibleGroups.length > 0 ? (
               <>
-                <div className="flex flex-col gap-[4px] opacity-60">
-                  <div>Current score {user?.score}</div>
+                <div className="flex flex-col items-center gap-[4px] opacity-60">
+                  <div>Current score: {user?.score}</div>
+                  {scoreAfterAddingAll ? (
+                    <div>
+                      Score after adding all eligible creddd :
+                      {scoreAfterAddingAll.toString()}
+                    </div>
+                  ) : (
+                    <></>
+                  )}
                 </div>
                 <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
                   {eligibleGroups.map((group, i) => (
@@ -244,27 +254,27 @@ export default function AccountPage() {
                   ) : (
                     <></>
                   )}
-                  <Button variant="link" onClick={switchAccounts}>
-                    Switch connected accounts
-                  </Button>
-                  <div className="flex flex-row items-center gap-[6px] md:gap-[12px]">
-                    <div className="text-sm">
-                      Connected to{' '}
-                      <span className="font-bold">{connector?.name}</span>
-                    </div>
-                    <Button
-                      variant="link"
-                      className="font-normal"
-                      onClick={switchWallet}
-                    >
-                      Use a different wallet
-                    </Button>
-                  </div>
                 </div>
               </>
             ) : (
               <div className="opacity-60">No creddd found</div>
             )}
+            <Button variant="link" onClick={switchAccounts}>
+              Switch connected accounts
+            </Button>
+            <div className="flex flex-row items-center gap-[6px] md:gap-[12px]">
+              <div className="text-sm">
+                Connected to{' '}
+                <span className="font-bold">{connector?.name}</span>
+              </div>
+              <Button
+                variant="link"
+                className="font-normal"
+                onClick={switchWallet}
+              >
+                Use a different wallet
+              </Button>
+            </div>
           </>
         )}
       </div>
