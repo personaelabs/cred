@@ -663,5 +663,26 @@
     "type": "ERC20",
     "chain": "ethereum",
     "fdv_usd": 2647855446
+  },
+  {
+    "name": "The Next 100x Memecoin on Base",
+    "address": "0x5B5dee44552546ECEA05EDeA01DCD7Be7aa6144A",
+    "type": "ERC20",
+    "fdv_usd" :5296900,
+    "chain": "base"
+  },
+  {
+    "name": "FrameToken",
+    "address": "0x91F45aa2BdE7393e0AF1CC674FFE75d746b93567",
+    "type": "ERC20",
+    "fdv_usd" : 6916216,
+    "chain": "base"
+  },
+  {
+    "name": "Enjoy Coin",
+    "address": "0x4cD86D0fBCF0E167B9c2986bcb4751b5a148dcaD",
+    "type": "ERC20",
+    "fdv_usd": 0,
+    "chain": "base"
   }
 ]
