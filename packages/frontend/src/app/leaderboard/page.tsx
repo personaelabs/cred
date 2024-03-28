@@ -8,6 +8,52 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+interface CredddListDialogProps {
+  creddd: string[];
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const CredddListDialog = (props: CredddListDialogProps) => {
+  const { creddd, isOpen, onClose } = props;
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent>
+        <DialogDescription>
+          <ul className="list-disc px-2">
+            {creddd.map((creddd, i) => (
+              <li key={i} className="text-left">
+                {creddd}
+              </li>
+            ))}
+          </ul>
+        </DialogDescription>
+        <DialogFooter>
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 interface LeaderBoardRowProps {
   record: LeaderBoardRecord;
@@ -15,6 +61,8 @@ interface LeaderBoardRowProps {
 }
 
 const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="flex flex-row justify-center items-center py-[12px] border-t border-[#E5E7EB]-500">
       <div className="w-[30px] md:w-[40px]">{rank}</div>
@@ -32,7 +80,7 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
           <div>{record.user.display_name}</div>
         </div>
       </Link>
-      <div className="w-[60px] text-center opacity-60 underline">
+      <div className="w-[60px] text-center opacity-60 underline hidden md:flex">
         <Tooltip delayDuration={200}>
           <TooltipTrigger>
             <div className="underline">{record.score}</div>
@@ -48,6 +96,21 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
           </TooltipContent>
         </Tooltip>
       </div>
+      <div className="flex md:hidden">
+        <div
+          className="underline"
+          onClick={() => {
+            setIsDialogOpen(true);
+          }}
+        >
+          {record.score}
+        </div>
+      </div>
+      <CredddListDialog
+        creddd={record.creddd}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      ></CredddListDialog>
     </div>
   );
 };
