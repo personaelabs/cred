@@ -67,6 +67,7 @@ model Group {
   displayName    String
   typeId         GroupType
   contractInputs Int[]
+  score          BigInt?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
