@@ -23,6 +23,7 @@ model ProcessedCast {
 }
 
 model FidAttestation {
+  hash        String?    @unique
   fid         Int
   attestation Bytes
   signInSig   Bytes

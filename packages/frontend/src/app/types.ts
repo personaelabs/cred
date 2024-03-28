@@ -74,3 +74,8 @@ export interface LeaderBoardRecord {
   creddd: Group['displayName'][];
   score: number;
 }
+
+export enum AttestationType {
+  // eslint-disable-next-line no-unused-vars
+  FidAttestation = 1,
+}
