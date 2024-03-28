@@ -1,8 +1,9 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex } from 'viem';
+import { Hex, keccak256 } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
+import { AttestationType } from '@/app/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -182,6 +183,44 @@ export const getGroupTypeTitle = (groupType: GroupType): string => {
     default:
       return 'Others';
   }
+};
+
+export const getFidAttestationHashV1 = (
+  merkleRoot: Hex,
+  fid: number
+): string => {
+  const type = AttestationType.FidAttestation;
+  const typeBuffer = Buffer.alloc(2);
+  typeBuffer.writeUInt16BE(type);
+
+  const version = 1;
+
+  const versionBuffer = Buffer.alloc(2);
+  versionBuffer.writeUInt16BE(version);
+
+  const fidBuffer = Buffer.alloc(8);
+  fidBuffer.writeBigUint64BE(BigInt(fid));
+
+  const merkleRootBuffer = fromHexString(merkleRoot, 32);
+
+  if (merkleRootBuffer.byteLength !== 32) {
+    throw new Error(
+      `Invalid merkle root length: ${merkleRootBuffer.byteLength}`
+    );
+  }
+
+  const input = Buffer.concat([
+    typeBuffer,
+    versionBuffer,
+    merkleRootBuffer,
+    fidBuffer,
+  ]);
+
+  if (input.byteLength !== 44) {
+    throw new Error(`Invalid input length: ${input.byteLength}`);
+  }
+
+  return keccak256(input);
 };
 
 export const PRECOMPUTED_HASHES = [
