@@ -34,6 +34,7 @@ export type MintLogSelect = Prisma.MintLogGetPayload<{
 export type GetUserResponse = NeynarUserResponse & {
   fidAttestations: FidAttestationSelect[];
   mints: MintLogSelect[];
+  score: string;
 };
 
 /**
@@ -67,6 +68,33 @@ export async function GET(
     },
   });
 
+  // Get the score of the user
+  const userCreddd = await prisma.fidAttestation.findMany({
+    select: {
+      MerkleTree: {
+        select: {
+          Group: {
+            select: {
+              id: true,
+              score: true,
+            },
+          },
+        },
+      },
+    },
+    where: {
+      fid,
+    },
+  });
+
+  let userScore = BigInt(0);
+  for (const cred of userCreddd) {
+    const score = cred.MerkleTree.Group.score;
+    if (score) {
+      userScore += score;
+    }
+  }
+
   // Get user data from Neynar
   const result = await neynar.get<{ users: NeynarUserResponse[] }>(
     `/user/bulk?fids=${fid}`
@@ -81,6 +109,7 @@ export async function GET(
   return Response.json({
     ...user,
     mints,
+    score: userScore.toString(),
     fidAttestations,
   });
 }

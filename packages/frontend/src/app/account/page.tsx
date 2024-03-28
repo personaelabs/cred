@@ -25,7 +25,7 @@ export default function AccountPage() {
   const { addresses, connector } = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<Hex | null>(null);
   const [metamaskProvider, setMetamaskProvider] = useState<any | null>(null);
-  const eligibleGroups = useEligibleGroups(addresses as Hex[] | undefined);
+  const { eligibleGroups } = useEligibleGroups(addresses as Hex[] | undefined);
   const [isMintInstructionModalOpen, setIsMintInstructionModalOpen] =
     useState<boolean>(false);
   const [isSwitchAccountsModalOpen, setIsSwitchAccountsModalOpen] =

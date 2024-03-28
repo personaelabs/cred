@@ -8,6 +8,7 @@ const groupSelect = {
   id: true,
   displayName: true,
   typeId: true,
+  score: true,
 } satisfies Prisma.GroupSelect;
 
 export type GroupSelect = Prisma.GroupGetPayload<{

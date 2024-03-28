@@ -26,7 +26,8 @@ async fn get_random_group(
                 "id",
                 "displayName",
                 "typeId",
-                "contractInputs"
+                "contractInputs",
+                "score"
             FROM
                 "Group"
             WHERE
@@ -46,6 +47,7 @@ async fn get_random_group(
     let group_name: String = row.get("displayName");
     let group_type: GroupType = row.get("typeId");
     let contract_inputs: Vec<i32> = row.get("contractInputs");
+    let score: i64 = row.get("score");
 
     // Convert the contract inputs to Contract struct
     let contract_inputs = contract_inputs
@@ -70,6 +72,7 @@ async fn get_random_group(
         name: group_name,
         group_type,
         contract_inputs,
+        score
     })
 }
 
