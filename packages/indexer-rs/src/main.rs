@@ -27,6 +27,7 @@ use tokio::sync::Semaphore;
 
 #[tokio::main]
 async fn main() {
+    /*
     dotenv_config();
 
     let pg_client = init_postgres().await;
@@ -144,4 +145,5 @@ async fn main() {
 
     // Run the sync and indexing jobs concurrently
     join!(join_all(sync_jobs), join_all(indexing_jobs));
+     */
 }
