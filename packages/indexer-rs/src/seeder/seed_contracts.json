@@ -1215,5 +1215,44 @@
       "EarlyHolder",
       "Whale"
     ]
+  },
+  {
+    "id": 96,
+    "contract_type": "ERC20",
+    "address": "0x5B5dee44552546ECEA05EDeA01DCD7Be7aa6144A",
+    "name": "The Next 100x Memecoin on Base",
+    "deployed_block": 10404435,
+    "chain": "Base",
+    "symbol": "TN100x",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 97,
+    "contract_type": "ERC20",
+    "address": "0x91F45aa2BdE7393e0AF1CC674FFE75d746b93567",
+    "name": "FrameToken",
+    "deployed_block": 9988775,
+    "chain": "Base",
+    "symbol": "FRAME",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 98,
+    "contract_type": "ERC20",
+    "address": "0x4cD86D0fBCF0E167B9c2986bcb4751b5a148dcaD",
+    "name": "Enjoy Coin",
+    "deployed_block": 12410559,
+    "chain": "Base",
+    "symbol": "Enjoy",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
   }
 ]
