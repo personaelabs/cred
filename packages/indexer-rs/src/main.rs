@@ -20,6 +20,7 @@ use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
+use log::info;
 use rocksdb::{Options, DB};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -31,6 +32,12 @@ async fn main() {
 
     let pg_client = init_postgres().await;
 
+    loop {
+        info!("Maintenance mode");
+        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+    }
+
+    /*
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
     rocksdb_options.create_if_missing(true);
@@ -144,4 +151,5 @@ async fn main() {
 
     // Run the sync and indexing jobs concurrently
     join!(join_all(sync_jobs), join_all(indexing_jobs));
+     */
 }
