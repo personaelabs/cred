@@ -81,6 +81,7 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
       <div className="flex flex-col items-center">
         <div>{user.display_name} </div>
         <div className="opacity-50">(FID {user?.fid})</div>
+        <div className="opacity-50">Score: {user.score}</div>
       </div>
       <div className="ml-2 flex flex-col gap-y-[10px]">
         {user.fidAttestations.map((attestation, i) => (
