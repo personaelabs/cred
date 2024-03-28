@@ -1,5 +1,6 @@
 import { Hex } from 'viem';
 import { MerkleTreeSelect } from './api/trees/route';
+import { Group } from '@prisma/client';
 
 /**
  * Witness to pass to the prover
@@ -66,4 +67,10 @@ interface EIP6963ProviderDetail {
 export interface EIP6963AnnounceProviderEvent extends CustomEvent {
   type: 'eip6963:announceProvider';
   detail: EIP6963ProviderDetail;
+}
+
+export interface LeaderBoardRecord {
+  user: NeynarUserResponse;
+  creddd: Group['displayName'][];
+  score: number;
 }
