@@ -187,7 +187,6 @@ export default function AccountPage() {
             ></img>
             <div>
               <div>{user.display_name} </div>
-              <div className="opacity-50">(FID {user?.fid})</div>
             </div>
           </div>
         )}
@@ -205,77 +204,68 @@ export default function AccountPage() {
               <div>(this could take a moment...)</div>
             </div>
           </div>
-        ) : !isSearching ? (
-          <div className="flex flex-col gap-[14px]">
-            <div className="opacity-80 text-center">
-              {eligibleGroups.length === 0 ? (
-                <>
-                  No creddd found for connected wallet. See{' '}
-                  <Link
-                    href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20#7e3c04c26d0547f2a7bf102ee9b2b0f8"
-                    target="_blank"
-                  >
-                    here
-                  </Link>{' '}
-                  for currently available creddd.
-                </>
-              ) : (
-                <>Found the following creddd:</>
-              )}
-            </div>
-            <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
-              {eligibleGroups.map((group, i) => (
-                <WalletView
-                  connector={connector}
-                  group={group}
-                  added={addedGroups.some(g => g === group.id)}
-                  key={i}
-                  afterAdd={() => {
-                    // Open mint instruction modal if user hasn't yet
-                    if (user && user.mints.length == 0) {
-                      setIsMintInstructionModalOpen(true);
-                    } else {
-                      toast.success('creddd added', {
-                        duration: 5000,
-                        closeButton: true,
-                      });
-                    }
-                  }}
-                />
-              ))}
-              {addedGroups.length > 0 ? (
-                <div className="text-sm opacity-80">
-                  See what you can do with creddd{' '}
-                  <Link
-                    href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20"
-                    target="_blank"
-                  >
-                    here
-                  </Link>
-                </div>
-              ) : (
-                <></>
-              )}
-              <Button variant="link" onClick={switchAccounts}>
-                Switch connected accounts
-              </Button>
-              <div className="flex flex-row items-center gap-[6px] md:gap-[12px]">
-                <div className="text-sm">
-                  Connected to{' '}
-                  <span className="font-bold">{connector?.name}</span>
-                </div>
-                <Button
-                  variant="link"
-                  className="font-normal"
-                  onClick={switchWallet}
-                >
-                  Use a different wallet
-                </Button>
-              </div>
-            </div>
-          </div>
         ) : (
-          <></>
+          <>
+            {eligibleGroups.length > 0 ? (
+              <>
+                <div className="flex flex-col gap-[4px] opacity-60">
+                  <div>Current score {user?.score}</div>
+                </div>
+                <div className="flex flex-col h-[200px] items-center gap-y-[20px] overflow-scroll">
+                  {eligibleGroups.map((group, i) => (
+                    <WalletView
+                      connector={connector}
+                      group={group}
+                      added={addedGroups.some(g => g === group.id)}
+                      key={i}
+                      afterAdd={() => {
+                        // Open mint instruction modal if user hasn't yet
+                        if (user && user.mints.length == 0) {
+                          setIsMintInstructionModalOpen(true);
+                        } else {
+                          toast.success('creddd added', {
+                            duration: 5000,
+                            closeButton: true,
+                          });
+                        }
+                      }}
+                    />
+                  ))}
+                  {addedGroups.length > 0 ? (
+                    <div className="text-sm opacity-80">
+                      See what you can do with creddd{' '}
+                      <Link
+                        href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20"
+                        target="_blank"
+                      >
+                        here
+                      </Link>
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                  <Button variant="link" onClick={switchAccounts}>
+                    Switch connected accounts
+                  </Button>
+                  <div className="flex flex-row items-center gap-[6px] md:gap-[12px]">
+                    <div className="text-sm">
+                      Connected to{' '}
+                      <span className="font-bold">{connector?.name}</span>
+                    </div>
+                    <Button
+                      variant="link"
+                      className="font-normal"
+                      onClick={switchWallet}
+                    >
+                      Use a different wallet
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="opacity-60">No creddd found</div>
+            )}
+          </>
         )}
       </div>
       <MintInstructionModal
