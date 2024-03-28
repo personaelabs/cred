@@ -89,7 +89,8 @@ pub fn get_seed_groups() -> Vec<Group> {
             "f925c0f578b2c6024c5bbb20947e1af3a0eb944e0c309930e3af644ced5200df", // "Early $PIKA holder",
             "167b42ecc5f95c2c10b5fa08a62929d5e3b4ca43783d96a41e7d014e9d0fd02b", // "$KIBSHI whale",
             "55830aa86161ab70bfd6a96e2abd3b338f13bb1848565c8a23c7c7317b5864a5", // $ticker rug survivor
-            "0676adf3eb3332e1e2f80daca621727a80f9e1bb793e6864a85656f61489467c",
+            "0676adf3eb3332e1e2f80daca621727a80f9e1bb793e6864a85656f61489467c", // creddd team
+            "158a378c99e764e3b287ed5b1c938ba4125d828a1d9b30aa2fc1c6dd44207419", // The187 historical holder
         ];
 
         let mut preview_groups = vec![];
