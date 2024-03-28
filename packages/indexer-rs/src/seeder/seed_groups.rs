@@ -81,8 +81,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         vec![],
     ));
 
-    //    if is_prod() {
-    if true {
+    if is_prod() {
         groups
     } else {
         // Only return a selected few
