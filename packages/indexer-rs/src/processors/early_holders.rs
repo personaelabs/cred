@@ -134,6 +134,7 @@ mod test {
             "Test Group".to_string(),
             GroupType::EarlyHolder,
             vec![contract.clone()],
+            0,
         );
 
         let indexer = EarlyHolderIndexer::new(group, resources.clone());

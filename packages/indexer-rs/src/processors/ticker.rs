@@ -180,6 +180,7 @@ mod test {
             "Test Group".to_string(),
             GroupType::Ticker,
             vec![ticker_contract.clone()],
+            0,
         );
 
         let indexer = TickerIndexer::new(group, resources.clone());

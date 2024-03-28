@@ -174,6 +174,7 @@ mod test {
             "Test group".to_string(),
             GroupType::Whale,
             vec![contract.clone()],
+            0,
         );
 
         let whale_indexer = WhaleIndexer::new(group, resources);

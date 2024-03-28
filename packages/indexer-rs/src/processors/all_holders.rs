@@ -189,6 +189,7 @@ mod test {
             "Test Group".to_string(),
             GroupType::AllHolders,
             vec![contract.clone()],
+            0,
         );
 
         let indexer = AllHoldersIndexer::new(group, resources);
@@ -262,6 +263,7 @@ mod test {
             "Test Group".to_string(),
             GroupType::AllHolders,
             vec![contract.clone()],
+            0,
         );
 
         let indexer = AllHoldersIndexer::new(group, resources);

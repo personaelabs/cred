@@ -8,12 +8,18 @@ use crate::{
 pub struct Group {
     pub id: GroupId,
     pub name: String,
+    pub score: i64,
     pub group_type: GroupType,
     pub contract_inputs: Vec<Contract>,
 }
 
 impl Group {
-    pub fn new(name: String, group_type: GroupType, contract_inputs: Vec<Contract>) -> Self {
+    pub fn new(
+        name: String,
+        group_type: GroupType,
+        contract_inputs: Vec<Contract>,
+        score: i64,
+    ) -> Self {
         let contract_addresses = contract_inputs
             .iter()
             .map(|contract| contract.address.clone())
@@ -26,6 +32,7 @@ impl Group {
             name,
             group_type,
             contract_inputs,
+            score,
         }
     }
 }
@@ -45,11 +52,11 @@ pub async fn upsert_group(
     let result = pg_client
         .query_one(
             r#"
-            INSERT INTO "Group" ("id", "displayName", "typeId", "contractInputs",  "updatedAt") VALUES ($1, $2, $3, $4, NOW())
-            ON CONFLICT ("id", "typeId", "contractInputs") DO UPDATE SET "displayName" = $2, "updatedAt" = NOW()
+            INSERT INTO "Group" ("id", "displayName", "typeId", "contractInputs", "score", "updatedAt") VALUES ($1, $2, $3, $4, $5, NOW())
+            ON CONFLICT ("id", "typeId", "contractInputs") DO UPDATE SET "displayName" = $2, "score" = $5, "updatedAt" = NOW()
             RETURNING id
         "#,
-            &[&group.id, &group.name, &group.group_type, &group_contract_inputs],
+            &[&group.id, &group.name, &group.group_type, &group_contract_inputs, &group.score],
         )
         .await?;
 
@@ -78,6 +85,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
             let group_name: String = row.get("displayName");
             let group_type: GroupType = row.get("typeId");
             let contract_inputs: Vec<i32> = row.get("contractInputs");
+            let score: i64 = row.get("score");
 
             // Convert the contract inputs to Contract struct
             let contract_inputs = contract_inputs
@@ -102,6 +110,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
                 name: group_name,
                 group_type,
                 contract_inputs,
+                score,
             }
         })
         .collect();
