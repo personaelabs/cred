@@ -2,20 +2,21 @@
 import '@rainbow-me/rainbowkit/styles.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
-import MobileFooter from '@/components/MobileFooter';
 import { Toaster } from '@/components/ui/sonner';
 import { UserProvider } from '@/context/UserContext';
-import DesktopFooter from '@/components/DesktopFooter';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
-import Header from '@/components/Header';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { mainnet } from 'viem/chains';
 import { MediaQueryProvider } from '@/context/MediaQueryContext';
 import { AddingCredddModalProvider } from '@/context/AddingCredddModalContext';
+import MobileHeader from '@/components/MobileHeader';
+import DesktopHeader from '@/components/DesktopHeader';
+import MobileFooter from '@/components/MobileFooter';
+import DesktopFooter from '@/components/DesktopFooter';
 
 const queryClient = new QueryClient();
 
@@ -69,7 +70,8 @@ export default function RootLayout({
                     <UserProvider>
                       <AuthKitProvider config={config}>
                         <ThemeProvider attribute="class" defaultTheme="dark">
-                          <Header></Header>
+                          <MobileHeader></MobileHeader>
+                          <DesktopHeader></DesktopHeader>
                           <div className="flex flex-row justify-center w-full">
                             <div className="w-full flex flex-col">
                               {children}
