@@ -2,13 +2,15 @@ use num_bigint::BigUint;
 
 pub mod contract;
 pub mod contract_event_iterator;
-pub mod contracts;
 pub mod eth_rpc;
 pub mod event;
+pub mod group;
 pub mod log_sync_engine;
 pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
+pub mod seeder;
+pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
 pub mod utils;
@@ -17,6 +19,7 @@ pub mod utils;
 pub mod test_utils;
 
 use postgres_types::{FromSql, ToSql};
+use serde::{Deserialize, Serialize};
 
 // Define the types for the RocksDB key and value
 
@@ -25,6 +28,8 @@ pub type EventId = u16;
 
 /// Contract id defined in the Postgres database
 pub type ContractId = u16;
+
+pub type GroupId = String;
 
 /// A chunk number is a number that represents a range of 2000 blocks.
 /// It's counted from the block the contract was deployed. (Chunk numbers are contract specific)
@@ -69,10 +74,11 @@ impl From<std::io::Error> for Error {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
     Static,
+    CredddTeam,
     EarlyHolder,
     Whale,
     AllHolders,

@@ -4,8 +4,10 @@ use crate::{
     contract::Contract,
     contract_event_iterator::ContractEventIterator,
     eth_rpc::Chain,
+    group::Group,
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
+    seeder::seed_contracts::get_seed_contracts,
     utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
     Address, BlockNum, TxIndex,
 };
@@ -18,16 +20,24 @@ const TO_BLOCK_NUMBER: BlockNum = 11968043;
 const TO_TX_INDEX: TxIndex = 26;
 
 pub struct TickerIndexer {
+    pub group: Group,
     pub contract: Contract,
-    pub group_id: i32,
     pub resources: IndexerResources,
 }
 
 impl TickerIndexer {
-    pub fn new(contract: Contract, group_id: i32, resources: IndexerResources) -> Self {
+    pub fn new(group: Group, resources: IndexerResources) -> Self {
+        let ticker_contract = get_seed_contracts()
+            .iter()
+            .find(|c| c.symbol == "ticker")
+            .unwrap()
+            .clone();
+
+        let contract = Contract::from_contract_data(ticker_contract);
+
         TickerIndexer {
+            group,
             contract,
-            group_id,
             resources,
         }
     }
@@ -39,8 +49,8 @@ impl GroupIndexer for TickerIndexer {
         self.contract.chain
     }
 
-    fn group_id(&self) -> i32 {
-        self.group_id
+    fn group(&self) -> &Group {
+        &self.group
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {
@@ -120,45 +130,31 @@ impl GroupIndexer for TickerIndexer {
 mod test {
     use super::*;
     use crate::{
-        contracts::erc20::erc20_contracts,
         eth_rpc::EthRpcClient,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
-        test_utils::{delete_all, get_members_from_csv},
+        seeder::seed_contracts::get_seed_contracts,
+        test_utils::{get_members_from_csv, init_test_rocksdb},
         utils::dotenv_config,
-        ROCKSDB_PATH,
+        GroupType,
     };
-    use rocksdb::{Options, DB};
     use std::sync::Arc;
 
     #[tokio::test]
     async fn test_ticker_indexer() {
         dotenv_config();
-
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_ticker_indexer";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        // Delete all records from the test db
-        delete_all(&db);
+        let db = init_test_rocksdb("test_ticker_indexer");
 
         let pg_client = init_postgres().await;
 
-        let ticker_contract = erc20_contracts()
+        // Get the ticker contract from the seed contracts list
+        let ticker_contract = get_seed_contracts()
             .iter()
             .find(|c| c.symbol == "ticker")
             .unwrap()
             .clone();
+
+        let ticker_contract = Contract::from_contract_data(ticker_contract);
 
         // Hardcoded to the latest block number at the time of writing this test,
         // so we can hardcode other values as well.
@@ -180,8 +176,13 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group_id = 1;
-        let indexer = TickerIndexer::new(ticker_contract.clone(), group_id, resources.clone());
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::Ticker,
+            vec![ticker_contract.clone()],
+        );
+
+        let indexer = TickerIndexer::new(group, resources.clone());
 
         let members = indexer.get_members(to_block).unwrap();
 

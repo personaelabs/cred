@@ -1,7 +1,7 @@
 extern crate merkle_tree as merkle_tree_lib;
 use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::utils::dev_addresses;
-use crate::{Address, GroupType};
+use crate::{Address, GroupId, GroupType};
 use bloomfilter::Bloom;
 use log::{info, warn};
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
@@ -22,7 +22,7 @@ fn to_hex(fe: Fq) -> String {
 }
 
 pub async fn save_tree(
-    group_id: i32,
+    group_id: GroupId,
     group_type: GroupType,
     pg_client: &tokio_postgres::Client,
     mut addresses: Vec<Address>,
@@ -40,7 +40,8 @@ pub async fn save_tree(
 
     // If the group type is not static and the number of addresses is less than 100,
     // then we skip building the tree since the anonymity set is too small
-    if group_type != GroupType::Static && addresses.len() < 100 {
+    if group_type != GroupType::CredddTeam && addresses.len() < 100 {
+        // TODO: Return an error here so that the caller can decide what to do
         warn!("Not enough addresses to build a tree for {}", group_id);
         return Ok(());
     }

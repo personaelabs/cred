@@ -1,4 +1,8 @@
 use crate::BlockNum;
+use cached::proc_macro::cached;
+use cached::TimedSizedCache;
+use serde::Deserialize;
+use serde::Serialize;
 use serde_json::{json, Value};
 use std::env;
 use std::env::VarError;
@@ -11,7 +15,7 @@ const NUM_MAINNET_NODES: u32 = 10;
 
 pub static PERMITS: Semaphore = Semaphore::const_new(100);
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Chain {
     Mainnet,
     Optimism,
@@ -53,6 +57,48 @@ impl LoadBalancer {
     }
 }
 
+#[cached(
+    type = "TimedSizedCache<String, BlockNum>",
+    create = "{ TimedSizedCache::with_size_and_lifespan(100, 12) }",
+    convert = r#"{ format!("{}", url) }"#,
+    result = true
+)]
+/// Get the latest block number for a chain
+/// Caches the result for 12 seconds
+async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, surf::Error> {
+    let permit = PERMITS.acquire().await.unwrap();
+
+    let delay = rand::random::<u64>() % 500;
+    tokio::time::sleep(Duration::from_millis(delay)).await;
+
+    let mut res = client
+        .post(url)
+        .body_json(&json!({
+            "jsonrpc": "2.0",
+            "method": "eth_getBlockByNumber",
+            "params": ["finalized", false],
+            "id": 0,
+        }))?
+        .await?;
+
+    drop(permit);
+
+    let body_str = res.body_string().await?;
+
+    let body: Value = serde_json::from_str(&body_str).unwrap();
+
+    let finalized_block = u64::from_str_radix(
+        body["result"]["number"]
+            .as_str()
+            .unwrap()
+            .trim_start_matches("0x"),
+        16,
+    )
+    .unwrap();
+
+    Ok(finalized_block)
+}
+
 /// A client for interacting with the Ethereum JSON-RPC API
 pub struct EthRpcClient {
     client: Arc<surf::Client>,
@@ -84,6 +130,17 @@ impl EthRpcClient {
         let url = load_balancer.get_endpoint(chain).unwrap();
         drop(load_balancer);
 
+        // Call the cached function to get the block number
+        get_block_number(&self.client, &url).await
+    }
+
+    /// Get logs for a contract event in batch
+    /// - `batch_options`: An array of `[fromBlock, toBlock]` options
+    pub async fn get_logs(&self, chain: Chain, params: &Value) -> Result<Value, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
 
@@ -94,28 +151,17 @@ impl EthRpcClient {
             .post(url)
             .body_json(&json!({
                 "jsonrpc": "2.0",
-                "method": "eth_getBlockByNumber",
-                "params": ["finalized", false],
-                "id": 0,
+                "method": "eth_getLogs",
+                "params": vec![params],
+                "id": 1,
             }))?
             .await?;
 
-        let body_str = res.body_string().await?;
-
-        let body: Value = serde_json::from_str(&body_str).unwrap();
-
         drop(permit);
 
-        let finalized_block = u64::from_str_radix(
-            body["result"]["number"]
-                .as_str()
-                .unwrap()
-                .trim_start_matches("0x"),
-            16,
-        )
-        .unwrap();
+        let body_str = res.body_string().await?;
 
-        Ok(finalized_block)
+        Ok(serde_json::from_str(&body_str).unwrap())
     }
 
     /// Get logs for a contract event in batch
@@ -153,6 +199,42 @@ impl EthRpcClient {
 
         let delay = rand::random::<u64>() % 500;
         tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
+
+        let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
+
+        drop(permit);
+
+        let body_str = res.body_string().await?;
+
+        Ok(serde_json::from_str(&body_str).unwrap())
+    }
+
+    pub async fn eth_call(
+        &self,
+        chain: Chain,
+        contract_address: &str,
+        func_selector: &str,
+        args: &[u8],
+        block_number: BlockNum,
+    ) -> Result<Value, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
+        let json_body = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_call",
+            "params": [
+                {
+                    "to": contract_address,
+                    "data": format!("0x{}{}", func_selector, hex::encode(args))
+                },
+                format!("0x{:x}", block_number)
+            ],
+            "id": 1
+        });
 
         let permit = PERMITS.acquire().await.unwrap();
 

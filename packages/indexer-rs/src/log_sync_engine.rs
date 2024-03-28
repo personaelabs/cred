@@ -9,14 +9,14 @@ use crate::rocksdb_key::{
     KeyType, RocksDbKey, ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID,
     ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID,
 };
-use crate::utils::get_latest_synched_chunk;
+use crate::utils::{get_latest_synched_chunk, search_missing_chunks};
 use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
 use log::{debug, error, info};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use rocksdb::{IteratorMode, WriteBatch};
+use rocksdb::WriteBatch;
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
@@ -24,13 +24,13 @@ use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
 
-const TRANSFER_EVENT_SIG: &str =
+pub const TRANSFER_EVENT_SIG: &str =
     "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
-const ERC1155_TRANSFER_BATCH_SIG: &str =
+pub const ERC1155_TRANSFER_BATCH_SIG: &str =
     "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
 
-const ERC1155_TRANSFER_SINGLE_SIG: &str =
+pub const ERC1155_TRANSFER_SINGLE_SIG: &str =
     "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62";
 
 /// A struct to sync all logs of a particular contract event
@@ -84,40 +84,20 @@ impl LogSyncEngine {
     }
 
     /// Search for chunks that aren't synched yet
-    fn search_missing_chunks(&self) -> Vec<ChunkNum> {
-        let start_key = RocksDbKey {
-            key_type: KeyType::SyncLog,
-            event_id: self.event_id,
-            contract_id: self.contract.id,
-            block_num: None,
-            log_index: None,
-            tx_index: None,
-            chunk_num: Some(0),
-        };
-
-        let iterator = self.rocksdb_client.iterator(IteratorMode::From(
-            &start_key.to_bytes(),
-            rocksdb::Direction::Forward,
-        ));
-
-        let mut missing_chunks = vec![];
-
-        for (expected_chunk_num, item) in iterator.enumerate() {
-            let (key_bytes, _value) = item.unwrap();
-
-            let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
-
-            if key.key_type != KeyType::SyncLog
-                || key.event_id != self.event_id
-                || key.contract_id != self.contract.id
-            {
-                break;
-            }
-
-            if key.chunk_num.unwrap() != expected_chunk_num as ChunkNum {
-                missing_chunks.push(expected_chunk_num as ChunkNum);
-            }
-        }
+    fn search_missing_chunks(&self, to_chunk: ChunkNum) -> Vec<ChunkNum> {
+        let start = Instant::now();
+        let missing_chunks = search_missing_chunks(
+            &self.rocksdb_client,
+            self.event_id,
+            self.contract.id,
+            to_chunk,
+        );
+        info!(
+            "${} {}: {:?}",
+            self.contract.name,
+            "Search Missing chunks".purple(),
+            start.elapsed()
+        );
 
         missing_chunks
     }
@@ -217,7 +197,7 @@ impl LogSyncEngine {
                         if needs_retry {
                             error!(
                                 "${} ({}) {} {:?}",
-                                self.contract.symbol.to_uppercase(),
+                                self.contract.name,
                                 batch.len(),
                                 "Error:".red(),
                                 error_msg
@@ -239,11 +219,7 @@ impl LogSyncEngine {
                     }
                 }
                 Err(e) => {
-                    error!(
-                        "${} Error (retrying): {:?}",
-                        self.contract.symbol.to_uppercase(),
-                        e
-                    );
+                    error!("${} Error (retrying): {:?}", self.contract.name, e);
                 }
             }
         }
@@ -268,80 +244,55 @@ impl LogSyncEngine {
 
         self.rocksdb_client.write(batch).unwrap();
         if !chunks.is_empty() {
-            info!(
-                "${} Synched chunk: {}",
-                self.contract.symbol.to_uppercase(),
-                chunks[0]
-            );
+            info!("${} Synched chunk: {}", self.contract.name, chunks[0]);
         }
     }
 
+    /// Sync contract logs up to the given block number
     pub async fn sync_to_block(&self, to_block: BlockNum) {
         let batch_size = 50;
 
+        // Calculate the total number of chunks to sync
         let num_total_chunks =
             f64::ceil(((to_block - self.contract.deployed_block) as f64) / CHUNK_SIZE as f64)
                 as u64;
 
-        let mut chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
+        // Get the latest synched chunk. We start from the next chunk.
+        let chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
 
-        debug!(
-            "${} Start from chunk: {}",
-            self.contract.symbol.to_uppercase(),
-            chunks_from
-        );
+        debug!("${} Start from chunk: {}", self.contract.name, chunks_from);
 
-        let mut chunks_to = min(chunks_from + batch_size, num_total_chunks);
+        // A chunk is 2000 blocks. We sync in batches of 50 chunks (100,000 blocks)
 
-        let mut jobs = vec![];
+        let chunk_batches = (chunks_from..num_total_chunks).collect::<Vec<ChunkNum>>();
 
-        // Loop through all chunks and sync them
-        loop {
-            let chunks = (chunks_from..chunks_to).collect::<Vec<ChunkNum>>();
-
-            let job = self.sync_chunks(chunks, to_block);
-            jobs.push(job);
-
-            if chunks_to >= num_total_chunks {
-                break;
-            }
-
-            chunks_from = chunks_to;
-            chunks_to = min(chunks_to + batch_size, num_total_chunks);
-        }
+        let jobs = chunk_batches
+            .chunks(batch_size as usize)
+            .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         let start = Instant::now();
         let num_jobs = jobs.len();
         join_all(jobs).await;
         info!(
             "Synced ${} in {:?} ({}jobs)",
-            self.contract.symbol.to_uppercase(),
+            self.contract.name,
             start.elapsed(),
             num_jobs
         );
 
         // Get missing chunks
-        let missing_chunks = self.search_missing_chunks();
+        let missing_chunks = self.search_missing_chunks(num_total_chunks);
 
         info!(
             "${} {}: {}",
-            self.contract.symbol.to_uppercase(),
+            self.contract.name,
             "Synching Missing chunks".blue(),
             missing_chunks.len()
         );
-        let mut start_index = 0;
 
-        let mut missing_chunks_sync_jobs = vec![];
-        // Sync missing chunks
-        while start_index < missing_chunks.len() {
-            let end_index = min(start_index + batch_size as usize, missing_chunks.len());
-            let chunk = missing_chunks[start_index..end_index].to_vec();
-
-            let job = self.sync_chunks(chunk, to_block);
-            missing_chunks_sync_jobs.push(job);
-
-            start_index = end_index;
-        }
+        let missing_chunks_sync_jobs = missing_chunks
+            .chunks(batch_size as usize)
+            .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         join_all(missing_chunks_sync_jobs).await;
     }
@@ -354,7 +305,7 @@ impl LogSyncEngine {
             if latest_block.is_err() {
                 error!(
                     "${} get_block_number Error: {:?}",
-                    self.contract.symbol.to_uppercase(),
+                    self.contract.name,
                     latest_block.err().unwrap()
                 );
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;
@@ -375,33 +326,75 @@ impl LogSyncEngine {
 mod test {
     use super::*;
     use crate::{
-        test_utils::{delete_all, erc20_test_contract},
-        utils::{count_synched_logs, dotenv_config, missing_chunk_exists},
-        ROCKSDB_PATH,
+        test_utils::{delete_all, erc20_test_contract, init_test_rocksdb},
+        utils::{count_synched_chunks, count_synched_logs, dotenv_config, missing_chunk_exists},
     };
-    use rocksdb::{Options, DB};
 
     #[tokio::test]
     async fn test_sync_engine() {
         dotenv_config();
 
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_sync_engine";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let rocksdb_conn = DB::open(
-            &rocksdb_options,
-            format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-        )
-        .unwrap();
-
-        // Delete all records from the test db
-        delete_all(&rocksdb_conn);
-
+        let rocksdb_conn = init_test_rocksdb("test_sync_engine");
         let eth_client = Arc::new(EthRpcClient::new());
-        let rocksdb_client = Arc::new(rocksdb_conn);
+
+        let contract = erc20_test_contract();
+
+        // Hardcoded to the latest block number at the time of writing this test,
+        // so we can hardcode other values as well.
+        let to_block = 19473397;
+
+        let contract_sync_engine = LogSyncEngine::new(
+            eth_client,
+            contract.clone(),
+            ERC20_TRANSFER_EVENT_ID,
+            rocksdb_conn.clone(),
+        );
+        contract_sync_engine.sync_to_block(to_block).await;
+
+        // 1. Check that the number of synched logs is equal to the expected count
+        let count = count_synched_logs(
+            &rocksdb_conn,
+            ERC20_TRANSFER_EVENT_ID,
+            contract.id,
+            Some(to_block),
+        );
+
+        let expected_count = 7239;
+        assert_eq!(count, expected_count);
+
+        // 2. Check that the latest synched chunk is equal to the expected chunk
+        let latest_synched_chunk = contract_sync_engine.get_latest_synched_chunk();
+        get_latest_synched_chunk(&rocksdb_conn, ERC20_TRANSFER_EVENT_ID, contract.id);
+
+        let expected_latest_synched_chunk = 466;
+
+        assert_eq!(latest_synched_chunk.unwrap(), expected_latest_synched_chunk);
+
+        // 3. Check the number of synched chunks
+        let num_synched_chunks =
+            count_synched_chunks(&rocksdb_conn, ERC20_TRANSFER_EVENT_ID, contract.id);
+        let expected_num_synched_chunks = expected_latest_synched_chunk + 1;
+        assert_eq!(num_synched_chunks, expected_num_synched_chunks as i32);
+
+        // 4. Check that `missing_chunk_exists` returns false
+        let missing_chunks_exists = missing_chunk_exists(
+            &rocksdb_conn,
+            ERC20_TRANSFER_EVENT_ID,
+            contract.id,
+            expected_latest_synched_chunk,
+        );
+        assert!(!missing_chunks_exists);
+
+        delete_all(&rocksdb_conn);
+    }
+
+    // Test that the sync engine recovers from a state where some chunks are missing
+    #[tokio::test]
+    async fn test_sync_engine_recovery() {
+        dotenv_config();
+
+        let rocksdb_client = init_test_rocksdb("test_sync_engine_recovery");
+        let eth_client = Arc::new(EthRpcClient::new());
 
         let contract = erc20_test_contract();
 
@@ -415,30 +408,50 @@ mod test {
             ERC20_TRANSFER_EVENT_ID,
             rocksdb_client.clone(),
         );
+
+        // Mark chunks 2~4, 6~8 as synched
+        let mut batch = WriteBatch::default();
+        for chunk in (2..5).chain(6..9) {
+            let sync_log_key = RocksDbKey {
+                key_type: KeyType::SyncLog,
+                event_id: ERC20_TRANSFER_EVENT_ID,
+                contract_id: contract.id,
+                block_num: None,
+                log_index: None,
+                tx_index: None,
+                chunk_num: Some(chunk),
+            };
+
+            batch.put(sync_log_key.to_bytes(), [1]);
+        }
+
+        rocksdb_client.write(batch).unwrap();
+
         contract_sync_engine.sync_to_block(to_block).await;
 
-        // 1. Check that the number of synched logs is equal to the expected count
-        let count = count_synched_logs(
-            &rocksdb_client,
-            ERC20_TRANSFER_EVENT_ID,
-            contract.id,
-            Some(to_block),
-        );
-
-        let expected_count = 7239;
-        assert_eq!(count, expected_count);
-
-        // 2. Check that the latest synched chunk is equal to the expected chunk
+        // 1. Check that the latest synched chunk is equal to the expected chunk
         let latest_synched_chunk = contract_sync_engine.get_latest_synched_chunk();
         get_latest_synched_chunk(&rocksdb_client, ERC20_TRANSFER_EVENT_ID, contract.id);
 
         let expected_latest_synched_chunk = 466;
-        println!("latest_synched_chunk: {:?}", latest_synched_chunk);
+
         assert_eq!(latest_synched_chunk.unwrap(), expected_latest_synched_chunk);
 
-        // 3. Check that `missing_chunk_exists` returns false
-        let missing_chunks_exists =
-            missing_chunk_exists(&rocksdb_client, ERC20_TRANSFER_EVENT_ID, contract.id);
+        // 2. Check the number of synched chunks
+        let num_synched_chunks =
+            count_synched_chunks(&rocksdb_client, ERC20_TRANSFER_EVENT_ID, contract.id);
+        let expected_num_synched_chunks = expected_latest_synched_chunk + 1;
+        assert_eq!(num_synched_chunks, expected_num_synched_chunks as i32);
+
+        // 3. Check that there are no missing chunks
+        let missing_chunks_exists = missing_chunk_exists(
+            &rocksdb_client,
+            ERC20_TRANSFER_EVENT_ID,
+            contract.id,
+            expected_latest_synched_chunk,
+        );
         assert!(!missing_chunks_exists);
+
+        delete_all(&rocksdb_client);
     }
 }

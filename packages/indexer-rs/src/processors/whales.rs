@@ -1,7 +1,9 @@
 use super::GroupIndexer;
+
 use crate::contract::Contract;
 use crate::contract_event_iterator::ContractEventIterator;
 use crate::eth_rpc::Chain;
+use crate::group::Group;
 use crate::processors::IndexerResources;
 use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS};
@@ -16,18 +18,17 @@ pub fn get_whale_handle(contract_name: &str) -> String {
 }
 
 pub struct WhaleIndexer {
-    contract: Contract,
-    group_id: i32,
+    group: Group,
     resources: IndexerResources,
 }
 
 impl WhaleIndexer {
-    pub fn new(contract: Contract, group_id: i32, resources: IndexerResources) -> Self {
-        WhaleIndexer {
-            contract,
-            group_id,
-            resources,
-        }
+    pub fn new(group: Group, resources: IndexerResources) -> Self {
+        WhaleIndexer { group, resources }
+    }
+
+    fn contract(&self) -> &Contract {
+        &self.group.contract_inputs[0]
     }
 
     fn get_whales(
@@ -37,7 +38,7 @@ impl WhaleIndexer {
         let iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC20_TRANSFER_EVENT_ID,
-            self.contract.id,
+            self.contract().id,
             Some(block_number),
         );
 
@@ -102,11 +103,11 @@ impl WhaleIndexer {
 #[async_trait::async_trait]
 impl GroupIndexer for WhaleIndexer {
     fn chain(&self) -> Chain {
-        self.contract.chain
+        self.contract().chain
     }
 
-    fn group_id(&self) -> i32 {
-        self.group_id
+    fn group(&self) -> &Group {
+        &self.group
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {
@@ -114,7 +115,7 @@ impl GroupIndexer for WhaleIndexer {
             &self.resources.rocksdb_client,
             &self.resources.eth_client,
             ERC20_TRANSFER_EVENT_ID,
-            &self.contract,
+            &self.contract(),
         )
         .await
     }
@@ -134,31 +135,16 @@ mod test {
         eth_rpc::EthRpcClient,
         log_sync_engine::LogSyncEngine,
         postgres::init_postgres,
-        test_utils::{delete_all, erc20_test_contract},
+        test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        ROCKSDB_PATH,
+        GroupType,
     };
-    use rocksdb::{Options, DB};
 
     #[tokio::test]
     async fn test_whale_indexer() {
         dotenv_config();
 
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_whale_indexer";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        delete_all(&db);
+        let db = init_test_rocksdb("test_whale_indexer");
 
         let pg_client = init_postgres().await;
 
@@ -184,8 +170,13 @@ mod test {
             eth_client,
         };
 
-        let group_id = 1;
-        let whale_indexer = WhaleIndexer::new(contract, group_id, resources);
+        let group = Group::new(
+            "Test group".to_string(),
+            GroupType::Whale,
+            vec![contract.clone()],
+        );
+
+        let whale_indexer = WhaleIndexer::new(group, resources);
 
         let (_, balances, total_supply) = whale_indexer.get_whales(to_block).unwrap();
 

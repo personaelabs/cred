@@ -3,6 +3,7 @@ use crate::{
     contract::{Contract, ContractType},
     contract_event_iterator::ContractEventIterator,
     eth_rpc::Chain,
+    group::Group,
     processors::GroupIndexer,
     rocksdb_key::{ERC1155_TRANSFER_SINGLE_EVENT_ID, ERC721_TRANSFER_EVENT_ID},
     utils::{
@@ -14,18 +15,17 @@ use crate::{
 use std::{collections::HashSet, io::Error};
 
 pub struct AllHoldersIndexer {
-    pub contract: Contract,
-    pub group_id: i32,
+    pub group: Group,
     pub resources: IndexerResources,
 }
 
 impl AllHoldersIndexer {
-    pub fn new(contract: Contract, group_id: i32, resources: IndexerResources) -> Self {
-        AllHoldersIndexer {
-            contract,
-            group_id,
-            resources,
-        }
+    pub fn new(group: Group, resources: IndexerResources) -> Self {
+        AllHoldersIndexer { group, resources }
+    }
+
+    fn contract(&self) -> &Contract {
+        &self.group.contract_inputs[0]
     }
 
     // Get all members by iterating over ERC721 transfer events
@@ -33,7 +33,7 @@ impl AllHoldersIndexer {
         let iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC721_TRANSFER_EVENT_ID,
-            self.contract.id,
+            self.contract().id,
             Some(block_number),
         );
 
@@ -51,7 +51,7 @@ impl AllHoldersIndexer {
         let transfer_single_iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC1155_TRANSFER_SINGLE_EVENT_ID,
-            self.contract.id,
+            self.contract().id,
             Some(block_number),
         );
 
@@ -65,7 +65,7 @@ impl AllHoldersIndexer {
         let transfer_batch_iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC1155_TRANSFER_SINGLE_EVENT_ID,
-            self.contract.id,
+            self.contract().id,
             Some(block_number),
         );
 
@@ -80,16 +80,16 @@ impl AllHoldersIndexer {
 
 #[async_trait::async_trait]
 impl GroupIndexer for AllHoldersIndexer {
-    fn group_id(&self) -> i32 {
-        self.group_id
+    fn group(&self) -> &Group {
+        &self.group
     }
 
     fn chain(&self) -> Chain {
-        self.contract.chain
+        self.contract().chain
     }
 
     fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
-        let unique_holders = match self.contract.contract_type {
+        let unique_holders = match self.contract().contract_type {
             ContractType::ERC721 => self.get_members_as_erc721(block_number)?,
             ContractType::ERC1155 => self.get_members_as_erc1155(block_number)?,
             _ => panic!("AllHoldersIndexer: Unsupported contract type"),
@@ -99,18 +99,18 @@ impl GroupIndexer for AllHoldersIndexer {
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {
-        if self.contract.contract_type == ContractType::ERC721
-            || self.contract.contract_type == ContractType::Punk
+        if self.contract().contract_type == ContractType::ERC721
+            || self.contract().contract_type == ContractType::Punk
         {
             // Check if ERC721 transfer event logs are ready
             return is_event_logs_ready(
                 &self.resources.rocksdb_client,
                 &self.resources.eth_client,
                 ERC721_TRANSFER_EVENT_ID,
-                &self.contract,
+                &self.contract(),
             )
             .await;
-        } else if self.contract.contract_type == ContractType::ERC1155 {
+        } else if self.contract().contract_type == ContractType::ERC1155 {
             // Check if both ERC1155 transfer single and transfer batch events are ready
 
             // Check if ERC1155 transfer single event logs are ready
@@ -118,7 +118,7 @@ impl GroupIndexer for AllHoldersIndexer {
                 &self.resources.rocksdb_client,
                 &self.resources.eth_client,
                 ERC1155_TRANSFER_SINGLE_EVENT_ID,
-                &self.contract,
+                &self.contract(),
             )
             .await?;
 
@@ -127,7 +127,7 @@ impl GroupIndexer for AllHoldersIndexer {
                 &self.resources.rocksdb_client,
                 &self.resources.eth_client,
                 ERC1155_TRANSFER_SINGLE_EVENT_ID,
-                &self.contract,
+                &self.contract(),
             )
             .await?;
 
@@ -147,9 +147,10 @@ mod test {
         postgres::init_postgres,
         test_utils::{
             delete_all, erc1155_test_contract, erc721_test_contract, get_members_from_csv,
+            init_test_rocksdb,
         },
         utils::dotenv_config,
-        ROCKSDB_PATH,
+        GroupType, ROCKSDB_PATH,
     };
     use rocksdb::{Options, DB};
     use std::sync::Arc;
@@ -158,22 +159,7 @@ mod test {
     async fn test_all_holders_erc721_get_members() {
         dotenv_config();
 
-        // Use a different path for the test db to avoid conflicts with the main db
-        const TEST_ROCKSDB_PATH: &str = "test_all_holders_erc721_get_members";
-
-        let mut rocksdb_options = Options::default();
-        rocksdb_options.create_if_missing(true);
-
-        let db = Arc::new(
-            DB::open(
-                &rocksdb_options,
-                format!("{}/{}", ROCKSDB_PATH, TEST_ROCKSDB_PATH),
-            )
-            .unwrap(),
-        );
-
-        // Delete all records from the test db
-        delete_all(&db);
+        let db = init_test_rocksdb("test_all_holders_erc721_get_members");
 
         let pg_client = init_postgres().await;
 
@@ -199,8 +185,13 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group_id = 1;
-        let indexer = AllHoldersIndexer::new(contract.clone(), group_id, resources);
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::AllHolders,
+            vec![contract.clone()],
+        );
+
+        let indexer = AllHoldersIndexer::new(group, resources);
 
         let members = indexer.get_members(to_block).unwrap();
 
@@ -267,8 +258,13 @@ mod test {
             eth_client: eth_client.clone(),
         };
 
-        let group_id = 1;
-        let indexer = AllHoldersIndexer::new(contract.clone(), group_id, resources);
+        let group = Group::new(
+            "Test Group".to_string(),
+            GroupType::AllHolders,
+            vec![contract.clone()],
+        );
+
+        let indexer = AllHoldersIndexer::new(group, resources);
 
         let members = indexer.get_members(to_block).unwrap();
 
