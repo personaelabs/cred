@@ -27,11 +27,11 @@ use tokio::sync::Semaphore;
 
 #[tokio::main]
 async fn main() {
-    /*
     dotenv_config();
 
     let pg_client = init_postgres().await;
 
+    /*
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
     rocksdb_options.create_if_missing(true);
