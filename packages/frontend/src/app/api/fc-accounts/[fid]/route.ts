@@ -5,6 +5,12 @@ import { NextRequest } from 'next/server';
 import neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
 
+// This is a workaround for the fact that BigInts are not supported by JSON.stringify
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 const selectAttestation = {
   MerkleTree: {
     select: {

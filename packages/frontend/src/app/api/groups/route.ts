@@ -4,6 +4,12 @@ import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
+// This is a workaround for the fact that BigInts are not supported by JSON.stringify
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 const groupSelect = {
   id: true,
   displayName: true,
