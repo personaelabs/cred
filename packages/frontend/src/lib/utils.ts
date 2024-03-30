@@ -160,6 +160,10 @@ export const getCredddDescription = (
     case GroupType.Ticker: {
       return `This indicates the user controlled wallets with >0 $ticker balance when $ticker dev rugged.`;
     }
+    case GroupType.Believer: {
+      const tokenName = groupName.replaceAll('believer', '').trim();
+      return `This indicates the user has contributed to >$50 of ${tokenName} buys.`;
+    }
     default:
       return '';
   }
