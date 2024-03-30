@@ -53,7 +53,8 @@ impl CoingeckoClient {
         let prices = prices
             .iter()
             .map(|price| {
-                let timestamp = price[0].as_u64().unwrap();
+                // Convert timestamp from milliseconds to seconds
+                let timestamp = price[0].as_u64().unwrap().checked_div(1000).unwrap();
                 let price = price[1].as_f64().unwrap();
 
                 (timestamp, price)

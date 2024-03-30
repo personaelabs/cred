@@ -4,6 +4,7 @@ use cached::TimedSizedCache;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use std::env;
 use std::env::VarError;
 use std::sync::Arc;
@@ -211,6 +212,68 @@ impl EthRpcClient {
         Ok(serde_json::from_str(&body_str).unwrap())
     }
 
+    pub async fn get_block_timestamp_batch(
+        &self,
+        chain: Chain,
+        block_numbers: &[BlockNum],
+    ) -> Result<HashMap<BlockNum, u64>, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
+        let mut json_body = vec![];
+
+        for (i, block_number) in block_numbers.iter().enumerate() {
+            json_body.push(json!({
+                "jsonrpc": "2.0",
+                "method": "eth_getBlockByNumber",
+                "params": [
+                    format!("0x{:x}", block_number),
+                    false
+                ],
+                "id": i
+            }));
+        }
+
+        let delay = rand::random::<u64>() % 500;
+        tokio::time::sleep(Duration::from_millis(delay)).await;
+
+        let permit = PERMITS.acquire().await.unwrap();
+
+        let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
+
+        drop(permit);
+
+        let body_str = res.body_string().await?;
+
+        let body: Value = serde_json::from_str(&body_str).unwrap();
+
+        let mut timestamps = HashMap::new();
+
+        for result in body.as_array().unwrap() {
+            let result = &result["result"];
+
+            let block_num = u64::from_str_radix(
+                result["number"].as_str().unwrap().trim_start_matches("0x"),
+                16,
+            )
+            .unwrap();
+
+            let timestamp = u64::from_str_radix(
+                result["timestamp"]
+                    .as_str()
+                    .unwrap()
+                    .trim_start_matches("0x"),
+                16,
+            )
+            .unwrap();
+
+            timestamps.insert(block_num, timestamp);
+        }
+
+        Ok(timestamps)
+    }
+
     pub async fn get_block_timestamp(
         &self,
         chain: Chain,
@@ -229,8 +292,6 @@ impl EthRpcClient {
             ],
             "id": 1
         });
-
-        println!("json_body: {:?}", json_body);
 
         let permit = PERMITS.acquire().await.unwrap();
 

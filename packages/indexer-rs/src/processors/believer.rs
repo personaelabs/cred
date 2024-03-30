@@ -6,9 +6,10 @@ use crate::{
     group::Group,
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
-    utils::{decode_erc20_transfer_event, is_event_logs_ready},
+    utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
     Address, BlockNum, Error,
 };
+use log::info;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use std::{
@@ -46,23 +47,28 @@ impl BelieverIndexer {
             None,
         );
 
+        let unique_block_numbers = iterator
+            .map(|(key, _)| key.block_num.unwrap())
+            .collect::<HashSet<BlockNum>>()
+            .iter()
+            .copied()
+            .collect::<Vec<BlockNum>>();
+
+        println!("Unique block numbers: {:?}", unique_block_numbers.len());
+
         let mut block_num_to_timestamp = HashMap::new();
 
         // Map block number to timestamp
-        for (key, _) in iterator {
-            let block_num = key.block_num.unwrap();
-            if block_num_to_timestamp.get(&block_num).is_some() {
-                // Skip if we already have the timestamp for this block number
-                continue;
-            }
-
-            let timestamp = self
+        for block_numbers in unique_block_numbers.chunks(1000) {
+            let result = self
                 .resources
                 .eth_client
-                .get_block_timestamp(self.chain(), key.block_num.unwrap())
+                .get_block_timestamp_batch(self.chain(), block_numbers)
                 .await?;
 
-            block_num_to_timestamp.insert(block_num, timestamp);
+            for (block_num, timestamp) in result {
+                block_num_to_timestamp.insert(block_num, timestamp);
+            }
         }
 
         Ok(block_num_to_timestamp)
@@ -118,10 +124,14 @@ impl GroupIndexer for BelieverIndexer {
         let timestamp_to_price = self.get_token_prices().await;
 
         let mut balances = HashMap::new();
+        let mut total_purchase_usd = HashMap::new();
         let mut believers = HashSet::new();
 
         // Get the block number to timestamp mapping
+        info!("Getting block number to timestamp mapping");
+        let start = std::time::Instant::now();
         let block_num_to_timestamp = self.get_block_timestamp().await?;
+        info!("Time taken: {:?}", start.elapsed());
 
         for (key, value) in iterator {
             let log = decode_erc20_transfer_event(&value);
@@ -139,53 +149,57 @@ impl GroupIndexer for BelieverIndexer {
                 *balance += &log.value;
             }
 
-            if balances.get(&log.from).is_none() {
-                // Initialize the balance of `from` to 0
-                balances.insert(log.from, BigUint::from(0u8));
+            if log.from != MINTER_ADDRESS {
+                if balances.get(&log.from).is_none() {
+                    // Initialize the balance of `from` to 0
+                    balances.insert(log.from, BigUint::from(0u8));
+                }
+
+                let balance = balances.get(&log.from).unwrap();
+                if balance < &log.value {
+                    return Err(Error::Std(std::io::Error::new(
+                        ErrorKind::Other,
+                        "Insufficient balance",
+                    )));
+                }
+
+                // Decrease balance of `from` by `value`
+                let balance = balances.get_mut(&log.from).unwrap();
+                *balance -= &log.value;
             }
-
-            let balance = balances.get(&log.from).unwrap();
-            if balance < &log.value {
-                return Err(Error::Std(std::io::Error::new(
-                    ErrorKind::Other,
-                    "Insufficient balance",
-                )));
-            }
-
-            // Decrease balance of `from` by `value`
-            let balance = balances.get_mut(&log.from).unwrap();
-            *balance -= &log.value;
-
-            // Check the USD amount of the `to` address
-            let balance = balances.get(&log.to).unwrap();
 
             // Find the timestamp of the block number
             let timestamp = block_num_to_timestamp.get(&key.block_num.unwrap()).unwrap();
 
-            // Find the closest timestamp that is less than or equal to the block number's timestamp
-            let closest_timestamp = timestamp_to_price
-                .keys()
-                .find(|&&x| x <= *timestamp)
-                .unwrap();
+            let mut sorted_timestamps = timestamp_to_price.keys().copied().collect::<Vec<u64>>();
+            sorted_timestamps.sort();
+
+            // Find the closest timestamp in the (timestamp -> price) mapping that is greater than or equal to the block number's timestamp
+            let closest_timestamp = sorted_timestamps
+                .iter()
+                .find(|&&t| t >= *timestamp)
+                .unwrap_or(sorted_timestamps.last().unwrap());
 
             // Get the price at the closest timestamp
             let price = timestamp_to_price.get(closest_timestamp).unwrap();
 
-            // Calculate the USD amount
+            // Calculate the USD amount of this transfer
+            let purchase_amount = log.value.clone();
+            let purchase_amount = purchase_amount / BigUint::from(10u8).pow(18u32);
+            let purchase_amount = purchase_amount.to_f64().unwrap();
+            let usd_amount = price * purchase_amount;
 
-            // Divide by 10^decimals
-            let balance = balance / BigUint::from(10u8).pow(18u32);
+            // Add the USD amount of this transfer to the total purchase amount of the `to` address
+            let total_purchase = total_purchase_usd.get(&log.to).unwrap_or(&0f64) + usd_amount;
+            total_purchase_usd.insert(log.to, total_purchase);
 
-            // Convert to f64
-            let balance = balance.to_f64().unwrap();
-
-            let usd_amount = price * balance;
-
-            // Check if the USD amount is greater than 1000
-            if usd_amount > 50f64 {
+            // Check if the USD amount is greater than $50
+            if total_purchase > 50f64 {
                 believers.insert(log.to);
             }
         }
+
+        info!("Found {:?} believers", believers.len());
 
         Ok(believers)
     }
