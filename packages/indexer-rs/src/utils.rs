@@ -1,14 +1,15 @@
 use crate::{
+    block_timestamp_iterator::BlockTimestampIterator,
     contract::Contract,
     contract_event_iterator::ContractEventIterator,
     erc1155_transfer_event, erc20_transfer_event, erc721_transfer_event,
-    eth_rpc::EthRpcClient,
+    eth_rpc::{Chain, EthRpcClient},
     log_sync_engine::CHUNK_SIZE,
     merkle_tree_proto::MerkleTree,
     rocksdb_key::{KeyType, RocksDbKey},
     synched_chunks_iterator::SynchedChunksIterator,
-    BlockNum, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent, ERC20TransferEvent,
-    ERC721TransferEvent, GroupType,
+    BlockNum, ChainId, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent,
+    ERC20TransferEvent, ERC721TransferEvent, GroupType,
 };
 use crate::{Address, ContractId, EventId};
 use num_bigint::BigUint;
@@ -138,6 +139,32 @@ pub async fn is_event_logs_ready(
     }
 }
 
+pub fn is_block_timestamps_ready(db: &DB, event_id: EventId, contract: &Contract) -> bool {
+    let chain_id = get_chain_id(contract.chain);
+    let iterator = ContractEventIterator::new(db, event_id, contract.id, None);
+
+    for (key, _) in iterator {
+        let block_num = key.block_num.unwrap();
+
+        let key = RocksDbKey {
+            key_type: KeyType::BlockTimestamp,
+            event_id: None,
+            contract_id: None,
+            block_num: Some(block_num),
+            log_index: None,
+            tx_index: None,
+            chunk_num: None,
+            chain_id: Some(chain_id),
+        };
+
+        if db.get(key.to_bytes()).unwrap().is_none() {
+            return false;
+        }
+    }
+
+    true
+}
+
 /// Decode ERC20 transfer protobuf bytes to ERC20TransferEvent
 pub fn decode_erc20_transfer_event(value: &[u8]) -> ERC20TransferEvent {
     let decoded =
@@ -211,6 +238,15 @@ pub fn count_synched_chunks(rocksdb_conn: &DB, event_id: EventId, contract_id: C
     iterator.count() as i32
 }
 
+pub fn count_synched_timestamps(
+    rocksdb_conn: &DB,
+    chain: Chain,
+    to_block: Option<BlockNum>,
+) -> i32 {
+    let iterator = BlockTimestampIterator::new(rocksdb_conn, chain, to_block);
+    iterator.count() as i32
+}
+
 pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String {
     let mut hasher = Keccak256::new();
 
@@ -230,6 +266,9 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         }
         GroupType::Ticker => {
             hasher.update(b"Ticker");
+        }
+        GroupType::Believer => {
+            hasher.update(b"Believer");
         }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
@@ -278,6 +317,15 @@ pub async fn get_tree_leaves(
     Ok(leaves)
 }
 
+pub fn get_chain_id(chain: Chain) -> ChainId {
+    match chain {
+        Chain::Mainnet => 1,
+        Chain::Base => 8453,
+        Chain::Arbitrum => 42161,
+        Chain::Optimism => 10,
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -316,12 +364,13 @@ mod test {
         for i in 0..10 {
             let key = RocksDbKey {
                 key_type: KeyType::SyncLog,
-                event_id,
-                contract_id,
+                event_id: Some(event_id),
+                contract_id: Some(contract_id),
                 chunk_num: Some(i),
                 block_num: None,
                 log_index: None,
                 tx_index: None,
+                chain_id: None,
             };
 
             rocksdb_conn.put(key.to_bytes(), [1]).unwrap();
@@ -338,12 +387,13 @@ mod test {
         for i in 3..16 {
             let key = RocksDbKey {
                 key_type: KeyType::SyncLog,
-                event_id,
-                contract_id,
+                event_id: Some(event_id),
+                contract_id: Some(contract_id),
                 chunk_num: Some(i),
                 block_num: None,
                 log_index: None,
                 tx_index: None,
+                chain_id: None,
             };
 
             rocksdb_conn.put(key.to_bytes(), [1]).unwrap();

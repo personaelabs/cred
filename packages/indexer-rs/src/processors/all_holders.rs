@@ -10,9 +10,9 @@ use crate::{
         decode_erc1155_transfer_batch_event, decode_erc1155_transfer_single_event,
         decode_erc721_transfer_event, is_event_logs_ready,
     },
-    Address, BlockNum,
+    Address, BlockNum, Error,
 };
-use std::{collections::HashSet, io::Error};
+use std::collections::HashSet;
 
 pub struct AllHoldersIndexer {
     pub group: Group,
@@ -88,7 +88,7 @@ impl GroupIndexer for AllHoldersIndexer {
         self.contract().chain
     }
 
-    fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
+    async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
         let unique_holders = match self.contract().contract_type {
             ContractType::ERC721 => self.get_members_as_erc721(block_number)?,
             ContractType::ERC1155 => self.get_members_as_erc1155(block_number)?,
@@ -194,7 +194,7 @@ mod test {
 
         let indexer = AllHoldersIndexer::new(group, resources);
 
-        let members = indexer.get_members(to_block).unwrap();
+        let members = indexer.get_members(to_block).await.unwrap();
 
         let expected_members = get_members_from_csv("the187_historical_holders.csv");
 
@@ -268,7 +268,7 @@ mod test {
 
         let indexer = AllHoldersIndexer::new(group, resources);
 
-        let members = indexer.get_members(to_block).unwrap();
+        let members = indexer.get_members(to_block).await.unwrap();
 
         let expected_members = get_members_from_csv("crypto_the_game_holders.csv");
 

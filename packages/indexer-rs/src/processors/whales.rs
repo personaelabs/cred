@@ -8,9 +8,9 @@ use crate::processors::IndexerResources;
 use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
 use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS};
 use crate::Address;
+use crate::Error;
 use num_bigint::BigUint;
 use std::collections::{HashMap, HashSet};
-use std::io::Error;
 use std::io::ErrorKind;
 
 pub fn get_whale_handle(contract_name: &str) -> String {
@@ -80,7 +80,10 @@ impl WhaleIndexer {
             } else {
                 let balance = balances.get(&log.from).unwrap();
                 if balance < &log.value {
-                    return Err(Error::new(ErrorKind::Other, "Insufficient balance"));
+                    return Err(Error::Std(std::io::Error::new(
+                        ErrorKind::Other,
+                        "Insufficient balance",
+                    )));
                 }
 
                 // Decrease balance of `from` by `value`
@@ -120,7 +123,7 @@ impl GroupIndexer for WhaleIndexer {
         .await
     }
 
-    fn get_members(&self, block_number: u64) -> Result<HashSet<Address>, Error> {
+    async fn get_members(&self, block_number: u64) -> Result<HashSet<Address>, Error> {
         let (whales, _, _) = self.get_whales(block_number)?;
         Ok(whales)
     }

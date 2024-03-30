@@ -1,11 +1,13 @@
 use futures::future::join_all;
 use futures::join;
+use indexer_rs::block_timestamp_sync_engine::BlockTimestampSyncEngine;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::group::get_groups;
 use indexer_rs::log_sync_engine::LogSyncEngine;
 use indexer_rs::postgres::init_postgres;
 use indexer_rs::processors::all_holders::AllHoldersIndexer;
+use indexer_rs::processors::believer::BelieverIndexer;
 use indexer_rs::processors::creddd_team::CredddTeamIndexer;
 use indexer_rs::processors::early_holders::EarlyHolderIndexer;
 use indexer_rs::processors::ticker::TickerIndexer;
@@ -20,6 +22,7 @@ use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
+use log::info;
 use rocksdb::{Options, DB};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -79,6 +82,22 @@ async fn main() {
                     rocksdb_client.clone(),
                 );
                 contract_sync_engine.sync().await;
+
+                // Run the block timestamp sync engine for contract.id == 86 (The Higher token contract)
+                if contract.id == 86 {
+                    let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
+                        eth_client.clone(),
+                        rocksdb_client.clone(),
+                        contract.chain,
+                        ERC20_TRANSFER_EVENT_ID,
+                        contract.clone().id,
+                    );
+                    info!(
+                        "Running block timestamp sync engine for contract.id == 86 {:?}",
+                        contract.chain
+                    );
+                    block_timestamp_sync_engine.sync().await;
+                }
             }))
             .await;
         });
@@ -123,6 +142,9 @@ async fn main() {
                     Box::new(CredddTeamIndexer::new(group.clone(), resources.clone()))
                 }
                 GroupType::Static => panic!("Static group type is deprecated"),
+                GroupType::Believer => {
+                    Box::new(BelieverIndexer::new(group.clone(), resources.clone()))
+                }
             };
 
             // Initialize the tree sync engine for the group

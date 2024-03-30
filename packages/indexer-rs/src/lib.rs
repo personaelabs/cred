@@ -1,5 +1,8 @@
 use num_bigint::BigUint;
 
+pub mod block_timestamp_iterator;
+pub mod block_timestamp_sync_engine;
+pub mod coingecko;
 pub mod contract;
 pub mod contract_event_iterator;
 pub mod eth_rpc;
@@ -44,6 +47,9 @@ pub type LogIndex = u32;
 /// Index of a transaction in a block
 pub type TxIndex = u32;
 
+/// Chain ID
+pub type ChainId = u16;
+
 /// 20byte Ethereum address
 pub type Address = [u8; 20];
 
@@ -53,6 +59,7 @@ pub const ROCKSDB_PATH: &str = "./db";
 pub enum Error {
     RocksDB(rocksdb::Error),
     Postgres(tokio_postgres::Error),
+    Surf(surf::Error),
     Std(std::io::Error),
 }
 
@@ -74,6 +81,12 @@ impl From<std::io::Error> for Error {
     }
 }
 
+impl From<surf::Error> for Error {
+    fn from(e: surf::Error) -> Self {
+        Error::Surf(e)
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
@@ -83,6 +96,7 @@ pub enum GroupType {
     Whale,
     AllHolders,
     Ticker,
+    Believer,
 }
 
 #[derive(Debug, Clone)]

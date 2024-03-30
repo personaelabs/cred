@@ -92,6 +92,7 @@ enum GroupType {
   Whale
   AllHolders
   Ticker
+  Believer
 }
 
 model Contract {

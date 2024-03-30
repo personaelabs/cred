@@ -1,5 +1,3 @@
-use num_bigint::BigUint;
-
 use crate::{
     contract::Contract,
     contract_event_iterator::ContractEventIterator,
@@ -9,11 +7,12 @@ use crate::{
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     seeder::seed_contracts::get_seed_contracts,
     utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
-    Address, BlockNum, TxIndex,
+    Address, BlockNum, Error, TxIndex,
 };
+use num_bigint::BigUint;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::io::ErrorKind;
-use std::{collections::HashSet, io::Error};
 
 // The block num and index of transaction: https://basescan.org/tx/0x3122445f0240df9530c8a360fb7631ad5aca4e24503e8856b9aedae05dab830c
 const TO_BLOCK_NUMBER: BlockNum = 11968043;
@@ -63,7 +62,7 @@ impl GroupIndexer for TickerIndexer {
         .await
     }
 
-    fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
+    async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
         let iterator = ContractEventIterator::new(
             &self.resources.rocksdb_client,
             ERC20_TRANSFER_EVENT_ID,
@@ -107,7 +106,10 @@ impl GroupIndexer for TickerIndexer {
             if log.from != MINTER_ADDRESS {
                 let balance = balances.get(&log.from).unwrap();
                 if balance < &log.value {
-                    return Err(Error::new(ErrorKind::Other, "Insufficient balance"));
+                    return Err(Error::Std(std::io::Error::new(
+                        ErrorKind::Other,
+                        "Insufficient balance",
+                    )));
                 }
 
                 // Decrease balance of `from` by `value`
@@ -185,7 +187,7 @@ mod test {
 
         let indexer = TickerIndexer::new(group, resources.clone());
 
-        let members = indexer.get_members(to_block).unwrap();
+        let members = indexer.get_members(to_block).await.unwrap();
 
         let expected_members = get_members_from_csv("ticker_rug_survivors.csv");
 

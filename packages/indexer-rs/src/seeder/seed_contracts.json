@@ -1096,7 +1096,8 @@
     "symbol": "higher",
     "derive_groups": [
       "EarlyHolder",
-      "Whale"
+      "Whale",
+      "Believer"
     ]
   },
   {

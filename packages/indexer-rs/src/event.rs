@@ -156,12 +156,14 @@ pub fn event_log_to_key_value(
 
     let key = RocksDbKey {
         key_type: KeyType::EventLog,
-        event_id,
-        contract_id,
+        event_id: Some(event_id),
+        contract_id: Some(contract_id),
         block_num: Some(block_num),
         log_index: Some(log_index),
         tx_index: Some(tx_index),
         chunk_num: None,
+
+        chain_id: None,
     };
 
     (key, parser(log))

@@ -29,9 +29,9 @@ fn calculate_group_score(group_type: GroupType, contract_inputs: &[&str]) -> i64
     let contract = contract.unwrap();
 
     match group_type {
-        GroupType::EarlyHolder => (contract.fdv_usd.unwrap().round() as i64),
-        GroupType::Whale => (contract.fdv_usd.unwrap().round() as i64),
-        GroupType::AllHolders => (contract.fp_usd.unwrap().round() as i64),
+        GroupType::EarlyHolder => contract.fdv_usd.unwrap().round() as i64,
+        GroupType::Whale => contract.fdv_usd.unwrap().round() as i64,
+        GroupType::AllHolders => contract.fp_usd.unwrap().round() as i64,
         GroupType::Ticker => 0,
         GroupType::CredddTeam => 0,
         _ => panic!("Deprecated group type {:?}", group_type),
@@ -67,6 +67,13 @@ pub fn get_seed_groups() -> Vec<Group> {
         .cloned()
         .collect::<Vec<ContractData>>();
 
+    // Get all contracts to build the believer groups from
+    let believer_contracts = seed_contracts
+        .iter()
+        .filter(|c| c.derive_groups.contains(&GroupType::Believer))
+        .cloned()
+        .collect::<Vec<ContractData>>();
+
     // Build Early holder groups
     for contract in early_holders_contracts.clone() {
         let name = format!("Early {} holder", contract.name.clone());
@@ -93,6 +100,15 @@ pub fn get_seed_groups() -> Vec<Group> {
         let name = format!("{} historical holder", contract.name.clone());
         let score = calculate_group_score(GroupType::AllHolders, &[&contract.address]);
         let group = Group::new(name, GroupType::AllHolders, vec![contract], score);
+
+        groups.push(group);
+    }
+
+    // Build believer group
+    for contract in believer_contracts.clone() {
+        let contract = Contract::from_contract_data(contract);
+        let name = format!("{} believer", contract.name.clone());
+        let group = Group::new(name, GroupType::Believer, vec![contract], 0);
 
         groups.push(group);
     }
@@ -130,6 +146,7 @@ pub fn get_seed_groups() -> Vec<Group> {
             "55830aa86161ab70bfd6a96e2abd3b338f13bb1848565c8a23c7c7317b5864a5", // $ticker rug survivor
             "0676adf3eb3332e1e2f80daca621727a80f9e1bb793e6864a85656f61489467c", // creddd team
             "158a378c99e764e3b287ed5b1c938ba4125d828a1d9b30aa2fc1c6dd44207419", // The187 historical holder
+            "3544a1d252e2cfffb5d977c9dd2e3766b13a72ea4206c5e29b69502de62a6023", // $Higher believer
         ];
 
         let mut preview_groups = vec![];

@@ -39,7 +39,7 @@ impl TreeSyncEngine {
 impl TreeSyncEngine {
     /// Sync the tree to a specific block number
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
-        let members = self.indexer.get_members(block_number)?;
+        let members = self.indexer.get_members(block_number).await?;
 
         save_tree(
             self.group.id.clone(),
