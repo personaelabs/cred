@@ -231,6 +231,9 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::Ticker => {
             hasher.update(b"Ticker");
         }
+        GroupType::Believer => {
+            hasher.update(b"Believer");
+        }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
         }

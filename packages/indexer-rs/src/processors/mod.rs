@@ -2,12 +2,12 @@
 
 use crate::eth_rpc::{Chain, EthRpcClient};
 use crate::group::Group;
-use crate::{Address, BlockNum};
+use crate::{Address, BlockNum, Error};
 use std::collections::HashSet;
-use std::io::Error;
 use std::sync::Arc;
 
 pub mod all_holders;
+pub mod believer;
 pub mod creddd_team;
 pub mod early_holders;
 pub mod ticker;
@@ -25,7 +25,7 @@ pub trait GroupIndexer: Send + Sync {
     /// Returns true if the logs which the indexer depends on are ready
     async fn is_ready(&self) -> Result<bool, surf::Error>;
     /// Return all members
-    fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error>;
+    async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error>;
 }
 
 #[derive(Clone)]

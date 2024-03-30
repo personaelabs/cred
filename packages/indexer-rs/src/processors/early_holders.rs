@@ -6,9 +6,9 @@ use crate::{
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     utils::{decode_erc20_transfer_event, is_event_logs_ready},
-    Address, BlockNum,
+    Address, BlockNum, Error,
 };
-use std::{collections::HashSet, io::Error};
+use std::collections::HashSet;
 
 pub struct EarlyHolderIndexer {
     pub group: Group,
@@ -59,7 +59,7 @@ impl GroupIndexer for EarlyHolderIndexer {
         self.contract().chain
     }
 
-    fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
+    async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
         let (unique_holders, ordered_holders) = self.get_holders(block_number);
 
         let total_holders = unique_holders.len();
@@ -150,7 +150,7 @@ mod test {
 
         // 2. Check that the first 5% of the holders are considered early holders
         let expected_early_holders = 133; // 5% of 2664
-        let early_holders = indexer.get_members(to_block).unwrap();
+        let early_holders = indexer.get_members(to_block).await.unwrap();
 
         assert_eq!(early_holders.len(), expected_early_holders);
     }

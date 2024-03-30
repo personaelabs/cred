@@ -1,5 +1,6 @@
 use num_bigint::BigUint;
 
+pub mod coingecko;
 pub mod contract;
 pub mod contract_event_iterator;
 pub mod eth_rpc;
@@ -53,6 +54,7 @@ pub const ROCKSDB_PATH: &str = "./db";
 pub enum Error {
     RocksDB(rocksdb::Error),
     Postgres(tokio_postgres::Error),
+    Surf(surf::Error),
     Std(std::io::Error),
 }
 
@@ -74,6 +76,12 @@ impl From<std::io::Error> for Error {
     }
 }
 
+impl From<surf::Error> for Error {
+    fn from(e: surf::Error) -> Self {
+        Error::Surf(e)
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
 #[postgres(name = "GroupType")]
 pub enum GroupType {
@@ -83,6 +91,7 @@ pub enum GroupType {
     Whale,
     AllHolders,
     Ticker,
+    Believer,
 }
 
 #[derive(Debug, Clone)]

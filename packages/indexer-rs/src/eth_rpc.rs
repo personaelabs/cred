@@ -211,6 +211,47 @@ impl EthRpcClient {
         Ok(serde_json::from_str(&body_str).unwrap())
     }
 
+    pub async fn get_block_timestamp(
+        &self,
+        chain: Chain,
+        block_number: BlockNum,
+    ) -> Result<u64, surf::Error> {
+        let mut load_balancer = self.load_balancer.lock().await;
+        let url = load_balancer.get_endpoint(chain).unwrap();
+        drop(load_balancer);
+
+        let json_body = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_getBlockByNumber",
+            "params": [
+                format!("0x{:x}", block_number),
+                false
+            ],
+            "id": 1
+        });
+
+        println!("json_body: {:?}", json_body);
+
+        let permit = PERMITS.acquire().await.unwrap();
+
+        let mut res = self.client.post(url).body_json(&json!(json_body))?.await?;
+
+        drop(permit);
+
+        let body_str = res.body_string().await?;
+
+        let body: Value = serde_json::from_str(&body_str).unwrap();
+
+        Ok(u64::from_str_radix(
+            body["result"]["timestamp"]
+                .as_str()
+                .unwrap()
+                .trim_start_matches("0x"),
+            16,
+        )
+        .unwrap())
+    }
+
     pub async fn eth_call(
         &self,
         chain: Chain,

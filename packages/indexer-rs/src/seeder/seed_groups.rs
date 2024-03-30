@@ -67,6 +67,13 @@ pub fn get_seed_groups() -> Vec<Group> {
         .cloned()
         .collect::<Vec<ContractData>>();
 
+    // Get all contracts to build the believer groups from
+    let believer_contracts = seed_contracts
+        .iter()
+        .filter(|c| c.derive_groups.contains(&GroupType::Believer))
+        .cloned()
+        .collect::<Vec<ContractData>>();
+
     // Build Early holder groups
     for contract in early_holders_contracts.clone() {
         let name = format!("Early {} holder", contract.name.clone());
@@ -97,6 +104,15 @@ pub fn get_seed_groups() -> Vec<Group> {
         groups.push(group);
     }
 
+    // Build believer group
+    for contract in believer_contracts.clone() {
+        let contract = Contract::from_contract_data(contract);
+        let name = format!("{} believer", contract.name.clone());
+        let group = Group::new(name, GroupType::Believer, vec![contract], 0);
+
+        groups.push(group);
+    }
+
     // Add ticker rug survivor group
     let ticker_contract = seed_contracts
         .iter()
@@ -120,7 +136,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
-    if is_prod() {
+    if true {
         groups
     } else {
         // Only return a selected few

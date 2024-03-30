@@ -1,6 +1,6 @@
 use super::IndexerResources;
-use crate::{eth_rpc::Chain, group::Group, processors::GroupIndexer, Address, BlockNum};
-use std::{collections::HashSet, io::Error};
+use crate::{eth_rpc::Chain, group::Group, processors::GroupIndexer, Address, BlockNum, Error};
+use std::collections::HashSet;
 
 pub struct CredddTeamIndexer {
     pub group: Group,
@@ -28,7 +28,7 @@ impl GroupIndexer for CredddTeamIndexer {
         Ok(true)
     }
 
-    fn get_members(&self, _block_number: BlockNum) -> Result<HashSet<Address>, Error> {
+    async fn get_members(&self, _block_number: BlockNum) -> Result<HashSet<Address>, Error> {
         let addresses = vec![
             "0x4f7d469a5237bd5feae5a3d852eea4b65e06aad1", // pfeffunit.eth
             "0xcb46219ba114245c3a18761e4f7891f9c4bef8c0", // lsankar.eth
