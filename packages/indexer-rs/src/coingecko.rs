@@ -27,7 +27,8 @@ impl CoingeckoClient {
         }
     }
 
-    pub async fn get_daily_market_chart(
+    /// Get the hourly price data of a token
+    pub async fn get_hourly_market_chart(
         &self,
         chain: Chain,
         contract_address: &str,
@@ -40,7 +41,7 @@ impl CoingeckoClient {
         };
 
         let url = format!(
-            "https://pro-api.coingecko.com/api/v3/coins/{}/contract/{}/market_chart?x_cg_pro_api_key={}&vs_currency=usd&days=365",
+            "https://pro-api.coingecko.com/api/v3/coins/{}/contract/{}/market_chart?x_cg_pro_api_key={}&vs_currency=usd&days=90",
             chain, contract_address, self.api_key
         );
 
@@ -78,7 +79,7 @@ mod tests {
         let contract_address = "0x0578d8a44db98b23bf096a382e016e29a5ce0ffe";
 
         let prices = client
-            .get_daily_market_chart(chain, contract_address)
+            .get_hourly_market_chart(chain, contract_address)
             .await
             .unwrap();
 

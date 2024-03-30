@@ -76,14 +76,14 @@ impl BelieverIndexer {
     }
      */
 
-    /// Get the daily token prices from Coingecko
+    /// Get the hourly token prices from Coingecko
     async fn get_token_prices(&self) -> HashMap<u64, f64> {
         let mut token_prices = HashMap::new();
 
         // Get the timestamp to price mapping from Coingecko
         let timestamp_to_price = self
             .coingecko_client
-            .get_daily_market_chart(self.chain(), &self.contract().address)
+            .get_hourly_market_chart(self.chain(), &self.contract().address)
             .await
             .unwrap();
 
