@@ -6,7 +6,10 @@ use crate::{
     group::Group,
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID},
-    utils::{decode_erc20_transfer_event, get_chain_id, is_event_logs_ready, MINTER_ADDRESS},
+    utils::{
+        decode_erc20_transfer_event, get_chain_id, is_block_timestamps_ready, is_event_logs_ready,
+        MINTER_ADDRESS,
+    },
     Address, BlockNum, Error,
 };
 use log::info;
@@ -93,13 +96,21 @@ impl GroupIndexer for BelieverIndexer {
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {
-        is_event_logs_ready(
+        let event_logs_ready = is_event_logs_ready(
             &self.resources.rocksdb_client,
             &self.resources.eth_client,
             ERC20_TRANSFER_EVENT_ID,
             self.contract(),
         )
-        .await
+        .await?;
+
+        let block_timestamps_ready = is_block_timestamps_ready(
+            &self.resources.rocksdb_client,
+            ERC20_TRANSFER_EVENT_ID,
+            self.contract(),
+        );
+
+        Ok(event_logs_ready && block_timestamps_ready)
     }
 
     async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error> {
@@ -193,11 +204,9 @@ impl GroupIndexer for BelieverIndexer {
             total_purchase_usd.insert(log.to, total_purchase);
         }
 
-        // Add the addresses that have a non-zero balance
-        // and have purchased more than $50 worth of the token
+        // Add the addresses that have purchased more than $50 worth of the token
         for (address, total_purchase) in total_purchase_usd {
-            let current_balance = balances.get(&address).unwrap();
-            if *current_balance != BigUint::from(0u32) && total_purchase > 50f64 {
+            if total_purchase > 50f64 {
                 believers.insert(address);
             }
         }
