@@ -109,3 +109,52 @@ impl BlockTimestampSyncEngine {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::log_sync_engine::LogSyncEngine;
+    use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
+    use crate::test_utils::{delete_all, erc20_test_contract, init_test_rocksdb};
+    use crate::utils::{count_synched_timestamps, dotenv_config};
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn test_block_timestamp_sync_engine() {
+        dotenv_config();
+
+        let rocksdb_conn = init_test_rocksdb("test_block_timestamp_sync_engine");
+        let eth_client = Arc::new(EthRpcClient::new());
+
+        let contract = erc20_test_contract();
+
+        // Hardcoded to the latest block number at the time of writing this test,
+        // so we can hardcode other values as well.
+        let to_block = 19473397;
+
+        let contract_sync_engine = LogSyncEngine::new(
+            eth_client.clone(),
+            contract.clone(),
+            ERC20_TRANSFER_EVENT_ID,
+            rocksdb_conn.clone(),
+        );
+        contract_sync_engine.sync_to_block(to_block).await;
+
+        let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
+            eth_client.clone(),
+            rocksdb_conn.clone(),
+            contract.chain,
+            ERC20_TRANSFER_EVENT_ID,
+            contract.id,
+        );
+
+        block_timestamp_sync_engine.sync().await;
+
+        let block_timestamps_count = count_synched_timestamps(&rocksdb_conn, contract.chain, None);
+
+        let expected_block_timestamps_count = 5845; // Value obtained from a Dune query
+        assert_eq!(block_timestamps_count, expected_block_timestamps_count);
+
+        delete_all(&rocksdb_conn);
+    }
+}
