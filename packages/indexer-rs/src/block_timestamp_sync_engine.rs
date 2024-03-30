@@ -1,4 +1,3 @@
-use crate::block_timestamp_iterator::BlockTimestampIterator;
 use crate::contract_event_iterator::ContractEventIterator;
 use crate::eth_rpc::{Chain, EthRpcClient};
 use crate::rocksdb_key::{KeyType, RocksDbKey};

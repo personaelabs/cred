@@ -1,4 +1,4 @@
-use crate::{contract::ContractType, eth_rpc::Chain, ContractId, GroupType};
+use crate::{contract::ContractType, eth_rpc::Chain, GroupType};
 use serde::{Deserialize, Serialize};
 use std::{
     env,

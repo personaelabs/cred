@@ -37,45 +37,6 @@ impl BelieverIndexer {
         &self.group.contract_inputs[0]
     }
 
-    /*
-    /// Get the block number to timestamp mapping for
-    /// all the blocks that have the contract's ERC20 transfer events
-    async fn get_block_timestamp(&self) -> Result<HashMap<BlockNum, u64>, Error> {
-        let iterator = ContractEventIterator::new(
-            &self.resources.rocksdb_client,
-            ERC20_TRANSFER_EVENT_ID,
-            self.contract().id,
-            None,
-        );
-
-        let unique_block_numbers = iterator
-            .map(|(key, _)| key.block_num.unwrap())
-            .collect::<HashSet<BlockNum>>()
-            .iter()
-            .copied()
-            .collect::<Vec<BlockNum>>();
-
-        println!("Unique block numbers: {:?}", unique_block_numbers.len());
-
-        let mut block_num_to_timestamp = HashMap::new();
-
-        // Map block number to timestamp
-        for block_numbers in unique_block_numbers.chunks(1000) {
-            let result = self
-                .resources
-                .eth_client
-                .get_block_timestamp_batch(self.chain(), block_numbers)
-                .await?;
-
-            for (block_num, timestamp) in result {
-                block_num_to_timestamp.insert(block_num, timestamp);
-            }
-        }
-
-        Ok(block_num_to_timestamp)
-    }
-     */
-
     /// Get the hourly token prices from Coingecko
     async fn get_token_prices(&self) -> HashMap<u64, f64> {
         let mut token_prices = HashMap::new();
