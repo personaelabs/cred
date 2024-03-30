@@ -330,7 +330,10 @@ impl LogSyncEngine {
             self.sync_to_block(latest_block).await;
 
             // Sync block timestamps
-            self.block_timestamp_sync_engine.sync().await;
+            // Only sync block timestamps for the $higher contract for now
+            if self.contract.id == 86 {
+                self.block_timestamp_sync_engine.sync().await;
+            }
 
             tokio::time::sleep(std::time::Duration::from_secs(60)).await;
         }

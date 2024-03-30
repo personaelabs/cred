@@ -82,22 +82,6 @@ async fn main() {
                     rocksdb_client.clone(),
                 );
                 contract_sync_engine.sync().await;
-
-                // Run the block timestamp sync engine for contract.id == 86 (The Higher token contract)
-                if contract.id == 86 {
-                    let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
-                        eth_client.clone(),
-                        rocksdb_client.clone(),
-                        contract.chain,
-                        ERC20_TRANSFER_EVENT_ID,
-                        contract.clone().id,
-                    );
-                    info!(
-                        "Running block timestamp sync engine for contract.id == 86 {:?}",
-                        contract.chain
-                    );
-                    block_timestamp_sync_engine.sync().await;
-                }
             }))
             .await;
         });
