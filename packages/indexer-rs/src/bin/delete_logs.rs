@@ -35,8 +35,8 @@ async fn main() -> Result<(), tokio_postgres::Error> {
         let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
 
         if key.key_type != KeyType::EventLog
-            || key.event_id != event_id
-            || key.contract_id != contract_id
+            || key.event_id.unwrap() != event_id
+            || key.contract_id.unwrap() != contract_id
         {
             break;
         }
@@ -58,8 +58,8 @@ async fn main() -> Result<(), tokio_postgres::Error> {
         let (key_bytes, _value) = item.unwrap();
         let key = RocksDbKey::from_bytes(key_bytes.as_ref().try_into().unwrap());
         if key.key_type != KeyType::SyncLog
-            || key.event_id != event_id
-            || key.contract_id != contract_id
+            || key.event_id.unwrap() != event_id
+            || key.contract_id.unwrap() != contract_id
         {
             break;
         }

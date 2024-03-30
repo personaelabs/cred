@@ -5,8 +5,8 @@ use crate::{
     eth_rpc::Chain,
     group::Group,
     processors::{GroupIndexer, IndexerResources},
-    rocksdb_key::ERC20_TRANSFER_EVENT_ID,
-    utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
+    rocksdb_key::{KeyType, RocksDbKey, ERC20_TRANSFER_EVENT_ID},
+    utils::{decode_erc20_transfer_event, get_chain_id, is_event_logs_ready, MINTER_ADDRESS},
     Address, BlockNum, Error,
 };
 use log::info;
@@ -37,6 +37,7 @@ impl BelieverIndexer {
         &self.group.contract_inputs[0]
     }
 
+    /*
     /// Get the block number to timestamp mapping for
     /// all the blocks that have the contract's ERC20 transfer events
     async fn get_block_timestamp(&self) -> Result<HashMap<BlockNum, u64>, Error> {
@@ -73,6 +74,7 @@ impl BelieverIndexer {
 
         Ok(block_num_to_timestamp)
     }
+     */
 
     /// Get the daily token prices from Coingecko
     async fn get_token_prices(&self) -> HashMap<u64, f64> {
@@ -90,6 +92,32 @@ impl BelieverIndexer {
         }
 
         token_prices
+    }
+
+    fn get_block_timestamp(&self, block_num: BlockNum) -> Result<u64, Error> {
+        let key = RocksDbKey {
+            key_type: KeyType::BlockTimestamp,
+            event_id: None,
+            contract_id: None,
+            block_num: Some(block_num),
+            log_index: None,
+            tx_index: None,
+            chunk_num: None,
+            chain_id: Some(get_chain_id(self.contract().chain)),
+        };
+
+        let value = self.resources.rocksdb_client.get(key.to_bytes()).unwrap();
+
+        match value {
+            Some(value) => {
+                let timestamp = u64::from_be_bytes(value.try_into().unwrap());
+                Ok(timestamp)
+            }
+            None => Err(Error::Std(std::io::Error::new(
+                ErrorKind::Other,
+                "Block timestamp not found",
+            ))),
+        }
     }
 }
 
@@ -121,20 +149,26 @@ impl GroupIndexer for BelieverIndexer {
             Some(block_number),
         );
 
+        // Get the timestamp to price mapping from Coingecko
         let timestamp_to_price = self.get_token_prices().await;
 
+        // Holds the balances of all addresses
         let mut balances = HashMap::new();
-        let mut total_purchase_usd = HashMap::new();
-        let mut believers = HashSet::new();
 
-        // Get the block number to timestamp mapping
-        info!("Getting block number to timestamp mapping");
-        let start = std::time::Instant::now();
-        let block_num_to_timestamp = self.get_block_timestamp().await?;
-        info!("Time taken: {:?}", start.elapsed());
+        // Holds the total purchase amount in USD purchased by each address.
+        // If an address has more than one purchase,
+        // the total purchase amount is the sum of all purchases where each purchase price is
+        // determined individually by the price at the block timestamp.
+        let mut total_purchase_usd = HashMap::new();
+
+        let mut believers = HashSet::new();
 
         for (key, value) in iterator {
             let log = decode_erc20_transfer_event(&value);
+
+            // ---------------------------------
+            // 1. Update the `balances` mapping
+            // ---------------------------------
 
             if log.value == BigUint::from(0u8) {
                 continue;
@@ -168,8 +202,12 @@ impl GroupIndexer for BelieverIndexer {
                 *balance -= &log.value;
             }
 
+            // ---------------------------------
+            // 2. Update the `total_purchase_usd` mapping
+            // ---------------------------------
+
             // Find the timestamp of the block number
-            let timestamp = block_num_to_timestamp.get(&key.block_num.unwrap()).unwrap();
+            let timestamp = self.get_block_timestamp(key.block_num.unwrap())?;
 
             let mut sorted_timestamps = timestamp_to_price.keys().copied().collect::<Vec<u64>>();
             sorted_timestamps.sort();
@@ -177,25 +215,29 @@ impl GroupIndexer for BelieverIndexer {
             // Find the closest timestamp in the (timestamp -> price) mapping that is greater than or equal to the block number's timestamp
             let closest_timestamp = sorted_timestamps
                 .iter()
-                .find(|&&t| t >= *timestamp)
+                .find(|&&t| t >= timestamp)
                 .unwrap_or(sorted_timestamps.last().unwrap());
 
-            // Get the price at the closest timestamp
             let price = timestamp_to_price.get(closest_timestamp).unwrap();
 
             // Calculate the USD amount of this transfer
             let purchase_amount = log.value.clone();
             let purchase_amount = purchase_amount / BigUint::from(10u8).pow(18u32);
             let purchase_amount = purchase_amount.to_f64().unwrap();
-            let usd_amount = price * purchase_amount;
+            let transfer_usd_amount = price * purchase_amount;
 
             // Add the USD amount of this transfer to the total purchase amount of the `to` address
-            let total_purchase = total_purchase_usd.get(&log.to).unwrap_or(&0f64) + usd_amount;
+            let total_purchase =
+                total_purchase_usd.get(&log.to).unwrap_or(&0f64) + transfer_usd_amount;
             total_purchase_usd.insert(log.to, total_purchase);
+        }
 
-            // Check if the USD amount is greater than $50
-            if total_purchase > 50f64 {
-                believers.insert(log.to);
+        // Add the addresses that have a non-zero balance
+        // and have purchased more than $50 worth of the token
+        for (address, total_purchase) in total_purchase_usd {
+            let current_balance = balances.get(&address).unwrap();
+            if *current_balance != BigUint::from(0u32) && total_purchase > 50f64 {
+                believers.insert(address);
             }
         }
 

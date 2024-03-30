@@ -1,3 +1,4 @@
+use crate::block_timestamp_sync_engine::BlockTimestampSyncEngine;
 use crate::contract::{Contract, ContractType};
 use crate::eth_rpc::EthRpcClient;
 use crate::event::{
@@ -41,6 +42,7 @@ pub struct LogSyncEngine {
     event_sig: &'static str,
     rocksdb_client: Arc<rocksdb::DB>,
     log_parser: fn(&Value) -> Vec<u8>,
+    block_timestamp_sync_engine: BlockTimestampSyncEngine,
 }
 
 impl LogSyncEngine {
@@ -73,6 +75,14 @@ impl LogSyncEngine {
             _ => panic!("Invalid contract type and event_id combination"),
         };
 
+        let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
+            eth_client.clone(),
+            rocksdb_client.clone(),
+            contract.chain,
+            event_id,
+            contract.id,
+        );
+
         Self {
             eth_client,
             contract,
@@ -80,6 +90,7 @@ impl LogSyncEngine {
             event_sig,
             rocksdb_client,
             log_parser,
+            block_timestamp_sync_engine,
         }
     }
 
@@ -228,12 +239,13 @@ impl LogSyncEngine {
 
         let mut sync_log_key = RocksDbKey {
             key_type: KeyType::SyncLog,
-            event_id: self.event_id,
-            contract_id: self.contract.id,
+            event_id: Some(self.event_id),
+            contract_id: Some(self.contract.id),
             block_num: None,
             log_index: None,
             tx_index: None,
             chunk_num: Some(0),
+            chain_id: None,
         };
 
         // Mark chunks as synched
@@ -316,6 +328,9 @@ impl LogSyncEngine {
 
             // Sync logs to the latest block
             self.sync_to_block(latest_block).await;
+
+            // Sync block timestamps
+            self.block_timestamp_sync_engine.sync().await;
 
             tokio::time::sleep(std::time::Duration::from_secs(60)).await;
         }
@@ -414,12 +429,13 @@ mod test {
         for chunk in (2..5).chain(6..9) {
             let sync_log_key = RocksDbKey {
                 key_type: KeyType::SyncLog,
-                event_id: ERC20_TRANSFER_EVENT_ID,
-                contract_id: contract.id,
+                event_id: Some(ERC20_TRANSFER_EVENT_ID),
+                contract_id: Some(contract.id),
                 block_num: None,
                 log_index: None,
                 tx_index: None,
                 chunk_num: Some(chunk),
+                chain_id: None,
             };
 
             batch.put(sync_log_key.to_bytes(), [1]);

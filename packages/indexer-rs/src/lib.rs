@@ -1,5 +1,7 @@
 use num_bigint::BigUint;
 
+pub mod block_timestamp_iterator;
+pub mod block_timestamp_sync_engine;
 pub mod coingecko;
 pub mod contract;
 pub mod contract_event_iterator;
@@ -44,6 +46,9 @@ pub type LogIndex = u32;
 
 /// Index of a transaction in a block
 pub type TxIndex = u32;
+
+/// Chain ID
+pub type ChainId = u16;
 
 /// 20byte Ethereum address
 pub type Address = [u8; 20];

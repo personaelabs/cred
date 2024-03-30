@@ -1,4 +1,4 @@
-use crate::{BlockNum, ChunkNum, ContractId, EventId, LogIndex, TxIndex};
+use crate::{BlockNum, ChainId, ChunkNum, ContractId, EventId, LogIndex, TxIndex};
 
 pub const ERC20_TRANSFER_EVENT_ID: EventId = 1;
 pub const ERC721_TRANSFER_EVENT_ID: EventId = 2;
@@ -12,6 +12,8 @@ pub enum KeyType {
     EventLog = 1,
     /// Key for sync log which tracks the sync status of the logs
     SyncLog = 2,
+    /// Key for block number to timestamp mapping
+    BlockTimestamp = 3,
 }
 
 // The RocksDB keys are the concatenation of the following fields:
@@ -48,23 +50,26 @@ const CHUNK_NUM_BEGIN: usize = CONTRACT_ID_END;
 const CHUNK_NUM_BYTES: usize = 8;
 const CHUNK_NUM_END: usize = CHUNK_NUM_BEGIN + CHUNK_NUM_BYTES;
 
-const KEY_BYTES: usize = KEY_TYPE_BYTES
-    + EVENT_ID_BYTES
-    + CONTRACT_ID_BYTES
-    + BLOCK_NUM_BYTES
-    + LOG_INDEX_BYTES
-    + TX_INDEX_BYTES;
+const CHAIN_ID_BEGIN: usize = KEY_TYPE_END;
+const CHAIN_ID_BYTES: usize = 2;
+const CHAIN_ID_END: usize = CHAIN_ID_BEGIN + CHAIN_ID_BYTES;
+
+const BLOCK_TIMESTAMP_BLOCK_NUM_BEGIN: usize = CHAIN_ID_END;
+const BLOCK_TIMESTAMP_BLOCK_NUM_BYTES: usize = 8;
+const BLOCK_TIMESTAMP_BLOCK_NUM_END: usize =
+    BLOCK_TIMESTAMP_BLOCK_NUM_BEGIN + BLOCK_TIMESTAMP_BLOCK_NUM_BYTES;
 
 /// Represents a RocksDB key
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct RocksDbKey {
     pub key_type: KeyType,
-    pub event_id: EventId,
-    pub contract_id: ContractId,
+    pub event_id: Option<EventId>,
+    pub contract_id: Option<ContractId>,
     pub chunk_num: Option<ChunkNum>,
     pub block_num: Option<BlockNum>,
     pub log_index: Option<LogIndex>,
     pub tx_index: Option<TxIndex>,
+    pub chain_id: Option<ChainId>,
 }
 
 impl RocksDbKey {
@@ -73,27 +78,43 @@ impl RocksDbKey {
         match key_type {
             KeyType::EventLog => Self {
                 key_type,
-                event_id,
-                contract_id,
+                event_id: Some(event_id),
+                contract_id: Some(contract_id),
                 chunk_num: None,
                 block_num: Some(0),
                 log_index: Some(0),
                 tx_index: Some(0),
+                chain_id: None,
             },
             KeyType::SyncLog => Self {
                 key_type,
-                event_id,
-                contract_id,
+                event_id: Some(event_id),
+                contract_id: Some(contract_id),
                 chunk_num: Some(0),
                 block_num: None,
                 log_index: None,
                 tx_index: None,
+                chain_id: None,
             },
+            _ => panic!("Invalid key type"),
+        }
+    }
+
+    pub fn new_block_timestamp_start_key(chain_id: ChainId) -> Self {
+        Self {
+            key_type: KeyType::BlockTimestamp,
+            event_id: None,
+            contract_id: None,
+            chunk_num: None,
+            block_num: Some(0),
+            log_index: None,
+            tx_index: None,
+            chain_id: Some(chain_id),
         }
     }
 
     /// Convert the key to a byte array
-    pub fn to_bytes(&self) -> [u8; KEY_BYTES] {
+    pub fn to_bytes(&self) -> Vec<u8> {
         if self.key_type == KeyType::SyncLog && self.chunk_num.is_none() {
             panic!("Chunk number is required for sync log key");
         }
@@ -106,77 +127,129 @@ impl RocksDbKey {
         let key_type_num = match self.key_type {
             KeyType::EventLog => 1u8,
             KeyType::SyncLog => 2u8,
+            KeyType::BlockTimestamp => 3u8,
         };
-        key.extend_from_slice(&key_type_num.to_be_bytes());
-        key.extend_from_slice(&self.event_id.to_be_bytes());
-        key.extend_from_slice(&self.contract_id.to_be_bytes());
 
-        if let Some(chunk_num) = self.chunk_num {
-            key.extend_from_slice(&chunk_num.to_be_bytes());
-            key.extend_from_slice(&[0; TX_INDEX_BYTES]);
-            key.extend_from_slice(&[0; LOG_INDEX_BYTES]);
-        }
-
-        if let Some(block_num) = self.block_num {
-            key.extend_from_slice(&block_num.to_be_bytes());
-            key.extend_from_slice(&self.tx_index.unwrap().to_be_bytes());
-            key.extend_from_slice(&self.log_index.unwrap().to_be_bytes());
+        match self.key_type {
+            KeyType::EventLog => {
+                key.extend_from_slice(&key_type_num.to_be_bytes());
+                key.extend_from_slice(&self.event_id.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.contract_id.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.block_num.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.tx_index.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.log_index.unwrap().to_be_bytes());
+            }
+            KeyType::SyncLog => {
+                key.extend_from_slice(&key_type_num.to_be_bytes());
+                key.extend_from_slice(&self.event_id.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.contract_id.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.chunk_num.unwrap().to_be_bytes());
+                key.extend_from_slice(&[0; TX_INDEX_BYTES]);
+                key.extend_from_slice(&[0; LOG_INDEX_BYTES]);
+            }
+            KeyType::BlockTimestamp => {
+                key.extend_from_slice(&key_type_num.to_be_bytes());
+                key.extend_from_slice(&self.chain_id.unwrap().to_be_bytes());
+                key.extend_from_slice(&self.block_num.unwrap().to_be_bytes());
+            }
         }
 
         key.try_into().unwrap()
     }
 
     /// Convert a byte array to a RocksDB key
-    pub fn from_bytes(key: [u8; KEY_BYTES]) -> Self {
+    pub fn from_bytes(key: &[u8]) -> Self {
         let key_type = match key[KEY_TYPE_BEGIN] {
             1 => KeyType::EventLog,
             2 => KeyType::SyncLog,
+            3 => KeyType::BlockTimestamp,
             _ => panic!("Invalid key type"),
         };
 
-        let mut event_id_bytes = [0; EVENT_ID_BYTES];
-        event_id_bytes.copy_from_slice(&key[EVENT_ID_BEGIN..EVENT_ID_END]);
-        let event_id = EventId::from_be_bytes(event_id_bytes);
+        match key_type {
+            KeyType::EventLog => {
+                let mut event_id_bytes = [0; EVENT_ID_BYTES];
+                event_id_bytes.copy_from_slice(&key[EVENT_ID_BEGIN..EVENT_ID_END]);
+                let event_id = EventId::from_be_bytes(event_id_bytes);
 
-        let mut contract_id_bytes = [0; CONTRACT_ID_BYTES];
-        contract_id_bytes.copy_from_slice(&key[CONTRACT_ID_BEGIN..CONTRACT_ID_END]);
-        let contract_id = ContractId::from_be_bytes(contract_id_bytes);
+                let mut contract_id_bytes = [0; CONTRACT_ID_BYTES];
+                contract_id_bytes.copy_from_slice(&key[CONTRACT_ID_BEGIN..CONTRACT_ID_END]);
+                let contract_id = ContractId::from_be_bytes(contract_id_bytes);
 
-        let chunk_num = if key_type == KeyType::SyncLog {
-            let mut chunk_num_bytes = [0; CHUNK_NUM_BYTES];
-            chunk_num_bytes.copy_from_slice(&key[CHUNK_NUM_BEGIN..CHUNK_NUM_END]);
-            Some(ChunkNum::from_be_bytes(chunk_num_bytes))
-        } else {
-            None
-        };
+                let mut block_num_bytes = [0; BLOCK_NUM_BYTES];
+                block_num_bytes.copy_from_slice(&key[BLOCK_NUM_BEGIN..BLOCK_NUM_END]);
 
-        let (block_num, tx_index, log_index) = if key_type == KeyType::EventLog {
-            let mut block_num_bytes = [0; BLOCK_NUM_BYTES];
-            block_num_bytes.copy_from_slice(&key[BLOCK_NUM_BEGIN..BLOCK_NUM_END]);
+                let mut tx_index_bytes = [0; 4];
+                tx_index_bytes.copy_from_slice(&key[TX_INDEX_BEGIN..TX_INDEX_END]);
 
-            let mut tx_index_bytes = [0; 4];
-            tx_index_bytes.copy_from_slice(&key[TX_INDEX_BEGIN..TX_INDEX_END]);
+                let mut log_index_bytes = [0; 4];
+                log_index_bytes.copy_from_slice(&key[LOG_INDEX_BEGIN..LOG_INDEX_END]);
 
-            let mut log_index_bytes = [0; 4];
-            log_index_bytes.copy_from_slice(&key[LOG_INDEX_BEGIN..LOG_INDEX_END]);
+                let block_num = BlockNum::from_be_bytes(block_num_bytes);
+                let tx_index = TxIndex::from_be_bytes(tx_index_bytes);
+                let log_index = LogIndex::from_be_bytes(log_index_bytes);
 
-            (
-                Some(BlockNum::from_be_bytes(block_num_bytes)),
-                Some(TxIndex::from_be_bytes(tx_index_bytes)),
-                Some(LogIndex::from_be_bytes(log_index_bytes)),
-            )
-        } else {
-            (None, None, None)
-        };
+                Self {
+                    key_type,
+                    event_id: Some(event_id),
+                    contract_id: Some(contract_id),
+                    chunk_num: None,
+                    block_num: Some(block_num),
+                    log_index: Some(log_index),
+                    tx_index: Some(tx_index),
 
-        Self {
-            key_type,
-            event_id,
-            contract_id,
-            chunk_num,
-            block_num,
-            log_index,
-            tx_index,
+                    chain_id: None,
+                }
+            }
+            KeyType::SyncLog => {
+                let mut event_id_bytes = [0; EVENT_ID_BYTES];
+                event_id_bytes.copy_from_slice(&key[EVENT_ID_BEGIN..EVENT_ID_END]);
+                let event_id = EventId::from_be_bytes(event_id_bytes);
+
+                let mut contract_id_bytes = [0; CONTRACT_ID_BYTES];
+                contract_id_bytes.copy_from_slice(&key[CONTRACT_ID_BEGIN..CONTRACT_ID_END]);
+                let contract_id = ContractId::from_be_bytes(contract_id_bytes);
+
+                let mut chunk_num_bytes = [0; CHUNK_NUM_BYTES];
+                chunk_num_bytes.copy_from_slice(&key[CHUNK_NUM_BEGIN..CHUNK_NUM_END]);
+
+                let chunk_num = ChunkNum::from_be_bytes(chunk_num_bytes);
+
+                Self {
+                    key_type,
+                    event_id: Some(event_id),
+                    contract_id: Some(contract_id),
+                    chunk_num: Some(chunk_num),
+                    block_num: None,
+                    log_index: None,
+                    tx_index: None,
+
+                    chain_id: None,
+                }
+            }
+            KeyType::BlockTimestamp => {
+                let mut chain_id_bytes = [0; CHAIN_ID_BYTES];
+                chain_id_bytes.copy_from_slice(&key[CHAIN_ID_BEGIN..CHAIN_ID_END]);
+
+                let mut block_num_bytes = [0; BLOCK_TIMESTAMP_BLOCK_NUM_BYTES];
+                block_num_bytes.copy_from_slice(
+                    &key[BLOCK_TIMESTAMP_BLOCK_NUM_BEGIN..BLOCK_TIMESTAMP_BLOCK_NUM_END],
+                );
+
+                let chain_id = ChainId::from_be_bytes(chain_id_bytes);
+                let block_num = BlockNum::from_be_bytes(block_num_bytes);
+
+                Self {
+                    key_type,
+                    event_id: None,
+                    contract_id: None,
+                    chunk_num: None,
+                    block_num: Some(block_num),
+                    log_index: None,
+                    tx_index: None,
+                    chain_id: Some(chain_id),
+                }
+            }
         }
     }
 }

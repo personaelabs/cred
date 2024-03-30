@@ -7,6 +7,7 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::env;
 use std::env::VarError;
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Mutex;
@@ -22,6 +23,20 @@ pub enum Chain {
     Optimism,
     Base,
     Arbitrum,
+}
+
+impl FromStr for Chain {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "mainnet" => Ok(Chain::Mainnet),
+            "optimism" => Ok(Chain::Optimism),
+            "base" => Ok(Chain::Base),
+            "arbitrum" => Ok(Chain::Arbitrum),
+            _ => Err(format!("Invalid chain: {}", s)),
+        }
+    }
 }
 
 /// A load balances to distribute requests across multiple Alchemy nodes

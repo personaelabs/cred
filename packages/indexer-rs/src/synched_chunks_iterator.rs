@@ -45,8 +45,8 @@ impl Iterator for SynchedChunksIterator<'_> {
             let key = RocksDbKey::from_bytes(key.as_ref().try_into().unwrap());
 
             if key.key_type == KeyType::SyncLog
-                && key.contract_id == self.contract_id
-                && key.event_id == self.event_id
+                && key.contract_id.unwrap() == self.contract_id
+                && key.event_id.unwrap() == self.event_id
             {
                 Some(key.chunk_num.unwrap())
             } else {
