@@ -6,6 +6,9 @@ ENV SCCACHE_GCS_BUCKET=creddd-sccache
 ENV SCCACHE_GCS_KEY_PATH=/etc/secrets/optimum-surface-375822-bbf8ad9f3a08.json
 ENV SCCACHE_GCS_RW_MODE=READ_WRITE
 
+ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+
+COPY /etc/secrets/optimum-surface-375822-bbf8ad9f3a08.json /etc/secrets/optimum-surface-375822-bbf8ad9f3a08.json
 COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
