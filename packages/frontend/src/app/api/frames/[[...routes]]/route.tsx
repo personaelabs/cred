@@ -25,7 +25,6 @@ const CONTAINER_STYLE = {
 const CREDDD_GENESIS_TOKEN_ID = 1;
 
 const { VERCEL_ENV } = process.env;
-console.log('VERCEL_ENV', VERCEL_ENV);
 
 const app = new Frog({
   basePath: '/api/frames',
@@ -92,13 +91,10 @@ app.frame('/', c => {
           fontSize: 60,
         }}
       >
-        mint creddd genesis
+        the mint has ended
       </div>
     ),
-    intents: [
-      <Button value="check">check eligibility</Button>,
-      <Button value="about">about</Button>,
-    ],
+    intents: [],
   });
 });
 
