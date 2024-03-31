@@ -1,14 +1,27 @@
-FROM danieltehrani/creddd-indexer-base:latest
+FROM rust:1.76.0
 
 WORKDIR /usr/src/app
 
-ENV SCCACHE_GCS_BUCKET=creddd-sccache
-ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/optimum-surface-375822-bbf8ad9f3a08.json
-ENV SCCACHE_GCS_RW_MODE=READ_WRITE
+# Step to cache dependencies
+RUN wget https://github.com/mozilla/sccache/releases/download/v0.7.7/sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz
+RUN tar -xzf sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz
+RUN cd sccache-v0.7.7-x86_64-unknown-linux-musl && cp sccache /usr/local/bin/sccache
 
 ENV RUSTC_WRAPPER=/usr/local/bin/sccache
 
-COPY optimum-surface-375822-bbf8ad9f3a08.json optimum-surface-375822-bbf8ad9f3a08.json
+RUN apt-get update -y && \
+    apt-get install -y llvm clang
+
+RUN export LIBCLANG_PATH=/usr/lib/llvm-14/lib/libclang-14.so.1
+
+# Download and install protoc
+RUN apt-get install -y protobuf-compiler
+
+ENV SCCACHE_GCS_BUCKET=creddd-sccache
+ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
+ENV SCCACHE_GCS_RW_MODE=READ_WRITE
+
+COPY google-service-account.json google-service-account.json
 COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
