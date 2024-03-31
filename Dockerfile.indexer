@@ -9,6 +9,7 @@ COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
 COPY Cargo.lock Cargo.lock
+COPY predeploy.sh predeploy.sh
 
 ENV RUST_LOG=info
 
