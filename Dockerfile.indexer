@@ -13,5 +13,6 @@ COPY Cargo.lock Cargo.lock
 
 ENV RUST_LOG=info
 
+RUN cargo build --release 
 CMD ["cargo", "run", "--release", "--bin", "indexer"]
 
