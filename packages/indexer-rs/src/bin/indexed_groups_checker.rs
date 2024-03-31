@@ -72,7 +72,7 @@ async fn get_random_group(
         name: group_name,
         group_type,
         contract_inputs,
-        score
+        score,
     })
 }
 
@@ -153,6 +153,7 @@ async fn test_all_holders(pg_client: Arc<tokio_postgres::Client>, eth_client: Ar
                 Value::Null,
                 member_padded
             ]),
+            ContractType::Punk => json!([TRANSFER_EVENT_SIG, Value::Null, member_padded]),
             _ => panic!("Unexpected contract type"),
         };
 
@@ -418,6 +419,6 @@ async fn main() {
         test_whale(pg_client.clone(), eth_client.clone()).await;
         test_early_holders(pg_client.clone(), eth_client.clone()).await;
 
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
     }
 }
