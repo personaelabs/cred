@@ -1,1 +1,1 @@
-cargo run --release --bin populate
+populate

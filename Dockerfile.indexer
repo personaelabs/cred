@@ -1,4 +1,4 @@
-FROM danieltehrani/creddd-indexer-base-amd64:latest
+FROM danieltehrani/creddd-indexer-base-amd64:latest as builder
 
 ENV SCCACHE_GCS_BUCKET=creddd-sccache
 ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
@@ -15,7 +15,13 @@ ENV RUST_LOG=info
 
 RUN cargo build --release 
 
-RUN rm -rf /usr/src/app/packages
+FROM debian:buster-slim
+COPY --from=builder /usr/src/app/target/release/indexer /usr/local/bin/indexer
+COPY --from=builder /usr/src/app/target/release/populate /usr/local/bin/populate
+COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bin/count_synched_logs
+COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
+COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
 
-CMD ["./target/release/indexer"]
+# Set the binary as the entrypoint of the container
+CMD ["indexer"]
 
