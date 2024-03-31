@@ -55,6 +55,7 @@ model MerkleTree {
   bloomSipKeys   Bytes[]
   bloomNumHashes Int?
   bloomNumBits   Int?
+  numLeaves      Int?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   FidAttestation FidAttestation[]

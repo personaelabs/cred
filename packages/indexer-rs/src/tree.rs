@@ -148,11 +148,12 @@ pub async fn save_tree(
     let num_hashes = bloom.number_of_hash_functions();
     let num_bits = bloom.number_of_bits();
     let bloom_bytes = bloom.bitmap();
+    let num_leaves = addresses.len() as i32;
 
     // Save the tree to the database
     let statement = r#"
-        INSERT INTO "MerkleTree" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "bloomFilter", "bloomSipKeys", "bloomNumHashes", "bloomNumBits", "updatedAt")
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        INSERT INTO "MerkleTree" ("groupId", "blockNumber", "merkleRoot", "treeProtoBuf", "bloomFilter", "bloomSipKeys", "bloomNumHashes", "bloomNumBits", "numLeaves", "updatedAt")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
         ON CONFLICT ("groupId", "blockNumber") DO NOTHING
         "#;
 
@@ -169,6 +170,7 @@ pub async fn save_tree(
                 &sip_keys,
                 &(num_hashes as i32),
                 &(num_bits as i32),
+                &(num_leaves as i32),
             ],
         )
         .await?;
