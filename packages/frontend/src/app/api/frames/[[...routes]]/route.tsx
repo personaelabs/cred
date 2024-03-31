@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-key */
 /** @jsxImportSource frog/jsx */
-import { Button, Frog } from 'frog';
+import { Frog } from 'frog';
 import { handle } from 'frog/vercel';
 import prisma from '@/lib/prisma';
 import { adminMint } from '@/lib/zora/zora';
@@ -115,7 +115,6 @@ const checkFrame = async (c: any) => {
   const alreadyMinted = await hasMinted(CREDDD_GENESIS_TOKEN_ID, frameData.fid);
 
   if (alreadyMinted) {
-    const custodyAddress = await getCustodyAddress(frameData.fid);
     return c.res({
       image: (
         <div
@@ -124,14 +123,10 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          already minted
+          the mint has ended
         </div>
       ),
-      intents: [
-        <Button.Link href={`https://zora.co/${custodyAddress}`}>
-          view on Zora
-        </Button.Link>,
-      ],
+      intents: [],
     });
   }
 
@@ -149,11 +144,10 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          creddd found! <br />
-          you are eligible to mint.
+          the mint has ended
         </div>
       ),
-      intents: [<Button value="mint">mint</Button>],
+      intents: [],
     });
   } else {
     return c.res({
@@ -164,15 +158,10 @@ const checkFrame = async (c: any) => {
             fontSize: 40,
           }}
         >
-          no creddd found.
-          <br />
-          add creddd to your Farcaster account to mint.
+          the mint has ended
         </div>
       ),
-      intents: [
-        <Button.Reset>back</Button.Reset>,
-        <Button.Link href="https://creddd.xyz">add creddd</Button.Link>,
-      ],
+      intents: [],
     });
   }
 };
@@ -224,15 +213,9 @@ const mintFrame = async (c: any) => {
           ...CONTAINER_STYLE,
           fontSize: 40,
         }}
-      >
-        minted!
-      </div>
+      ></div>
     ),
-    intents: [
-      <Button.Link href={`https://zora.co/${custodyAddress}`}>
-        view on Zora
-      </Button.Link>,
-    ],
+    intents: [],
   });
 };
 
@@ -262,12 +245,7 @@ const aboutFrame = async (c: any) => {
         your full onchain activity.
       </div>
     ),
-    intents: [
-      <Button.Reset>back</Button.Reset>,
-      <Button.Link href="https://personae-labs.notion.site/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20">
-        read more
-      </Button.Link>,
-    ],
+    intents: [],
   });
 };
 
