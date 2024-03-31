@@ -191,7 +191,7 @@ pub async fn save_tree(
 
     let start = Instant::now();
     pg_client
-        .query(statement, &[&group_id, &(block_number - 100)])
+        .query(statement, &[&group_id, &(block_number - 2000)])
         .await?;
 
     info!(
