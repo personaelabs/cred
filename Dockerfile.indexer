@@ -1,21 +1,4 @@
-FROM rust:1.76.0
-
-WORKDIR /usr/src/app
-
-# Step to cache dependencies
-RUN wget https://github.com/mozilla/sccache/releases/download/v0.7.7/sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz
-RUN tar -xzf sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz
-RUN cd sccache-v0.7.7-x86_64-unknown-linux-musl && cp sccache /usr/local/bin/sccache
-
-ENV RUSTC_WRAPPER=/usr/local/bin/sccache
-
-RUN apt-get update -y && \
-    apt-get install -y llvm clang
-
-RUN export LIBCLANG_PATH=/usr/lib/llvm-14/lib/libclang-14.so.1
-
-# Download and install protoc
-RUN apt-get install -y protobuf-compiler
+FROM danieltehrani/creddd-indexer-base-amd64:latest
 
 ENV SCCACHE_GCS_BUCKET=creddd-sccache
 ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
@@ -30,5 +13,8 @@ COPY Cargo.lock Cargo.lock
 ENV RUST_LOG=info
 
 RUN cargo build --release 
-CMD ["cargo", "run", "--release", "--bin", "indexer"]
+
+RUN rm -rf /usr/src/app/packages
+
+CMD ["./target/release/indexer"]
 
