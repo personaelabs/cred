@@ -3,6 +3,7 @@ services:
   - type: web
     name: cred-frontend
     plan: pro
+    previewPlan: starter
     runtime: node
     region: oregon
     buildCommand: pnpm i && pnpm -F frontend build
