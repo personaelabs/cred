@@ -1,10 +1,11 @@
 FROM danieltehrani/creddd-indexer-base-amd64:latest as builder
 
-ENV SCCACHE_GCS_BUCKET=creddd-sccache
-ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
-ENV SCCACHE_GCS_RW_MODE=READ_ONLY
+#ENV SCCACHE_GCS_BUCKET=creddd-sccache
+#ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
+#ENV SCCACHE_GCS_RW_MODE=READ_ONLY
+ENV SCCACHE_REDIS_ENDPOINT=rediss://red-co4tp1sf7o1s739175ig:VZq9B3VERZepSdzJrJxEXNlmM0LAdonj@oregon-redis.render.com:6379
 
-COPY google-service-account.json google-service-account.json
+#COPY google-service-account.json google-service-account.json
 COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
