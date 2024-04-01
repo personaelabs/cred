@@ -6,7 +6,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i && pnpm -F frontend build && pnpm -F db migrate:prod
+    buildCommand: '[ -d "/cache/.next" ] && cp -r /cache/.next ./.next || echo "No cache found" && pnpm i && pnpm -F frontend build && cp -r ./.next /cache/.next && pnpm -F db migrate:prod'
     startCommand: NODE_ENV=production pnpm -F frontend start
     buildFilter:
       paths:
@@ -22,7 +22,7 @@ services:
       - fromGroup: cred
     disk:
       name: next-build-cache
-      mountPath: /.next
+      mountPath: /cache
   - type: worker
     name: credbot
     plan: pro
