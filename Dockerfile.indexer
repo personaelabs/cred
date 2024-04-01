@@ -1,43 +1,34 @@
-FROM node:18.17.0 
+FROM danieltehrani/creddd-indexer-base-amd64:latest as builder
 
-WORKDIR /usr/src/app
+ENV SCCACHE_GCS_BUCKET=creddd-sccache
+ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
+ENV SCCACHE_GCS_RW_MODE=READ_WRITE
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Make sure Rust is in the PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-COPY package.json .
-COPY pnpm-lock.yaml .
-COPY pnpm-workspace.yaml .
-
-COPY packages/db/package.json packages/db/package.json
-
-# Install dependencies
-RUN pnpm i
-
-COPY packages/db packages/db
+COPY google-service-account.json google-service-account.json
 COPY packages/indexer-rs packages/indexer-rs
 COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
 COPY Cargo.lock Cargo.lock
 
-COPY predeploy.sh .
-
-RUN apt-get update -y && \
-    apt-get install -y llvm clang
-
-RUN export LIBCLANG_PATH=/usr/lib/llvm-14/lib/libclang-14.so.1
-
-# Download and install protoc
-RUN apt update
-RUN apt install -y protobuf-compiler
-
 ENV RUST_LOG=info
 
-RUN cargo build --release --bin indexer-rs
-CMD ["cargo", "run", "--release", "--bin", "indexer-rs"]
+RUN cargo build --release 
+
+FROM ubuntu:latest
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/target/release/indexer /usr/local/bin/indexer
+COPY --from=builder /usr/src/app/target/release/populate /usr/local/bin/populate
+COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bin/count_synched_logs
+COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
+COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/seed_contracts.json seed_contracts.json
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_prices.json assets_with_prices.json
+
+RUN apt-get update -y
+RUN apt-get install libcurl4 -y
+
+# Set the binary as the entrypoint of the container
+CMD ["indexer"]
+

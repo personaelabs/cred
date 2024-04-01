@@ -22,9 +22,17 @@ pub struct ContractData {
 
 /// Get the seed contracts from the seed_contracts.json file
 pub fn get_seed_contracts() -> Vec<ContractData> {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let contracts = fs::read_to_string(format!("{}/src/seeder/seed_contracts.json", manifest_dir))
-        .expect("Unable to open contracts.json");
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR");
+
+    let contracts = if manifest_dir.is_err() {
+        fs::read_to_string("./seed_contracts.json").expect("Unable to open contracts.json")
+    } else {
+        fs::read_to_string(format!(
+            "{}/src/seeder/seed_contracts.json",
+            manifest_dir.unwrap()
+        ))
+        .expect("Unable to open contracts.json")
+    };
 
     let contracts: Vec<ContractData> =
         serde_json::from_str(&contracts).expect("Unable to parse contracts.json");

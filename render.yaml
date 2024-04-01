@@ -32,7 +32,7 @@ services:
     runtime: docker
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
-    preDeployCommand: sh ./predeploy.sh
+    preDeployCommand: populate
     rootDir: ./
     buildFilter:
       paths:

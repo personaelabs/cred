@@ -1,1 +1,0 @@
-pnpm -F db migrate:prod && cargo run --release --bin populate
