@@ -16,11 +16,16 @@ ENV RUST_LOG=info
 RUN cargo build --release 
 
 FROM ubuntu:latest
+
+WORKDIR /usr/src/app
+
 COPY --from=builder /usr/src/app/target/release/indexer /usr/local/bin/indexer
 COPY --from=builder /usr/src/app/target/release/populate /usr/local/bin/populate
 COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bin/count_synched_logs
 COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
 COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/seed_contracts.json seed_contracts.json
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/asset_with_prices.json asset_with_prices.json
 
 RUN apt-get update -y
 RUN apt-get install libcurl4 -y
