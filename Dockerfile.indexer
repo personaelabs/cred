@@ -10,8 +10,6 @@ COPY packages/protobufs packages/protobufs
 COPY Cargo.toml.docker Cargo.toml
 COPY Cargo.lock Cargo.lock
 
-ENV RUST_LOG=info
-
 RUN cargo build --release 
 
 FROM ubuntu:latest
