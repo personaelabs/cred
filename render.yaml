@@ -22,7 +22,7 @@ services:
       - fromGroup: cred
     disk:
       name: next-build-cache
-      mountPath: /
+      mountPath: /.next
   - type: worker
     name: credbot
     plan: pro
