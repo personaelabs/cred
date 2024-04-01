@@ -30,7 +30,7 @@ export type MerkleTreeSelect = {
   bloomNumHashes?: number;
   bloomNumBits?: number;
   Group: {
-    id: number;
+    id: string;
     displayName: string;
     score: number;
     typeId: GroupType;
