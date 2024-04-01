@@ -2,14 +2,15 @@
 
 import * as Comlink from 'comlink';
 import { useEffect } from 'react';
-import { FidAttestationRequestBody, WitnessInput } from '@/app/types';
-import { WalletClient } from 'viem';
-import { MerkleTreeSelect } from '@/app/api/groups/[group]/merkle-proofs/route';
+import {
+  EligibleGroup,
+  FidAttestationRequestBody,
+  WitnessInput,
+} from '@/app/types';
 import {
   calculateSigRecovery,
   concatUint8Arrays,
   fromHexString,
-  captureFetchError,
   toHexString,
 } from '@/lib/utils';
 import {
@@ -19,66 +20,25 @@ import {
   hexToCompactSignature,
   hexToSignature,
 } from 'viem';
-import { toast } from 'sonner';
 import { useUser } from '@/context/UserContext';
+import { Connector, useSignMessage } from 'wagmi';
+import { useAddingCredddModal } from '@/context/AddingCredddModalContext';
 
 interface Prover {
   prepare(): Promise<void>;
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const getMerkleTree = async (groupId: number): Promise<MerkleTreeSelect> => {
-  let skip = 0;
-  const take = 30000;
-
-  let merkleTree: MerkleTreeSelect | null = null;
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const searchParams = new URLSearchParams();
-    searchParams.set('skip', skip.toString());
-    searchParams.set('take', take.toString());
-    const response = await fetch(
-      `/api/groups/${groupId}/merkle-proofs?${searchParams.toString()}`
-    );
-
-    if (!response.ok) {
-      await captureFetchError(response);
-      throw new Error('Failed to fetch merkle tree');
-    }
-
-    console.log('Fetched merkle tree', skip);
-
-    // If the response is 204, then there are no more records to fetch
-    if (response.status === 204) {
-      break;
-    }
-
-    const tree = (await response.json()) as MerkleTreeSelect;
-
-    if (!merkleTree) {
-      merkleTree = tree;
-    } else {
-      merkleTree.merkleProofs.push(...tree.merkleProofs);
-    }
-
-    skip += take;
-  }
-
-  if (!merkleTree) {
-    throw new Error('Failed to fetch merkle tree');
-  }
-
-  console.log('Fetched merkle tree', merkleTree.merkleProofs.length);
-
-  return merkleTree;
-};
-
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
 let prover: Comlink.Remote<Prover>;
-const useProver = () => {
+
+const useProver = (eligibleGroup: EligibleGroup) => {
   const { user, siwfResponse } = useUser();
+
+  const { address, merkleProof } = eligibleGroup;
+  const { signMessageAsync } = useSignMessage();
+  const { setIsOpen: setIsAddingCredddModalOpen } = useAddingCredddModal();
 
   useEffect(() => {
     prover = Comlink.wrap<Prover>(
@@ -87,9 +47,7 @@ const useProver = () => {
   }, []);
 
   const prove = async (
-    address: Hex,
-    client: WalletClient,
-    groupId: number
+    connector: Connector
   ): Promise<FidAttestationRequestBody | null> => {
     if (prover && user?.fid && siwfResponse) {
       const message = `\n${SIG_SALT}Personae attest:${user?.fid}`;
@@ -97,29 +55,25 @@ const useProver = () => {
       await prover.prepare();
 
       // Sign message with the source key
-      const sig = await client.signMessage({
+      const sig = await signMessageAsync({
         message,
         account: address,
+        connector,
       });
 
-      toast('Adding creddd...', {
-        description: 'This may take a minute...',
-      });
-
-      const merkleTree = await getMerkleTree(groupId);
+      // The user has signed the message so we open
+      // the "Adding Creddd" modal
+      setIsAddingCredddModalOpen(true);
 
       const { s, r, v } = hexToSignature(sig);
+
+      if (!v) {
+        throw new Error('Signature recovery value not found');
+      }
+
       const isYOdd = calculateSigRecovery(v);
 
       const msgHash = hashMessage(message);
-
-      const merkleProof = merkleTree.merkleProofs.find(
-        proof => proof.address === address.toLowerCase()
-      );
-
-      if (!merkleProof) {
-        throw new Error('Merkle proof not found');
-      }
 
       if (!siwfResponse.signature) {
         throw new Error('SIWF response signature not found');
@@ -147,7 +101,7 @@ const useProver = () => {
             return buf;
           })
         ),
-        root: hexToBytes(merkleTree.merkleRoot as Hex),
+        root: merkleProof.root,
         signInSigS: hexToBytes(signInSigS),
       };
 
@@ -169,23 +123,10 @@ const useProver = () => {
           custody: siwfResponse.custody!,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
-          treeId: merkleTree.id,
+          treeId: eligibleGroup.treeId,
           issuedAt: issuedAt[0],
         };
       }
-
-      /*
-      console.log(siwfResponse.message);
-      return {
-        proof: '0x0',
-        signInSigS: siwfResponse.signature!,
-        custody: siwfResponse.custody!,
-        signInSigNonce: siwfResponse.nonce,
-        fid: user.fid,
-        treeId: 0,
-        //        issuedAt: buildSignInMessage(siwfResponse.message)
-      };
-      */
 
       return null;
     } else {

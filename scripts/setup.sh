@@ -16,6 +16,4 @@ fi && \
 # Install protobuf
 brew install protobuf@3 && brew link --overwrite protobuf@3 && \
 # Install dependencies
-pnpm i && \
-# Build the merkle-tree-rs module
-pnpm -F merkle-tree-rs exec pnpm build
+pnpm i

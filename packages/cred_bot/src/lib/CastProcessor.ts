@@ -49,7 +49,7 @@ class CastProcessor {
    */
   public async processNewCasts(): Promise<void> {
     // Use a longer interval in development and PR environments to avoid rate limiting.
-    const interval = IS_PROD ? 1500 : 5000;
+    const interval = IS_PROD ? 60000 : 120000; // 1 minute in production, 2 minutes in development.
 
     setInterval(async () => {
       const startTime = new Date();

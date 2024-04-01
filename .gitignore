@@ -10,3 +10,10 @@ addr_membership.r1cs
 
 .DS_Store
 .eslintcache
+
+/db/
+/checkpoint/
+packages/indexer-rs/db
+!./packages/db
+
+google-service-account.json

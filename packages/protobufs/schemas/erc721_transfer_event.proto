@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package erc721_transfer_event;
+
+message ERC721TransferEvent {
+    bytes from = 1;
+    bytes to = 2;
+    bytes token_id = 3;
+}
+

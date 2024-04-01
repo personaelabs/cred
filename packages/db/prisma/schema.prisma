@@ -23,6 +23,7 @@ model ProcessedCast {
 }
 
 model FidAttestation {
+  hash        String?    @unique
   fid         Int
   attestation Bytes
   signInSig   Bytes
@@ -47,59 +48,76 @@ model MerkleTree {
   id             Int              @id @default(autoincrement())
   merkleRoot     String
   Group          Group            @relation(fields: [groupId], references: [id])
-  groupId        Int
+  groupId        String
   blockNumber    BigInt
+  treeProtoBuf   Bytes?
+  bloomFilter    Bytes?
+  bloomSipKeys   Bytes[]
+  bloomNumHashes Int?
+  bloomNumBits   Int?
+  numLeaves      Int?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  merkleProofs   MerkleProof[]
   FidAttestation FidAttestation[]
 
-  @@unique([merkleRoot, groupId, blockNumber])
-}
-
-model MerkleProof {
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  address     String
-  path        String[]
-  pathIndices Int[]
-
-  MerkleTree MerkleTree @relation(fields: [treeId], references: [id])
-  treeId     Int
-
-  @@id([treeId, address])
+  @@unique([groupId, blockNumber])
 }
 
 model Group {
-  id          Int     @id @default(autoincrement())
-  handle      String  @unique
-  displayName String
-  type        String?
+  id             String    @id
+  displayName    String
+  typeId         GroupType
+  contractInputs Int[]
+  score          BigInt?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   merkleTrees MerkleTree[]
+
+  @@unique([id, typeId, contractInputs])
 }
 
 enum ContractType {
   ERC20
   ERC721
+  ERC1155
+  Punk
   Other
 }
 
+enum GroupType {
+  Static
+  CredddTeam
+  EarlyHolder
+  Whale
+  AllHolders
+  Ticker
+  Believer
+}
+
 model Contract {
-  id            Int          @id @default(autoincrement())
+  id            Int          @id
   address       String
   name          String
   type          ContractType
   deployedBlock BigInt
-  symbol        String?
-  targetGroups  String[]
   chain         String
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  @@unique([address, chain])
+  @@unique([id, address, chain])
+}
+
+model EventRSVPs {
+  id    Int    @id @default(autoincrement())
+  event String
+  fid   Int
+
+  attending Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([event, fid])
 }

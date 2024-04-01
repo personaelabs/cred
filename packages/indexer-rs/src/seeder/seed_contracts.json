@@ -1,0 +1,1259 @@
+[
+  {
+    "id": 1,
+    "contract_type": "ERC20",
+    "address": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce",
+    "name": "Shiba Inu",
+    "deployed_block": 10569013,
+    "chain": "Mainnet",
+    "symbol": "shib",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 2,
+    "contract_type": "ERC20",
+    "address": "0x1151cb3d861920e07a38e03eead12c32178567f6",
+    "name": "Bonk",
+    "deployed_block": 16628745,
+    "chain": "Mainnet",
+    "symbol": "BONK",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 3,
+    "contract_type": "ERC20",
+    "address": "0x6b431b8a964bfcf28191b07c91189ff4403957d0",
+    "name": "CorgiAI",
+    "deployed_block": 18540899,
+    "chain": "Mainnet",
+    "symbol": "corgiai",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 4,
+    "contract_type": "ERC20",
+    "address": "0x6982508145454ce325ddbe47a25d4ec3d2311933",
+    "name": "Pepe",
+    "deployed_block": 17046105,
+    "chain": "Mainnet",
+    "symbol": "pepe",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 5,
+    "contract_type": "ERC20",
+    "address": "0xcf0c122c6b73ff809c693db761e7baebe62b6a2e",
+    "name": "FLOKI",
+    "deployed_block": 14029867,
+    "chain": "Mainnet",
+    "symbol": "floki",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 6,
+    "contract_type": "ERC20",
+    "address": "0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74",
+    "name": "Memecoin",
+    "deployed_block": 18429439,
+    "chain": "Mainnet",
+    "symbol": "meme",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 7,
+    "contract_type": "ERC20",
+    "address": "0xb9f599ce614feb2e1bbe58f180f370d05b39344e",
+    "name": "PepeFork",
+    "deployed_block": 19117207,
+    "chain": "Mainnet",
+    "symbol": "pork",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 8,
+    "contract_type": "ERC20",
+    "address": "0xac57de9c1a09fec648e93eb98875b212db0d460b",
+    "name": "Baby Doge Coin",
+    "deployed_block": 13570063,
+    "chain": "Mainnet",
+    "symbol": "babydoge",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 9,
+    "contract_type": "ERC20",
+    "address": "0x576e2bed8f7b46d34016198911cdf9886f78bea7",
+    "name": "MAGA",
+    "deployed_block": 17894408,
+    "chain": "Mainnet",
+    "symbol": "trump",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 10,
+    "contract_type": "ERC20",
+    "address": "0x761d38e5ddf6ccf6cf7c55759d5210750b5d60f3",
+    "name": "Dogelon Mars",
+    "deployed_block": 12293419,
+    "chain": "Mainnet",
+    "symbol": "elon",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 11,
+    "contract_type": "ERC20",
+    "address": "0x12970e6868f88f6557b76120662c1b3e50a646bf",
+    "name": "Milady Meme Coin",
+    "deployed_block": 17208204,
+    "chain": "Mainnet",
+    "symbol": "ladys",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 12,
+    "contract_type": "ERC20",
+    "address": "0x72e4f9f808c49a2a61de9c5896298920dc4eeea9",
+    "name": "HarryPotterObamaSonic10Inu (ETH)",
+    "deployed_block": 17228251,
+    "chain": "Mainnet",
+    "symbol": "bitcoin",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 13,
+    "contract_type": "ERC20",
+    "address": "0xc5fb36dd2fb59d3b98deff88425a3f425ee469ed",
+    "name": "Dejitaru Tsuka",
+    "deployed_block": 14845791,
+    "chain": "Mainnet",
+    "symbol": "tsuka",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 14,
+    "contract_type": "ERC20",
+    "address": "0x27c70cd1946795b66be9d954418546998b546634",
+    "name": "Doge Killer",
+    "deployed_block": 10778241,
+    "chain": "Mainnet",
+    "symbol": "leash",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 15,
+    "contract_type": "ERC20",
+    "address": "0xbaac2b4491727d78d2b78815144570b9f2fe8899",
+    "name": "The Doge NFT",
+    "deployed_block": 13130302,
+    "chain": "Mainnet",
+    "symbol": "dog",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 16,
+    "contract_type": "ERC20",
+    "address": "0xa2b4c0af19cc16a6cfacce81f192b024d625817d",
+    "name": "Kishu Inu",
+    "deployed_block": 12260512,
+    "chain": "Mainnet",
+    "symbol": "kishu",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 17,
+    "contract_type": "ERC20",
+    "address": "0xa35923162c49cf95e6bf26623385eb431ad920d3",
+    "name": "Turbo",
+    "deployed_block": 17149228,
+    "chain": "Mainnet",
+    "symbol": "turbo",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 18,
+    "contract_type": "ERC20",
+    "address": "0x7f792db54b0e580cdc755178443f0430cf799aca",
+    "name": "Volt Inu",
+    "deployed_block": 17236595,
+    "chain": "Mainnet",
+    "symbol": "volt",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 19,
+    "contract_type": "ERC20",
+    "address": "0x5026f006b85729a8b14553fae6af249ad16c9aab",
+    "name": "Wojak",
+    "deployed_block": 17069315,
+    "chain": "Mainnet",
+    "symbol": "wojak",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 20,
+    "contract_type": "ERC20",
+    "address": "0xba386a4ca26b85fd057ab1ef86e3dc7bdeb5ce70",
+    "name": "Jesus Coin",
+    "deployed_block": 17118237,
+    "chain": "Mainnet",
+    "symbol": "jesus",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 21,
+    "contract_type": "ERC20",
+    "address": "0x562e362876c8aee4744fc2c6aac8394c312d215d",
+    "name": "Optimus AI",
+    "deployed_block": 16467561,
+    "chain": "Mainnet",
+    "symbol": "opti",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 22,
+    "contract_type": "ERC20",
+    "address": "0x43d7e65b8ff49698d9550a7f315c87e67344fb59",
+    "name": "Shiba Saga",
+    "deployed_block": 17972295,
+    "chain": "Mainnet",
+    "symbol": "shia",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 23,
+    "contract_type": "ERC20",
+    "address": "0x9e20461bc2c4c980f62f1b279d71734207a6a356",
+    "name": "OmniCat",
+    "deployed_block": 18831524,
+    "chain": "Mainnet",
+    "symbol": "omni",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 24,
+    "contract_type": "ERC20",
+    "address": "0x7d8146cf21e8d7cbe46054e01588207b51198729",
+    "name": "BOB Token",
+    "deployed_block": 17083228,
+    "chain": "Mainnet",
+    "symbol": "bob",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 25,
+    "contract_type": "ERC20",
+    "address": "0xa71d0588eaf47f12b13cf8ec750430d21df04974",
+    "name": "Shiba Predator",
+    "deployed_block": 14396702,
+    "chain": "Mainnet",
+    "symbol": "qom",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 26,
+    "contract_type": "ERC20",
+    "address": "0x6bc40d4099f9057b23af309c08d935b890d7adc0",
+    "name": "SnailBrook",
+    "deployed_block": 17088430,
+    "chain": "Mainnet",
+    "symbol": "snail",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 27,
+    "contract_type": "ERC20",
+    "address": "0x32b86b99441480a7e5bd3a26c124ec2373e3f015",
+    "name": "Bad Idea AI",
+    "deployed_block": 17197271,
+    "chain": "Mainnet",
+    "symbol": "bad",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 28,
+    "contract_type": "ERC20",
+    "address": "0xf05897cfe3ce9bbbfe0751cbe6b1b2c686848dcb",
+    "name": "CateCoin",
+    "deployed_block": 16938223,
+    "chain": "Mainnet",
+    "symbol": "cate",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 29,
+    "contract_type": "ERC20",
+    "address": "0xb62e45c3df611dce236a6ddc7a493d79f9dfadef",
+    "name": "Wall Street Memes",
+    "deployed_block": 17372057,
+    "chain": "Mainnet",
+    "symbol": "wsm",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 30,
+    "contract_type": "ERC20",
+    "address": "0x61a35258107563f6b6f102ae25490901c8760b12",
+    "name": "Kitty Inu",
+    "deployed_block": 17302150,
+    "chain": "Mainnet",
+    "symbol": "kitty",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 31,
+    "contract_type": "ERC20",
+    "address": "0xafcdd4f666c84fed1d8bd825aa762e3714f652c9",
+    "name": "Vita Inu",
+    "deployed_block": 14990356,
+    "chain": "Mainnet",
+    "symbol": "vinu",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 32,
+    "contract_type": "ERC20",
+    "address": "0xfad45e47083e4607302aa43c65fb3106f1cd7607",
+    "name": "Hoge Finance",
+    "deployed_block": 11809212,
+    "chain": "Mainnet",
+    "symbol": "hoge",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 33,
+    "contract_type": "ERC20",
+    "address": "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
+    "name": "Degen",
+    "deployed_block": 8925894,
+    "chain": "Base",
+    "symbol": "degen",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 34,
+    "contract_type": "ERC20",
+    "address": "0x8ed97a637a790be1feff5e888d43629dc05408f6",
+    "name": "Non-Playable Coin",
+    "deployed_block": 17798474,
+    "chain": "Mainnet",
+    "symbol": "npc",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 35,
+    "contract_type": "ERC20",
+    "address": "0x4200000000000000000000000000000000000042",
+    "name": "OP",
+    "deployed_block": 6490467,
+    "chain": "Optimism",
+    "symbol": "op",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 36,
+    "contract_type": "ERC20",
+    "address": "0xaaee1a9723aadb7afa2810263653a34ba2c21c7a",
+    "name": "Mog Coin",
+    "deployed_block": 17731591,
+    "chain": "Mainnet",
+    "symbol": "mog",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 37,
+    "contract_type": "ERC20",
+    "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    "name": "Uniswap",
+    "deployed_block": 10861674,
+    "chain": "Mainnet",
+    "symbol": "uni",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 38,
+    "contract_type": "ERC20",
+    "address": "0x470c8950c0c3aa4b09654bc73b004615119a44b5",
+    "name": "Kizuna",
+    "deployed_block": 18265095,
+    "chain": "Mainnet",
+    "symbol": "kizuna",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 39,
+    "contract_type": "ERC20",
+    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+    "name": "MKR",
+    "deployed_block": 4620855,
+    "chain": "Mainnet",
+    "symbol": "mkr",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 40,
+    "contract_type": "ERC20",
+    "address": "0xd8fa690304d2b2824d918c0c7376e2823704557a",
+    "name": "SquidGrow",
+    "deployed_block": 17157845,
+    "chain": "Mainnet",
+    "symbol": "squidgrow",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 41,
+    "contract_type": "ERC20",
+    "address": "0x49642110b712c1fd7261bc074105e9e44676c68f",
+    "name": "DinoLFG",
+    "deployed_block": 15948828,
+    "chain": "Mainnet",
+    "symbol": "dino",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 42,
+    "contract_type": "ERC20",
+    "address": "0x12b6893ce26ea6341919fe289212ef77e51688c8",
+    "name": "Tamadoge",
+    "deployed_block": 15217184,
+    "chain": "Mainnet",
+    "symbol": "tama",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 43,
+    "contract_type": "ERC20",
+    "address": "0xdfdb7f72c1f195c5951a234e8db9806eb0635346",
+    "name": "Feisty Doge NFT",
+    "deployed_block": 13056457,
+    "chain": "Mainnet",
+    "symbol": "nfd",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 44,
+    "contract_type": "ERC20",
+    "address": "0x7b744eea1deca2f1b7b31f15ba036fa1759452d7",
+    "name": "El Hippo",
+    "deployed_block": 17911824,
+    "chain": "Mainnet",
+    "symbol": "hipp",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 45,
+    "contract_type": "ERC20",
+    "address": "0xff836a5821e69066c87e268bc51b849fab94240c",
+    "name": "Real Smurf Cat",
+    "deployed_block": 18129682,
+    "chain": "Mainnet",
+    "symbol": "шайлушай",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 46,
+    "contract_type": "ERC20",
+    "address": "0x2598c30330d5771ae9f983979209486ae26de875",
+    "name": "Any Inu",
+    "deployed_block": 18894536,
+    "chain": "Mainnet",
+    "symbol": "ai",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 47,
+    "contract_type": "ERC20",
+    "address": "0xfb130d93e49dca13264344966a611dc79a456bc5",
+    "name": "DogeGF",
+    "deployed_block": 12510443,
+    "chain": "Mainnet",
+    "symbol": "dogegf",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 48,
+    "contract_type": "ERC20",
+    "address": "0x0d505c03d30e65f6e9b4ef88855a47a89e4b7676",
+    "name": "Zoomer",
+    "deployed_block": 17594376,
+    "chain": "Mainnet",
+    "symbol": "zoomer",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 49,
+    "contract_type": "ERC20",
+    "address": "0xf538296e7dd856af7044deec949489e2f25705bc",
+    "name": "Illumicati",
+    "deployed_block": 18513639,
+    "chain": "Mainnet",
+    "symbol": "milk",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 50,
+    "contract_type": "ERC20",
+    "address": "0x005d1123878fc55fbd56b54c73963b234a64af3c",
+    "name": "Kiba Inu",
+    "deployed_block": 14320884,
+    "chain": "Mainnet",
+    "symbol": "kiba",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 51,
+    "contract_type": "ERC20",
+    "address": "0x8ee325ae3e54e83956ef2d5952d3c8bc1fa6ec27",
+    "name": "Fable Of The Dragon",
+    "deployed_block": 15787768,
+    "chain": "Mainnet",
+    "symbol": "tyrant",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 52,
+    "contract_type": "ERC20",
+    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+    "name": "LINK",
+    "deployed_block": 4281611,
+    "chain": "Mainnet",
+    "symbol": "link",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 53,
+    "contract_type": "ERC20",
+    "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+    "name": "ARB",
+    "deployed_block": 70398215,
+    "chain": "Arbitrum",
+    "symbol": "arb",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 54,
+    "contract_type": "ERC20",
+    "address": "0x76e222b07c53d28b89b0bac18602810fc22b49a8",
+    "name": "Joe Coin",
+    "deployed_block": 18329212,
+    "chain": "Mainnet",
+    "symbol": "joe",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 55,
+    "contract_type": "ERC20",
+    "address": "0x03049b395147713ae53c0617093675b4b86dde78",
+    "name": "BobaCat",
+    "deployed_block": 18112540,
+    "chain": "Mainnet",
+    "symbol": "psps",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 56,
+    "contract_type": "ERC20",
+    "address": "0xa9d54f37ebb99f83b603cc95fc1a5f3907aaccfd",
+    "name": "Pikaboss",
+    "deployed_block": 16628745,
+    "chain": "Mainnet",
+    "symbol": "pika",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 57,
+    "contract_type": "ERC20",
+    "address": "0x02e7f808990638e9e67e1f00313037ede2362361",
+    "name": "KiboShib",
+    "deployed_block": 16140853,
+    "chain": "Mainnet",
+    "symbol": "KIBSHI",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 58,
+    "contract_type": "ERC20",
+    "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+    "name": "Ondo",
+    "deployed_block": 14670968,
+    "chain": "Mainnet",
+    "symbol": "ondo",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 59,
+    "contract_type": "ERC20",
+    "address": "0x58cb30368ceb2d194740b144eab4c2da8a917dcb",
+    "name": "Zyncoin",
+    "deployed_block": 18665578,
+    "chain": "Mainnet",
+    "symbol": "zyn",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 60,
+    "contract_type": "ERC20",
+    "address": "0xe3dbc4f88eaa632ddf9708732e2832eeaa6688ab",
+    "name": "Arbius",
+    "deployed_block": 19215261,
+    "chain": "Mainnet",
+    "symbol": "aius",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 61,
+    "contract_type": "ERC20",
+    "address": "0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44",
+    "name": "Wrapped TAO",
+    "deployed_block": 1652160,
+    "chain": "Mainnet",
+    "symbol": "wTAO",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 62,
+    "contract_type": "ERC20",
+    "address": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+    "name": "Lido",
+    "deployed_block": 11473216,
+    "chain": "Mainnet",
+    "symbol": "ldo",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 63,
+    "contract_type": "ERC20",
+    "address": "0xb8a87405d9a4f2f866319b77004e88dff66c0d92",
+    "name": "Sora",
+    "deployed_block": 19235060,
+    "chain": "Mainnet",
+    "symbol": "sora",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 64,
+    "contract_type": "ERC20",
+    "address": "0x24fcfc492c1393274b6bcd568ac9e225bec93584",
+    "name": "Heroes of Mavia",
+    "deployed_block": 18709570,
+    "chain": "Mainnet",
+    "symbol": "mavia",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 65,
+    "contract_type": "ERC20",
+    "address": "0x710287d1d39dcf62094a83ebb3e736e79400068a",
+    "name": "enqAI",
+    "deployed_block": 18569660,
+    "chain": "Mainnet",
+    "symbol": "enqai",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 66,
+    "contract_type": "ERC20",
+    "address": "0x15e6e0d4ebeac120f9a97e71faa6a0235b85ed12",
+    "name": "SatoshiVM",
+    "deployed_block": 18983993,
+    "chain": "Mainnet",
+    "symbol": "savm",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 67,
+    "contract_type": "ERC20",
+    "address": "0x163f8c2467924be0ae7b5347228cabf260318753",
+    "name": "Worldcoin",
+    "deployed_block": 17714705,
+    "chain": "Mainnet",
+    "symbol": "wld",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 68,
+    "contract_type": "ERC20",
+    "address": "0xf4fbc617a5733eaaf9af08e1ab816b103388d8b6",
+    "name": "Glow",
+    "deployed_block": 18809233,
+    "chain": "Mainnet",
+    "symbol": "glw-beta",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 69,
+    "contract_type": "ERC20",
+    "address": "0x38e68a37e401f7271568cecaac63c6b1e19130b4",
+    "name": "Banana",
+    "deployed_block": 18135851,
+    "chain": "Mainnet",
+    "symbol": "banana",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 70,
+    "contract_type": "ERC20",
+    "address": "0xa0c05e2eed05912d9eb76d466167628e8024a708",
+    "name": "Ticker",
+    "deployed_block": 11962318,
+    "chain": "Base",
+    "symbol": "ticker",
+    "derive_groups": []
+  },
+  {
+    "id": 71,
+    "contract_type": "Punk",
+    "address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+    "name": "CRYPTOPUNKS",
+    "deployed_block": 3914495,
+    "chain": "Mainnet",
+    "symbol": "PUNK",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 72,
+    "contract_type": "ERC721",
+    "address": "0x5Af0D9827E0c53E4799BB226655A1de152A425a5",
+    "name": "Milady",
+    "deployed_block": 13090020,
+    "chain": "Mainnet",
+    "symbol": "MIL",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 73,
+    "contract_type": "ERC721",
+    "address": "0xed5af388653567af2f388e6224dc7c4b3241c544",
+    "name": "Azuki",
+    "deployed_block": 13975838,
+    "chain": "Mainnet",
+    "symbol": "AZUKI",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 74,
+    "contract_type": "ERC721",
+    "address": "0xbd3531da5cf5857e7cfaa92426877b022e612cf8",
+    "name": "Pudgy Penguins",
+    "deployed_block": 12876179,
+    "chain": "Mainnet",
+    "symbol": "PPG",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 75,
+    "contract_type": "ERC721",
+    "address": "0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03",
+    "name": "Nouns",
+    "deployed_block": 12985438,
+    "chain": "Mainnet",
+    "symbol": "NOUN",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 76,
+    "contract_type": "ERC721",
+    "address": "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+    "name": "Bored Ape Yacht Club",
+    "deployed_block": 12985438,
+    "chain": "Mainnet",
+    "symbol": "BAYC",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 77,
+    "contract_type": "ERC721",
+    "address": "0x60E4d786628Fea6478F785A6d7e704777c86a7c6",
+    "name": "Mutant Ape Yacht Club",
+    "deployed_block": 13117018,
+    "chain": "Mainnet",
+    "symbol": "MAYC",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 78,
+    "contract_type": "ERC721",
+    "address": "0x8821bee2ba0df28761afff119d66390d594cd280",
+    "name": "DeGods",
+    "deployed_block": 16940173,
+    "chain": "Mainnet",
+    "symbol": "DEGODS",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 79,
+    "contract_type": "ERC721",
+    "address": "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
+    "name": "Doodles",
+    "deployed_block": 13430097,
+    "chain": "Mainnet",
+    "symbol": "DOODLE",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 80,
+    "contract_type": "ERC721",
+    "address": "0xdA1bf9B5De160cecdE3f9304B187a2F5F5b83707",
+    "name": "Chronophotograph",
+    "deployed_block": 17160816,
+    "chain": "Mainnet",
+    "symbol": "CHRONOPHOTO",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 81,
+    "contract_type": "ERC721",
+    "address": "0x7Bd29408f11D2bFC23c34f18275bBf23bB716Bc7",
+    "name": "Meebits",
+    "deployed_block": 12358080,
+    "chain": "Mainnet",
+    "symbol": "meebits",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 82,
+    "contract_type": "ERC721",
+    "address": "0x9ef8750c72061edbeeef4beb1aceee5b5a63748a",
+    "name": "The187",
+    "deployed_block": 17052667,
+    "chain": "Mainnet",
+    "symbol": "The187",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 83,
+    "contract_type": "ERC721",
+    "address": "0x4E1f41613c9084FdB9E34E11fAE9412427480e56",
+    "name": "Terraforms",
+    "deployed_block": 13823015,
+    "chain": "Mainnet",
+    "symbol": "TERRAFORMS",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 84,
+    "contract_type": "ERC721",
+    "address": "0xd3d9ddd0cf0a5f0bfb8f7fceae075df687eaebab",
+    "name": "Remilio",
+    "deployed_block": 15323174,
+    "chain": "Mainnet",
+    "symbol": "TEST",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 85,
+    "contract_type": "ERC1155",
+    "address": "0xa41273d9ecce19051e109d87431002fb1404d392",
+    "name": "Crypto: The Game S1",
+    "deployed_block": 11088633,
+    "chain": "Base",
+    "symbol": "crypto-the-game-s1",
+    "derive_groups": [
+      "AllHolders"
+    ]
+  },
+  {
+    "id": 86,
+    "contract_type": "ERC20",
+    "address": "0x0578d8A44db98B23BF096A382e016e29a5Ce0ffe",
+    "name": "Higher",
+    "deployed_block": 11604028,
+    "chain": "Base",
+    "symbol": "higher",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale",
+      "Believer"
+    ]
+  },
+  {
+    "id": 87,
+    "contract_type": "ERC20",
+    "address": "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4",
+    "name": "Toshi",
+    "deployed_block": 5037210,
+    "chain": "Base",
+    "symbol": "TOSHI",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 88,
+    "contract_type": "ERC20",
+    "address": "0xF6e932Ca12afa26665dC4dDE7e27be02A7c02e50",
+    "name": "Mochi",
+    "deployed_block": 6382775,
+    "chain": "Base",
+    "symbol": "MOCHI",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 89,
+    "contract_type": "ERC20",
+    "address": "0x6921B130D297cc43754afba22e5EAc0FBf8Db75b",
+    "name": "doginme",
+    "deployed_block": 10149949,
+    "chain": "Base",
+    "symbol": "doginme",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 90,
+    "contract_type": "ERC20",
+    "address": "0xE1aBD004250AC8D1F199421d647e01d094FAa180",
+    "name": "Roost Coin",
+    "deployed_block": 12347238,
+    "chain": "Base",
+    "symbol": "ROOST",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 91,
+    "contract_type": "ERC20",
+    "address": "0x181E7f2F2a096E3E3c867d92d1ca0D8c849D2869",
+    "name": "Meeseeks",
+    "deployed_block": 12338214,
+    "chain": "Base",
+    "symbol": "MSEEK",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 92,
+    "contract_type": "ERC20",
+    "address": "0x532f27101965dd16442E59d40670FaF5eBB142E4",
+    "name": "Brett",
+    "deployed_block": 10983962,
+    "chain": "Base",
+    "symbol": "BRETT",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 93,
+    "contract_type": "ERC20",
+    "address": "0x347F500323D51E9350285Daf299ddB529009e6AE",
+    "name": "BLERF",
+    "deployed_block": 12216496,
+    "chain": "Base",
+    "symbol": "BLERF",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 94,
+    "contract_type": "ERC20",
+    "address": "0xfEA9DcDc9E23a9068bF557AD5b186675C61d33eA",
+    "name": "Based Shiba Inu",
+    "deployed_block": 11786193,
+    "chain": "Base",
+    "symbol": "BSHIB",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 95,
+    "contract_type": "ERC20",
+    "address": "0x9A3b7959e998BF2B50EF1969067D623877050D92",
+    "name": "PEPE BUT BLUE",
+    "deployed_block": 11916350,
+    "chain": "Base",
+    "symbol": "PBB",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 96,
+    "contract_type": "ERC20",
+    "address": "0x5B5dee44552546ECEA05EDeA01DCD7Be7aa6144A",
+    "name": "The Next 100x Memecoin on Base",
+    "deployed_block": 10404435,
+    "chain": "Base",
+    "symbol": "TN100x",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 97,
+    "contract_type": "ERC20",
+    "address": "0x91F45aa2BdE7393e0AF1CC674FFE75d746b93567",
+    "name": "FrameToken",
+    "deployed_block": 9988775,
+    "chain": "Base",
+    "symbol": "FRAME",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 98,
+    "contract_type": "ERC20",
+    "address": "0x4cD86D0fBCF0E167B9c2986bcb4751b5a148dcaD",
+    "name": "Enjoy Coin",
+    "deployed_block": 12410559,
+    "chain": "Base",
+    "symbol": "Enjoy",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  }
+]

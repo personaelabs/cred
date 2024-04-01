@@ -1,5 +1,6 @@
 import { Hex } from 'viem';
-import { GroupSelect } from './api/groups/route';
+import { MerkleTreeSelect } from './api/trees/route';
+import { Group } from '@prisma/client';
 
 /**
  * Witness to pass to the prover
@@ -35,6 +36,46 @@ export interface NeynarUserResponse {
   pfp_url: string;
 }
 
-export type EligibleGroup = {
+export interface MerkleProof {
+  root: Uint8Array;
+  path: Hex[];
+  pathIndices: number[];
+}
+
+export type EligibleGroup = MerkleTreeSelect['Group'] & {
   address: Hex;
-} & GroupSelect;
+  merkleProof: MerkleProof;
+  treeId: number;
+};
+
+/**
+ * EIP-6963: Represents the assets needed to display a wallet
+ */
+interface EIP6963ProviderInfo {
+  uuid: string;
+  name: string;
+  icon: string;
+  rdns: string;
+}
+
+interface EIP6963ProviderDetail {
+  info: EIP6963ProviderInfo;
+  provider: any;
+}
+
+// EIP-6963 Announce Event dispatched by a Wallet
+export interface EIP6963AnnounceProviderEvent extends CustomEvent {
+  type: 'eip6963:announceProvider';
+  detail: EIP6963ProviderDetail;
+}
+
+export interface LeaderBoardRecord {
+  user: NeynarUserResponse;
+  creddd: Group['displayName'][];
+  score: number;
+}
+
+export enum AttestationType {
+  // eslint-disable-next-line no-unused-vars
+  FidAttestation = 1,
+}

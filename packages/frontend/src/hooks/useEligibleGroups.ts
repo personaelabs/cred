@@ -1,116 +1,227 @@
-import { GroupSelect } from '@/app/api/groups/route';
-import { EligibleGroup } from '@/app/types';
-import { captureFetchError } from '@/lib/utils';
-import { AddressToGroupsMap, Groups } from '@/proto/address_to_groups_pb';
+import { MerkleTreeSelect } from '@/app/api/trees/route';
+import {
+  PRECOMPUTED_HASHES,
+  captureFetchError,
+  fromHexString,
+  toHexString,
+} from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Hex } from 'viem';
+import { Hex, hexToBytes } from 'viem';
+import { EligibleGroup, MerkleProof } from '@/app/types';
+import { MerkleTree, MerkleTreeList } from '@/proto/merkle_tree_pb';
 
-const useEligibleGroups = (addresses: Hex[] | null) => {
-  const [addressToGroupsMaps, setAddressToGroupsMaps] = useState<
-    AddressToGroupsMap[] | null
-  >(null);
+const MAX_TREES_PRE_REQUEST = 5;
+
+/**
+ * Get the bodies of given Merkle trees IDs
+ * @returns Protocol buffer binary of the Merkle trees
+ */
+const getMerkleTrees = async (treeIds: number[]): Promise<MerkleTreeList> => {
+  const params = new URLSearchParams();
+  params.set('ids', treeIds.join(','));
+  const response = await fetch(`/api/trees-protobufs?${params.toString()}`);
+
+  if (!response.ok) {
+    await captureFetchError(response);
+    throw new Error('Failed to fetch merkle tree');
+  }
+
+  const responseBuf = await response.arrayBuffer();
+
+  const merkleTree = MerkleTreeList.deserializeBinary(
+    new Uint8Array(responseBuf)
+  );
+
+  return merkleTree;
+};
+
+/**
+ * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
+ */
+const getMerkleProof = (
+  merkleTree: MerkleTree,
+  address: Hex
+): MerkleProof | null => {
+  const layers = merkleTree.getLayersList();
+  const treeDepth = layers.length;
+
+  // Get the leaves of the tree
+  const leaves = layers[0].getNodesList();
+
+  // Convert the address to a buffer
+  const addressBuffer = fromHexString(address, 20);
+
+  // Find the leaf index
+  const leafNode = leaves.find(leaf => {
+    const leafBytes = leaf.getNode_asU8();
+    return addressBuffer.equals(Buffer.from(leafBytes));
+  });
+
+  if (!leafNode) {
+    return null;
+  }
+
+  let leafIndex = leafNode.getIndex();
+
+  // Get the merkle proof
+  const siblings = [];
+  const pathIndices = [];
+
+  for (let i = 0; i < treeDepth - 1; i++) {
+    const layer = layers[i];
+    const siblingIndex = leafIndex % 2 === 0 ? leafIndex + 1 : leafIndex - 1;
+
+    const sibling =
+      (layer
+        .getNodesList()
+        .find(node => node.getIndex() === siblingIndex)
+        ?.getNode() as Uint8Array) || PRECOMPUTED_HASHES[i];
+
+    siblings.push(sibling);
+    pathIndices.push(leafIndex & 1);
+
+    leafIndex = Math.floor(leafIndex / 2);
+  }
+
+  const root = layers[treeDepth - 1].getNodesList()[0].getNode_asU8();
+
+  return {
+    root,
+    path: siblings.map(sibling => toHexString(sibling)),
+    pathIndices,
+  };
+};
+
+/**
+ *  Get the eligible groups for a set of addresses
+ */
+const useEligibleGroups = (addresses: Hex[] | undefined) => {
+  const [merkleTrees, setMerkleTrees] = useState<MerkleTreeSelect[] | null>(
+    null
+  );
   const [eligibleGroups, setEligibleGroups] = useState<EligibleGroup[] | null>(
     null
   );
-
-  const [groups, setGroups] = useState<GroupSelect[] | null>(null);
+  const [scoreAfterAddingAll, setScoreAfterAddingAll] = useState<bigint | null>(
+    null
+  );
 
   useEffect(() => {
     (async () => {
-      const groupResponse = await fetch('/api/groups');
+      const result = await fetch(`/api/trees`);
 
-      if (groupResponse.ok) {
-        const groupData = (await groupResponse.json()) as GroupSelect[];
-        setGroups(groupData);
+      if (result.ok) {
+        const _merkleTrees = (await result.json()) as MerkleTreeSelect[];
+        setMerkleTrees(_merkleTrees);
       } else {
-        toast.error('Failed to fetch groups');
-        await captureFetchError(groupResponse);
+        toast.error('Failed to fetch merkle trees');
+        await captureFetchError(result);
       }
     })();
   }, []);
 
-  const fetchMapping = useCallback(async () => {
-    let skip = 0;
-    const take = 100000;
-
-    const _addressToGroupsMap = [];
-
-    // We fetch the address to groups mapping in chunks
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const searchParams = new URLSearchParams();
-      searchParams.set('skip', skip.toString());
-      searchParams.set('take', take.toString());
-      const response = await fetch(
-        `/api/address-to-groups?${searchParams.toString()}`,
-        {
-          headers: {
-            Accept: 'application/x-protobuf',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        await captureFetchError(response);
-        throw new Error('Failed to fetch address to groups mapping');
-      }
-
-      // If the response is 204, then there are no more records to fetch
-      if (response.status === 204) {
-        break;
-      }
-
-      const buffer = await response.arrayBuffer();
-
-      // Deserialize the response into an `AddressToGroupsMap` object
-      const addressesToGroups = AddressToGroupsMap.deserializeBinary(
-        new Uint8Array(buffer)
-      );
-      _addressToGroupsMap.push(addressesToGroups);
-      skip += take;
-    }
-
-    setAddressToGroupsMaps(_addressToGroupsMap);
-  }, []);
-
-  const searchEligibleGroups = useCallback(() => {
+  const searchEligibleGroups = useCallback(async () => {
     // Search for the eligible groups once the addresses and groups are available
-    if (addresses && groups && addressToGroupsMaps) {
-      const _eligibleGroups = [];
-      // We use a set to track unique groups
-      const uniqueGroups = new Set<number>();
+    if (addresses && addresses.length > 0 && merkleTrees) {
+      setEligibleGroups(null);
 
-      const maps = addressToGroupsMaps.map(map => map.getAddresstogroupsMap());
+      // @ts-ignore
+      const circuit = await import('circuit-web');
+      circuit.init_panic_hook();
+
+      // Mapping of tree IDs to the addresses that matched the bloom filter
+      const bloomFilterMatchedTrees = new Map<number, Hex[]>();
+
+      // Fill `bloomFilterMatchedTrees`
       for (const address of addresses) {
-        // Iterate over each map and check if the address is present in the map
-        for (const map of maps) {
-          const record = map.get(address);
-          if (record) {
-            // We found the address in the map
-            const groupIds = (record as Groups).getGroupsList();
-            for (const groupId of groupIds) {
-              if (uniqueGroups.has(groupId)) {
-                // The group is already present in the set
-                continue;
-              }
+        for (const merkleTree of merkleTrees) {
+          if (
+            merkleTree.bloomFilter &&
+            merkleTree.bloomNumBits &&
+            merkleTree.bloomNumHashes &&
+            merkleTree.bloomSipKeys
+          ) {
+            const sipKeys = Buffer.concat([
+              Buffer.from(merkleTree.bloomSipKeys[0]),
+              Buffer.from(merkleTree.bloomSipKeys[1]),
+            ]);
 
-              // Get the `GroupSelect` object that corresponds to the `groupId`
-              const group = groups.find(g => g.id === groupId);
-              if (!group) {
-                throw new Error('Group not found');
-              }
+            const addressBytes = hexToBytes(address);
 
-              // Add the group to the set
-              uniqueGroups.add(group.id);
+            // Check if the address is a member using the bloom filter
+            const isMember = circuit.bloom_check(
+              // @ts-ignore
+              merkleTree.bloomFilter.data,
+              BigInt(merkleTree.bloomNumBits),
+              merkleTree.bloomNumHashes,
+              sipKeys,
+              addressBytes
+            );
 
-              const groupWithAddress = {
-                address,
+            if (isMember) {
+              // Add the address to the list of matched addresses for the tree
+              bloomFilterMatchedTrees.set(
+                merkleTree.id,
+                (bloomFilterMatchedTrees.get(merkleTree.id) || []).concat(
+                  address
+                )
+              );
+            }
+          } else {
+            console.log('Bloom filter not available');
+          }
+        }
+      }
+
+      // Get the tree IDs that had a match in the bloom filter
+      const bloomFilterMatchedTreeIds = Array.from(
+        bloomFilterMatchedTrees.keys()
+      );
+
+      const _eligibleGroups: EligibleGroup[] = [];
+
+      // Get and check for false positives in batches
+      for (
+        let i = 0;
+        i < bloomFilterMatchedTreeIds.length;
+        i += MAX_TREES_PRE_REQUEST
+      ) {
+        const ids = bloomFilterMatchedTreeIds.slice(
+          i,
+          i + MAX_TREES_PRE_REQUEST
+        );
+
+        const merkleTreeList = await getMerkleTrees(ids);
+
+        const merkleTreesProtoBufs = merkleTreeList.getTreesList();
+
+        for (let j = 0; j < merkleTreesProtoBufs.length; j++) {
+          const merkleTreeProtoBuf = merkleTreesProtoBufs[j];
+          const treeId = ids[j];
+
+          // Get the addresses that matched the bloom filter for the tree
+          const addresses = bloomFilterMatchedTrees.get(treeId) || [];
+
+          // Search for an address that is actually in the tree
+          for (const address of addresses) {
+            const merkleProof = getMerkleProof(merkleTreeProtoBuf, address);
+            if (merkleProof === null) {
+              console.log('Bloom filter false positive');
+            } else {
+              const treeId = ids[j];
+
+              const group = merkleTrees.find(tree => tree.id === treeId)!.Group;
+
+              _eligibleGroups.push({
                 ...group,
-              };
+                address,
+                treeId,
+                merkleProof,
+              });
 
-              _eligibleGroups.push(groupWithAddress);
+              // We only need one address to be eligible for the group
+              break;
             }
           }
         }
@@ -118,21 +229,25 @@ const useEligibleGroups = (addresses: Hex[] | null) => {
 
       setEligibleGroups(_eligibleGroups);
     }
-  }, [addressToGroupsMaps, addresses, groups]);
-
-  // Fetch the address to groups mapping on page load
-  useEffect(() => {
-    fetchMapping().catch(e => {
-      toast.error('Failed to fetch address to groups mapping');
-      console.error(e);
-    });
-  }, [fetchMapping]);
+  }, [addresses, merkleTrees]);
 
   useEffect(() => {
     searchEligibleGroups();
-  }, [addresses, addressToGroupsMaps, searchEligibleGroups]);
+  }, [addresses, searchEligibleGroups]);
 
-  return eligibleGroups;
+  useEffect(() => {
+    if (eligibleGroups) {
+      let score = BigInt(0);
+      for (const group of eligibleGroups) {
+        if (group.score) {
+          score += BigInt(group.score);
+        }
+      }
+      setScoreAfterAddingAll(score);
+    }
+  }, [eligibleGroups]);
+
+  return { eligibleGroups, scoreAfterAddingAll };
 };
 
 export default useEligibleGroups;

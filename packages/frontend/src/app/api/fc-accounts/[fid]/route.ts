@@ -5,7 +5,11 @@ import { NextRequest } from 'next/server';
 import neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
 
-console.log('NODE_ENV', process.env.NODE_ENV);
+// This is a workaround for the fact that BigInts are not supported by JSON.stringify
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
 
 const selectAttestation = {
   MerkleTree: {
@@ -13,7 +17,7 @@ const selectAttestation = {
       Group: {
         select: {
           id: true,
-          handle: true,
+          typeId: true,
           displayName: true,
         },
       },
@@ -21,12 +25,13 @@ const selectAttestation = {
   },
 } satisfies Prisma.FidAttestationSelect;
 
-type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
+export type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
   select: typeof selectAttestation;
 }>;
 
 export type GetUserResponse = NeynarUserResponse & {
   fidAttestations: FidAttestationSelect[];
+  score: string;
 };
 
 /**
@@ -45,18 +50,38 @@ export async function GET(
   const fid = Number(params.fid);
 
   // Get attestations (i.e. proofs) for the FID
-  let fidAttestations = await prisma.fidAttestation.findMany({
+  const fidAttestations = await prisma.fidAttestation.findMany({
     select: selectAttestation,
     where: {
       fid,
     },
   });
 
-  // Filter out dev groups in production
-  if (process.env.NODE_ENV === 'production') {
-    fidAttestations = fidAttestations.filter(
-      attestation => !attestation.MerkleTree.Group.handle.startsWith('dev')
-    );
+  // Get the score of the user
+  const userCreddd = await prisma.fidAttestation.findMany({
+    select: {
+      MerkleTree: {
+        select: {
+          Group: {
+            select: {
+              id: true,
+              score: true,
+            },
+          },
+        },
+      },
+    },
+    where: {
+      fid,
+    },
+  });
+
+  let userScore = BigInt(0);
+  for (const cred of userCreddd) {
+    const score = cred.MerkleTree.Group.score;
+    if (score) {
+      userScore += score;
+    }
   }
 
   // Get user data from Neynar
@@ -72,6 +97,7 @@ export async function GET(
   // Return user data and attestations
   return Response.json({
     ...user,
+    score: userScore.toString(),
     fidAttestations,
   });
 }

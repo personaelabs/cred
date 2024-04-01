@@ -1,30 +1,34 @@
-FROM node:18.17.0
+FROM danieltehrani/creddd-indexer-base-amd64:latest as builder
+
+ENV SCCACHE_GCS_BUCKET=creddd-sccache
+ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
+ENV SCCACHE_GCS_RW_MODE=READ_WRITE
+
+COPY google-service-account.json google-service-account.json
+COPY packages/indexer-rs packages/indexer-rs
+COPY packages/protobufs packages/protobufs
+COPY Cargo.toml.docker Cargo.toml
+COPY Cargo.lock Cargo.lock
+
+ENV RUST_LOG=info
+
+RUN cargo build --release 
+
+FROM ubuntu:latest
 
 WORKDIR /usr/src/app
 
-# Install pnpm
-RUN npm install -g pnpm
+COPY --from=builder /usr/src/app/target/release/indexer /usr/local/bin/indexer
+COPY --from=builder /usr/src/app/target/release/populate /usr/local/bin/populate
+COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bin/count_synched_logs
+COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
+COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/seed_contracts.json seed_contracts.json
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_prices.json assets_with_prices.json
 
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN apt-get update -y
+RUN apt-get install libcurl4 -y
 
-# Make sure Rust is in the PATH
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Set the binary as the entrypoint of the container
+CMD ["indexer"]
 
-COPY package.json .
-COPY pnpm-lock.yaml .
-COPY pnpm-workspace.yaml .
-
-COPY packages/db packages/db
-COPY packages/indexer packages/indexer
-COPY packages/merkle-tree-rs packages/merkle-tree-rs
-COPY scripts scripts
-
-# Build the merkle-tree-rs Neon module
-RUN pnpm -F merkle-tree-rs exec pnpm i
-RUN pnpm -F merkle-tree-rs exec pnpm build
-
-# Install dependencies
-RUN pnpm i
-
-CMD ["sh", "./scripts/start-indexer.sh"]

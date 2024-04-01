@@ -1,0 +1,688 @@
+[
+  {
+    "name": "HarryPotterObamaSonic10Inu (ETH)",
+    "address": "0x72e4f9f808c49a2a61de9c5896298920dc4eeea9",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 112982021
+  },
+  {
+    "name": "Banana",
+    "address": "0x38e68a37e401f7271568cecaac63c6b1e19130b4",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 411778887
+  },
+  {
+    "name": "Mutant Ape Yacht Club",
+    "address": "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 7834.38
+  },
+  {
+    "name": "Doge Killer",
+    "address": "0x27c70cd1946795b66be9d954418546998b546634",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 64000878
+  },
+  {
+    "name": "PEPE BUT BLUE",
+    "address": "0x9a3b7959e998bf2b50ef1969067d623877050d92",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 2600000
+  },
+  {
+    "name": "Meebits",
+    "address": "0x7bd29408f11d2bfc23c34f18275bbf23bb716bc7",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 2929.14
+  },
+  {
+    "name": "Chronophotograph",
+    "address": "0xda1bf9b5de160cecde3f9304b187a2f5f5b83707",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 6047.29
+  },
+  {
+    "name": "Shiba Predator",
+    "address": "0xa71d0588eaf47f12b13cf8ec750430d21df04974",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 30220562
+  },
+  {
+    "name": "LINK",
+    "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 19174939874
+  },
+  {
+    "name": "DeGods",
+    "address": "0x8821bee2ba0df28761afff119d66390d594cd280",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 5328.42
+  },
+  {
+    "name": "Jesus Coin",
+    "address": "0xba386a4ca26b85fd057ab1ef86e3dc7bdeb5ce70",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 112751380
+  },
+  {
+    "name": "Based Shiba Inu",
+    "address": "0xfea9dcdc9e23a9068bf557ad5b186675c61d33ea",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 7700000
+  },
+  {
+    "name": "Degen",
+    "address": "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 786647501
+  },
+  {
+    "name": "Toshi",
+    "address": "0xac1bd2486aaf3b5c0fc3fd868558b082a531b2b4",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 246374659
+  },
+  {
+    "name": "Bonk",
+    "address": "0x1151cb3d861920e07a38e03eead12c32178567f6",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 2595517288
+  },
+  {
+    "name": "Zoomer",
+    "address": "0x0d505c03d30e65f6e9b4ef88855a47a89e4b7676",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 3985870
+  },
+  {
+    "name": "ARB",
+    "address": "0x912ce59144191c1204e64559fe8253a0e49e6548",
+    "type": "ERC20",
+    "chain": "arbitrum-one",
+    "fdv_usd": 16676084143
+  },
+  {
+    "name": "Mog Coin",
+    "address": "0xaaee1a9723aadb7afa2810263653a34ba2c21c7a",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 303710158
+  },
+  {
+    "name": "Dejitaru Tsuka",
+    "address": "0xc5fb36dd2fb59d3b98deff88425a3f425ee469ed",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 45992686
+  },
+  {
+    "name": "Wrapped TAO",
+    "address": "0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 78163636
+  },
+  {
+    "name": "The187",
+    "address": "0x9ef8750c72061edbeeef4beb1aceee5b5a63748a",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 14216
+  },
+  {
+    "name": "Baby Doge Coin",
+    "address": "0xac57de9c1a09fec648e93eb98875b212db0d460b",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1067253289
+  },
+  {
+    "name": "Any Inu",
+    "address": "0x2598c30330d5771ae9f983979209486ae26de875",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 25257575
+  },
+  {
+    "name": "DinoLFG",
+    "address": "0x49642110b712c1fd7261bc074105e9e44676c68f",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 8337463
+  },
+  {
+    "name": "Volt Inu",
+    "address": "0x7f792db54b0e580cdc755178443f0430cf799aca",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 40740786
+  },
+  {
+    "name": "Azuki",
+    "address": "0xed5af388653567af2f388e6224dc7c4b3241c544",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 16643.63
+  },
+  {
+    "name": "CateCoin",
+    "address": "0xf05897cfe3ce9bbbfe0751cbe6b1b2c686848dcb",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 42589057
+  },
+  {
+    "name": "Turbo",
+    "address": "0xa35923162c49cf95e6bf26623385eb431ad920d3",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 52005251
+  },
+  {
+    "name": "Joe Coin",
+    "address": "0x76e222b07c53d28b89b0bac18602810fc22b49a8",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1940314
+  },
+  {
+    "name": "Arbius",
+    "address": "0xe3dbc4f88eaa632ddf9708732e2832eeaa6688ab",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 61300000
+  },
+  {
+    "name": "MKR",
+    "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 3503012353
+  },
+  {
+    "name": "Sora",
+    "address": "0xb8a87405d9a4f2f866319b77004e88dff66c0d92",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 7355205
+  },
+  {
+    "name": "BOB Token",
+    "address": "0x7d8146cf21e8d7cbe46054e01588207b51198729",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 28071357
+  },
+  {
+    "name": "Real Smurf Cat",
+    "address": "0xff836a5821e69066c87e268bc51b849fab94240c",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 10452731
+  },
+  {
+    "name": "OP",
+    "address": "0x4200000000000000000000000000000000000042",
+    "type": "ERC20",
+    "chain": "optimistic-ethereum",
+    "fdv_usd": 15873124210
+  },
+  {
+    "name": "Milady",
+    "address": "0x5af0d9827e0c53e4799bb226655a1de152a425a5",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 13646.73
+  },
+  {
+    "name": "Terraforms",
+    "address": "0x4e1f41613c9084fdb9e34e11fae9412427480e56",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 4468.97
+  },
+  {
+    "name": "Zyncoin",
+    "address": "0x58cb30368ceb2d194740b144eab4c2da8a917dcb",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 48593594
+  },
+  {
+    "name": "Brett",
+    "address": "0x532f27101965dd16442e59d40670faf5ebb142e4",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 516205555
+  },
+  {
+    "name": "Doodles",
+    "address": "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 6367.22
+  },
+  {
+    "name": "Illumicati",
+    "address": "0xf538296e7dd856af7044deec949489e2f25705bc",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1128268
+  },
+  {
+    "name": "Kitty Inu",
+    "address": "0x61a35258107563f6b6f102ae25490901c8760b12",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 4023800
+  },
+  {
+    "name": "Wall Street Memes",
+    "address": "0xb62e45c3df611dce236a6ddc7a493d79f9dfadef",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1300000
+  },
+  {
+    "name": "Ondo",
+    "address": "0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 9398137632
+  },
+  {
+    "name": "Glow",
+    "address": "0xf4fbc617a5733eaaf9af08e1ab816b103388d8b6",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 0
+  },
+  {
+    "name": "CorgiAI",
+    "address": "0x6b431b8a964bfcf28191b07c91189ff4403957d0",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1012748002
+  },
+  {
+    "name": "Pepe",
+    "address": "0x6982508145454ce325ddbe47a25d4ec3d2311933",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 3364545842
+  },
+  {
+    "name": "Feisty Doge NFT",
+    "address": "0xdfdb7f72c1f195c5951a234e8db9806eb0635346",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 17135794
+  },
+  {
+    "name": "Optimus AI",
+    "address": "0x562e362876c8aee4744fc2c6aac8394c312d215d",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 28039887
+  },
+  {
+    "name": "Shiba Saga",
+    "address": "0x43d7e65b8ff49698d9550a7f315c87e67344fb59",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 68348821
+  },
+  {
+    "name": "MAGA",
+    "address": "0x576e2bed8f7b46d34016198911cdf9886f78bea7",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 214742305
+  },
+  {
+    "name": "Lido",
+    "address": "0x5a98fcbea516cf06857215779fd812ca3bef1b32",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 2896069323
+  },
+  {
+    "name": "SnailBrook",
+    "address": "0x6bc40d4099f9057b23af309c08d935b890d7adc0",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 20598625
+  },
+  {
+    "name": "Wojak",
+    "address": "0x5026f006b85729a8b14553fae6af249ad16c9aab",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 31478096
+  },
+  {
+    "name": "Heroes of Mavia",
+    "address": "0x24fcfc492c1393274b6bcd568ac9e225bec93584",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1504087041
+  },
+  {
+    "name": "Dogelon Mars",
+    "address": "0x761d38e5ddf6ccf6cf7c55759d5210750b5d60f3",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 286526728
+  },
+  {
+    "name": "doginme",
+    "address": "0x6921b130d297cc43754afba22e5eac0fbf8db75b",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 90175529
+  },
+  {
+    "name": "enqAI",
+    "address": "0x710287d1d39dcf62094a83ebb3e736e79400068a",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 77107504
+  },
+  {
+    "name": "Mochi",
+    "address": "0xf6e932ca12afa26665dc4dde7e27be02a7c02e50",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 64245517
+  },
+  {
+    "name": "Fable Of The Dragon",
+    "address": "0x8ee325ae3e54e83956ef2d5952d3c8bc1fa6ec27",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 1226239
+  },
+  {
+    "name": "KiboShib",
+    "address": "0x02e7f808990638e9e67e1f00313037ede2362361",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 5015907
+  },
+  {
+    "name": "Remilio",
+    "address": "0xd3d9ddd0cf0a5f0bfb8f7fceae075df687eaebab",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 3824.6
+  },
+  {
+    "name": "Bored Ape Yacht Club",
+    "address": "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 44108
+  },
+  {
+    "name": "Higher",
+    "address": "0x0578d8a44db98b23bf096a382e016e29a5ce0ffe",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 13957815
+  },
+  {
+    "name": "Pikaboss",
+    "address": "0xa9d54f37ebb99f83b603cc95fc1a5f3907aaccfd",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 5739567
+  },
+  {
+    "name": "OmniCat",
+    "address": "0x9e20461bc2c4c980f62f1b279d71734207a6a356",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 30785876
+  },
+  {
+    "name": "SquidGrow",
+    "address": "0xd8fa690304d2b2824d918c0c7376e2823704557a",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 14005450
+  },
+  {
+    "name": "Meeseeks",
+    "address": "0x181e7f2f2a096e3e3c867d92d1ca0d8c849d2869",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 182000
+  },
+  {
+    "name": "CRYPTOPUNKS",
+    "address": "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+    "type": "Punk",
+    "chain": "ethereum",
+    "fp_usd": 180000
+  },
+  {
+    "name": "El Hippo",
+    "address": "0x7b744eea1deca2f1b7b31f15ba036fa1759452d7",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 4904108
+  },
+  {
+    "name": "Bad Idea AI",
+    "address": "0x32b86b99441480a7e5bd3a26c124ec2373e3f015",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 45551472
+  },
+  {
+    "name": "Crypto: The Game S1",
+    "address": "0xa41273d9ecce19051e109d87431002fb1404d392",
+    "type": "ERC1155",
+    "chain": "base",
+    "fp_usd": 1000
+  },
+  {
+    "name": "Worldcoin",
+    "address": "0x163f8c2467924be0ae7b5347228cabf260318753",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 84496291143
+  },
+  {
+    "name": "BLERF",
+    "address": "0x347f500323d51e9350285daf299ddb529009e6ae",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 1548445
+  },
+  {
+    "name": "Non-Playable Coin",
+    "address": "0x8ed97a637a790be1feff5e888d43629dc05408f6",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 21245804
+  },
+  {
+    "name": "Roost Coin",
+    "address": "0xe1abd004250ac8d1f199421d647e01d094faa180",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 58583097
+  },
+  {
+    "name": "Hoge Finance",
+    "address": "0xfad45e47083e4607302aa43c65fb3106f1cd7607",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 14088732
+  },
+  {
+    "name": "Milady Meme Coin",
+    "address": "0x12970e6868f88f6557b76120662c1b3e50a646bf",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 242607897
+  },
+  {
+    "name": "BobaCat",
+    "address": "0x03049b395147713ae53c0617093675b4b86dde78",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 36402874
+  },
+  {
+    "name": "Vita Inu",
+    "address": "0xafcdd4f666c84fed1d8bd825aa762e3714f652c9",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 20258307
+  },
+  {
+    "name": "Kizuna",
+    "address": "0x470c8950c0c3aa4b09654bc73b004615119a44b5",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 19772086
+  },
+  {
+    "name": "SatoshiVM",
+    "address": "0x15e6e0d4ebeac120f9a97e71faa6a0235b85ed12",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 135209563
+  },
+  {
+    "name": "The Doge NFT",
+    "address": "0xbaac2b4491727d78d2b78815144570b9f2fe8899",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 192653552
+  },
+  {
+    "name": "Shiba Inu",
+    "address": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 31706818871
+  },
+  {
+    "name": "Pudgy Penguins",
+    "address": "0xbd3531da5cf5857e7cfaa92426877b022e612cf8",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 45885
+  },
+  {
+    "name": "Kishu Inu",
+    "address": "0xa2b4c0af19cc16a6cfacce81f192b024d625817d",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 29665722
+  },
+  {
+    "name": "Tamadoge",
+    "address": "0x12b6893ce26ea6341919fe289212ef77e51688c8",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 9429305
+  },
+  {
+    "name": "Uniswap",
+    "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 12463546124
+  },
+  {
+    "name": "DogeGF",
+    "address": "0xfb130d93e49dca13264344966a611dc79a456bc5",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 6901486
+  },
+  {
+    "name": "FLOKI",
+    "address": "0xcf0c122c6b73ff809c693db761e7baebe62b6a2e",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 2638609075
+  },
+  {
+    "name": "Ticker",
+    "address": "0xa0c05e2eed05912d9eb76d466167628e8024a708",
+    "type": "ERC20",
+    "chain": "base",
+    "fdv_usd": 2000000
+  },
+  {
+    "name": "PepeFork",
+    "address": "0xb9f599ce614feb2e1bbe58f180f370d05b39344e",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 131278806
+  },
+  {
+    "name": "Nouns",
+    "address": "0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 29678
+  },
+  {
+    "name": "Kiba Inu",
+    "address": "0x005d1123878fc55fbd56b54c73963b234a64af3c",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 3625068
+  },
+  {
+    "name": "Memecoin",
+    "address": "0xb131f4a55907b10d1f0a50d8ab8fa09ec342cd74",
+    "type": "ERC20",
+    "chain": "ethereum",
+    "fdv_usd": 2647855446
+  },
+  {
+    "name": "The Next 100x Memecoin on Base",
+    "address": "0x5B5dee44552546ECEA05EDeA01DCD7Be7aa6144A",
+    "type": "ERC20",
+    "fdv_usd" :5296900,
+    "chain": "base"
+  },
+  {
+    "name": "FrameToken",
+    "address": "0x91F45aa2BdE7393e0AF1CC674FFE75d746b93567",
+    "type": "ERC20",
+    "fdv_usd" : 6916216,
+    "chain": "base"
+  },
+  {
+    "name": "Enjoy Coin",
+    "address": "0x4cD86D0fBCF0E167B9c2986bcb4751b5a148dcaD",
+    "type": "ERC20",
+    "fdv_usd": 0,
+    "chain": "base"
+  }
+]

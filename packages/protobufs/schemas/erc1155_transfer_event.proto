@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package erc1155_transfer_event;
+
+message ERC1155TransferSingleEvent {
+    bytes operator = 1;
+    bytes from = 2;
+    bytes to = 3;
+    bytes id = 4; 
+    bytes value = 5;
+}
+
+
+message ERC1155TransferBatchEvent {
+    bytes operator = 1;
+    bytes from = 2;
+    bytes to = 3;
+    repeated bytes ids = 4;
+    repeated bytes values = 5;
+}

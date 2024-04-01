@@ -18,7 +18,7 @@ import {
 } from 'viem';
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
-import { buildSiwfMessage } from '@/lib/utils';
+import { buildSiwfMessage, getFidAttestationHashV1 } from '@/lib/utils';
 
 let circuitInitialized = false;
 
@@ -90,6 +90,9 @@ export async function POST(req: NextRequest) {
   const merkleRoot = bytesToHex(merkleRootBytes);
 
   const merkleTreeInDb = await prisma.merkleTree.findUnique({
+    select: {
+      merkleRoot: true,
+    },
     where: {
       id: body.treeId,
     },
@@ -124,12 +127,14 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid message' }, { status: 400 });
   }
 
+  const attestationHash = getFidAttestationHashV1(merkleRoot, fid);
+
   const attestationExists = await prisma.fidAttestation.findUnique({
+    select: {
+      hash: true,
+    },
     where: {
-      fid_treeId: {
-        fid: fid,
-        treeId: merkleTreeInDb.id,
-      },
+      hash: attestationHash,
     },
   });
 
@@ -143,6 +148,7 @@ export async function POST(req: NextRequest) {
   // Save the attestation to the database
   await prisma.fidAttestation.create({
     data: {
+      hash: attestationHash,
       fid: fid,
       signInSig: Buffer.from(hexToBytes(body.signInSig)),
       attestation: Buffer.from(proofBytes),
