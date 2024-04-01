@@ -1,5 +1,26 @@
 previewsEnabled: true
 services:
+  - type: web
+    name: cred-frontend
+    plan: pro
+    previewPlan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i && pnpm -F frontend build
+    startCommand: NODE_ENV=production pnpm -F frontend start
+    preDeployCommand: pnpm -F db migrate:prod
+    buildFilter:
+      paths:
+        - packages/frontend/**
+        - packages/db/**
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cred
+          property: connectionString
+      - key: NODE_VERSION
+        value: 18.17.0
+      - fromGroup: cred
   - type: worker
     name: credbot
     plan: pro
