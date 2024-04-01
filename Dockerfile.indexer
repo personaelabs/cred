@@ -13,7 +13,7 @@ COPY predeploy.sh predeploy.sh
 
 ENV RUST_LOG=info
 
-RUN cargo build --release 
+#RUN cargo build --release 
 
 FROM ubuntu:latest
 
@@ -25,11 +25,11 @@ COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bi
 COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
 COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/seed_contracts.json seed_contracts.json
-COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/asset_with_prices.json asset_with_prices.json
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_prices.json assets_with_prices.json
 
 RUN apt-get update -y
 RUN apt-get install libcurl4 -y
 
 # Set the binary as the entrypoint of the container
-CMD ["indexer"]
+#CMD ["indexer"]
 
