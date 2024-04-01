@@ -31,5 +31,5 @@ RUN apt-get update -y
 RUN apt-get install libcurl4 -y
 
 # Set the binary as the entrypoint of the container
-#CMD ["indexer"]
+CMD ["indexer"]
 
