@@ -15,7 +15,7 @@ ENV RUST_LOG=info
 
 RUN cargo build --release 
 
-FROM debian:buster-slim
+FROM ubuntu:noble-20240225
 COPY --from=builder /usr/src/app/target/release/indexer /usr/local/bin/indexer
 COPY --from=builder /usr/src/app/target/release/populate /usr/local/bin/populate
 COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bin/count_synched_logs
