@@ -22,6 +22,9 @@ COPY --from=builder /usr/src/app/target/release/count_synched_logs /usr/local/bi
 COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
 COPY --from=builder /usr/src/app/target/release/get_tree_leaves /usr/local/bin/get_tree_leaves
 
+RUN apt-get update -y
+RUN apt-get install libcurl4
+
 # Set the binary as the entrypoint of the container
 CMD ["indexer"]
 
