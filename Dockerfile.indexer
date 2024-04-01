@@ -2,7 +2,7 @@ FROM danieltehrani/creddd-indexer-base-amd64:latest as builder
 
 ENV SCCACHE_GCS_BUCKET=creddd-sccache
 ENV SCCACHE_GCS_KEY_PATH=/usr/src/app/google-service-account.json
-ENV SCCACHE_GCS_RW_MODE=READ_ONLY
+ENV SCCACHE_GCS_RW_MODE=READ_WRITE
 
 COPY google-service-account.json google-service-account.json
 COPY packages/indexer-rs packages/indexer-rs
