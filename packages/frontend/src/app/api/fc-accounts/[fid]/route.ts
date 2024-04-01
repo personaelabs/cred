@@ -39,7 +39,6 @@ export type MintLogSelect = Prisma.MintLogGetPayload<{
 
 export type GetUserResponse = NeynarUserResponse & {
   fidAttestations: FidAttestationSelect[];
-  mints: MintLogSelect[];
   score: string;
 };
 
@@ -61,14 +60,6 @@ export async function GET(
   // Get attestations (i.e. proofs) for the FID
   const fidAttestations = await prisma.fidAttestation.findMany({
     select: selectAttestation,
-    where: {
-      fid,
-    },
-  });
-
-  // Get mints for the FID
-  const mints = await prisma.mintLog.findMany({
-    select: selectMintLog,
     where: {
       fid,
     },
@@ -114,7 +105,6 @@ export async function GET(
   // Return user data and attestations
   return Response.json({
     ...user,
-    mints,
     score: userScore.toString(),
     fidAttestations,
   });
