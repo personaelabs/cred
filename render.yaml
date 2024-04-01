@@ -20,6 +20,9 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
+    disk:
+      name: next-build-cache
+      mountPath: /
   - type: worker
     name: credbot
     plan: pro
