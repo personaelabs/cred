@@ -13,7 +13,7 @@ COPY predeploy.sh predeploy.sh
 
 ENV RUST_LOG=info
 
-#RUN cargo build --release 
+RUN cargo build --release 
 
 FROM ubuntu:latest
 
