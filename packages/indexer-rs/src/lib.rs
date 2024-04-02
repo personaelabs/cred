@@ -6,7 +6,7 @@ pub mod coingecko;
 pub mod contract;
 pub mod contract_event_iterator;
 pub mod eth_rpc;
-pub mod event;
+pub mod events;
 pub mod group;
 pub mod log_sync_engine;
 pub mod postgres;
