@@ -26,6 +26,12 @@ pub trait GroupIndexer: Send + Sync {
     async fn is_ready(&self) -> Result<bool, surf::Error>;
     /// Return all members
     async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error>;
+    /// Sanity check that the given members are eligible to be in the group
+    async fn sanity_check_members(
+        &self,
+        members: &[Address],
+        block_number: BlockNum,
+    ) -> Result<bool, Error>;
 }
 
 #[derive(Clone)]

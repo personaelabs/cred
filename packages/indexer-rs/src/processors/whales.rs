@@ -4,12 +4,17 @@ use crate::contract::Contract;
 use crate::contract_event_iterator::ContractEventIterator;
 use crate::eth_rpc::Chain;
 use crate::group::Group;
+use crate::log_sync_engine::TRANSFER_EVENT_SIG;
 use crate::processors::IndexerResources;
 use crate::rocksdb_key::ERC20_TRANSFER_EVENT_ID;
-use crate::utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS};
-use crate::Address;
+use crate::utils::{
+    decode_erc20_transfer_event, get_balance_at_block, get_total_supply_at_block,
+    is_event_logs_ready, MINTER_ADDRESS,
+};
 use crate::Error;
+use crate::{Address, BlockNum};
 use num_bigint::BigUint;
+use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::io::ErrorKind;
 
@@ -126,6 +131,81 @@ impl GroupIndexer for WhaleIndexer {
     async fn get_members(&self, block_number: u64) -> Result<HashSet<Address>, Error> {
         let (whales, _, _) = self.get_whales(block_number)?;
         Ok(whales)
+    }
+
+    async fn sanity_check_members(
+        &self,
+        members: &[Address],
+        block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        let contract = self.contract();
+        for member in members {
+            let member = hex::encode(member);
+            // Get logs where the balance of the address increases
+            let params = json!({
+                "address": contract.address.clone(),
+                "topics": [
+                    TRANSFER_EVENT_SIG,
+                    Value::Null,
+                    format!("0x{:0>width$}", member, width = 64),
+                ],
+                "fromBlock": "earliest",
+                "toBlock": format!("0x{:x}", block_number),
+            });
+
+            let result = self
+                .resources
+                .eth_client
+                .get_logs(contract.chain, &params)
+                .await
+                .unwrap();
+
+            let block_nums = result["result"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|log| {
+                    let block_num = log["blockNumber"].as_str().unwrap();
+                    u64::from_str_radix(block_num.trim_start_matches("0x"), 16).unwrap()
+                })
+                .collect::<Vec<BlockNum>>();
+
+            // Make sure that the address has received a transfer before
+
+            let mut is_whale = false;
+
+            // Check the balance of the address at each block
+            // where the balance increased
+            for block_num in &block_nums {
+                // Get the balance of the address at the block
+                let balance = get_balance_at_block(
+                    &self.resources.eth_client,
+                    &contract,
+                    &member,
+                    block_num + 1,
+                )
+                .await;
+
+                // Get the total supply at the block
+                let total_supply =
+                    get_total_supply_at_block(&self.resources.eth_client, &contract, block_num + 1)
+                        .await;
+
+                let whale_threshold = total_supply.clone() / BigUint::from(1000u32);
+
+                if balance >= whale_threshold {
+                    // We found a block where the address had a balance greater than 0.1% of the total supply
+                    is_whale = true;
+                    break;
+                }
+            }
+
+            if !is_whale || block_nums.is_empty() {
+                return Ok(false);
+            }
+        }
+
+        Ok(true)
     }
 }
 
