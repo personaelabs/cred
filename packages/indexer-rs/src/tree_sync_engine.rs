@@ -11,7 +11,7 @@ use rand::{rngs::OsRng, seq::SliceRandom};
 use std::{sync::Arc, time::Instant};
 use tokio::sync::Semaphore;
 
-const INDEXING_INTERVAL_SECS: u64 = 60; // 60 seconds
+const INDEXING_INTERVAL_SECS: u64 = 300; // 5 minutes
 
 pub struct TreeSyncEngine {
     pub indexer: Box<dyn GroupIndexer>,
