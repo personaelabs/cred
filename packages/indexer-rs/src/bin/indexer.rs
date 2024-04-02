@@ -1,6 +1,5 @@
 use futures::future::join_all;
 use futures::join;
-use indexer_rs::block_timestamp_sync_engine::BlockTimestampSyncEngine;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::group::get_groups;
@@ -22,7 +21,6 @@ use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
-use log::info;
 use rocksdb::{Options, DB};
 use std::collections::HashSet;
 use std::sync::Arc;

@@ -1,8 +1,10 @@
 use crate::{
-    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, BlockNum, Error,
+    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, Address,
+    BlockNum, Error,
 };
 use log::{error, info};
-use std::sync::Arc;
+use rand::{rngs::OsRng, seq::SliceRandom};
+use std::{sync::Arc, time::Instant};
 use tokio::sync::Semaphore;
 
 const INDEXING_INTERVAL_SECS: u64 = 60; // 60 seconds
@@ -39,16 +41,58 @@ impl TreeSyncEngine {
 impl TreeSyncEngine {
     /// Sync the tree to a specific block number
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
+        // Get the members of the group at the given block number
         let members = self.indexer.get_members(block_number).await?;
 
-        save_tree(
-            self.group.id.clone(),
-            self.group.group_type,
-            &self.pg_client,
-            members.iter().copied().collect(),
-            block_number as i64,
-        )
-        .await?;
+        // Sanity check the eligibility of a few members
+        let mut rng = OsRng::default();
+        let members_to_check: Vec<Address> = members
+            .iter()
+            .collect::<Vec<&Address>>()
+            .choose_multiple(&mut rng, 5)
+            .copied()
+            .copied()
+            .into_iter()
+            .collect();
+
+        let start = Instant::now();
+        let sanity_check_result = self
+            .indexer
+            .sanity_check_members(&members_to_check, block_number)
+            .await?;
+
+        info!(
+            "${} Sanity check took {}ms",
+            self.group.name,
+            start.elapsed().as_millis()
+        );
+
+        if !sanity_check_result {
+            error!(
+                "${} Sanity check failed for block {}",
+                self.group.name, block_number
+            );
+        } else {
+            info!(
+                target: "sanity-check",
+                "${} Sanity check passed for {:?} at block {}",
+                self.group.name,
+                members_to_check
+                    .iter()
+                    .map(|m| hex::encode(m))
+                    .collect::<Vec<String>>(),
+                block_number
+            );
+
+            save_tree(
+                self.group.id.clone(),
+                self.group.group_type,
+                &self.pg_client,
+                members.iter().copied().collect(),
+                block_number as i64,
+            )
+            .await?;
+        }
 
         Ok(())
     }

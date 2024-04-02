@@ -126,6 +126,15 @@ impl GroupIndexer for TickerIndexer {
 
         Ok(holders_at_block)
     }
+
+    async fn sanity_check_members(
+        &self,
+        _members: &[Address],
+        _block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        // No sanity check needed for the ticker group
+        Ok(true)
+    }
 }
 
 #[cfg(test)]

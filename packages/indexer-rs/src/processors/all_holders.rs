@@ -4,6 +4,7 @@ use crate::{
     contract_event_iterator::ContractEventIterator,
     eth_rpc::Chain,
     group::Group,
+    log_sync_engine::{ERC1155_TRANSFER_SINGLE_SIG, TRANSFER_EVENT_SIG},
     processors::GroupIndexer,
     rocksdb_key::{ERC1155_TRANSFER_SINGLE_EVENT_ID, ERC721_TRANSFER_EVENT_ID},
     utils::{
@@ -12,6 +13,7 @@ use crate::{
     },
     Address, BlockNum, Error,
 };
+use serde_json::{json, Value};
 use std::collections::HashSet;
 
 pub struct AllHoldersIndexer {
@@ -96,6 +98,51 @@ impl GroupIndexer for AllHoldersIndexer {
         };
 
         Ok(unique_holders)
+    }
+
+    async fn sanity_check_members(
+        &self,
+        members: &[Address],
+        block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        let contract = self.contract();
+        for member in members {
+            let member = hex::encode(member);
+            let member_padded = format!("0x{:0>width$}", member, width = 64);
+
+            let topics = match contract.contract_type {
+                ContractType::ERC721 => json!([TRANSFER_EVENT_SIG, Value::Null, member_padded]),
+                ContractType::ERC1155 => json!([
+                    ERC1155_TRANSFER_SINGLE_SIG,
+                    Value::Null,
+                    Value::Null,
+                    member_padded
+                ]),
+                ContractType::Punk => json!([TRANSFER_EVENT_SIG, Value::Null, member_padded]),
+                _ => panic!("Unexpected contract type"),
+            };
+
+            let params = json!({
+                "address": contract.address.clone(),
+                "topics": topics,
+                "fromBlock": "earliest",
+                "toBlock": format!("0x{:x}", block_number),
+            });
+
+            let result = self
+                .resources
+                .eth_client
+                .get_logs(contract.chain, &params)
+                .await?;
+
+            let result = result["result"].as_array().unwrap();
+
+            if result.is_empty() {
+                return Ok(false);
+            }
+        }
+
+        Ok(true)
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {

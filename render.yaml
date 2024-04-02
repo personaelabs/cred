@@ -71,27 +71,6 @@ services:
     disk:
       name: db
       mountPath: /usr/src/app/db
-  - type: worker
-    name: cred-checker
-    plan: standard
-    previewPlan: starter
-    runtime: docker
-    region: oregon
-    dockerfilePath: ./Dockerfile.checker
-    rootDir: ./
-    buildFilter:
-      paths:
-        - packages/indexer-rs/**
-        - packages/db/**
-      ignoredPaths:
-        - packages/circuit/**
-        - packages/frontend/**
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: cred
-          property: connectionString
-      - fromGroup: cred
 
 databases:
   - name: cred

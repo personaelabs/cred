@@ -215,4 +215,13 @@ impl GroupIndexer for BelieverIndexer {
 
         Ok(believers)
     }
+
+    async fn sanity_check_members(
+        &self,
+        _members: &[Address],
+        _block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        // No sanity check for the believer group for now
+        Ok(true)
+    }
 }
