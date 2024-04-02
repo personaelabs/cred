@@ -13,7 +13,7 @@ pub mod early_holders;
 pub mod ticker;
 pub mod whales;
 
-pub const SYNC_WINDOW_SECS: u64 = 60; // 60 seconds
+pub const SYNC_WINDOW_SECS: u64 = 300; // 5 minutes
 
 #[async_trait::async_trait]
 /// A trait for a group indexer

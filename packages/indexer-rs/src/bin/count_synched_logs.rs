@@ -1,5 +1,4 @@
 use indexer_rs::eth_rpc::Chain;
-use indexer_rs::postgres::init_postgres;
 use indexer_rs::utils::count_synched_logs;
 use indexer_rs::utils::count_synched_timestamps;
 use indexer_rs::utils::dotenv_config;
