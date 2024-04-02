@@ -13,6 +13,8 @@ use crate::{
 };
 use crate::{Address, ContractId, EventId};
 use alloy_json_abi::Function;
+use merkle_tree::ark_ff::PrimeField;
+use merkle_tree::ark_secp256k1::Fq;
 use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::DB;
@@ -391,6 +393,10 @@ pub async fn get_total_supply_at_block(
         )
         .unwrap(),
     )
+}
+
+pub fn to_hex(fe: Fq) -> String {
+    format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
 }
 
 #[cfg(test)]

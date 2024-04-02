@@ -1,13 +1,17 @@
 use crate::{
-    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, Address,
-    BlockNum, Error,
+    eth_rpc::EthRpcClient,
+    group::Group,
+    processors::GroupIndexer,
+    tree::{build_tree, get_group_latest_merkle_tree, save_tree, update_tree_block_num},
+    utils::to_hex,
+    Address, BlockNum, Error,
 };
 use log::{error, info};
 use rand::{rngs::OsRng, seq::SliceRandom};
 use std::{sync::Arc, time::Instant};
 use tokio::sync::Semaphore;
 
-const INDEXING_INTERVAL_SECS: u64 = 60; // 60 seconds
+const INDEXING_INTERVAL_SECS: u64 = 300; // 5 minutes
 
 pub struct TreeSyncEngine {
     pub indexer: Box<dyn GroupIndexer>,
@@ -44,54 +48,81 @@ impl TreeSyncEngine {
         // Get the members of the group at the given block number
         let members = self.indexer.get_members(block_number).await?;
 
-        // Sanity check the eligibility of a few members
-        let mut rng = OsRng::default();
-        let members_to_check: Vec<Address> = members
-            .iter()
-            .collect::<Vec<&Address>>()
-            .choose_multiple(&mut rng, 5)
-            .copied()
-            .copied()
-            .into_iter()
-            .collect();
+        // Convert the members to a vector
+        let mut members = members.iter().copied().collect::<Vec<Address>>();
 
-        let start = Instant::now();
-        let sanity_check_result = self
-            .indexer
-            .sanity_check_members(&members_to_check, block_number)
-            .await?;
+        // Build the merkle tree
+        let merkle_tree = build_tree(self.group.id.clone(), self.group.group_type, &mut members);
 
-        info!(
-            "${} Sanity check took {}ms",
-            self.group.name,
-            start.elapsed().as_millis()
-        );
+        if merkle_tree.is_none() {
+            return Ok(());
+        }
 
-        if !sanity_check_result {
-            error!(
-                "${} Sanity check failed for block {}",
-                self.group.name, block_number
-            );
+        let merkle_tree = merkle_tree.unwrap();
+
+        // Get the latest merkle root for the group
+        let group_latest_merkle_tree =
+            get_group_latest_merkle_tree(self.group.id.clone(), &self.pg_client).await?;
+
+        // Compare the latest merkle root with the new merkle root.
+        // If they are the same, then the tree is already up to date
+        // and we don't need to save the new tree.
+        if let Some((tree_id, merkle_root)) = group_latest_merkle_tree {
+            if merkle_root == to_hex(merkle_tree.root.unwrap()) {
+                info!(
+                    "${} Tree already up to date at block {}",
+                    self.group.name, block_number
+                );
+
+                // Update the block number of the tree
+                update_tree_block_num(tree_id, block_number, &self.pg_client).await?;
+            }
         } else {
+            // New Merkle tree detected
+
+            // Sanity check the eligibility of a few members
+            let mut rng = OsRng::default();
+            let members_to_check: Vec<Address> =
+                members.choose_multiple(&mut rng, 5).cloned().collect();
+
+            let start = Instant::now();
+            let sanity_check_result = self
+                .indexer
+                .sanity_check_members(&members_to_check, block_number)
+                .await?;
+
             info!(
-                target: "sanity-check",
-                "${} Sanity check passed for {:?} at block {}",
+                "${} Sanity check took {}ms",
                 self.group.name,
-                members_to_check
-                    .iter()
-                    .map(|m| hex::encode(m))
-                    .collect::<Vec<String>>(),
-                block_number
+                start.elapsed().as_millis()
             );
 
-            save_tree(
-                self.group.id.clone(),
-                self.group.group_type,
-                &self.pg_client,
-                members.iter().copied().collect(),
-                block_number as i64,
-            )
-            .await?;
+            if !sanity_check_result {
+                error!(
+                    "${} Sanity check failed for block {}",
+                    self.group.name, block_number
+                );
+            } else {
+                info!(
+                    target: "sanity-check",
+                    "${} Sanity check passed for {:?} at block {}",
+                    self.group.name,
+                    members_to_check
+                        .iter()
+                        .map(|m| hex::encode(m))
+                        .collect::<Vec<String>>(),
+                    block_number
+                );
+
+                save_tree(
+                    &members,
+                    merkle_tree,
+                    self.group.id.clone(),
+                    &self.pg_client,
+                    block_number as i64,
+                )
+                .await?;
+            }
         }
 
         Ok(())

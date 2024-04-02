@@ -1,11 +1,11 @@
 use crate::block_timestamp_sync_engine::BlockTimestampSyncEngine;
-use crate::contract::{Contract, ContractType};
+use crate::contract::Contract;
 use crate::eth_rpc::EthRpcClient;
-use crate::event::{
-    event_log_to_key_value, parse_erc1155_transfer_batch_event_log,
-    parse_erc1155_transfer_single_event_log, parse_erc20_event_log, parse_erc721_event_log,
-    parse_punk_transfer_event_log,
-};
+use crate::events::erc1155_batch::ERC1155TransferBatchLog;
+use crate::events::erc1155_single::ERC1155TransferSingleLog;
+use crate::events::erc20::ERC20TransferLog;
+use crate::events::erc721::ERC721TransferLog;
+use crate::events::EventLogLike;
 use crate::rocksdb_key::{
     KeyType, RocksDbKey, ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID,
     ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID,
@@ -41,7 +41,6 @@ pub struct LogSyncEngine {
     event_id: EventId,
     event_sig: &'static str,
     rocksdb_client: Arc<rocksdb::DB>,
-    log_parser: fn(&Value) -> Vec<u8>,
     block_timestamp_sync_engine: BlockTimestampSyncEngine,
 }
 
@@ -61,20 +60,6 @@ impl LogSyncEngine {
             _ => panic!("Invalid event_id"),
         };
 
-        // Select the log parser based on the contract type and event_id
-        let log_parser = match (contract.contract_type, event_id) {
-            (ContractType::ERC20, ERC20_TRANSFER_EVENT_ID) => parse_erc20_event_log,
-            (ContractType::ERC721, ERC721_TRANSFER_EVENT_ID) => parse_erc721_event_log,
-            (ContractType::Punk, ERC721_TRANSFER_EVENT_ID) => parse_punk_transfer_event_log,
-            (ContractType::ERC1155, ERC1155_TRANSFER_SINGLE_EVENT_ID) => {
-                parse_erc1155_transfer_single_event_log
-            }
-            (ContractType::ERC1155, ERC1155_TRANSFER_BATCH_EVENT_ID) => {
-                parse_erc1155_transfer_batch_event_log
-            }
-            _ => panic!("Invalid contract type and event_id combination"),
-        };
-
         let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
             eth_client.clone(),
             rocksdb_client.clone(),
@@ -89,7 +74,6 @@ impl LogSyncEngine {
             event_id,
             event_sig,
             rocksdb_client,
-            log_parser,
             block_timestamp_sync_engine,
         }
     }
@@ -121,14 +105,25 @@ impl LogSyncEngine {
             .par_iter()
             .flat_map(|logs_batch| {
                 logs_batch.par_iter().map(|log| {
-                    let (key, event) = event_log_to_key_value(
-                        log,
-                        self.event_id,
-                        self.contract.id,
-                        self.log_parser,
-                    );
+                    let contract_id = self.contract.id;
+                    let event_log: Box<dyn EventLogLike> = match self.event_id {
+                        ERC20_TRANSFER_EVENT_ID => {
+                            Box::new(ERC20TransferLog::from_json(log, contract_id))
+                        }
+                        ERC721_TRANSFER_EVENT_ID => {
+                            Box::new(ERC721TransferLog::from_json(log, contract_id))
+                        }
+                        ERC1155_TRANSFER_SINGLE_EVENT_ID => {
+                            Box::new(ERC1155TransferSingleLog::from_json(log, contract_id))
+                        }
+                        ERC1155_TRANSFER_BATCH_EVENT_ID => {
+                            Box::new(ERC1155TransferBatchLog::from_json(log, contract_id))
+                        }
+                        _ => panic!("Invalid event_id"),
+                    };
 
-                    (key.to_bytes().to_vec(), event)
+                    let (key, value) = event_log.to_rocksdb_record();
+                    (key.to_bytes(), value)
                 })
             })
             .collect();
