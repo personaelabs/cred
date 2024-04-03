@@ -83,7 +83,7 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
       <div className="w-[60px] text-center opacity-60 underline hidden md:flex">
         <Tooltip delayDuration={200}>
           <TooltipTrigger>
-            <div className="underline">{record.score}</div>
+            <div className="underline">{Math.round(record.score)}</div>
           </TooltipTrigger>
           <TooltipContent side="right" className="max-w-[300px]">
             <ul className="list-disc px-2">

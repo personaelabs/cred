@@ -6,13 +6,14 @@ interface LeaderboardResult {
   creddd: string[];
 }
 
-const K_WHALE = 100;
-const K_EARLY = 0.1;
-const K_BELIEVER = 0.01; // NOTE: applies to $TICKER too for now
+const K_WHALE = 1e2;
+const K_EARLY = 1e-1;
+const K_BELIEVER = 1e-2; // NOTE: applies to $TICKER too for now
+const K_NFT = 5e4;
 
-const K_NFT = 50000;
+// NOTE: this is to keep scores 5 digits for display purposes
+const SCORE_NORM = 1e-6;
 
-// TODO: normalize scores s.t. top scores are 5-figures
 export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
   const result = await prisma.$queryRaw<LeaderboardResult[]>`
    SELECT
@@ -43,5 +44,9 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
     LIMIT 15
   `;
 
-  return result;
+  return result.map(record => ({
+    fid: record.fid,
+    score: record.score * SCORE_NORM,
+    creddd: record.creddd,
+  }));
 }
