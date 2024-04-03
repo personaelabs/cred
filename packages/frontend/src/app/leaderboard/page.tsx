@@ -103,7 +103,7 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
             setIsDialogOpen(true);
           }}
         >
-          {record.score}
+          {Math.round(record.score)}
         </div>
       </div>
       <CredddListDialog
