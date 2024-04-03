@@ -8,7 +8,9 @@ pub mod contract_event_iterator;
 pub mod eth_rpc;
 pub mod events;
 pub mod group;
+pub mod intrinsic_creddd_sync_engine;
 pub mod log_sync_engine;
+pub mod neynar;
 pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
@@ -34,6 +36,8 @@ pub type ContractId = u16;
 
 pub type GroupId = String;
 
+pub type TreeId = i32;
+
 /// A chunk number is a number that represents a range of 2000 blocks.
 /// It's counted from the block the contract was deployed. (Chunk numbers are contract specific)
 pub type ChunkNum = u64;
@@ -49,6 +53,8 @@ pub type TxIndex = u32;
 
 /// Chain ID
 pub type ChainId = u16;
+
+pub type Fid = i64;
 
 /// 20byte Ethereum address
 pub type Address = [u8; 20];

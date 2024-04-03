@@ -399,6 +399,15 @@ pub fn to_hex(fe: Fq) -> String {
     format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
 }
 
+/// Format an address to a 66 character hex string
+pub fn format_address(address: &str) -> String {
+    format!(
+        "0x{:0>width$}",
+        address.trim_start_matches("0x"),
+        width = 64
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
