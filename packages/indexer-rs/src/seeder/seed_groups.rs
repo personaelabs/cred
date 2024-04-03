@@ -127,11 +127,12 @@ pub fn get_seed_groups() -> Vec<Group> {
     for contract in believer_contracts.clone() {
         let contract = Contract::from_contract_data(contract);
         let name = format!("{} believer", contract.name.clone());
+        let score = calculate_group_score(GroupType::Believer, &[&contract.address]);
         let group = Group::new(
             name,
             GroupType::Believer,
             vec![contract],
-            0,
+            score,
             GroupState::Recordable,
         );
 
@@ -163,7 +164,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         GroupState::Recordable,
     ));
 
-    if is_prod() {
+    if true {
         groups
     } else {
         // Only return a selected few
