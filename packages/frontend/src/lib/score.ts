@@ -34,12 +34,8 @@ export async function getUserScore(fid: number): Promise<number> {
       LEFT JOIN "MerkleTree" ON "FidAttestation"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
     WHERE "FidAttestation".fid = ${fid}
-    GROUP BY
-      "FidAttestation".fid
-    ORDER BY
-      score DESC
-    LIMIT 15
   `;
+
   if (result.length === 0) {
     return 0;
   }
