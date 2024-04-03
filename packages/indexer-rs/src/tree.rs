@@ -11,7 +11,6 @@ use merkle_tree_lib::tree::MerkleTree;
 use num_bigint::BigUint;
 use prost::Message;
 use std::env;
-use std::time::Instant;
 
 const TREE_DEPTH: usize = 18;
 const TREE_WIDTH: usize = 3;
@@ -195,7 +194,6 @@ pub async fn save_tree(
         ON CONFLICT ("groupId", "blockNumber") DO NOTHING
         "#;
 
-    let start = Instant::now();
     pg_client
         .query(
             statement,
@@ -213,13 +211,6 @@ pub async fn save_tree(
         )
         .await?;
 
-    info!(
-        "Saved tree for group {} and block {} in {:?}",
-        group_id,
-        block_number,
-        start.elapsed()
-    );
-
     // Set bloom filter and the tree body to null for older trees
 
     let statement = r#"
@@ -227,16 +218,13 @@ pub async fn save_tree(
         WHERE "groupId" = $1 AND "blockNumber" < $2
         "#;
 
-    let start = Instant::now();
     pg_client
         .query(statement, &[&group_id, &(block_number - 2000)])
         .await?;
 
     info!(
-        "Nullified old trees for group {} and block {} in {:?}",
-        group_id,
-        block_number,
-        start.elapsed()
+        "${} New Merkle tree saved at block {}",
+        group_id, block_number
     );
 
     Ok(())

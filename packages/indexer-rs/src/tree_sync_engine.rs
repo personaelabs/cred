@@ -1,14 +1,14 @@
 use crate::{
     eth_rpc::EthRpcClient,
-    group::Group,
+    group::{upsert_group, Group},
     processors::GroupIndexer,
     tree::{build_tree, get_group_latest_merkle_tree, save_tree, update_tree_block_num},
     utils::to_hex,
-    Address, BlockNum, Error,
+    Address, BlockNum, Error, GroupState, IndexerError,
 };
 use log::{error, info};
 use rand::{rngs::OsRng, seq::SliceRandom};
-use std::{sync::Arc, time::Instant};
+use std::sync::Arc;
 use tokio::sync::Semaphore;
 
 const INDEXING_INTERVAL_SECS: u64 = 300; // 5 minutes
@@ -85,17 +85,10 @@ impl TreeSyncEngine {
             let members_to_check: Vec<Address> =
                 members.choose_multiple(&mut rng, 5).cloned().collect();
 
-            let start = Instant::now();
             let sanity_check_result = self
                 .indexer
                 .sanity_check_members(&members_to_check, block_number)
                 .await?;
-
-            info!(
-                "${} Sanity check took {}ms",
-                self.group.name,
-                start.elapsed().as_millis()
-            );
 
             if !sanity_check_result {
                 error!(
@@ -103,17 +96,6 @@ impl TreeSyncEngine {
                     self.group.name, block_number
                 );
             } else {
-                info!(
-                    target: "sanity-check",
-                    "${} Sanity check passed for {:?} at block {}",
-                    self.group.name,
-                    members_to_check
-                        .iter()
-                        .map(|m| hex::encode(m))
-                        .collect::<Vec<String>>(),
-                    block_number
-                );
-
                 save_tree(
                     &members,
                     merkle_tree,
@@ -182,9 +164,23 @@ impl TreeSyncEngine {
             // Sync to the latest block
             let sync_to_block_result = self.sync_to_block(latest_block).await;
 
+            // If `get_members` return incorrect state error,
+            // mark the group as unrecordable and break the loop
+
             match sync_to_block_result {
-                Ok(_) => {
-                    info!("${} Tree synced to block {}", self.group.name, latest_block);
+                Ok(_) => {}
+                Err(Error::Indexer(IndexerError::InvalidBalance)) => {
+                    error!("${} Invalid balance {:?}", self.group.name, latest_block);
+                    drop(permit);
+                    let mut updated_group = self.group.clone();
+
+                    // Update the group state to unrecordable
+                    updated_group.state = GroupState::Unrecordable;
+
+                    // TODO: Propagate the error to the caller
+                    upsert_group(&self.pg_client, updated_group).await.unwrap();
+
+                    break;
                 }
                 Err(err) => {
                     error!(

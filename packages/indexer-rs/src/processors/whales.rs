@@ -11,12 +11,11 @@ use crate::utils::{
     decode_erc20_transfer_event, get_balance_at_block, get_total_supply_at_block,
     is_event_logs_ready, MINTER_ADDRESS,
 };
-use crate::Error;
 use crate::{Address, BlockNum};
+use crate::{Error, IndexerError};
 use num_bigint::BigUint;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
-use std::io::ErrorKind;
 
 pub fn get_whale_handle(contract_name: &str) -> String {
     format!("whale-{}", contract_name.to_lowercase())
@@ -85,10 +84,7 @@ impl WhaleIndexer {
             } else {
                 let balance = balances.get(&log.from).unwrap();
                 if balance < &log.value {
-                    return Err(Error::Std(std::io::Error::new(
-                        ErrorKind::Other,
-                        "Insufficient balance",
-                    )));
+                    return Err(IndexerError::InvalidBalance.into());
                 }
 
                 // Decrease balance of `from` by `value`
@@ -220,7 +216,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType,
+        GroupState, GroupType,
     };
 
     #[tokio::test]
@@ -258,6 +254,7 @@ mod test {
             GroupType::Whale,
             vec![contract.clone()],
             0,
+            GroupState::Recordable,
         );
 
         let whale_indexer = WhaleIndexer::new(group, resources);

@@ -15,13 +15,12 @@ use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
-use log::{debug, error, info};
+use log::{error, info};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rocksdb::WriteBatch;
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
-use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
 
@@ -80,18 +79,11 @@ impl LogSyncEngine {
 
     /// Search for chunks that aren't synched yet
     fn search_missing_chunks(&self, to_chunk: ChunkNum) -> Vec<ChunkNum> {
-        let start = Instant::now();
         let missing_chunks = search_missing_chunks(
             &self.rocksdb_client,
             self.event_id,
             self.contract.id,
             to_chunk,
-        );
-        info!(
-            "${} {}: {:?}",
-            self.contract.name,
-            "Search Missing chunks".purple(),
-            start.elapsed()
         );
 
         missing_chunks
@@ -251,7 +243,12 @@ impl LogSyncEngine {
 
         self.rocksdb_client.write(batch).unwrap();
         if !chunks.is_empty() {
-            info!("${} Synched chunk: {}", self.contract.name, chunks[0]);
+            info!(
+                "${} Synched chunk: {}-{}",
+                self.contract.name,
+                chunks[0],
+                chunks[chunks.len() - 1]
+            );
         }
     }
 
@@ -267,8 +264,6 @@ impl LogSyncEngine {
         // Get the latest synched chunk. We start from the next chunk.
         let chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
 
-        debug!("${} Start from chunk: {}", self.contract.name, chunks_from);
-
         // A chunk is 2000 blocks. We sync in batches of 50 chunks (100,000 blocks)
 
         let chunk_batches = (chunks_from..num_total_chunks).collect::<Vec<ChunkNum>>();
@@ -277,31 +272,18 @@ impl LogSyncEngine {
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
-        let start = Instant::now();
-        let num_jobs = jobs.len();
         join_all(jobs).await;
-        info!(
-            "Synced ${} in {:?} ({}jobs)",
-            self.contract.name,
-            start.elapsed(),
-            num_jobs
-        );
 
         // Get missing chunks
         let missing_chunks = self.search_missing_chunks(num_total_chunks);
-
-        info!(
-            "${} {}: {}",
-            self.contract.name,
-            "Synching Missing chunks".blue(),
-            missing_chunks.len()
-        );
 
         let missing_chunks_sync_jobs = missing_chunks
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         join_all(missing_chunks_sync_jobs).await;
+
+        info!("${} Synced to block: {}", self.contract.name, to_block);
     }
 
     pub async fn sync(self) {
