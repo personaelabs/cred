@@ -120,7 +120,7 @@ const LeaderBoardPage = () => {
 
   return (
     <div className="px-[20px] md:px-[200px] flex flex-col items-center">
-      <div className="text-md text-center">the creddd 10 </div>
+      <div className="text-md text-center">leaderboard</div>
       <div className="text-sm text-center">value + variety = hi score</div>
       <div className="flex flex-row w-[270px] md:w-[450px] justify-end">
         <div className="w-[60px] opacity-60 text-center">score</div>
