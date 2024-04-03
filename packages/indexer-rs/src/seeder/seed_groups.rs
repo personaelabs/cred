@@ -164,7 +164,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         GroupState::Recordable,
     ));
 
-    if true {
+    if is_prod() {
         groups
     } else {
         // Only return a selected few
