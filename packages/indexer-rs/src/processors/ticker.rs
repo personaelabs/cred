@@ -7,12 +7,11 @@ use crate::{
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     seeder::seed_contracts::get_seed_contracts,
     utils::{decode_erc20_transfer_event, is_event_logs_ready, MINTER_ADDRESS},
-    Address, BlockNum, Error, TxIndex,
+    Address, BlockNum, Error, IndexerError, TxIndex,
 };
 use num_bigint::BigUint;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::io::ErrorKind;
 
 // The block num and index of transaction: https://basescan.org/tx/0x3122445f0240df9530c8a360fb7631ad5aca4e24503e8856b9aedae05dab830c
 const TO_BLOCK_NUMBER: BlockNum = 11968043;
@@ -106,10 +105,7 @@ impl GroupIndexer for TickerIndexer {
             if log.from != MINTER_ADDRESS {
                 let balance = balances.get(&log.from).unwrap();
                 if balance < &log.value {
-                    return Err(Error::Std(std::io::Error::new(
-                        ErrorKind::Other,
-                        "Insufficient balance",
-                    )));
+                    return Err(IndexerError::InvalidBalance.into());
                 }
 
                 // Decrease balance of `from` by `value`
@@ -147,7 +143,7 @@ mod test {
         seeder::seed_contracts::get_seed_contracts,
         test_utils::{get_members_from_csv, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType,
+        GroupState, GroupType,
     };
     use std::sync::Arc;
 
@@ -192,6 +188,7 @@ mod test {
             GroupType::Ticker,
             vec![ticker_contract.clone()],
             0,
+            GroupState::Recordable,
         );
 
         let indexer = TickerIndexer::new(group, resources.clone());

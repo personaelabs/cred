@@ -142,7 +142,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType,
+        GroupState, GroupType,
     };
     use std::sync::Arc;
 
@@ -181,6 +181,7 @@ mod test {
             GroupType::EarlyHolder,
             vec![contract.clone()],
             0,
+            GroupState::Recordable,
         );
 
         let indexer = EarlyHolderIndexer::new(group, resources.clone());

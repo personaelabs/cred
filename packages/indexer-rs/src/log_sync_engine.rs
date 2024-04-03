@@ -15,13 +15,12 @@ use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
-use log::{debug, error, info};
+use log::{error, info};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rocksdb::WriteBatch;
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
-use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
 

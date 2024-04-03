@@ -3,7 +3,7 @@ use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::utils::dev_addresses;
 use crate::{Address, BlockNum, GroupId, GroupType};
 use bloomfilter::Bloom;
-use log::warn;
+use log::{info, warn};
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
 use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
@@ -221,6 +221,11 @@ pub async fn save_tree(
     pg_client
         .query(statement, &[&group_id, &(block_number - 2000)])
         .await?;
+
+    info!(
+        "${} New Merkle tree saved at block {}",
+        group_id, block_number
+    );
 
     Ok(())
 }

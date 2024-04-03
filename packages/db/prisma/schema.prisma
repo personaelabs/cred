@@ -64,11 +64,12 @@ model MerkleTree {
 }
 
 model Group {
-  id             String    @id
+  id             String     @id
   displayName    String
   typeId         GroupType
   contractInputs Int[]
   score          BigInt?
+  state          GroupState @default(Recordable)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,6 +95,11 @@ enum GroupType {
   AllHolders
   Ticker
   Believer
+}
+
+enum GroupState {
+  Recordable
+  Unrecordable
 }
 
 model Contract {

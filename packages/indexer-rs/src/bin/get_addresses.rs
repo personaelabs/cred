@@ -1,6 +1,4 @@
-use indexer_rs::{
-    merkle_tree_proto::MerkleTree, postgres::init_postgres, utils::dotenv_config, GroupType,
-};
+use indexer_rs::{merkle_tree_proto::MerkleTree, postgres::init_postgres, utils::dotenv_config};
 use prost::Message;
 use std::collections::{HashMap, HashSet};
 
