@@ -12,6 +12,9 @@ use crate::{
     ERC20TransferEvent, ERC721TransferEvent, GroupType,
 };
 use crate::{Address, ContractId, EventId};
+use alloy_json_abi::Function;
+use merkle_tree::ark_ff::PrimeField;
+use merkle_tree::ark_secp256k1::Fq;
 use num_bigint::BigUint;
 use prost::Message;
 use rocksdb::DB;
@@ -324,6 +327,76 @@ pub fn get_chain_id(chain: Chain) -> ChainId {
         Chain::Arbitrum => 42161,
         Chain::Optimism => 10,
     }
+}
+
+pub async fn get_balance_at_block(
+    eth_client: &EthRpcClient,
+    contract: &Contract,
+    address: &str,
+    block_number: BlockNum,
+) -> BigUint {
+    let balance_of_selector = hex::encode(
+        Function::parse("balanceOf(address _owner)")
+            .unwrap()
+            .selector()
+            .0,
+    );
+
+    let args = hex::decode(format!("{:0>width$}", address, width = 64)).unwrap();
+
+    let balance_at_block = eth_client
+        .eth_call(
+            contract.chain,
+            &contract.address,
+            &balance_of_selector,
+            &args,
+            block_number,
+        )
+        .await
+        .unwrap();
+
+    BigUint::from_bytes_be(
+        &hex::decode(
+            balance_at_block["result"]
+                .as_str()
+                .unwrap()
+                .trim_start_matches("0x"),
+        )
+        .unwrap(),
+    )
+}
+
+pub async fn get_total_supply_at_block(
+    eth_client: &EthRpcClient,
+    contract: &Contract,
+    block_number: BlockNum,
+) -> BigUint {
+    let total_supply_selector = hex::encode(Function::parse("totalSupply()").unwrap().selector().0);
+
+    let total_supply_at_block = eth_client
+        .eth_call(
+            contract.chain,
+            &contract.address,
+            &total_supply_selector,
+            &[],
+            block_number,
+        )
+        .await
+        .unwrap();
+
+    BigUint::from_bytes_be(
+        &hex::decode(
+            total_supply_at_block["result"]
+                .as_str()
+                .unwrap()
+                .trim_start_matches("0x"),
+        )
+        .unwrap(),
+    )
+}
+
+pub fn to_hex(fe: Fq) -> String {
+    format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
 }
 
 #[cfg(test)]

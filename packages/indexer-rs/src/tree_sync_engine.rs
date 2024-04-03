@@ -1,11 +1,17 @@
 use crate::{
-    eth_rpc::EthRpcClient, group::Group, processors::GroupIndexer, tree::save_tree, BlockNum, Error,
+    eth_rpc::EthRpcClient,
+    group::{upsert_group, Group},
+    processors::GroupIndexer,
+    tree::{build_tree, get_group_latest_merkle_tree, save_tree, update_tree_block_num},
+    utils::to_hex,
+    Address, BlockNum, Error, GroupState, IndexerError,
 };
 use log::{error, info};
+use rand::{rngs::OsRng, seq::SliceRandom};
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 
-const INDEXING_INTERVAL_SECS: u64 = 60; // 60 seconds
+const INDEXING_INTERVAL_SECS: u64 = 300; // 5 minutes
 
 pub struct TreeSyncEngine {
     pub indexer: Box<dyn GroupIndexer>,
@@ -39,16 +45,68 @@ impl TreeSyncEngine {
 impl TreeSyncEngine {
     /// Sync the tree to a specific block number
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
+        // Get the members of the group at the given block number
         let members = self.indexer.get_members(block_number).await?;
 
-        save_tree(
-            self.group.id.clone(),
-            self.group.group_type,
-            &self.pg_client,
-            members.iter().copied().collect(),
-            block_number as i64,
-        )
-        .await?;
+        // Convert the members to a vector
+        let mut members = members.iter().copied().collect::<Vec<Address>>();
+
+        // Build the merkle tree
+        let merkle_tree = build_tree(self.group.id.clone(), self.group.group_type, &mut members);
+
+        if merkle_tree.is_none() {
+            return Ok(());
+        }
+
+        let merkle_tree = merkle_tree.unwrap();
+
+        // Get the latest merkle root for the group
+        let group_latest_merkle_tree =
+            get_group_latest_merkle_tree(self.group.id.clone(), &self.pg_client).await?;
+
+        // Compare the latest merkle root with the new merkle root.
+        // If they are the same, then the tree is already up to date
+        // and we don't need to save the new tree.
+        if let Some((tree_id, merkle_root)) = group_latest_merkle_tree {
+            if merkle_root == to_hex(merkle_tree.root.unwrap()) {
+                info!(
+                    "${} Tree already up to date at block {}",
+                    self.group.name, block_number
+                );
+
+                // Update the block number of the tree
+                update_tree_block_num(tree_id, block_number, &self.pg_client).await?;
+                return Ok(());
+            }
+        }
+
+        // New Merkle tree detected
+
+        // Sanity check the eligibility of a few members
+        let mut rng = OsRng::default();
+        let members_to_check: Vec<Address> =
+            members.choose_multiple(&mut rng, 5).cloned().collect();
+
+        let sanity_check_result = self
+            .indexer
+            .sanity_check_members(&members_to_check, block_number)
+            .await?;
+
+        if !sanity_check_result {
+            error!(
+                "${} Sanity check failed for block {}",
+                self.group.name, block_number
+            );
+        } else {
+            save_tree(
+                &members,
+                merkle_tree,
+                self.group.id.clone(),
+                &self.pg_client,
+                block_number as i64,
+            )
+            .await?;
+        }
 
         Ok(())
     }
@@ -107,9 +165,23 @@ impl TreeSyncEngine {
             // Sync to the latest block
             let sync_to_block_result = self.sync_to_block(latest_block).await;
 
+            // If `get_members` return incorrect state error,
+            // mark the group as unrecordable and break the loop
+
             match sync_to_block_result {
-                Ok(_) => {
-                    info!("${} Tree synced to block {}", self.group.name, latest_block);
+                Ok(_) => {}
+                Err(Error::Indexer(IndexerError::InvalidBalance)) => {
+                    error!("${} Invalid balance {:?}", self.group.name, latest_block);
+                    drop(permit);
+                    let mut updated_group = self.group.clone();
+
+                    // Update the group state to unrecordable
+                    updated_group.state = GroupState::Unrecordable;
+
+                    // TODO: Propagate the error to the caller
+                    upsert_group(&self.pg_client, updated_group).await.unwrap();
+
+                    break;
                 }
                 Err(err) => {
                     error!(

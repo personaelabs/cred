@@ -90,6 +90,9 @@ export async function POST(req: NextRequest) {
   const merkleRoot = bytesToHex(merkleRootBytes);
 
   const merkleTreeInDb = await prisma.merkleTree.findUnique({
+    select: {
+      merkleRoot: true,
+    },
     where: {
       id: body.treeId,
     },
@@ -127,6 +130,9 @@ export async function POST(req: NextRequest) {
   const attestationHash = getFidAttestationHashV1(merkleRoot, fid);
 
   const attestationExists = await prisma.fidAttestation.findUnique({
+    select: {
+      hash: true,
+    },
     where: {
       hash: attestationHash,
     },

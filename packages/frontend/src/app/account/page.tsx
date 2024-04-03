@@ -9,7 +9,6 @@ import Link from 'next/link';
 import useEligibleGroups from '@/hooks/useEligibleGroups';
 import { Hex } from 'viem';
 import { Loader2 } from 'lucide-react';
-import MintInstructionModal from '@/components/MintInstructionModal';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
 import SwitchAccountsModal from '@/components/SwitchAccountsModal';
@@ -26,8 +25,6 @@ export default function AccountPage() {
   const [connectedAddress, setConnectedAddress] = useState<Hex | null>(null);
   const [metamaskProvider, setMetamaskProvider] = useState<any | null>(null);
   const { eligibleGroups } = useEligibleGroups(addresses as Hex[] | undefined);
-  const [isMintInstructionModalOpen, setIsMintInstructionModalOpen] =
-    useState<boolean>(false);
   const [isSwitchAccountsModalOpen, setIsSwitchAccountsModalOpen] =
     useState(false);
   const { openConnectModal } = useConnectModal();
@@ -231,15 +228,10 @@ export default function AccountPage() {
                   added={addedGroups.some(g => g === group.id)}
                   key={i}
                   afterAdd={() => {
-                    // Open mint instruction modal if user hasn't yet
-                    if (user && user.mints.length == 0) {
-                      setIsMintInstructionModalOpen(true);
-                    } else {
-                      toast.success('creddd added', {
-                        duration: 5000,
-                        closeButton: true,
-                      });
-                    }
+                    toast.success('creddd added', {
+                      duration: 5000,
+                      closeButton: true,
+                    });
                   }}
                 />
               ))}
@@ -278,12 +270,6 @@ export default function AccountPage() {
           <></>
         )}
       </div>
-      <MintInstructionModal
-        isOpen={isMintInstructionModalOpen}
-        onClose={() => {
-          setIsMintInstructionModalOpen(false);
-        }}
-      />
       <SwitchAccountsModal
         isOpen={isSwitchAccountsModalOpen}
         onClose={() => {

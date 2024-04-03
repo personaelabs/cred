@@ -6,7 +6,7 @@ pub mod coingecko;
 pub mod contract;
 pub mod contract_event_iterator;
 pub mod eth_rpc;
-pub mod event;
+pub mod events;
 pub mod group;
 pub mod log_sync_engine;
 pub mod postgres;
@@ -56,11 +56,17 @@ pub type Address = [u8; 20];
 pub const ROCKSDB_PATH: &str = "./db";
 
 #[derive(Debug)]
+pub enum IndexerError {
+    InvalidBalance,
+    NoBlockTimestamp,
+}
+
+#[derive(Debug)]
 pub enum Error {
     RocksDB(rocksdb::Error),
     Postgres(tokio_postgres::Error),
     Surf(surf::Error),
-    Std(std::io::Error),
+    Indexer(IndexerError),
 }
 
 impl From<rocksdb::Error> for Error {
@@ -75,15 +81,15 @@ impl From<tokio_postgres::Error> for Error {
     }
 }
 
-impl From<std::io::Error> for Error {
-    fn from(e: std::io::Error) -> Self {
-        Error::Std(e)
-    }
-}
-
 impl From<surf::Error> for Error {
     fn from(e: surf::Error) -> Self {
         Error::Surf(e)
+    }
+}
+
+impl From<IndexerError> for Error {
+    fn from(e: IndexerError) -> Self {
+        Error::Indexer(e)
     }
 }
 
@@ -97,6 +103,13 @@ pub enum GroupType {
     AllHolders,
     Ticker,
     Believer,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
+#[postgres(name = "GroupState")]
+pub enum GroupState {
+    Recordable,
+    Unrecordable,
 }
 
 #[derive(Debug, Clone)]

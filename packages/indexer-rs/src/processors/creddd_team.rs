@@ -45,4 +45,13 @@ impl GroupIndexer for CredddTeamIndexer {
 
         Ok(addresses_set)
     }
+
+    async fn sanity_check_members(
+        &self,
+        _members: &[Address],
+        _block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        // No sanity check required
+        Ok(true)
+    }
 }

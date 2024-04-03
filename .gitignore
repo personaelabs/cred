@@ -15,3 +15,5 @@ addr_membership.r1cs
 /checkpoint/
 packages/indexer-rs/db
 !./packages/db
+
+google-service-account.json

@@ -10,14 +10,13 @@ use crate::{
         decode_erc20_transfer_event, get_chain_id, is_block_timestamps_ready, is_event_logs_ready,
         MINTER_ADDRESS,
     },
-    Address, BlockNum, Error,
+    Address, BlockNum, Error, IndexerError,
 };
 use log::info;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use std::{
     collections::{HashMap, HashSet},
-    io::ErrorKind,
     sync::Arc,
 };
 
@@ -77,10 +76,7 @@ impl BelieverIndexer {
                 let timestamp = u64::from_be_bytes(value.try_into().unwrap());
                 Ok(timestamp)
             }
-            None => Err(Error::Std(std::io::Error::new(
-                ErrorKind::Other,
-                "Block timestamp not found",
-            ))),
+            None => Err(IndexerError::NoBlockTimestamp.into()),
         }
     }
 }
@@ -163,10 +159,7 @@ impl GroupIndexer for BelieverIndexer {
 
                 let balance = balances.get(&log.from).unwrap();
                 if balance < &log.value {
-                    return Err(Error::Std(std::io::Error::new(
-                        ErrorKind::Other,
-                        "Insufficient balance",
-                    )));
+                    return Err(IndexerError::InvalidBalance.into());
                 }
 
                 // Decrease balance of `from` by `value`
@@ -214,5 +207,14 @@ impl GroupIndexer for BelieverIndexer {
         info!("Found {:?} believers", believers.len());
 
         Ok(believers)
+    }
+
+    async fn sanity_check_members(
+        &self,
+        _members: &[Address],
+        _block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        // No sanity check for the believer group for now
+        Ok(true)
     }
 }

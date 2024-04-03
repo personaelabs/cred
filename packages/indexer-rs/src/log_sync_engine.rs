@@ -1,11 +1,11 @@
 use crate::block_timestamp_sync_engine::BlockTimestampSyncEngine;
-use crate::contract::{Contract, ContractType};
+use crate::contract::Contract;
 use crate::eth_rpc::EthRpcClient;
-use crate::event::{
-    event_log_to_key_value, parse_erc1155_transfer_batch_event_log,
-    parse_erc1155_transfer_single_event_log, parse_erc20_event_log, parse_erc721_event_log,
-    parse_punk_transfer_event_log,
-};
+use crate::events::erc1155_batch::ERC1155TransferBatchLog;
+use crate::events::erc1155_single::ERC1155TransferSingleLog;
+use crate::events::erc20::ERC20TransferLog;
+use crate::events::erc721::ERC721TransferLog;
+use crate::events::EventLogLike;
 use crate::rocksdb_key::{
     KeyType, RocksDbKey, ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID,
     ERC20_TRANSFER_EVENT_ID, ERC721_TRANSFER_EVENT_ID,
@@ -15,13 +15,12 @@ use crate::{BlockNum, ChunkNum, EventId};
 use colored::*;
 use core::panic;
 use futures::future::join_all;
-use log::{debug, error, info};
+use log::{error, info};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rocksdb::WriteBatch;
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
-use std::time::Instant;
 
 pub const CHUNK_SIZE: u64 = 2000;
 
@@ -41,7 +40,6 @@ pub struct LogSyncEngine {
     event_id: EventId,
     event_sig: &'static str,
     rocksdb_client: Arc<rocksdb::DB>,
-    log_parser: fn(&Value) -> Vec<u8>,
     block_timestamp_sync_engine: BlockTimestampSyncEngine,
 }
 
@@ -61,20 +59,6 @@ impl LogSyncEngine {
             _ => panic!("Invalid event_id"),
         };
 
-        // Select the log parser based on the contract type and event_id
-        let log_parser = match (contract.contract_type, event_id) {
-            (ContractType::ERC20, ERC20_TRANSFER_EVENT_ID) => parse_erc20_event_log,
-            (ContractType::ERC721, ERC721_TRANSFER_EVENT_ID) => parse_erc721_event_log,
-            (ContractType::Punk, ERC721_TRANSFER_EVENT_ID) => parse_punk_transfer_event_log,
-            (ContractType::ERC1155, ERC1155_TRANSFER_SINGLE_EVENT_ID) => {
-                parse_erc1155_transfer_single_event_log
-            }
-            (ContractType::ERC1155, ERC1155_TRANSFER_BATCH_EVENT_ID) => {
-                parse_erc1155_transfer_batch_event_log
-            }
-            _ => panic!("Invalid contract type and event_id combination"),
-        };
-
         let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
             eth_client.clone(),
             rocksdb_client.clone(),
@@ -89,25 +73,17 @@ impl LogSyncEngine {
             event_id,
             event_sig,
             rocksdb_client,
-            log_parser,
             block_timestamp_sync_engine,
         }
     }
 
     /// Search for chunks that aren't synched yet
     fn search_missing_chunks(&self, to_chunk: ChunkNum) -> Vec<ChunkNum> {
-        let start = Instant::now();
         let missing_chunks = search_missing_chunks(
             &self.rocksdb_client,
             self.event_id,
             self.contract.id,
             to_chunk,
-        );
-        info!(
-            "${} {}: {:?}",
-            self.contract.name,
-            "Search Missing chunks".purple(),
-            start.elapsed()
         );
 
         missing_chunks
@@ -121,14 +97,25 @@ impl LogSyncEngine {
             .par_iter()
             .flat_map(|logs_batch| {
                 logs_batch.par_iter().map(|log| {
-                    let (key, event) = event_log_to_key_value(
-                        log,
-                        self.event_id,
-                        self.contract.id,
-                        self.log_parser,
-                    );
+                    let contract_id = self.contract.id;
+                    let event_log: Box<dyn EventLogLike> = match self.event_id {
+                        ERC20_TRANSFER_EVENT_ID => {
+                            Box::new(ERC20TransferLog::from_json(log, contract_id))
+                        }
+                        ERC721_TRANSFER_EVENT_ID => {
+                            Box::new(ERC721TransferLog::from_json(log, contract_id))
+                        }
+                        ERC1155_TRANSFER_SINGLE_EVENT_ID => {
+                            Box::new(ERC1155TransferSingleLog::from_json(log, contract_id))
+                        }
+                        ERC1155_TRANSFER_BATCH_EVENT_ID => {
+                            Box::new(ERC1155TransferBatchLog::from_json(log, contract_id))
+                        }
+                        _ => panic!("Invalid event_id"),
+                    };
 
-                    (key.to_bytes().to_vec(), event)
+                    let (key, value) = event_log.to_rocksdb_record();
+                    (key.to_bytes(), value)
                 })
             })
             .collect();
@@ -256,7 +243,12 @@ impl LogSyncEngine {
 
         self.rocksdb_client.write(batch).unwrap();
         if !chunks.is_empty() {
-            info!("${} Synched chunk: {}", self.contract.name, chunks[0]);
+            info!(
+                "${} Synched chunk: {}-{}",
+                self.contract.name,
+                chunks[0],
+                chunks[chunks.len() - 1]
+            );
         }
     }
 
@@ -272,8 +264,6 @@ impl LogSyncEngine {
         // Get the latest synched chunk. We start from the next chunk.
         let chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
 
-        debug!("${} Start from chunk: {}", self.contract.name, chunks_from);
-
         // A chunk is 2000 blocks. We sync in batches of 50 chunks (100,000 blocks)
 
         let chunk_batches = (chunks_from..num_total_chunks).collect::<Vec<ChunkNum>>();
@@ -282,31 +272,18 @@ impl LogSyncEngine {
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
-        let start = Instant::now();
-        let num_jobs = jobs.len();
         join_all(jobs).await;
-        info!(
-            "Synced ${} in {:?} ({}jobs)",
-            self.contract.name,
-            start.elapsed(),
-            num_jobs
-        );
 
         // Get missing chunks
         let missing_chunks = self.search_missing_chunks(num_total_chunks);
-
-        info!(
-            "${} {}: {}",
-            self.contract.name,
-            "Synching Missing chunks".blue(),
-            missing_chunks.len()
-        );
 
         let missing_chunks_sync_jobs = missing_chunks
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         join_all(missing_chunks_sync_jobs).await;
+
+        info!("${} Synced to block: {}", self.contract.name, to_block);
     }
 
     pub async fn sync(self) {

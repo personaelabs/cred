@@ -11,12 +11,18 @@ pub struct AssetsWithPrices {
 
 /// Load the `assets_with_prices.json` file and return a vector of `AssetsWithPrices`
 pub fn get_assets_with_prices() -> Vec<AssetsWithPrices> {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let assets = fs::read_to_string(format!(
-        "{}/src/seeder/assets_with_prices.json",
-        manifest_dir
-    ))
-    .expect("Unable to open assets_with_prices.json");
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR");
+
+    let assets = if manifest_dir.is_err() {
+        fs::read_to_string("./assets_with_prices.json")
+            .expect("Unable to open assets_with_prices.json")
+    } else {
+        fs::read_to_string(format!(
+            "{}/src/seeder/assets_with_prices.json",
+            manifest_dir.unwrap()
+        ))
+        .expect("Unable to open assets_with_prices.json")
+    };
 
     let assets: Vec<AssetsWithPrices> =
         serde_json::from_str(&assets).expect("Unable to parse contracts.json");

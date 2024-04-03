@@ -3,11 +3,14 @@ use crate::{
     contract_event_iterator::ContractEventIterator,
     eth_rpc::Chain,
     group::Group,
+    log_sync_engine::TRANSFER_EVENT_SIG,
     processors::{GroupIndexer, IndexerResources},
     rocksdb_key::ERC20_TRANSFER_EVENT_ID,
     utils::{decode_erc20_transfer_event, is_event_logs_ready},
     Address, BlockNum, Error,
 };
+use rand::{rngs::OsRng, seq::SliceRandom};
+use serde_json::{json, Value};
 use std::collections::HashSet;
 
 pub struct EarlyHolderIndexer {
@@ -71,9 +74,52 @@ impl GroupIndexer for EarlyHolderIndexer {
             .iter()
             .take(earliness_threshold)
             .copied()
-            .collect();
+            .collect::<HashSet<Address>>();
 
         Ok(early_holders)
+    }
+
+    async fn sanity_check_members(
+        &self,
+        members: &[Address],
+        block_number: BlockNum,
+    ) -> Result<bool, Error> {
+        let members = members.iter().collect::<Vec<&Address>>();
+
+        // Choose a 5 random members to check
+        let mut rng = OsRng::default();
+        let members_to_check = members.choose_multiple(&mut rng, 5);
+
+        let contract = self.contract();
+        for member in members_to_check {
+            // Get logs where the balance of the address increases
+            let member = hex::encode(member);
+            let params = json!({
+                "address": contract.address.clone(),
+                "topics": [
+                    TRANSFER_EVENT_SIG,
+                    Value::Null,
+                    format!("0x{:0>width$}", member, width = 64),
+                ],
+                "fromBlock": "earliest",
+                "toBlock": format!("0x{:x}", block_number),
+            });
+
+            let result = self
+                .resources
+                .eth_client
+                .get_logs(contract.chain, &params)
+                .await
+                .unwrap();
+
+            let result = result["result"].as_array().unwrap();
+
+            if result.is_empty() {
+                return Ok(false);
+            }
+        }
+
+        Ok(true)
     }
 
     async fn is_ready(&self) -> Result<bool, surf::Error> {
@@ -96,7 +142,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupType,
+        GroupState, GroupType,
     };
     use std::sync::Arc;
 
@@ -135,6 +181,7 @@ mod test {
             GroupType::EarlyHolder,
             vec![contract.clone()],
             0,
+            GroupState::Recordable,
         );
 
         let indexer = EarlyHolderIndexer::new(group, resources.clone());
