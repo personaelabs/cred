@@ -3,7 +3,7 @@ use crate::merkle_tree_proto::{self, MerkleTreeLayer};
 use crate::utils::dev_addresses;
 use crate::{Address, BlockNum, GroupId, GroupType};
 use bloomfilter::Bloom;
-use log::{info, warn};
+use log::warn;
 use merkle_tree_lib::ark_ff::{BigInteger, Field, PrimeField};
 use merkle_tree_lib::ark_secp256k1::Fq;
 use merkle_tree_lib::poseidon::constants::secp256k1_w3;
@@ -11,7 +11,6 @@ use merkle_tree_lib::tree::MerkleTree;
 use num_bigint::BigUint;
 use prost::Message;
 use std::env;
-use std::time::Instant;
 
 const TREE_DEPTH: usize = 18;
 const TREE_WIDTH: usize = 3;
@@ -195,7 +194,6 @@ pub async fn save_tree(
         ON CONFLICT ("groupId", "blockNumber") DO NOTHING
         "#;
 
-    let start = Instant::now();
     pg_client
         .query(
             statement,
@@ -213,13 +211,6 @@ pub async fn save_tree(
         )
         .await?;
 
-    info!(
-        "Saved tree for group {} and block {} in {:?}",
-        group_id,
-        block_number,
-        start.elapsed()
-    );
-
     // Set bloom filter and the tree body to null for older trees
 
     let statement = r#"
@@ -227,17 +218,9 @@ pub async fn save_tree(
         WHERE "groupId" = $1 AND "blockNumber" < $2
         "#;
 
-    let start = Instant::now();
     pg_client
         .query(statement, &[&group_id, &(block_number - 2000)])
         .await?;
-
-    info!(
-        "Nullified old trees for group {} and block {} in {:?}",
-        group_id,
-        block_number,
-        start.elapsed()
-    );
 
     Ok(())
 }

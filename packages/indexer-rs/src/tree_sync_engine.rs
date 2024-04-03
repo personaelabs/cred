@@ -85,17 +85,10 @@ impl TreeSyncEngine {
             let members_to_check: Vec<Address> =
                 members.choose_multiple(&mut rng, 5).cloned().collect();
 
-            let start = Instant::now();
             let sanity_check_result = self
                 .indexer
                 .sanity_check_members(&members_to_check, block_number)
                 .await?;
-
-            info!(
-                "${} Sanity check took {}ms",
-                self.group.name,
-                start.elapsed().as_millis()
-            );
 
             if !sanity_check_result {
                 error!(
@@ -103,17 +96,6 @@ impl TreeSyncEngine {
                     self.group.name, block_number
                 );
             } else {
-                info!(
-                    target: "sanity-check",
-                    "${} Sanity check passed for {:?} at block {}",
-                    self.group.name,
-                    members_to_check
-                        .iter()
-                        .map(|m| hex::encode(m))
-                        .collect::<Vec<String>>(),
-                    block_number
-                );
-
                 save_tree(
                     &members,
                     merkle_tree,
