@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 import neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
+import { getUserScore } from '@/lib/score';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -74,32 +75,7 @@ export async function GET(
     },
   });
 
-  // Get the score of the user
-  const userCreddd = await prisma.fidAttestation.findMany({
-    select: {
-      MerkleTree: {
-        select: {
-          Group: {
-            select: {
-              id: true,
-              score: true,
-            },
-          },
-        },
-      },
-    },
-    where: {
-      fid,
-    },
-  });
-
-  let userScore = BigInt(0);
-  for (const cred of userCreddd) {
-    const score = cred.MerkleTree.Group.score;
-    if (score) {
-      userScore += score;
-    }
-  }
+  const score = await getUserScore(fid);
 
   // Get user data from Neynar
   const result = await neynar.get<{ users: NeynarUserResponse[] }>(
@@ -115,7 +91,7 @@ export async function GET(
   return Response.json({
     ...user,
     mints,
-    score: userScore.toString(),
+    score: score,
     fidAttestations,
   });
 }
