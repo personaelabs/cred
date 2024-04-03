@@ -76,35 +76,36 @@ impl TreeSyncEngine {
 
                 // Update the block number of the tree
                 update_tree_block_num(tree_id, block_number, &self.pg_client).await?;
+                return Ok(());
             }
+        }
+
+        // New Merkle tree detected
+
+        // Sanity check the eligibility of a few members
+        let mut rng = OsRng::default();
+        let members_to_check: Vec<Address> =
+            members.choose_multiple(&mut rng, 5).cloned().collect();
+
+        let sanity_check_result = self
+            .indexer
+            .sanity_check_members(&members_to_check, block_number)
+            .await?;
+
+        if !sanity_check_result {
+            error!(
+                "${} Sanity check failed for block {}",
+                self.group.name, block_number
+            );
         } else {
-            // New Merkle tree detected
-
-            // Sanity check the eligibility of a few members
-            let mut rng = OsRng::default();
-            let members_to_check: Vec<Address> =
-                members.choose_multiple(&mut rng, 5).cloned().collect();
-
-            let sanity_check_result = self
-                .indexer
-                .sanity_check_members(&members_to_check, block_number)
-                .await?;
-
-            if !sanity_check_result {
-                error!(
-                    "${} Sanity check failed for block {}",
-                    self.group.name, block_number
-                );
-            } else {
-                save_tree(
-                    &members,
-                    merkle_tree,
-                    self.group.id.clone(),
-                    &self.pg_client,
-                    block_number as i64,
-                )
-                .await?;
-            }
+            save_tree(
+                &members,
+                merkle_tree,
+                self.group.id.clone(),
+                &self.pg_client,
+                block_number as i64,
+            )
+            .await?;
         }
 
         Ok(())
