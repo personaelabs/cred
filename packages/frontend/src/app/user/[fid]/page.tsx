@@ -79,8 +79,8 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
         className="w-[60px] h-[60px] rounded-full object-cover"
       ></img>
       <div className="flex flex-col items-center">
-        <div>{user.display_name} </div>
-        <div className="opacity-50">(FID {user?.fid})</div>
+        <div>{user.display_name}</div>
+        <div className="opacity-50">CREDDD SCORE: {Math.round(user.score)}</div>
       </div>
       <div className="ml-2 flex flex-col gap-y-[10px]">
         {user.fidAttestations.map((attestation, i) => (
