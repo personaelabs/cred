@@ -41,7 +41,7 @@ export type MintLogSelect = Prisma.MintLogGetPayload<{
 export type GetUserResponse = NeynarUserResponse & {
   fidAttestations: FidAttestationSelect[];
   mints: MintLogSelect[];
-  score: string;
+  score: number;
 };
 
 /**
