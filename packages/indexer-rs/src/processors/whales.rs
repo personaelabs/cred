@@ -131,9 +131,10 @@ impl GroupIndexer for WhaleIndexer {
 
     async fn sanity_check_members(
         &self,
-        members: &[Address],
-        block_number: BlockNum,
+        _members: &[Address],
+        _block_number: BlockNum,
     ) -> Result<bool, Error> {
+        /*
         let contract = self.contract();
         for member in members {
             let member = hex::encode(member);
@@ -200,6 +201,7 @@ impl GroupIndexer for WhaleIndexer {
                 return Ok(false);
             }
         }
+         */
 
         Ok(true)
     }
