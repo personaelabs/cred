@@ -24,8 +24,8 @@ export async function getUserScore(fid: number): Promise<number> {
           score * ${K_WHALE} --- k for 'Whale'
         when "Group"."typeId" = 'Believer' THEN
           score * ${K_BELIEVER} --- k for 'Believer'
-        when "Group"."typeId" = 'Believer' THEN
-          score * ${K_BELIEVER} --- k for 'Believer'
+        when "Group"."typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
         END) AS score
@@ -66,8 +66,8 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
           score * ${K_WHALE} --- k for 'Whale'
         when "Group"."typeId" = 'Believer' THEN
           score * ${K_BELIEVER} --- k for 'Believer'
-        when "Group"."typeId" = 'Believer' THEN
-          score * ${K_BELIEVER} --- k for 'Believer'
+        when "Group"."typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
         END) AS score,
