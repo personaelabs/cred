@@ -7,11 +7,12 @@ interface LeaderboardResult {
 }
 
 const K_WHALE = 100;
-const K_EARLY = 10;
-const K_BELIEVER = 1; // NOTE: applies to $TICKER too for now
+const K_EARLY = 0.1;
+const K_BELIEVER = 0.01; // NOTE: applies to $TICKER too for now
 
-const K_NFT = 200000;
+const K_NFT = 50000;
 
+// TODO: normalize scores s.t. top scores are 5-figures
 export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
   const result = await prisma.$queryRaw<LeaderboardResult[]>`
    SELECT
@@ -39,7 +40,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
       "FidAttestation".fid
     ORDER BY
       score DESC
-    LIMIT 10
+    LIMIT 15
   `;
 
   return result;
