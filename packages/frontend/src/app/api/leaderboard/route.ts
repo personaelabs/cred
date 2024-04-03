@@ -17,7 +17,6 @@ export async function GET(_req: NextRequest) {
   const leaderBoardWithUserData = leaderBoardData
     .map(record => {
       const user = userData.data.users.find(u => u.fid === record.fid);
-      console.log(record);
       return {
         fid: record.fid,
         user,
