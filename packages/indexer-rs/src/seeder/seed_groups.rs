@@ -31,8 +31,9 @@ fn calculate_group_score(group_type: GroupType, contract_inputs: &[&str]) -> i64
     match group_type {
         GroupType::EarlyHolder => contract.fdv_usd.unwrap().round() as i64,
         GroupType::Whale => contract.fdv_usd.unwrap().round() as i64,
+        GroupType::Believer => contract.fdv_usd.unwrap().round() as i64,
         GroupType::AllHolders => contract.fp_usd.unwrap().round() as i64,
-        GroupType::Ticker => 0,
+        GroupType::Ticker => contract.fdv_usd.unwrap().round() as i64,
         GroupType::CredddTeam => 0,
         _ => panic!("Deprecated group type {:?}", group_type),
     }
