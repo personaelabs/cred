@@ -6,7 +6,7 @@ const K_BELIEVER = 1e-2; // NOTE: applies to $TICKER too for now
 const K_NFT = 5e4;
 
 // NOTE: this is to keep scores 5 digits for display purposes
-const SCORE_NORM = 1e-6;
+const SCORE_NORM = 1e-8;
 
 interface ScoreResult {
   score: number;
