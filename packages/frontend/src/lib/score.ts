@@ -33,7 +33,7 @@ export async function getUserScore(fid: number): Promise<number> {
       "FidAttestation"
       LEFT JOIN "MerkleTree" ON "FidAttestation"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-    WHERE "FidAttestation".fid = ${fid}
+    WHERE "FidAttestation".fid = ${fid} AND "Group".state != 'Invalid'
   `;
 
   if (result.length === 0) {
@@ -72,6 +72,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
       "FidAttestation"
       LEFT JOIN "MerkleTree" ON "FidAttestation"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+    WHERE "Group".state != 'Invalid'
     GROUP BY
       "FidAttestation".fid
     ORDER BY

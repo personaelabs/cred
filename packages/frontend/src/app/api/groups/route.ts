@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { GroupState, Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
@@ -26,6 +26,7 @@ export async function GET(_req: NextRequest) {
   const groups = await prisma.group.findMany({
     select: groupSelect,
     where: {
+      state: GroupState.Recordable,
       merkleTrees: {
         some: {
           treeProtoBuf: {
