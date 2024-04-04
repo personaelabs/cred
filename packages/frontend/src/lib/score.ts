@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 
-const K_WHALE = 1e2;
-const K_EARLY = 1e-1;
+const K_WHALE = 5e2;
+const K_EARLY = 1;
 const K_BELIEVER = 1e-2; // NOTE: applies to $TICKER too for now
 const K_NFT = 5e4;
 
@@ -43,7 +43,7 @@ export async function getUserScore(fid: number): Promise<number> {
         WHERE "Group".state = 'Recordable'
       )
     SELECT
-        SUM(
+        (SUM(
           CASE WHEN "typeId" = 'AllHolders' THEN
             score * ${K_NFT} --- k for 'AllHolders'
           WHEN "typeId" = 'EarlyHolder' THEN
@@ -56,7 +56,7 @@ export async function getUserScore(fid: number): Promise<number> {
             score * ${K_BELIEVER} --- k for 'Ticker'
           ELSE
             0
-          END) AS score
+          END) * COUNT(*) )AS score
       FROM
         "distinct_user_creddd"
   `;
@@ -104,7 +104,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
       )
    SELECT
       fid,
-      SUM(
+      (SUM(
         CASE WHEN "typeId" = 'AllHolders' THEN
           score * ${K_NFT} --- k for 'AllHolders'
         WHEN "typeId" = 'EarlyHolder' THEN
@@ -117,7 +117,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
           score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
-        END) AS score,
+        END) * COUNT(*)) AS score,
       ARRAY_AGG("displayName") AS creddd
     FROM
       "distinct_user_creddd"
