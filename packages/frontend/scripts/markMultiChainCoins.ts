@@ -23,7 +23,6 @@ export const getCoin = async (chain: string, contractAddress: Hex) => {
       throw new Error('Unsupported chain');
   }
 
-  console.log(process.env.COINGECKO_API_KEY);
   try {
     const response = await axios.get(
       `https://pro-api.coingecko.com/api/v3/coins/${chainStr}/contract/${contractAddress}?x_cg_pro_api_key=${process.env.COINGECKO_API_KEY}`
