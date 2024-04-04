@@ -201,7 +201,7 @@ const EligibleCredddList = () => {
               <div>
                 You have{' '}
                 <Link href="/account"> {user.groups.length} creddd </Link>{' '}
-                already added to your account.{' '}
+                already attached to your account.{' '}
               </div>
             </>
           ) : (
@@ -245,7 +245,7 @@ const EligibleCredddList = () => {
 export default function SearchPage() {
   return (
     <div className="flex flex-col gap-y-[30px] justify-start items-center h-[90vh] px-4">
-      <div className="text-xl">Search eligible creddd</div>
+      <div className="text-xl">Add creddd</div>
       <EligibleCredddList />
     </div>
   );

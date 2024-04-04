@@ -22,8 +22,8 @@ const CredddBadge = (props: CredddBadgeProps) => {
 
   return (
     <div className="flex flex-row items-center">
+      <Check className="w-4 h-4 mr-2" color="#FDA174"></Check>
       <div>{group.displayName}</div>
-      <Check className="w-4 h-4 ml-2" color="#FDA174"></Check>
       {credddDescription ? (
         <Tooltip delayDuration={200}>
           <TooltipTrigger>
