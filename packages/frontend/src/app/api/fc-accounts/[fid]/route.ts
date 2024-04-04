@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
-import neynar from '@/lib/neynar';
+import * as neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
 import { getUserScore } from '@/lib/score';
 
@@ -65,15 +65,13 @@ export async function GET(
       "user_creddd"
       LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+    WHERE "Group"."state" = 'Recordable'
     `;
 
   const score = await getUserScore(fid);
 
   // Get user data from Neynar
-  const result = await neynar.get<{ users: NeynarUserResponse[] }>(
-    `/user/bulk?fids=${fid}`
-  );
-  const user = result.data.users[0];
+  const user = await neynar.getUser(fid);
 
   if (!user) {
     return Response.json('User not found', { status: 404 });

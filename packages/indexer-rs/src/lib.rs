@@ -116,6 +116,7 @@ pub enum GroupType {
 pub enum GroupState {
     Recordable,
     Unrecordable,
+    Invalid,
 }
 
 #[derive(Debug, Clone)]

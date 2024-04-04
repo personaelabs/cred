@@ -197,7 +197,7 @@ mod test {
             init_test_rocksdb,
         },
         utils::dotenv_config,
-        GroupState, GroupType, ROCKSDB_PATH,
+        GroupType, ROCKSDB_PATH,
     };
     use rocksdb::{Options, DB};
     use std::sync::Arc;
@@ -237,7 +237,6 @@ mod test {
             GroupType::AllHolders,
             vec![contract.clone()],
             0,
-            GroupState::Recordable,
         );
 
         let indexer = AllHoldersIndexer::new(group, resources);
@@ -312,7 +311,6 @@ mod test {
             GroupType::AllHolders,
             vec![contract.clone()],
             0,
-            GroupState::Recordable,
         );
 
         let indexer = AllHoldersIndexer::new(group, resources);

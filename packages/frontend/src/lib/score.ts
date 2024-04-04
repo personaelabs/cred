@@ -40,6 +40,7 @@ export async function getUserScore(fid: number): Promise<number> {
           "user_creddd"
         LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
         LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+        WHERE "Group".state = 'Recordable'
       )
     SELECT
         SUM(
@@ -99,6 +100,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
           "user_creddd"
         LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
         LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+        WHERE "Group".state = 'Recordable'
       )
    SELECT
       fid,

@@ -20,7 +20,6 @@ pub struct Group {
     pub score: i64,
     pub group_type: GroupType,
     pub contract_inputs: Vec<Contract>,
-    pub state: GroupState,
 }
 
 impl Group {
@@ -29,7 +28,6 @@ impl Group {
         group_type: GroupType,
         contract_inputs: Vec<Contract>,
         score: i64,
-        state: GroupState,
     ) -> Self {
         let contract_addresses = contract_inputs
             .iter()
@@ -44,9 +42,24 @@ impl Group {
             group_type,
             contract_inputs,
             score,
-            state,
         }
     }
+}
+
+/// Update the state of a group
+pub async fn update_group_state(
+    pg_client: &tokio_postgres::Client,
+    group_id: &str,
+    state: GroupState,
+) -> Result<(), tokio_postgres::Error> {
+    pg_client
+        .execute(
+            r#"UPDATE "Group" SET "state" = $1 WHERE "id" = $2"#,
+            &[&state, &group_id],
+        )
+        .await?;
+
+    Ok(())
 }
 
 /// Upsert a group and return the group id
@@ -64,11 +77,11 @@ pub async fn upsert_group(
     let result = pg_client
         .query_one(
             r#"
-            INSERT INTO "Group" ("id", "displayName", "typeId", "contractInputs", "score", "state", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, NOW())
-            ON CONFLICT ("id", "typeId", "contractInputs") DO UPDATE SET "displayName" = $2, "score" = $5, "state" = $6, "updatedAt" = NOW()
+            INSERT INTO "Group" ("id", "displayName", "typeId", "contractInputs", "score", "updatedAt") VALUES ($1, $2, $3, $4, $5, NOW())
+            ON CONFLICT ("id", "typeId", "contractInputs") DO UPDATE SET "displayName" = $2, "score" = $5, "updatedAt" = NOW()
             RETURNING id
         "#,
-            &[&group.id, &group.name, &group.group_type, &group_contract_inputs, &group.score, &group.state],
+            &[&group.id, &group.name, &group.group_type, &group_contract_inputs, &group.score],
         )
         .await?;
 
@@ -81,7 +94,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
     // Get all groups from the storage
     let result = pg_client
         .query(
-            r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" != 'Unrecordable' "#,
+            r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" = 'Recordable' "#,
             &[],
         )
         .await
@@ -98,7 +111,6 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
             let group_type: GroupType = row.get("typeId");
             let contract_inputs: Vec<i32> = row.get("contractInputs");
             let score: i64 = row.get("score");
-            let state: GroupState = row.get("state");
 
             // Convert the contract inputs to Contract struct
             let contract_inputs = contract_inputs
@@ -124,7 +136,6 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
                 group_type,
                 contract_inputs,
                 score,
-                state,
             }
         })
         .collect::<Vec<Group>>();

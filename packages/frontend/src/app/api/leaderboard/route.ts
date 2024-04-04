@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
-import neynar from '@/lib/neynar';
-import { NeynarUserResponse } from '@/app/types';
+import * as neynar from '@/lib/neynar';
 import { getLeaderboardUsers } from '@/lib/score';
 
 export async function GET(_req: NextRequest) {
@@ -10,13 +9,11 @@ export async function GET(_req: NextRequest) {
   const fids = leaderBoardData.map(record => record.fid);
 
   // Get user data from Neynar
-  const userData = await neynar.get<{ users: NeynarUserResponse[] }>(
-    `/user/bulk?fids=${fids.join(',')}`
-  );
+  const userData = await neynar.getUsers(fids);
 
   const leaderBoardWithUserData = leaderBoardData
     .map(record => {
-      const user = userData.data.users.find(u => u.fid === record.fid);
+      const user = userData.find(u => u.fid === record.fid);
       return {
         fid: record.fid,
         user,

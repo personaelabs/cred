@@ -143,7 +143,7 @@ mod test {
         seeder::seed_contracts::get_seed_contracts,
         test_utils::{get_members_from_csv, init_test_rocksdb},
         utils::dotenv_config,
-        GroupState, GroupType,
+        GroupType,
     };
     use std::sync::Arc;
 
@@ -188,7 +188,6 @@ mod test {
             GroupType::Ticker,
             vec![ticker_contract.clone()],
             0,
-            GroupState::Recordable,
         );
 
         let indexer = TickerIndexer::new(group, resources.clone());
