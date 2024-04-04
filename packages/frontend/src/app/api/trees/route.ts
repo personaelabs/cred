@@ -53,7 +53,7 @@ export async function GET(_req: NextRequest) {
     "MerkleTree"
     LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
     WHERE "MerkleTree"."bloomFilter" IS NOT NULL
-    AND "Group".state != 'Invalid'
+    AND "Group".state = 'Recordable'
   ORDER BY
     "Group".id,
     "MerkleTree"."blockNumber" DESC
