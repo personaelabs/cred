@@ -20,11 +20,18 @@ const MobileFooter = () => {
       <div className="w-full h-full border-t bg-background">
         <div className="w-full h-full px-10 justify-between items-center inline-flex">
           <MenuItem
+            icon="BookLock"
+            onClick={() => {
+              router.push('/search');
+            }}
+          ></MenuItem>
+          <MenuItem
             icon="CircleUser"
             onClick={() => {
               router.push('/account');
             }}
           ></MenuItem>
+
           <MenuItem
             icon="Crown"
             onClick={() => {
