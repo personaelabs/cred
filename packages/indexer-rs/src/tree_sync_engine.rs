@@ -1,6 +1,6 @@
 use crate::{
     eth_rpc::EthRpcClient,
-    group::{upsert_group, Group},
+    group::{update_group_state, Group},
     processors::GroupIndexer,
     tree::{build_tree, get_group_latest_merkle_tree, save_tree, update_tree_block_num},
     utils::to_hex,
@@ -173,13 +173,11 @@ impl TreeSyncEngine {
                 Err(Error::Indexer(IndexerError::InvalidBalance)) => {
                     error!("${} Invalid balance {:?}", self.group.name, latest_block);
                     drop(permit);
-                    let mut updated_group = self.group.clone();
-
-                    // Update the group state to unrecordable
-                    updated_group.state = GroupState::Unrecordable;
 
                     // TODO: Propagate the error to the caller
-                    upsert_group(&self.pg_client, updated_group).await.unwrap();
+                    update_group_state(&self.pg_client, &self.group.id, GroupState::Unrecordable)
+                        .await
+                        .unwrap();
 
                     break;
                 }

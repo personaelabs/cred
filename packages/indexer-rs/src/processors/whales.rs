@@ -218,7 +218,7 @@ mod test {
         postgres::init_postgres,
         test_utils::{erc20_test_contract, init_test_rocksdb},
         utils::dotenv_config,
-        GroupState, GroupType,
+        GroupType,
     };
 
     #[tokio::test]
@@ -256,7 +256,6 @@ mod test {
             GroupType::Whale,
             vec![contract.clone()],
             0,
-            GroupState::Recordable,
         );
 
         let whale_indexer = WhaleIndexer::new(group, resources);

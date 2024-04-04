@@ -6,7 +6,7 @@ use crate::{
         seed_contracts::{get_seed_contracts, ContractData},
     },
     utils::is_prod,
-    GroupState, GroupType,
+    GroupType,
 };
 /// Calculate the score for a group
 fn calculate_group_score(group_type: GroupType, contract_inputs: &[&str]) -> i64 {
@@ -80,13 +80,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         let name = format!("Early {} holder", contract.name.clone());
         let contract = Contract::from_contract_data(contract);
         let score = calculate_group_score(GroupType::EarlyHolder, &[&contract.address]);
-        let group = Group::new(
-            name,
-            GroupType::EarlyHolder,
-            vec![contract],
-            score,
-            GroupState::Recordable,
-        );
+        let group = Group::new(name, GroupType::EarlyHolder, vec![contract], score);
 
         groups.push(group);
     }
@@ -96,13 +90,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         let name = format!("{} whale", contract.name.clone());
         let contract = Contract::from_contract_data(contract);
         let score = calculate_group_score(GroupType::Whale, &[&contract.address]);
-        let group = Group::new(
-            name,
-            GroupType::Whale,
-            vec![contract],
-            score,
-            GroupState::Recordable,
-        );
+        let group = Group::new(name, GroupType::Whale, vec![contract], score);
 
         groups.push(group);
     }
@@ -112,13 +100,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         let contract = Contract::from_contract_data(contract);
         let name = format!("{} historical holder", contract.name.clone());
         let score = calculate_group_score(GroupType::AllHolders, &[&contract.address]);
-        let group = Group::new(
-            name,
-            GroupType::AllHolders,
-            vec![contract],
-            score,
-            GroupState::Recordable,
-        );
+        let group = Group::new(name, GroupType::AllHolders, vec![contract], score);
 
         groups.push(group);
     }
@@ -128,13 +110,7 @@ pub fn get_seed_groups() -> Vec<Group> {
         let contract = Contract::from_contract_data(contract);
         let name = format!("{} believer", contract.name.clone());
         let score = calculate_group_score(GroupType::Believer, &[&contract.address]);
-        let group = Group::new(
-            name,
-            GroupType::Believer,
-            vec![contract],
-            score,
-            GroupState::Recordable,
-        );
+        let group = Group::new(name, GroupType::Believer, vec![contract], score);
 
         groups.push(group);
     }
@@ -152,7 +128,6 @@ pub fn get_seed_groups() -> Vec<Group> {
         GroupType::Ticker,
         vec![Contract::from_contract_data(ticker_contract)],
         ticker_score,
-        GroupState::Recordable,
     ));
 
     // Add creddd team group
@@ -161,10 +136,9 @@ pub fn get_seed_groups() -> Vec<Group> {
         GroupType::CredddTeam,
         vec![],
         0,
-        GroupState::Recordable,
     ));
 
-    if true {
+    if is_prod() {
         groups
     } else {
         // Only return a selected few
