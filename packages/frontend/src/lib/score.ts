@@ -14,6 +14,21 @@ interface ScoreResult {
 
 export async function getUserScore(fid: number): Promise<number> {
   const result = await prisma.$queryRaw<ScoreResult[]>`
+    WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE fid = ${fid}
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+        WHERE fid = ${fid}
+    )
    SELECT
       SUM(
         CASE WHEN "Group"."typeId" = 'AllHolders' THEN
@@ -30,10 +45,9 @@ export async function getUserScore(fid: number): Promise<number> {
           0
         END) AS score
     FROM
-      "FidAttestation"
-      LEFT JOIN "MerkleTree" ON "FidAttestation"."treeId" = "MerkleTree".id
+      "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-    WHERE "FidAttestation".fid = ${fid}
   `;
 
   if (result.length === 0) {
@@ -51,6 +65,19 @@ interface LeaderboardResult {
 
 export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
   const result = await prisma.$queryRaw<LeaderboardResult[]>`
+    WITH "user_creddd" AS (
+        SELECT
+          fid,
+          "treeId"
+        FROM
+          "FidAttestation"
+        UNION
+        SELECT
+          fid,
+          "treeId"
+        FROM
+          "IntrinsicCreddd"
+      )
    SELECT
       fid,
       SUM(
@@ -69,11 +96,11 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
         END) AS score,
       ARRAY_AGG("Group"."displayName") AS creddd
     FROM
-      "FidAttestation"
-      LEFT JOIN "MerkleTree" ON "FidAttestation"."treeId" = "MerkleTree".id
+      "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
       LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
     GROUP BY
-      "FidAttestation".fid
+      "user_creddd".fid
     ORDER BY
       score DESC
     LIMIT 15
