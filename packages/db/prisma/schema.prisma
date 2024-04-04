@@ -100,6 +100,7 @@ enum GroupType {
 enum GroupState {
   Recordable
   Unrecordable
+  Invalid
 }
 
 model Contract {
@@ -109,6 +110,7 @@ model Contract {
   type          ContractType
   deployedBlock BigInt
   chain         String
+  isMultiChain  Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
+import { GroupState, Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
 import * as neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
@@ -20,6 +20,7 @@ const selectAttestation = {
           id: true,
           typeId: true,
           displayName: true,
+          state: true,
         },
       },
     },
@@ -58,6 +59,11 @@ export async function GET(
     },
   });
 
+  // Filter out invalid groups
+  const validAttestations = fidAttestations.filter(
+    a => a.MerkleTree.Group.state === GroupState.Recordable
+  );
+
   const score = await getUserScore(fid);
 
   // Get user data from Neynar
@@ -71,6 +77,6 @@ export async function GET(
   return Response.json({
     ...user,
     score: score,
-    fidAttestations,
+    fidAttestations: validAttestations,
   });
 }

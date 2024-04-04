@@ -85,7 +85,7 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
     // Get all groups from the storage
     let result = pg_client
         .query(
-            r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" != 'Unrecordable' "#,
+            r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" = 'Recordable' "#,
             &[],
         )
         .await
