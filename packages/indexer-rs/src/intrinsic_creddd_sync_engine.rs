@@ -187,9 +187,10 @@ impl IntrinsicCredddSyncEngine {
 
             if result.is_err() {
                 error!("IntrinsicCredddSyncEngine: {:?}", result.err().unwrap());
+                tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+            } else {
+                tokio::time::sleep(std::time::Duration::from_secs(600)).await;
             }
-
-            tokio::time::sleep(std::time::Duration::from_secs(600)).await;
         }
     }
 }
