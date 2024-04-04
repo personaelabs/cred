@@ -138,31 +138,5 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
-    if is_prod() {
-        groups
-    } else {
-        // Only return a selected few
-        let preview_group_ids = vec![
-            "f925c0f578b2c6024c5bbb20947e1af3a0eb944e0c309930e3af644ced5200df", // "Early $PIKA holder",
-            "167b42ecc5f95c2c10b5fa08a62929d5e3b4ca43783d96a41e7d014e9d0fd02b", // "$KIBSHI whale",
-            "55830aa86161ab70bfd6a96e2abd3b338f13bb1848565c8a23c7c7317b5864a5", // $ticker rug survivor
-            "0676adf3eb3332e1e2f80daca621727a80f9e1bb793e6864a85656f61489467c", // creddd team
-            "158a378c99e764e3b287ed5b1c938ba4125d828a1d9b30aa2fc1c6dd44207419", // The187 historical holder
-            "3544a1d252e2cfffb5d977c9dd2e3766b13a72ea4206c5e29b69502de62a6023", // $Higher believer
-        ];
-
-        let mut preview_groups = vec![];
-
-        for preview_group_id in preview_group_ids {
-            let preview_group = groups
-                .iter()
-                .find(|g| g.id == preview_group_id)
-                .unwrap()
-                .clone();
-
-            preview_groups.push(preview_group);
-        }
-
-        preview_groups
-    }
+    groups
 }
