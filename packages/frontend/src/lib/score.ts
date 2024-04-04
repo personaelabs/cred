@@ -15,39 +15,49 @@ interface ScoreResult {
 export async function getUserScore(fid: number): Promise<number> {
   const result = await prisma.$queryRaw<ScoreResult[]>`
     WITH "user_creddd" AS (
-      SELECT
-        fid,
-        "treeId"
-      FROM
-        "FidAttestation"
-      WHERE fid = ${fid}
-      UNION
-      SELECT
-        fid,
-        "treeId"
-      FROM
-        "IntrinsicCreddd"
+        SELECT
+          fid,
+          "treeId"
+        FROM
+          "FidAttestation"
         WHERE fid = ${fid}
-    )
-   SELECT
-      SUM(
-        CASE WHEN "Group"."typeId" = 'AllHolders' THEN
-          score * ${K_NFT} --- k for 'AllHolders'
-        WHEN "Group"."typeId" = 'EarlyHolder' THEN
-          score * ${K_EARLY} --- k for 'EarlyHolder'
-        WHEN "Group"."typeId" = 'Whale' THEN
-          score * ${K_WHALE} --- k for 'Whale'
-        when "Group"."typeId" = 'Believer' THEN
-          score * ${K_BELIEVER} --- k for 'Believer'
-        when "Group"."typeId" = 'Ticker' THEN
-          score * ${K_BELIEVER} --- k for 'Ticker'
-        ELSE
-          0
-        END) AS score
-    FROM
-      "user_creddd"
-      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
-      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+        UNION
+        SELECT
+          fid,
+          "treeId"
+        FROM
+          "IntrinsicCreddd"
+        WHERE fid = ${fid}
+      ),
+      "distinct_user_creddd" AS (
+        SELECT DISTINCT ON (fid,
+          "Group".id)
+          fid,
+          "Group"."typeId",
+          "Group"."displayName",
+          "Group".score
+        FROM
+          "user_creddd"
+        LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+        LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      )
+    SELECT
+        SUM(
+          CASE WHEN "typeId" = 'AllHolders' THEN
+            score * ${K_NFT} --- k for 'AllHolders'
+          WHEN "typeId" = 'EarlyHolder' THEN
+            score * ${K_EARLY} --- k for 'EarlyHolder'
+          WHEN "typeId" = 'Whale' THEN
+            score * ${K_WHALE} --- k for 'Whale'
+          when "typeId" = 'Believer' THEN
+            score * ${K_BELIEVER} --- k for 'Believer'
+          when "typeId" = 'Ticker' THEN
+            score * ${K_BELIEVER} --- k for 'Ticker'
+          ELSE
+            0
+          END) AS score
+      FROM
+        "distinct_user_creddd"
   `;
 
   if (result.length === 0) {
@@ -65,7 +75,7 @@ interface LeaderboardResult {
 
 export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
   const result = await prisma.$queryRaw<LeaderboardResult[]>`
-    WITH "user_creddd" AS (
+      WITH "user_creddd" AS (
         SELECT
           fid,
           "treeId"
@@ -77,30 +87,40 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
           "treeId"
         FROM
           "IntrinsicCreddd"
+      ),
+      "distinct_user_creddd" AS (
+        SELECT DISTINCT ON (fid,
+          "Group".id)
+          fid,
+          "Group"."typeId",
+          "Group"."displayName",
+          "Group".score
+        FROM
+          "user_creddd"
+        LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+        LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
       )
    SELECT
       fid,
       SUM(
-        CASE WHEN "Group"."typeId" = 'AllHolders' THEN
+        CASE WHEN "typeId" = 'AllHolders' THEN
           score * ${K_NFT} --- k for 'AllHolders'
-        WHEN "Group"."typeId" = 'EarlyHolder' THEN
+        WHEN "typeId" = 'EarlyHolder' THEN
           score * ${K_EARLY} --- k for 'EarlyHolder'
-        WHEN "Group"."typeId" = 'Whale' THEN
+        WHEN "typeId" = 'Whale' THEN
           score * ${K_WHALE} --- k for 'Whale'
-        when "Group"."typeId" = 'Believer' THEN
+        when "typeId" = 'Believer' THEN
           score * ${K_BELIEVER} --- k for 'Believer'
-        when "Group"."typeId" = 'Ticker' THEN
+        when "typeId" = 'Ticker' THEN
           score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
         END) AS score,
-      ARRAY_AGG("Group"."displayName") AS creddd
+      ARRAY_AGG("displayName") AS creddd
     FROM
-      "user_creddd"
-      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
-      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      "distinct_user_creddd"
     GROUP BY
-      "user_creddd".fid
+      fid
     ORDER BY
       score DESC
     LIMIT 15
