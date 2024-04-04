@@ -12,26 +12,18 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const selectAttestation = {
-  MerkleTree: {
-    select: {
-      Group: {
-        select: {
-          id: true,
-          typeId: true,
-          displayName: true,
-        },
-      },
-    },
-  },
-} satisfies Prisma.FidAttestationSelect;
+const groupSelect = {
+  id: true,
+  typeId: true,
+  displayName: true,
+} satisfies Prisma.GroupSelect;
 
-export type FidAttestationSelect = Prisma.FidAttestationGetPayload<{
-  select: typeof selectAttestation;
+export type GroupSelect = Prisma.GroupGetPayload<{
+  select: typeof groupSelect;
 }>;
 
 export type GetUserResponse = NeynarUserResponse & {
-  fidAttestations: FidAttestationSelect[];
+  groups: GroupSelect[];
   score: number;
 };
 
@@ -50,13 +42,30 @@ export async function GET(
 ) {
   const fid = Number(params.fid);
 
-  // Get attestations (i.e. proofs) for the FID
-  const fidAttestations = await prisma.fidAttestation.findMany({
-    select: selectAttestation,
-    where: {
-      fid,
-    },
-  });
+  const userGroups = await prisma.$queryRaw<GroupSelect[]>`
+  WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE
+        fid = ${fid}
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+      WHERE
+        fid = ${fid}
+    ) SELECT DISTINCT ON ("Group".id)
+      "Group".id, "Group"."displayName", "Group"."typeId"
+    FROM
+      "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+    `;
 
   const score = await getUserScore(fid);
 
@@ -74,6 +83,6 @@ export async function GET(
   return Response.json({
     ...user,
     score: score,
-    fidAttestations,
+    groups: userGroups,
   });
 }

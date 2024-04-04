@@ -164,9 +164,7 @@ export default function AccountPage() {
     }
   }, [accounts, addresses]);
 
-  const addedGroups =
-    user?.fidAttestations.map(attestation => attestation.MerkleTree.Group.id) ||
-    [];
+  const addedGroups = user?.groups.map(group => group.id) || [];
 
   return (
     <>
