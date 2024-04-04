@@ -3,7 +3,9 @@ import axios from 'axios';
 import { NeynarUserResponse } from '@/app/types';
 import NodeCache from 'node-cache';
 
-const cache = new NodeCache({ stdTTL: 60, checkperiod: 70 });
+const cacheTTL = process.env.NODE_ENV === 'development' ? 9999999999 : 60;
+console.log('cacheTTL', cacheTTL);
+const cache = new NodeCache({ stdTTL: cacheTTL, checkperiod: 70 });
 
 const neynar = axios.create({
   baseURL: 'https://api.neynar.com/v2/farcaster',
@@ -15,7 +17,7 @@ const neynar = axios.create({
 
 /**
  * Get user data for a given FID from Neynar
- * The data is cached for 60 seconds
+ * The data is cached for 60 seconds in production, and forever in development
  */
 export const getUser = async (
   fid: number
@@ -44,6 +46,40 @@ export const getUser = async (
   cache.set(`user-${fid}`, user);
 
   return user;
+};
+
+/**
+ * Get users for a given list of FIDs from Neynar
+ * The data is cached for 60 seconds in production, and forever in development
+ */
+export const getUsers = async (
+  fids: number[]
+): Promise<NeynarUserResponse[]> => {
+  // Check cache for each FID
+  const cacheData = fids.map(fid =>
+    cache.get<NeynarUserResponse>(`user-${fid}`)
+  );
+
+  const missingFids = fids.filter((fid, index) => !cacheData[index]);
+
+  if (!missingFids.length) {
+    // All data is in the cache
+    console.log('getUsers: cache hit');
+    return cacheData as NeynarUserResponse[];
+  } else {
+    console.log('getUsers: cache miss');
+    // Get all FIDs from Neynar (including the ones that were in the cache)
+    const result = await neynar.get<{ users: NeynarUserResponse[] }>(
+      `/user/bulk?fids=${fids.join(',')}`
+    );
+
+    // Cache data
+    result.data.users.forEach(user => {
+      cache.set(`user-${user.fid}`, user);
+    });
+
+    return result.data.users;
+  }
 };
 
 export default neynar;
