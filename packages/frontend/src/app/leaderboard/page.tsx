@@ -68,7 +68,7 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
       <div className="w-[30px] md:w-[40px]">{rank}</div>
       <Link
         className="no-underline"
-        href={`https://creddd.xyz/user/${record.user.fid}`}
+        href={`/user/${record.user.fid}`}
         target="_blank"
       >
         <div className="w-[180px] md:w-[360px] flex flex-row justify-start items-center gap-[12px]">
