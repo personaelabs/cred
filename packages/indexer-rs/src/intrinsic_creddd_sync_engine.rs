@@ -116,6 +116,10 @@ impl IntrinsicCredddSyncEngine {
         &self,
         fid_to_trees: HashMap<Fid, HashSet<TreeId>>,
     ) -> Result<(), tokio_postgres::Error> {
+        if fid_to_trees.is_empty() {
+            return Ok(());
+        }
+
         let params = fid_to_trees
             .iter()
             .flat_map(|(fid, trees)| {
