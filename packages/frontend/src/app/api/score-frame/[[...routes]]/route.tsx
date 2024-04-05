@@ -81,10 +81,10 @@ const checkScoreFrame = async (c: any, fid: number) => {
             fontSize: 60,
           }}
         >
-          User not found
+          user not found
         </div>
       ),
-      intents: [<Button value="">Reload</Button>],
+      intents: [<Button value="">reload</Button>],
     });
   }
 
@@ -133,15 +133,17 @@ const checkScoreFrame = async (c: any, fid: number) => {
               }}
             >
               CREDDD SCORE: <span>{Math.round(score).toString()}</span>
+              <br />
+              Add more credd for a higher score.
             </span>
           </div>
         </div>
       </div>
     ),
     intents: [
-      <Button value="check">Check my score</Button>,
-      <Button.Link href={shareLink}>Share</Button.Link>,
-      <Button.Link href="https://creddd.xyz/search">Add creddd</Button.Link>,
+      <Button value="check">reload score</Button>,
+      <Button.Link href={shareLink}>share</Button.Link>,
+      <Button.Link href="https://creddd.xyz/search">add creddd</Button.Link>,
     ],
   });
 };
