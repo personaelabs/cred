@@ -214,7 +214,6 @@ const EligibleCredddList = () => {
               connector={connector!}
               group={group}
               key={i}
-              added={false}
               afterAdd={() => {}}
             ></EligibleGroup>
           ))}
