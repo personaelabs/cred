@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 /** @jsxImportSource frog/jsx */
 import { Button, Frog } from 'frog';
-import { handle } from 'frog/vercel';
+import { handle } from 'frog/next';
 import prisma from '@/lib/prisma';
 
 const TEXT_COLOR = '#FDA174';
@@ -21,11 +21,9 @@ const CONTAINER_STYLE = {
 };
 
 const { VERCEL_ENV } = process.env;
-console.log('VERCEL_ENV', VERCEL_ENV);
 
 const app = new Frog({
   basePath: '/api/rsvp-frames',
-  browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
   verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',

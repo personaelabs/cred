@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 /** @jsxImportSource frog/jsx */
 import { Frog } from 'frog';
-import { handle } from 'frog/vercel';
+import { handle } from 'frog/next';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
