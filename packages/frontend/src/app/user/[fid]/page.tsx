@@ -9,10 +9,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { FidAttestationSelect } from '@/app/api/fc-accounts/[fid]/route';
+import { GroupSelect } from '@/app/api/fc-accounts/[fid]/route';
 
 interface CredddBadgeProps {
-  group: FidAttestationSelect['MerkleTree']['Group'];
+  group: GroupSelect;
 }
 
 const CredddBadge = (props: CredddBadgeProps) => {
@@ -83,13 +83,10 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
         <div className="opacity-50">CREDDD SCORE: {Math.round(user.score)}</div>
       </div>
       <div className="ml-2 flex flex-col gap-y-[10px]">
-        {user.fidAttestations.map((attestation, i) => (
-          <CredddBadge
-            key={i}
-            group={attestation.MerkleTree.Group}
-          ></CredddBadge>
+        {user.groups.map((group, i) => (
+          <CredddBadge key={i} group={group}></CredddBadge>
         ))}
-        {user.fidAttestations.length === 0 ? (
+        {user.groups.length === 0 ? (
           <div className="text-sm text-gray-500 opacity-80">
             No creddd found
           </div>

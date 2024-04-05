@@ -45,20 +45,21 @@ model MintLog {
 }
 
 model MerkleTree {
-  id             Int              @id @default(autoincrement())
-  merkleRoot     String
-  Group          Group            @relation(fields: [groupId], references: [id])
-  groupId        String
-  blockNumber    BigInt
-  treeProtoBuf   Bytes?
-  bloomFilter    Bytes?
-  bloomSipKeys   Bytes[]
-  bloomNumHashes Int?
-  bloomNumBits   Int?
-  numLeaves      Int?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  FidAttestation FidAttestation[]
+  id              Int               @id @default(autoincrement())
+  merkleRoot      String
+  Group           Group             @relation(fields: [groupId], references: [id])
+  groupId         String
+  blockNumber     BigInt
+  treeProtoBuf    Bytes?
+  bloomFilter     Bytes?
+  bloomSipKeys    Bytes[]
+  bloomNumHashes  Int?
+  bloomNumBits    Int?
+  numLeaves       Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  FidAttestation  FidAttestation[]
+  IntrinsicCreddd IntrinsicCreddd[]
 
   @@unique([groupId, blockNumber])
 }
@@ -128,4 +129,16 @@ model EventRSVPs {
   updatedAt DateTime @updatedAt
 
   @@unique([event, fid])
+}
+
+model IntrinsicCreddd {
+  id        Int        @id @default(autoincrement())
+  fid       Int
+  treeId    Int
+  MerklTree MerkleTree @relation(fields: [treeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([fid, treeId])
 }

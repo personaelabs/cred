@@ -18,7 +18,7 @@ interface WalletViewProps {
   afterAdd: () => void;
 }
 
-const WalletView: React.FC<WalletViewProps> = ({
+const EligibleGroup: React.FC<WalletViewProps> = ({
   connector,
   group,
   ...props
@@ -96,4 +96,4 @@ const WalletView: React.FC<WalletViewProps> = ({
   );
 };
 
-export default WalletView;
+export default EligibleGroup;

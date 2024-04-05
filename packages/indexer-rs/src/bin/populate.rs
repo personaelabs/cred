@@ -14,11 +14,7 @@ async fn main() {
     // Connect to the database.
     let client = init_postgres().await;
 
-    let groups = if is_prod() {
-        get_seed_groups()
-    } else {
-        get_seed_groups()
-    };
+    let groups = get_seed_groups();
 
     // Populate the contracts that the groups are based on.
     let mut contracts = HashSet::new();
