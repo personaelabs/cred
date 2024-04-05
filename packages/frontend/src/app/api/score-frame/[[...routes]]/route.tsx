@@ -130,7 +130,7 @@ const checkScoreFrame = async (c: any, fid: number) => {
                 opacity: 0.6,
               }}
             >
-              CREDDD SCORE: <span>{score}</span>
+              CREDDD SCORE: <span>{Math.round(score)}</span>
             </span>
           </div>
         </div>
