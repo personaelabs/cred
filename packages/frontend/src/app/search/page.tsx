@@ -169,6 +169,12 @@ const EligibleCredddList = () => {
     return (
       <div className="flex flex-col items-center gap-[14px]">
         <div className="opacity-80">Connect your wallets to add creddd</div>
+        <div className="opacity-80">
+          <div>Your Ethereum addresses are kept private.</div>
+          <div>
+            <b>Even Personae can’t see your addresses.</b>
+          </div>
+        </div>
         <Button onClick={openConnectModal}>Connect wallet</Button>
       </div>
     );
