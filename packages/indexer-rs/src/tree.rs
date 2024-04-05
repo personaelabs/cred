@@ -17,7 +17,11 @@ const TREE_WIDTH: usize = 3;
 const BLOOM_FILTER_FP_RATE: f64 = 0.005;
 
 fn to_hex(fe: Fq) -> String {
-    format!("0x{}", BigUint::from(fe.into_bigint()).to_str_radix(16))
+    format!(
+        "0x{:0>width$}",
+        BigUint::from(fe.into_bigint()).to_str_radix(16),
+        width = 64
+    )
 }
 
 /// Returns the latest merkle root for a group
