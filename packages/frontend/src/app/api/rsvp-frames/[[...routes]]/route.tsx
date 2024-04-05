@@ -20,17 +20,16 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const { RENDER } = process.env;
-const IS_RENDER = RENDER === 'true';
+const { VERCEL_ENV } = process.env;
 
 const app = new Frog({
   basePath: '/api/rsvp-frames',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: IS_RENDER,
+  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: !IS_RENDER,
+    enabled: VERCEL_ENV !== 'production',
   },
 });
 

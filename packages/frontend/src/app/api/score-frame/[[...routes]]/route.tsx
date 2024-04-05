@@ -4,7 +4,9 @@
 import { getUser } from '@/lib/neynar';
 import { getUserScore } from '@/lib/score';
 import { Button, Frog } from 'frog';
-import { handle } from 'frog/next';
+import { handle } from 'frog/vercel';
+
+const { VERCEL_ENV } = process.env;
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -22,17 +24,14 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const { RENDER } = process.env;
-const IS_RENDER = RENDER === 'true';
-
 const app = new Frog({
   // Supply a Hub API URL to enable frame verification.
-  verify: IS_RENDER,
+  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
   basePath: '/api/score-frame',
   hubApiUrl: 'https://api.hub.wevm.dev',
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: !IS_RENDER,
+    enabled: VERCEL_ENV !== 'production',
   },
 });
 
