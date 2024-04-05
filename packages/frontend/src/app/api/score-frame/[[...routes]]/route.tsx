@@ -139,6 +139,7 @@ const checkScoreFrame = async (c: any, fid: number) => {
       </div>
     ),
     intents: [
+      <Button value="check">Check my score</Button>,
       <Button.Link href={shareLink}>Share</Button.Link>,
       <Button.Link href="https://creddd.xyz/search">Add creddd</Button.Link>,
     ],
