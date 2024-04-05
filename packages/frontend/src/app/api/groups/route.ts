@@ -111,7 +111,6 @@ const handleGetGroupLatestMerkleTrees = async (
   });
 };
 
-// Get all groups with a merkle tree from the database
 export async function GET(req: NextRequest) {
   const groupIds = req.nextUrl.searchParams.get('groupIds')?.split(',');
 
@@ -119,7 +118,7 @@ export async function GET(req: NextRequest) {
     // If groupIds are provided,
     // return the specified groups with their latest merkle tree
 
-    // Check if the number of groupIds within the limit.
+    // Check if the number of groupIds is within the limit.
     // We need this limit because the server refuses to return a response if
     // the response is too large.
     if (groupIds.length > MAX_TREES_PRE_REQUEST) {
