@@ -88,7 +88,7 @@ const checkScoreFrame = async (c: any, fid: number) => {
     });
   }
 
-  const shareLink = `https://warpcast.com/~/compose?text=Check your creddd score&embeds[]=https://${process.env.VERCEL_URL}/api/score-frame/user/${fid}`;
+  const shareLink = `https://warpcast.com/~/compose?text=for those legit onchain?&embeds[]=https://${process.env.VERCEL_URL}/api/score-frame/user/${fid}`;
 
   return c.res({
     action: '/',
