@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 /** @jsxImportSource frog/jsx */
 import { Frog } from 'frog';
-import { handle } from 'frog/vercel';
+import { handle } from 'frog/next';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -19,17 +19,18 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const { VERCEL_ENV } = process.env;
+const { RENDER } = process.env;
+const IS_RENDER = RENDER === 'true';
 
 const app = new Frog({
   basePath: '/api/frames',
   browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  verify: IS_RENDER,
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: VERCEL_ENV !== 'production',
+    enabled: !IS_RENDER,
   },
 });
 
