@@ -87,33 +87,25 @@ export async function POST(req: NextRequest) {
   // 4. Verify the merkle root
 
   const merkleRootBytes = await circuit.get_merkle_root(proofBytes);
-  const merkleRoot = bytesToHex(merkleRootBytes);
+  const merkleRoot = bytesToHex(merkleRootBytes, {
+    size: 32,
+  });
 
-  const merkleTreeInDb = await prisma.merkleTree.findUnique({
+  const groupMerkleTree = await prisma.merkleTree.findFirst({
     select: {
-      merkleRoot: true,
+      id: true,
     },
     where: {
-      id: body.treeId,
+      merkleRoot: merkleRoot,
+      groupId: body.groupId,
+    },
+    orderBy: {
+      blockNumber: 'desc',
     },
   });
 
-  if (!merkleTreeInDb) {
-    return Response.json({ error: 'Merkle root not found' }, { status: 400 });
-  }
-
-  // Pad the merkle root returned from the db to 32 bytes.
-  // The merkle root in the database is stored as a hex string but isn't padded to 32 bytes so we need to pad it here.
-  const merkleRootInDb = `0x${merkleTreeInDb.merkleRoot
-    .replace('0x', '')
-    .padStart(64, '0')}`;
-
-  // For debugging
-  console.log('merkleRoot', merkleRoot);
-  console.log('merkleRootInDb', merkleRootInDb);
-
-  if (merkleRoot !== merkleRootInDb) {
-    return Response.json({ error: 'Invalid merkle root' }, { status: 400 });
+  if (!groupMerkleTree) {
+    return Response.json({ error: 'Merkle tree not found' }, { status: 400 });
   }
 
   // 5. Verify the signed message in the proof
@@ -152,7 +144,7 @@ export async function POST(req: NextRequest) {
       fid: fid,
       signInSig: Buffer.from(hexToBytes(body.signInSig)),
       attestation: Buffer.from(proofBytes),
-      treeId: body.treeId,
+      treeId: groupMerkleTree.id,
     },
   });
 
