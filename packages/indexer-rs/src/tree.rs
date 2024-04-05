@@ -223,7 +223,7 @@ pub async fn save_tree(
         "#;
 
     pg_client
-        .query(statement, &[&group_id, &(block_number - 2000)])
+        .query(statement, &[&group_id, &block_number])
         .await?;
 
     info!(
