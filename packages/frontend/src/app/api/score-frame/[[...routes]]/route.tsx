@@ -27,7 +27,6 @@ const IS_RENDER = RENDER === 'true';
 
 const app = new Frog({
   basePath: '/api/score-frame',
-  browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
   verify: IS_RENDER,
