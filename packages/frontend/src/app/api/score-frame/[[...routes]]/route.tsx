@@ -133,9 +133,8 @@ const checkScoreFrame = async (c: any, fid: number) => {
               }}
             >
               CREDDD SCORE: <span>{Math.round(score).toString()}</span>
-              <br />
-              Add more credd for a higher score.
             </span>
+            <span>Add more credd for a higher score.</span>
           </div>
         </div>
       </div>
