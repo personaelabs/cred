@@ -19,6 +19,11 @@ const AddedCredddList = (props: AddedCredddListProps) => {
       {user?.groups.map((group, i) => (
         <CredddBadge group={group} key={i}></CredddBadge>
       ))}
+      {user?.groups.length === 0 ? (
+        <div className="text-center">No creddd found</div>
+      ) : (
+        <> </>
+      )}
       <Link href="/search">Add creddd</Link>
     </div>
   );

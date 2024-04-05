@@ -10,6 +10,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { GroupSelect } from '@/app/api/fc-accounts/[fid]/route';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface CredddBadgeProps {
   group: GroupSelect;
@@ -78,8 +80,13 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
         alt="profile image"
         className="w-[60px] h-[60px] rounded-full object-cover"
       ></img>
-      <div className="flex flex-col items-center">
-        <div>{user.display_name}</div>
+      <div className="flex flex-col gap-y-[12px] items-center">
+        <div className="flex flex-row items-center gap-x-[8px]">
+          {user.display_name}
+          <Link href={`https://warpcast.com/${user.username}`} target="href">
+            <Image src="/warpcast.svg" alt="warpcast" width={20} height={20} />
+          </Link>
+        </div>
         <div className="opacity-50">CREDDD SCORE: {Math.round(user.score)}</div>
       </div>
       <div className="ml-2 flex flex-col gap-y-[10px]">
