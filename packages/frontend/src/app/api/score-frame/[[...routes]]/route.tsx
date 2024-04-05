@@ -42,6 +42,7 @@ app.frame('/', c => {
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'check' && frameData) {
+    console.log('check score click', frameData.fid);
     return checkScoreFrame(c, frameData.fid);
   }
 
