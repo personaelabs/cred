@@ -28,6 +28,7 @@ const IS_RENDER = RENDER === 'true';
 const app = new Frog({
   // Supply a Hub API URL to enable frame verification.
   verify: IS_RENDER,
+  basePath: '/api/score-frame',
   hubApiUrl: 'https://api.hub.wevm.dev',
   secret: process.env.FROG_SECRET || '',
   dev: {
@@ -35,8 +36,8 @@ const app = new Frog({
   },
 });
 
-app.frame('/api/score-frame', c => {
-  console.log(c);
+app.frame('/', c => {
+  c.url.replace(':10000', '');
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'check' && frameData) {
@@ -59,6 +60,7 @@ app.frame('/api/score-frame', c => {
 });
 
 app.frame('/user/:fid', c => {
+  c.url.replace(':10000', '');
   const { fid } = c.req.param();
 
   return checkScoreFrame(c, parseInt(fid));
