@@ -81,14 +81,14 @@ const checkScoreFrame = async (c: any, fid: number) => {
             fontSize: 60,
           }}
         >
-          User not found
+          user not found
         </div>
       ),
-      intents: [<Button value="">Reload</Button>],
+      intents: [<Button value="">reload</Button>],
     });
   }
 
-  const shareLink = `https://warpcast.com/~/compose?text=Check your creddd score&embeds[]=https://${process.env.VERCEL_URL}/api/score-frame/user/${fid}`;
+  const shareLink = `https://warpcast.com/~/compose?text=for those legit onchain?&embeds[]=https://${process.env.VERCEL_URL}/api/score-frame/user/${fid}`;
 
   return c.res({
     action: '/',
@@ -134,14 +134,15 @@ const checkScoreFrame = async (c: any, fid: number) => {
             >
               CREDDD SCORE: <span>{Math.round(score).toString()}</span>
             </span>
+            <span>Add more credd for a higher score.</span>
           </div>
         </div>
       </div>
     ),
     intents: [
-      <Button value="check">Check my score</Button>,
-      <Button.Link href={shareLink}>Share</Button.Link>,
-      <Button.Link href="https://creddd.xyz/search">Add creddd</Button.Link>,
+      <Button value="check">reload score</Button>,
+      <Button.Link href={shareLink}>share</Button.Link>,
+      <Button.Link href="https://creddd.xyz/search">add creddd</Button.Link>,
     ],
   });
 };
