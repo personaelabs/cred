@@ -37,10 +37,10 @@ const app = new Frog({
 });
 
 app.frame('/', c => {
-  const { buttonValue } = c;
+  const { buttonValue, frameData } = c;
 
-  if (buttonValue === 'check') {
-    return checkScoreFrame(c);
+  if (buttonValue === 'check' && frameData) {
+    return checkScoreFrame(c, frameData.fid);
   }
 
   return c.res({
@@ -59,17 +59,15 @@ app.frame('/', c => {
   });
 });
 
-const checkScoreFrame = async (c: any) => {
-  const { frameData } = c;
+app.frame('/user/:fid', c => {
+  const { fid } = c.req.param();
 
-  if (!frameData) {
-    throw new Error('No frame data');
-  }
+  return checkScoreFrame(c, parseInt(fid));
+});
 
-  console.log('fid', frameData.fid);
-
-  const user = await getUser(frameData.fid);
-  const score = await getUserScore(frameData.fid);
+const checkScoreFrame = async (c: any, fid: number) => {
+  const user = await getUser(fid);
+  const score = await getUserScore(fid);
 
   if (!user) {
     return c.res({
@@ -87,6 +85,8 @@ const checkScoreFrame = async (c: any) => {
       intents: [<Button value="">Reload</Button>],
     });
   }
+
+  const shareLink = `https://warpcast.com/~/compose?text=Check your creddd score ${process.env.RENDER_EXTERNAL_URL}/api/score-frame/user/${fid}`;
 
   return c.res({
     action: '/',
@@ -137,7 +137,8 @@ const checkScoreFrame = async (c: any) => {
       </div>
     ),
     intents: [
-      <Button.Link href="https://creddd.xyz/search">Add more</Button.Link>,
+      <Button.Link href={shareLink}>Share</Button.Link>,
+      <Button.Link href="https://creddd.xyz/search">Add creddd</Button.Link>,
     ],
   });
 };
