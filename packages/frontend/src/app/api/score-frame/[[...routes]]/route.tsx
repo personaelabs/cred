@@ -5,6 +5,8 @@ import { getUser } from '@/lib/neynar';
 import { getUserScore } from '@/lib/score';
 import { Button, Frog } from 'frog';
 import { handle } from 'frog/vercel';
+import { devtools } from 'frog/dev';
+import { serveStatic } from 'frog/serve-static';
 
 const { VERCEL_ENV } = process.env;
 
@@ -130,7 +132,7 @@ const checkScoreFrame = async (c: any, fid: number) => {
                 opacity: 0.6,
               }}
             >
-              CREDDD SCORE: <span>{Math.round(score)}</span>
+              CREDDD SCORE: <span>{Math.round(score).toString()}</span>
             </span>
           </div>
         </div>
@@ -142,6 +144,8 @@ const checkScoreFrame = async (c: any, fid: number) => {
     ],
   });
 };
+
+devtools(app, { serveStatic });
 
 export const GET = handle(app);
 export const POST = handle(app);
