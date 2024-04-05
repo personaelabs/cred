@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import useProver from '@/hooks/useProver';
 import { captureFetchError, getCredddDescription, postJSON } from '@/lib/utils';
-import { Check, Info, Loader2 } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
@@ -14,19 +14,13 @@ import { useAddingCredddModal } from '@/context/AddingCredddModalContext';
 interface WalletViewProps {
   connector: Connector;
   group: EligibleGroup;
-  added: boolean;
   afterAdd: () => void;
 }
 
-const EligibleGroup: React.FC<WalletViewProps> = ({
-  connector,
-  group,
-  ...props
-}) => {
+const EligibleGroup: React.FC<WalletViewProps> = ({ connector, group }) => {
   const { refetchUser } = useUser();
   const { setIsOpen: setIsAddingCredddModalOpen } = useAddingCredddModal();
   const prover = useProver(group);
-  const [added, setAdded] = useState(props.added);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
   const addGroup = async () => {
@@ -45,9 +39,11 @@ const EligibleGroup: React.FC<WalletViewProps> = ({
         setIsAddingCredddModalOpen(false);
 
         setIsAdding(false);
-        setAdded(true);
         refetchUser();
-        props.afterAdd();
+        toast.success('creddd added', {
+          duration: 10000,
+          closeButton: true,
+        });
       } else {
         toast.error('Failed to add creddd', {
           duration: 100000,
@@ -81,13 +77,12 @@ const EligibleGroup: React.FC<WalletViewProps> = ({
           )}
         </div>
         <div className="w-[85px] text-center">
-          <Button onClick={addGroup} disabled={isAdding || added}>
+          <Button onClick={addGroup} disabled={isAdding}>
             {isAdding ? (
               <Loader2 className="animate-spin mr-2 w-4 h-4"></Loader2>
             ) : (
               <></>
             )}
-            {added ? <Check className="w-4 h-4 mr-1" /> : <></>}
             Add
           </Button>
         </div>
