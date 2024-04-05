@@ -26,17 +26,17 @@ const { RENDER } = process.env;
 const IS_RENDER = RENDER === 'true';
 
 const app = new Frog({
-  basePath: '/api/score-frame',
   // Supply a Hub API URL to enable frame verification.
-  hubApiUrl: 'https://api.hub.wevm.dev',
   verify: IS_RENDER,
+  hubApiUrl: 'https://api.hub.wevm.dev',
   secret: process.env.FROG_SECRET || '',
   dev: {
     enabled: !IS_RENDER,
   },
 });
 
-app.frame('/', c => {
+app.frame('/api/score-frame', c => {
+  console.log(c);
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'check' && frameData) {
@@ -44,7 +44,6 @@ app.frame('/', c => {
   }
 
   return c.res({
-    action: '/',
     image: (
       <div
         style={{
