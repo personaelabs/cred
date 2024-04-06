@@ -123,7 +123,7 @@ const useProver = (eligibleGroup: EligibleGroup) => {
           custody: siwfResponse.custody!,
           signInSigNonce: siwfResponse.nonce,
           fid: user.fid,
-          treeId: eligibleGroup.treeId,
+          groupId: eligibleGroup.id,
           issuedAt: issuedAt[0],
         };
       }

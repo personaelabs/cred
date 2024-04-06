@@ -24,7 +24,7 @@ export interface FidAttestationRequestBody {
   signInSig: Hex;
   proof: Hex;
   fid: number;
-  treeId: number;
+  groupId: string;
   custody: Hex;
   issuedAt: string;
 }
@@ -45,7 +45,6 @@ export interface MerkleProof {
 export type EligibleGroup = MerkleTreeSelect['Group'] & {
   address: Hex;
   merkleProof: MerkleProof;
-  treeId: number;
 };
 
 /**
