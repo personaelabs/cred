@@ -4,7 +4,7 @@
 import { useUser } from '@/context/UserContext';
 import CredddBadge from '@/components/CredddBadge';
 import { GetUserResponse } from '../api/fc-accounts/[fid]/route';
-import { Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface AddedCredddListProps {
@@ -49,7 +49,12 @@ export default function AccountPage() {
           className="w-[60px] h-[60px] rounded-full object-cover"
         ></img>
         <div>
-          <div>{user.display_name} </div>
+          <div className="flex flex-row items-center">
+            {user.display_name}
+            <Link href={`/user/${user?.fid}`} target="_blank">
+              <ExternalLink className="w-4 h-4 ml-2"></ExternalLink>
+            </Link>
+          </div>
           <div className="opacity-50">(FID {user?.fid})</div>
         </div>
       </div>
