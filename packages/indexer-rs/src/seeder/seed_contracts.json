@@ -1255,5 +1255,17 @@
       "EarlyHolder",
       "Whale"
     ]
+  },
+  {
+    "id": 99,
+    "contract_type": "ERC721",
+    "address": "0x7ddaa898d33d7ab252ea5f89f96717c47b2fee6e",
+    "name": "EVMavericks",
+    "deployed_block": 14546599,
+    "chain": "Mainnet",
+    "symbol": "EVM",
+    "derive_groups": [
+      "AllHolders"
+    ]
   }
 ]
