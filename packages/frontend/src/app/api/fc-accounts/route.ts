@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { Hex, Chain } from 'viem';
-import { HDKey, hdKeyToAccount } from 'viem/accounts';
+import { hdKeyToAccount, mnemonicToAccount } from 'viem/accounts';
 
 const { RESKIN_MNEMONIC } = process.env;
 
@@ -10,8 +10,8 @@ if (!RESKIN_MNEMONIC) {
   throw new Error('RESKIN_MNEMONIC is not set');
 }
 
-const MASTER_SEED = Buffer.from(RESKIN_MNEMONIC);
-const hdKey = HDKey.fromMasterSeed(MASTER_SEED);
+const account = mnemonicToAccount(RESKIN_MNEMONIC);
+const hdKey = account.getHdKey();
 
 /**
  * Register a new Farcaster account.
