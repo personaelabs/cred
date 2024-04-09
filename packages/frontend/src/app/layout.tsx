@@ -17,6 +17,7 @@ import MobileHeader from '@/components/MobileHeader';
 import DesktopHeader from '@/components/DesktopHeader';
 import MobileFooter from '@/components/MobileFooter';
 import DesktopFooter from '@/components/DesktopFooter';
+import { ConnectedWalletProvider } from '@/context/ConnectWalletContext';
 
 const queryClient = new QueryClient();
 
@@ -64,27 +65,29 @@ export default function RootLayout({
         <WagmiProvider config={wagmicConfig}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider modalSize="wide">
-              <TooltipProvider>
-                <MediaQueryProvider>
-                  <AddingCredddModalProvider>
-                    <UserProvider>
-                      <AuthKitProvider config={config}>
-                        <ThemeProvider attribute="class" defaultTheme="dark">
-                          <MobileHeader></MobileHeader>
-                          <DesktopHeader></DesktopHeader>
-                          <div className="flex flex-row justify-center w-full">
-                            <div className="w-full flex flex-col">
-                              {children}
+              <ConnectedWalletProvider>
+                <TooltipProvider>
+                  <MediaQueryProvider>
+                    <AddingCredddModalProvider>
+                      <UserProvider>
+                        <AuthKitProvider config={config}>
+                          <ThemeProvider attribute="class" defaultTheme="dark">
+                            <MobileHeader></MobileHeader>
+                            <DesktopHeader></DesktopHeader>
+                            <div className="flex flex-row justify-center w-full">
+                              <div className="w-full flex flex-col">
+                                {children}
+                              </div>
                             </div>
-                          </div>
-                          <MobileFooter></MobileFooter>
-                          <DesktopFooter></DesktopFooter>
-                        </ThemeProvider>
-                      </AuthKitProvider>
-                    </UserProvider>
-                  </AddingCredddModalProvider>
-                </MediaQueryProvider>
-              </TooltipProvider>
+                            <MobileFooter></MobileFooter>
+                            <DesktopFooter></DesktopFooter>
+                          </ThemeProvider>
+                        </AuthKitProvider>
+                      </UserProvider>
+                    </AddingCredddModalProvider>
+                  </MediaQueryProvider>
+                </TooltipProvider>
+              </ConnectedWalletProvider>
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>

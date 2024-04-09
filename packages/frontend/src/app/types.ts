@@ -78,3 +78,10 @@ export enum AttestationType {
   // eslint-disable-next-line no-unused-vars
   FidAttestation = 1,
 }
+
+export interface CreateAccountArgs {
+  displayName: string;
+  bio: string;
+  selectedCreddd: string[];
+  profileImage: File;
+}

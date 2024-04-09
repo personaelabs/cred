@@ -1,6 +1,6 @@
 'use client';
 import { icons } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface MenuItemProps {
   icon: keyof typeof icons;
@@ -14,6 +14,13 @@ const MenuItem = (props: MenuItemProps) => {
 
 const MobileFooter = () => {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isHidden = pathname.startsWith('/reskin');
+
+  if (isHidden) {
+    return null;
+  }
 
   return (
     <div className="md:hidden h-[70px] w-full bg-background fixed bottom-0 flex flex-col">

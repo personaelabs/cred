@@ -2,9 +2,17 @@
 'use client';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const DesktopHeader = () => {
   const { user } = useUser();
+  const pathname = usePathname();
+
+  const isHidden = pathname.startsWith('/reskin');
+
+  if (isHidden) {
+    return <></>;
+  }
 
   return (
     <div className="hidden md:flex h-[80px] w-[100vw] flex-row justify-between items-center gap-8 px-[20px] md:px-[100px]">

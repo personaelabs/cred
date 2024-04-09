@@ -2,9 +2,17 @@
 'use client';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const MobileHeader = () => {
   const { user } = useUser();
+  const pathname = usePathname();
+
+  const isHidden = pathname.startsWith('/reskin');
+
+  if (isHidden) {
+    return <></>;
+  }
 
   return (
     <div className="md:hidden flex flex-row justify-between h-[80px] w-[100vw] p-[24px]">
