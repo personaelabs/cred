@@ -11,10 +11,9 @@ datasource db {
 }
 
 model PaymentAddress {
-  id              Int    @id @default(autoincrement())
-  address         String
-  encryptedSecret Bytes
-  custodyAddress  String
+  id             Int    @id @default(autoincrement())
+  address        String
+  custodyAddress String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
