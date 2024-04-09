@@ -13,7 +13,60 @@ import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { EligibleGroup } from '@/app/types';
 // import useCreateAccount from '@/hooks/useCreateAccount';
+
+interface EligibleCredddListProps {
+  setSelectedCreddd: React.Dispatch<React.SetStateAction<string[] | null>>;
+  eligibleGroups: EligibleGroup[] | null;
+}
+
+const EligibleCredddList = (props: EligibleCredddListProps) => {
+  const { setSelectedCreddd, eligibleGroups } = props;
+
+  if (!eligibleGroups) {
+    return (
+      <div>
+        <CredddSearchSpinner />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-[14px] h-[220px] overflow-y-scroll border-b-slate-800 border py-2 px-6 rounded-lg">
+        <div className="opacity-80 text-center">
+          {eligibleGroups.length === 0 ? (
+            <>
+              <div>No creddd found for connected wallet.</div>
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
+        <div className="flex flex-col max-h-[400px] items-center gap-y-[20px] overflow-scroll">
+          {eligibleGroups.map((group, i) => (
+            <div key={i} className="flex flex-row items-center">
+              <Checkbox
+                id={group.id}
+                onClick={() => {
+                  setSelectedCreddd(prev => {
+                    if (prev?.includes(group.id)) {
+                      return prev?.filter(id => id !== group.id);
+                    }
+                    return [...(prev || []), group.id];
+                  });
+                }}
+                className="mr-2"
+              ></Checkbox>
+              <div>{group.displayName}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
 
 const ReskinSetupPage = () => {
   const { accounts } = useConnectedAccounts();
@@ -38,7 +91,10 @@ const ReskinSetupPage = () => {
 
   return (
     <div className="flex flex-col items-center w-full gap-y-[40px] mt-8">
-      <div>reskin</div>
+      <div className="flex flex-col items-center gap-y-[4px]">
+        <div className="text-lg">reskinnn</div>
+        <div>create a Farcaster anon from your creddd</div>
+      </div>
       <div className="flex flex-col items-center gap-y-[4px]">
         {profileImage ? (
           <img
@@ -50,7 +106,7 @@ const ReskinSetupPage = () => {
         ) : (
           <div className="relative">
             <UploadIcon
-              className="w-6 h-6 absolute inset-0 m-auto cursor-pointer"
+              className="w-4 h-6 absolute inset-0 m-auto cursor-pointer"
               onClick={handleUploadProfileImageClick}
             ></UploadIcon>
             <Image
@@ -95,37 +151,29 @@ const ReskinSetupPage = () => {
       </div>
       <div className="flex flex-col items-center gap-[8px]">
         <div>selected creddd to reskin with</div>
-        <div className="flex flex-col gap-[8px] h-[150px] overflow-y-scroll border-b-slate-800 border py-4 px-8 rounded-lg">
-          {eligibleGroups ? (
-            eligibleGroups.map((group, i) => (
-              <div key={i} className="flex flex-row items-center">
-                <Checkbox
-                  id={group.id}
-                  onClick={() => {
-                    setSelectedCreddd(prev => {
-                      if (prev?.includes(group.id)) {
-                        return prev?.filter(id => id !== group.id);
-                      }
-                      return [...(prev || []), group.id];
-                    });
-                  }}
-                  className="mr-2"
-                ></Checkbox>
-                <div>{group.displayName}</div>
-              </div>
-            ))
-          ) : (
-            <CredddSearchSpinner />
-          )}
-        </div>
+        <EligibleCredddList
+          eligibleGroups={eligibleGroups}
+          setSelectedCreddd={setSelectedCreddd}
+        ></EligibleCredddList>
       </div>
       <ConnectWalletButton label=""></ConnectWalletButton>
-      <div className="flex flex-col items-center gap-y-[8px] w-[400px]">
-        Your identity is hidden among 80 others
-        <Progress value={80} className="w-[60%] h-[8px]"></Progress>
-      </div>
+      {eligibleGroups && eligibleGroups.length > 0 ? (
+        <div className="flex flex-col items-center gap-y-[8px] w-[400px]">
+          Your identity is hidden among 80 others
+          <Progress
+            value={80}
+            className="w-[60%] h-[8px]"
+            indicatorColor="#0BB95B"
+          ></Progress>
+        </div>
+      ) : (
+        <></>
+      )}
       <Separator className="w-[40%]"></Separator>
-      <Button onClick={handleCreateAccountClick}>Create account</Button>
+      <div className="flex flex-col items-center gap-[4px]">
+        <Button onClick={handleCreateAccountClick}>Create account</Button>
+        <div className="opacity-60">fee 0.0005ETH ~= $10</div>
+      </div>
     </div>
   );
 };
