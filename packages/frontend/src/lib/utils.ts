@@ -5,6 +5,8 @@ import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
 
+export const PERSONAE_ADDRESS = '0x141b63D93DaF55bfb7F396eEe6114F3A5d4A90B2'; // personaelabs.eth
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -131,6 +133,7 @@ export const buildSiwfMessage = ({
 
 export const captureFetchError = async (response: Response) => {
   const error = await response.json();
+  console.error(error);
   Sentry.captureException(new Error(JSON.stringify(error)));
 };
 
@@ -225,6 +228,19 @@ export const getFidAttestationHashV1 = (
   }
 
   return keccak256(input);
+};
+
+export const generateRandomString = (length: number): string => {
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
+  array.forEach(byte => {
+    result += characters[byte % characters.length];
+  });
+  return result;
 };
 
 export const PRECOMPUTED_HASHES = [

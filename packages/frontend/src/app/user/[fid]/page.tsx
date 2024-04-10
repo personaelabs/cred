@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import useUser from '@/hooks/useUser';
 import { Check, Info } from 'lucide-react';
 import CREDDD_1_USERS from '@/lib/creddd1Users';
 import { getCredddDescription } from '@/lib/utils';
@@ -12,6 +11,7 @@ import {
 import { GroupSelect } from '@/app/api/fc-accounts/[fid]/route';
 import Image from 'next/image';
 import Link from 'next/link';
+import useUserData from '@/hooks/useUserData';
 
 interface CredddBadgeProps {
   group: GroupSelect;
@@ -44,7 +44,7 @@ const CredddBadge = (props: CredddBadgeProps) => {
 };
 
 const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
-  const user = useUser(fid);
+  const user = useUserData(fid);
 
   // If the user is a creddd 1.0 user, render a slightly different UI
   if (CREDDD_1_USERS[fid]) {

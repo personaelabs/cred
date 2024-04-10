@@ -10,7 +10,7 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { mainnet } from 'viem/chains';
+import { optimism } from 'wagmi/chains';
 import { MediaQueryProvider } from '@/context/MediaQueryContext';
 import { AddingCredddModalProvider } from '@/context/AddingCredddModalContext';
 import MobileHeader from '@/components/MobileHeader';
@@ -21,10 +21,25 @@ import { ConnectedWalletProvider } from '@/context/ConnectWalletContext';
 
 const queryClient = new QueryClient();
 
-const wagmicConfig = getDefaultConfig({
+const chains =
+  process.env.RENDER === 'true'
+    ? [optimism]
+    : [
+        {
+          ...optimism,
+          rpcUrls: {
+            default: {
+              http: ['http://127.0.0.1:8545'],
+            },
+          },
+        },
+      ];
+
+export const wagmicConfig = getDefaultConfig({
   appName: 'creddd',
   projectId: '2ea91e648a2198845fee3ea267ff37dc',
-  chains: [mainnet],
+  // @ts-ignore
+  chains,
   ssr: true,
 });
 

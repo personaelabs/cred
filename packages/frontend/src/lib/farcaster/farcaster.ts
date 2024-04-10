@@ -1,5 +1,3 @@
-import { Hex } from 'viem';
-
-export const transferOwnership = async (_transferTo: Hex) => {
-  // TODO: Implement this
-};
+export const KEY_GATEWAY_ADDRESS = '0x00000000fc56947c7e7183f8ca4b62398caadf0b';
+export const ID_GATEWAY_ADDRESS = '0x00000000fc25870c6ed6b6c7e41fb078b7656f69';
+export const ID_REGISTRY_ADDRESS = '0x00000000Fc6c5F01Fc30151999387Bb99A9f489b';

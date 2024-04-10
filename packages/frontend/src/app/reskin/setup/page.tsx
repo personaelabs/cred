@@ -14,7 +14,9 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { EligibleGroup } from '@/app/types';
-// import useCreateAccount from '@/hooks/useCreateAccount';
+import PaymentModal from '@/components/PaymentModal';
+import useCreateAccount from '@/hooks/useCreateAccount';
+import CreatingAccountModal from '@/components/CreatingAccountModal';
 
 interface EligibleCredddListProps {
   setSelectedCreddd: React.Dispatch<React.SetStateAction<string[] | null>>;
@@ -69,21 +71,24 @@ const EligibleCredddList = (props: EligibleCredddListProps) => {
 };
 
 const ReskinSetupPage = () => {
-  const { accounts } = useConnectedAccounts();
+  const { accounts, isConnected } = useConnectedAccounts();
   const { eligibleGroups } = useEligibleGroups(accounts);
   const [displayName, setDisplayName] = useState<string>('');
   const [bio, setBio] = useState<string>('');
-  const [selectedCreddd, setSelectedCreddd] = useState<string[] | null>(null);
+  const [_selectedCreddd, setSelectedCreddd] = useState<string[] | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const profileImageInputRef = useRef<HTMLInputElement | null>(null);
-  // const { createAccount } = useCreateAccount();
+  const { createAccount } = useCreateAccount();
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isCreatingAccountModalOpen, setIsCreatingAccountModalOpen] =
+    useState(false);
 
-  const handleCreateAccountClick = useCallback(() => {
-    if (!selectedCreddd) {
-      return;
-    }
-    // create account with selected creddd
-  }, [selectedCreddd]);
+  const handleCreateAccountClick = useCallback(async () => {
+    setIsPaymentModalOpen(false);
+    setIsCreatingAccountModalOpen(true);
+    await createAccount();
+    setIsCreatingAccountModalOpen(false);
+  }, [createAccount]);
 
   const handleUploadProfileImageClick = useCallback(() => {
     profileImageInputRef.current?.click();
@@ -149,14 +154,18 @@ const ReskinSetupPage = () => {
           className="w-[220px]"
         ></Textarea>
       </div>
-      <div className="flex flex-col items-center gap-[8px]">
-        <div>selected creddd to reskin with</div>
-        <EligibleCredddList
-          eligibleGroups={eligibleGroups}
-          setSelectedCreddd={setSelectedCreddd}
-        ></EligibleCredddList>
-      </div>
-      <ConnectWalletButton label=""></ConnectWalletButton>
+      {isConnected ? (
+        <div className="flex flex-col items-center gap-[8px]">
+          <div>select creddd to reskin with</div>
+          <EligibleCredddList
+            eligibleGroups={eligibleGroups}
+            setSelectedCreddd={setSelectedCreddd}
+          ></EligibleCredddList>
+        </div>
+      ) : (
+        <></>
+      )}
+      <ConnectWalletButton label="Connect wallet to attach creddd"></ConnectWalletButton>
       {eligibleGroups && eligibleGroups.length > 0 ? (
         <div className="flex flex-col items-center gap-y-[8px] w-[400px]">
           Your identity is hidden among 80 others
@@ -171,9 +180,34 @@ const ReskinSetupPage = () => {
       )}
       <Separator className="w-[40%]"></Separator>
       <div className="flex flex-col items-center gap-[4px]">
-        <Button onClick={handleCreateAccountClick}>Create account</Button>
+        <Button
+          onClick={() => {
+            setIsPaymentModalOpen(true);
+          }}
+          disabled={
+            /*
+            displayName === '' ||
+            bio === '' ||
+            !selectedCreddd ||
+            selectedCreddd?.length === 0
+            */
+            false
+          }
+        >
+          Create account
+        </Button>
         <div className="opacity-60">fee 0.0005ETH ~= $10</div>
       </div>
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => {
+          setIsPaymentModalOpen(false);
+        }}
+        onConfirm={handleCreateAccountClick}
+      ></PaymentModal>
+      <CreatingAccountModal
+        isOpen={isCreatingAccountModalOpen}
+      ></CreatingAccountModal>
     </div>
   );
 };

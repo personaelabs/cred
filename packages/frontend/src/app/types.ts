@@ -79,9 +79,10 @@ export enum AttestationType {
   FidAttestation = 1,
 }
 
-export interface CreateAccountArgs {
-  displayName: string;
-  bio: string;
-  selectedCreddd: string[];
-  profileImage: File;
+export interface FcUserSignInInfo {
+  fid: number;
+  message: string;
+  signature: Hex;
+  custodyAddress: Hex;
+  nonce: string;
 }

@@ -1,4 +1,5 @@
-import { Chain, createPublicClient, http } from 'viem';
+import { Chain, Hex, createPublicClient, createWalletClient, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import * as chains from 'viem/chains';
 const {
   ALCHEMY_API_KEY_0,
@@ -7,41 +8,50 @@ const {
   ALCHEMY_ARB_API_KEY,
 } = process.env;
 
-const mainnetClient = createPublicClient({
-  transport: http(
-    `https://eth-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_API_KEY_0}`
-  ),
-});
+const MAINNET_RPC_URL = `https://eth-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_API_KEY_0}`;
+const OP_MAINNET_RPC_URL = `https://opt-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_OPT_API_KEY}`;
+const ARB_MAINNET_RPC_URL = `https://arb-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_ARB_API_KEY}`;
+const BASE_MAINNET_RPC_URL = `https://base-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_BASE_API_KEY}`;
 
-const optClient = createPublicClient({
-  transport: http(
-    `https://opt-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_OPT_API_KEY}`
-  ),
-});
+const { RESKIN_PRIV_KEY } = process.env;
 
-const arbClient = createPublicClient({
-  transport: http(
-    `https://arb-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_ARB_API_KEY}`
-  ),
-});
+if (!RESKIN_PRIV_KEY) {
+  throw new Error('RESKIN_PRIV_KEY not set');
+}
 
-const baseClient = createPublicClient({
-  transport: http(
-    `https://base-mainnet.g.alchemy.com/v2/<apiKey>/${ALCHEMY_BASE_API_KEY}`
-  ),
-});
+const account = privateKeyToAccount(RESKIN_PRIV_KEY as Hex);
 
-export const getClient = (chain: Chain) => {
+/**
+ * Returns the RPC URL for the given chain.
+ */
+const getRpcUrl = (chain: Chain) => {
   switch (chain) {
     case chains.mainnet:
-      return mainnetClient;
+      return MAINNET_RPC_URL;
     case chains.optimism:
-      return optClient;
+      return OP_MAINNET_RPC_URL;
     case chains.arbitrum:
-      return arbClient;
+      return ARB_MAINNET_RPC_URL;
     case chains.base:
-      return baseClient;
+      return BASE_MAINNET_RPC_URL;
     default:
       throw new Error(`Unsupported chain: ${chain}`);
   }
+};
+
+export const getPublicClient = (chain: Chain) => {
+  const url = getRpcUrl(chain);
+
+  return createPublicClient({
+    transport: http(url),
+  });
+};
+
+export const getWalletClient = (chain: Chain) => {
+  const url = getRpcUrl(chain);
+
+  return createWalletClient({
+    account,
+    transport: http(url),
+  });
 };
