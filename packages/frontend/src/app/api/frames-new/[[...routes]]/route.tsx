@@ -259,7 +259,9 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
     intents: [
       <Button value="checkStats">back</Button>,
       suggestedUsers.map(user => (
-        <Button.Link href={`https://warpcast.com/${user.username}`}>
+        <Button.Link
+          href={`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/warpcast-proxy/${user.username}`}
+        >
           {user.display_name}
         </Button.Link>
       )),
