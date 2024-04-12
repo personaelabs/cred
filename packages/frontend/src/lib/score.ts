@@ -70,7 +70,7 @@ export async function getSuggestedFollows(
           score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
-        END) * COUNT(*) * ${SCORE_NORM} ) AS score,
+        END) * COUNT(*) * ${SCORE_NORM} ) AS score
     FROM
       "distinct_user_creddd"
     GROUP BY fid
@@ -91,7 +91,10 @@ interface MedianQueryResult {
   median: number;
 }
 
-export async function getMedianScore(fids: number[]): Promise<number> {
+/**
+ * Returns the median non-zero scores of the given FIDs.
+ */
+export async function getNonzeroMedianScore(fids: number[]): Promise<number> {
   const result = await prisma.$queryRaw<MedianQueryResult[]>`
     WITH "user_creddd" AS (
       SELECT
@@ -136,7 +139,7 @@ export async function getMedianScore(fids: number[]): Promise<number> {
           score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
-        END) * COUNT(*) * ${SCORE_NORM} )AS score
+        END) * COUNT(*) * ${SCORE_NORM}) AS score
     FROM
       "distinct_user_creddd"
     GROUP BY fid
@@ -145,7 +148,7 @@ export async function getMedianScore(fids: number[]): Promise<number> {
       ROUND(percentile_cont(0.5)
       WITHIN GROUP (ORDER BY "score")) AS median
     FROM
-      user_scores
+      user_scores WHERE "score" > 0
   `;
 
   if (result.length === 0) {

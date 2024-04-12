@@ -7,7 +7,7 @@ import { handle } from 'frog/next';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
 import { getFollowingFids, getUsers } from '@/lib/neynar';
-import { getMedianScore, getSuggestedFollows } from '@/lib/score';
+import { getNonzeroMedianScore, getSuggestedFollows } from '@/lib/score';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -68,7 +68,7 @@ app.frame('/', async c => {
 
 const showStatsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
-  const medianScore = await getMedianScore(followingFids);
+  const medianScore = await getNonzeroMedianScore(followingFids);
 
   const suggestedFollows = await getSuggestedFollows(followingFids);
 
