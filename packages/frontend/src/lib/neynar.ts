@@ -3,7 +3,7 @@ import axios from 'axios';
 import { NeynarUserResponse } from '@/app/types';
 import NodeCache from 'node-cache';
 
-import Pool from 'pg-pool';
+import { PrismaClient } from '@prisma/client';
 
 const cacheTTL = process.env.NODE_ENV === 'development' ? 9999999999 : 60;
 console.log('cacheTTL', cacheTTL);
@@ -17,26 +17,34 @@ const neynar = axios.create({
   },
 });
 
-// NOTE: not robust to neynar db host/db name changes
-const neynarDbConfig = {
-  user: process.env.NEYNAR_DB_USER,
-  password: process.env.NEYNAR_DB_PWD,
-  host: 'db.neynar.com',
-  port: 5432,
-  database: 'farcaster',
-};
-const neynarDbPool = new Pool(neynarDbConfig);
+const neynarDb = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.NEYNAR_DB_URL,
+    },
+  },
+});
 
-export const getFollowingFids = async (fid: number) => {
-  const client = await neynarDbPool.connect();
-  try {
-    const res = await client.query(
-      `select distinct target_fid from "links" where fid=${fid} and type='follow'`
-    );
-    return res.rows.map((row: any) => parseInt(row.target_fid));
-  } finally {
-    client.release();
-  }
+interface NeynarQueryFollowsResult {
+  target_fid: number;
+}
+
+/**
+ * Get the FIDs that a given FID is following
+ */
+export const getFollowingFids = async (fid: number): Promise<number[]> => {
+  const res = await neynarDb.$queryRaw<
+    NeynarQueryFollowsResult[]
+  >`SELECT DISTINCT
+        target_fid
+      FROM
+        "links"
+      WHERE
+        fid = ${fid}
+        AND TYPE = 'follow'
+        AND deleted_at IS NULL`;
+
+  return res.map(row => row.target_fid);
 };
 
 /**
