@@ -72,6 +72,7 @@ const showStatsFrame = async (c: any, fid: number) => {
 
   const suggestedFollows = await getSuggestedFollows(followingFids);
 
+  // Monitor what the frame returns
   console.log('followingFids', followingFids.length);
   console.log('medianScore', medianScore);
   console.log(
@@ -79,6 +80,7 @@ const showStatsFrame = async (c: any, fid: number) => {
     suggestedFollows.map(({ fid, score }) => ({ fid, score }))
   );
 
+  // Get user data for the suggested follows
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   return c.res({

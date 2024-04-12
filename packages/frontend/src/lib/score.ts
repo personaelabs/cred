@@ -15,12 +15,12 @@ interface ScoreResult {
 
 interface SuggestedFollowsQueryResult {
   fid: number;
-  creddd: string[];
   score: number;
 }
 
 /**
  * Returns a list of suggested follows for a given user.
+ * Suggested follows are the first 3 highest score users that the user is not following.
  * @param followingFids List of FIDs that the user is following.
  */
 export async function getSuggestedFollows(
@@ -71,7 +71,6 @@ export async function getSuggestedFollows(
         ELSE
           0
         END) * COUNT(*) * ${SCORE_NORM} ) AS score,
-        ARRAY_AGG("displayName") AS creddd
     FROM
       "distinct_user_creddd"
     GROUP BY fid
