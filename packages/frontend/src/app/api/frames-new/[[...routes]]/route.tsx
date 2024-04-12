@@ -7,7 +7,12 @@ import { handle } from 'frog/next';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
 import { getFollowingFids, getUsers } from '@/lib/neynar';
-import { getNonzeroMedianScore, getSuggestedFollows } from '@/lib/score';
+import {
+  getNonZeroFollowCount,
+  getNonzeroAverageScore,
+  getNonzeroMedianScore,
+  getSuggestedFollows,
+} from '@/lib/score';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -50,9 +55,14 @@ const app = new Frog({
 app.frame('/', async c => {
   const { buttonValue, frameData } = c;
 
-  if (buttonValue === 'check' && frameData) {
-    console.log('check score click', frameData.fid);
+  if (buttonValue === 'checkStats' && frameData) {
+    console.log('check stats click', frameData.fid);
     return showStatsFrame(c, frameData.fid);
+  }
+
+  if (buttonValue === 'suggestedFollows' && frameData) {
+    console.log('suggested follows click', frameData.fid);
+    return suggestedFollowsFrame(c, frameData.fid);
   }
 
   return c.res({
@@ -62,26 +72,34 @@ app.frame('/', async c => {
         how onchain is your feed?
       </div>
     ),
-    intents: [<Button value="check">check</Button>],
+    intents: [<Button value="checkStats">check</Button>],
   });
 });
 
 const showStatsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
+
+  const numNonZeroFollows = await getNonZeroFollowCount(followingFids);
   const medianScore = await getNonzeroMedianScore(followingFids);
+  const averageScore = await getNonzeroAverageScore(followingFids);
 
-  const suggestedFollows = await getSuggestedFollows(followingFids);
+  const stats = [
+    {
+      label: 'nonzero score users you follow',
+      value: `${numNonZeroFollows.toLocaleString()} / ${followingFids.length.toLocaleString()}`,
+    },
+    {
+      label: 'mean score',
+      value: averageScore.toLocaleString(),
+    },
+    {
+      label: 'median score',
+      value: medianScore.toLocaleString(),
+    },
+  ];
 
-  // Monitor what the frame returns
-  console.log('followingFids', followingFids.length);
-  console.log('medianScore', medianScore);
-  console.log(
-    'suggestedFollows',
-    suggestedFollows.map(({ fid, score }) => ({ fid, score }))
-  );
-
-  // Get user data for the suggested follows
-  const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
+  // Monitor the stats the users see
+  console.log('fid stats', fid, stats);
 
   return c.res({
     action: '/',
@@ -103,17 +121,56 @@ const showStatsFrame = async (c: any, fid: number) => {
             width: '100%',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '100%',
-              gap: 20,
-            }}
-          >
-            feed score:<span>{medianScore.toString()}</span>
-          </div>
+          {stats.map(({ label, value }) => (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '100%',
+                gap: 20,
+              }}
+            >
+              <span>{label}</span>:<span>{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+    intents: [<Button value="suggestedFollows">who should I follow?</Button>],
+  });
+};
+
+const suggestedFollowsFrame = async (c: any, fid: number) => {
+  const followingFids = await getFollowingFids(fid);
+  const suggestedFollows = await getSuggestedFollows(followingFids);
+
+  // Get user data for the suggested follows
+  const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
+
+  // Monitor the suggested follows the users see
+  console.log('fid suggested follows', fid, suggestedFollows);
+
+  return c.res({
+    action: '/',
+    image: (
+      <div
+        style={{
+          ...CONTAINER_STYLE,
+          fontSize: 60,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+
+            color: 'white',
+            fontSize: 32,
+            width: '100%',
+          }}
+        >
           <span>suggested follows</span>
           {suggestedFollows.map(({ fid, score }) => {
             const user = suggestedUsers.find(user => user.fid === fid)!;
@@ -153,11 +210,14 @@ const showStatsFrame = async (c: any, fid: number) => {
         </div>
       </div>
     ),
-    intents: suggestedUsers.map(user => (
-      <Button.Link href={`https://warpcast.com/${user.username}`}>
-        {user.display_name}
-      </Button.Link>
-    )),
+    intents: [
+      <Button value="checkStats">back</Button>,
+      suggestedUsers.map(user => (
+        <Button.Link href={`https://warpcast.com/${user.username}`}>
+          {user.display_name}
+        </Button.Link>
+      )),
+    ].flat(),
   });
 };
 
