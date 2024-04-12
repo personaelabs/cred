@@ -85,16 +85,16 @@ const showStatsFrame = async (c: any, fid: number) => {
 
   const stats = [
     {
-      label: 'nonzero score users you follow',
-      value: `${numNonZeroFollows.toLocaleString()} / ${followingFids.length.toLocaleString()}`,
+      label: 'users with nonzero scores',
+      value: `${numNonZeroFollows.toLocaleString('en-US')} / ${followingFids.length.toLocaleString('en-US')}`,
     },
     {
       label: 'mean score',
-      value: averageScore.toLocaleString(),
+      value: averageScore.toLocaleString('en-US'),
     },
     {
       label: 'median score',
-      value: medianScore.toLocaleString(),
+      value: medianScore.toLocaleString('en-US'),
     },
   ];
 
@@ -107,9 +107,17 @@ const showStatsFrame = async (c: any, fid: number) => {
       <div
         style={{
           ...CONTAINER_STYLE,
-          fontSize: 60,
+          alignItems: 'flex-start',
+          gap: 30,
         }}
       >
+        <span
+          style={{
+            fontSize: 48,
+          }}
+        >
+          your feed stats
+        </span>
         <div
           style={{
             display: 'flex',
@@ -117,8 +125,9 @@ const showStatsFrame = async (c: any, fid: number) => {
             alignItems: 'flex-start',
 
             color: 'white',
-            fontSize: 32,
+            fontSize: 40,
             width: '100%',
+            gap: 16,
           }}
         >
           {stats.map(({ label, value }) => (
@@ -131,7 +140,22 @@ const showStatsFrame = async (c: any, fid: number) => {
                 gap: 20,
               }}
             >
-              <span>{label}</span>:<span>{value}</span>
+              <span
+                style={{
+                  opacity: 0.6,
+                }}
+              >
+                {label}
+              </span>
+              :
+              <span
+                style={{
+                  fontWeight: 'bold',
+                  color: TEXT_COLOR,
+                }}
+              >
+                {value}
+              </span>
             </div>
           ))}
         </div>
@@ -165,13 +189,19 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
-
             color: 'white',
-            fontSize: 32,
             width: '100%',
+            gap: 16,
           }}
         >
-          <span>suggested follows</span>
+          <span
+            style={{
+              fontSize: 40,
+              color: TEXT_COLOR,
+            }}
+          >
+            suggested follows
+          </span>
           {suggestedFollows.map(({ fid, score }) => {
             const user = suggestedUsers.find(user => user.fid === fid)!;
             return (
@@ -182,7 +212,8 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
                   alignItems: 'center',
                   justifyItems: 'flex-start',
                   width: '100%',
-                  gap: 20,
+                  gap: 16,
+                  fontSize: 28,
                   margin: 20,
                 }}
               >
@@ -196,14 +227,29 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
                     objectFit: 'cover',
                   }}
                 ></img>
-                <span>{user.display_name}</span>
-                <span
+                <div
                   style={{
-                    opacity: 0.6,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    fontSize: 32,
+                    gap: 32,
                   }}
                 >
-                  {score.toLocaleString()}
-                </span>
+                  <span>{user.display_name}</span>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      opacity: 0.6,
+                      alignItems: 'center',
+                      gap: 5,
+                    }}
+                  >
+                    <span>creddd score:</span>
+                    <span>{Number(score).toLocaleString('en-US')}</span>
+                  </div>
+                </div>
               </div>
             );
           })}
