@@ -25,7 +25,7 @@ const CONTAINER_STYLE = {
 const { VERCEL_ENV } = process.env;
 
 const app = new Frog({
-  basePath: '/api/frames-new/follow-score',
+  basePath: '/api/frames-new/feed-score',
   browserLocation: '/:path',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
