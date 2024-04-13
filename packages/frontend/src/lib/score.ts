@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 const K_WHALE = 5e2;
 const K_EARLY = 1;
@@ -10,6 +11,293 @@ const SCORE_NORM = 1e-8;
 
 interface ScoreResult {
   score: number;
+}
+
+interface SuggestedFollowsQueryResult {
+  fid: number;
+  score: number;
+}
+
+/**
+ * Returns a list of suggested follows for a given user.
+ * Suggested follows are the first 3 highest score users that the user is not following.
+ * @param followingFids List of FIDs that the user is following.
+ */
+export async function getSuggestedFollows(
+  followingFids: number[]
+): Promise<SuggestedFollowsQueryResult[]> {
+  const result = await prisma.$queryRaw<SuggestedFollowsQueryResult[]>`
+    WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE fid NOT IN (${Prisma.join(followingFids)})
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+      WHERE fid NOT IN (${Prisma.join(followingFids)})
+    ),
+    "distinct_user_creddd" AS (
+      SELECT DISTINCT ON (fid,
+        "Group".id)
+        fid,
+        "Group"."typeId",
+        "Group"."displayName",
+        "Group".score
+      FROM
+        "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      WHERE "Group".state = 'Recordable'
+    ), "user_scores" AS (
+      SELECT
+      fid,
+      ROUND(SUM(
+        CASE WHEN "typeId" = 'AllHolders' THEN
+          score * ${K_NFT} --- k for 'AllHolders'
+        WHEN "typeId" = 'EarlyHolder' THEN
+          score * ${K_EARLY} --- k for 'EarlyHolder'
+        WHEN "typeId" = 'Whale' THEN
+          score * ${K_WHALE} --- k for 'Whale'
+        when "typeId" = 'Believer' THEN
+          score * ${K_BELIEVER} --- k for 'Believer'
+        when "typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
+        ELSE
+          0
+        END) * COUNT(*) * ${SCORE_NORM} ) AS score
+    FROM
+      "distinct_user_creddd"
+    GROUP BY fid
+    )
+    SELECT
+      *
+    FROM
+      user_scores
+    ORDER BY
+      score DESC
+    LIMIT 3
+  `;
+
+  return result;
+}
+
+interface NonZeroFollowCountQueryResult {
+  nonZeroFollowCount: number;
+}
+
+/**
+ * Returns the number of non-zero score users that the given user is following.
+ */
+export async function getNonZeroFollowCount(
+  followingFids: number[]
+): Promise<number> {
+  const result = await prisma.$queryRaw<NonZeroFollowCountQueryResult[]>`
+    WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE fid in (${Prisma.join(followingFids)})
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+      WHERE fid in (${Prisma.join(followingFids)})
+    ),
+    "distinct_user_creddd" AS (
+      SELECT DISTINCT ON (fid,
+        "Group".id)
+        fid,
+        "Group"."typeId",
+        "Group"."displayName",
+        "Group".score
+      FROM
+        "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      WHERE "Group".state = 'Recordable'
+    ), "user_scores" AS (
+      SELECT
+      fid,
+      ROUND(SUM(
+        CASE WHEN "typeId" = 'AllHolders' THEN
+          score * ${K_NFT} --- k for 'AllHolders'
+        WHEN "typeId" = 'EarlyHolder' THEN
+          score * ${K_EARLY} --- k for 'EarlyHolder'
+        WHEN "typeId" = 'Whale' THEN
+          score * ${K_WHALE} --- k for 'Whale'
+        when "typeId" = 'Believer' THEN
+          score * ${K_BELIEVER} --- k for 'Believer'
+        when "typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
+        ELSE
+          0
+        END) * COUNT(*) * ${SCORE_NORM}) AS score
+    FROM
+      "distinct_user_creddd"
+    GROUP BY fid
+    )
+    SELECT
+      count(*) as "nonZeroFollowCount"
+    FROM
+      user_scores WHERE "score" > 0
+  `;
+
+  if (result.length === 0) {
+    return 0;
+  }
+
+  return result[0].nonZeroFollowCount;
+}
+
+interface AverageQueryResult {
+  average: number;
+}
+
+/**
+ * Returns the average non-zero scores of the given FIDs.
+ */
+export async function getNonzeroAverageScore(fids: number[]): Promise<number> {
+  const result = await prisma.$queryRaw<AverageQueryResult[]>`
+    WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE fid in (${Prisma.join(fids)})
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+      WHERE fid in (${Prisma.join(fids)})
+    ),
+    "distinct_user_creddd" AS (
+      SELECT DISTINCT ON (fid,
+        "Group".id)
+        fid,
+        "Group"."typeId",
+        "Group"."displayName",
+        "Group".score
+      FROM
+        "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      WHERE "Group".state = 'Recordable'
+    ), "user_scores" AS (
+      SELECT
+      fid,
+      ROUND(SUM(
+        CASE WHEN "typeId" = 'AllHolders' THEN
+          score * ${K_NFT} --- k for 'AllHolders'
+        WHEN "typeId" = 'EarlyHolder' THEN
+          score * ${K_EARLY} --- k for 'EarlyHolder'
+        WHEN "typeId" = 'Whale' THEN
+          score * ${K_WHALE} --- k for 'Whale'
+        when "typeId" = 'Believer' THEN
+          score * ${K_BELIEVER} --- k for 'Believer'
+        when "typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
+        ELSE
+          0
+        END) * COUNT(*) * ${SCORE_NORM}) AS score
+    FROM
+      "distinct_user_creddd"
+    GROUP BY fid
+    )
+    SELECT
+      ROUND(AVG("score")) as average
+    FROM
+      user_scores WHERE "score" > 0
+  `;
+
+  if (result.length === 0) {
+    return 0;
+  }
+
+  return result[0].average;
+}
+
+interface MedianQueryResult {
+  median: number;
+}
+
+/**
+ * Returns the median non-zero scores of the given FIDs.
+ */
+export async function getNonzeroMedianScore(fids: number[]): Promise<number> {
+  const result = await prisma.$queryRaw<MedianQueryResult[]>`
+    WITH "user_creddd" AS (
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "FidAttestation"
+      WHERE fid in (${Prisma.join(fids)})
+      UNION
+      SELECT
+        fid,
+        "treeId"
+      FROM
+        "IntrinsicCreddd"
+      WHERE fid in (${Prisma.join(fids)})
+    ),
+    "distinct_user_creddd" AS (
+      SELECT DISTINCT ON (fid,
+        "Group".id)
+        fid,
+        "Group"."typeId",
+        "Group"."displayName",
+        "Group".score
+      FROM
+        "user_creddd"
+      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
+      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
+      WHERE "Group".state = 'Recordable'
+    ), "user_scores" AS (
+      SELECT
+      fid,
+      ROUND(SUM(
+        CASE WHEN "typeId" = 'AllHolders' THEN
+          score * ${K_NFT} --- k for 'AllHolders'
+        WHEN "typeId" = 'EarlyHolder' THEN
+          score * ${K_EARLY} --- k for 'EarlyHolder'
+        WHEN "typeId" = 'Whale' THEN
+          score * ${K_WHALE} --- k for 'Whale'
+        when "typeId" = 'Believer' THEN
+          score * ${K_BELIEVER} --- k for 'Believer'
+        when "typeId" = 'Ticker' THEN
+          score * ${K_BELIEVER} --- k for 'Ticker'
+        ELSE
+          0
+        END) * COUNT(*) * ${SCORE_NORM}) AS score
+    FROM
+      "distinct_user_creddd"
+    GROUP BY fid
+    )
+    SELECT
+      ROUND(percentile_cont(0.5)
+      WITHIN GROUP (ORDER BY "score")) AS median
+    FROM
+      user_scores WHERE "score" > 0
+  `;
+
+  if (result.length === 0) {
+    return 0;
+  }
+
+  return result[0].median;
 }
 
 export async function getUserScore(fid: number): Promise<number> {
@@ -56,7 +344,7 @@ export async function getUserScore(fid: number): Promise<number> {
             score * ${K_BELIEVER} --- k for 'Ticker'
           ELSE
             0
-          END) * COUNT(*) )AS score
+          END) * COUNT(*) * ${SCORE_NORM})AS score
       FROM
         "distinct_user_creddd"
   `;
@@ -65,7 +353,7 @@ export async function getUserScore(fid: number): Promise<number> {
     return 0;
   }
 
-  return result[0].score * SCORE_NORM;
+  return result[0].score;
 }
 
 interface LeaderboardResult {
@@ -117,7 +405,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
           score * ${K_BELIEVER} --- k for 'Ticker'
         ELSE
           0
-        END) * COUNT(*)) AS score,
+        END) * COUNT(*) * ${SCORE_NORM}) AS score,
       ARRAY_AGG("displayName") AS creddd
     FROM
       "distinct_user_creddd"
@@ -130,7 +418,7 @@ export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
 
   return result.map(record => ({
     fid: record.fid,
-    score: record.score * SCORE_NORM,
+    score: record.score,
     creddd: record.creddd,
   }));
 }
