@@ -10,7 +10,6 @@ import { getFollowingFids, getUsers } from '@/lib/neynar';
 import {
   getNonZeroFollowCount,
   getNonzeroAverageScore,
-  getNonzeroMedianScore,
   getSuggestedFollows,
 } from '@/lib/score';
 
@@ -71,21 +70,16 @@ const showStatsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
 
   const numNonZeroFollows = await getNonZeroFollowCount(followingFids);
-  const medianScore = await getNonzeroMedianScore(followingFids);
   const averageScore = await getNonzeroAverageScore(followingFids);
 
   const stats = [
     {
-      label: 'users with nonzero creddd scores',
+      label: 'follows with nonzero creddd scores',
       value: `${numNonZeroFollows.toLocaleString('en-US')} / ${followingFids.length.toLocaleString('en-US')}`,
     },
     {
-      label: 'mean creddd score',
+      label: 'follow mean creddd score',
       value: averageScore.toLocaleString('en-US'),
-    },
-    {
-      label: 'median creddd score',
-      value: medianScore.toLocaleString('en-US'),
     },
   ];
 
@@ -107,7 +101,7 @@ const showStatsFrame = async (c: any, fid: number) => {
             fontSize: 48,
           }}
         >
-          your feed stats. a mean greater than 20k is elite
+          stats of ppl you follow. a mean score greater than 20k is elite
         </span>
         <div
           style={{
