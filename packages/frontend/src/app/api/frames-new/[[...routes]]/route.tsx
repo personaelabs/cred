@@ -194,7 +194,7 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
               color: TEXT_COLOR,
             }}
           >
-            suggested follows
+            suggested follows to make your feed more onchain
           </span>
           {suggestedFollows.map(({ fid, score }) => {
             const user = suggestedUsers.find(user => user.fid === fid)!;
