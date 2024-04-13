@@ -107,7 +107,7 @@ const showStatsFrame = async (c: any, fid: number) => {
             fontSize: 48,
           }}
         >
-          your feed stats
+          your feed stats. a mean greater than 20k is elite
         </span>
         <div
           style={{
