@@ -43,15 +43,6 @@ const app = new Frog({
   },
 });
 
-// TODO: finish flow
-// 1. how onchain is your feed? (intents: check)
-// 2. show feed stats (intents: what is the creddd score?, who should I follow?)
-//     - {num nonzero} / {num zero}
-//     - mean nonzero, median nonzero (because most accounts today are zero score)
-//     - fid with the top score (with profile pic?)
-// 3. show 3 accounts to follow to increase mean score
-//     - ideally, with slightly different creddd
-//     - track follow clicks
 app.frame('/', async c => {
   const { buttonValue, frameData } = c;
 
@@ -85,21 +76,21 @@ const showStatsFrame = async (c: any, fid: number) => {
 
   const stats = [
     {
-      label: 'users with nonzero scores',
+      label: 'users with nonzero creddd scores',
       value: `${numNonZeroFollows.toLocaleString('en-US')} / ${followingFids.length.toLocaleString('en-US')}`,
     },
     {
-      label: 'mean score',
+      label: 'mean creddd score',
       value: averageScore.toLocaleString('en-US'),
     },
     {
-      label: 'median score',
+      label: 'median creddd score',
       value: medianScore.toLocaleString('en-US'),
     },
   ];
 
   // Monitor the stats the users see
-  console.log('fid stats', fid, stats);
+  console.log('your feed stats', fid, stats);
 
   return c.res({
     action: '/',
@@ -161,7 +152,12 @@ const showStatsFrame = async (c: any, fid: number) => {
         </div>
       </div>
     ),
-    intents: [<Button value="suggestedFollows">who should I follow?</Button>],
+    intents: [
+      <Button value="suggestedFollows">who should I follow?</Button>,
+      <Button.Link href="https://www.notion.so/personae-labs/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20?pvs=4#cd4ceb802403436fab01ea1f6d5478f0">
+        what is creddd score?
+      </Button.Link>,
+    ],
   });
 };
 
