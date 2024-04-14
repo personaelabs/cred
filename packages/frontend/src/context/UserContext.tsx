@@ -76,9 +76,15 @@ export const UserProvider: FC<UserProviderProps> = ({ children }) => {
     const isUserProfilePage = /\/user\//.test(pathname);
     const isExplorePage = /\/explore/.test(pathname);
     const isLeaderBoardPage = /\/leaderboard/.test(pathname);
+    const isPublicApiPath = /\/api\/v1/.test(pathname);
 
     // Check login status if this is not a user profile page
-    if (!isUserProfilePage && !isExplorePage && !isLeaderBoardPage) {
+    if (
+      !isUserProfilePage &&
+      !isExplorePage &&
+      !isLeaderBoardPage &&
+      !isPublicApiPath
+    ) {
       const fid = localStorage.getItem('fid');
       if (fid) {
         fetchUser(parseInt(fid));
