@@ -42,9 +42,11 @@ export const getFollowingFids = async (fid: number): Promise<number[]> => {
       WHERE
         fid = ${fid}
         AND TYPE = 'follow'
+        AND target_fid IS NOT NULL
         AND deleted_at IS NULL`;
 
-  return res.map(row => row.target_fid);
+  // Realistically, target_fid won't overflow.
+  return res.map(row => Number(row.target_fid));
 };
 
 /**
