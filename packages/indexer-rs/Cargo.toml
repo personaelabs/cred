@@ -41,6 +41,9 @@ cached = { version = "0.49.2", features = ["async"] }
 sha3 = "0.10.8"
 alloy-json-abi = "0.6.4"
 num-traits = "0.2.18"
+tokio-native-tls = "0.3.1"
+postgres-native-tls = "0.5.0"
+native-tls = "0.2.11"
 
 [build-dependencies]
 prost-build = "0.10.1"

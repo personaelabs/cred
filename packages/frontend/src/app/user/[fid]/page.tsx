@@ -87,7 +87,7 @@ const UserPage = ({ params: { fid } }: { params: { fid: string } }) => {
             <Image src="/warpcast.svg" alt="warpcast" width={20} height={20} />
           </Link>
         </div>
-        <div className="opacity-50">CREDDD SCORE: {Math.round(user.score)}</div>
+        <div className="opacity-50">CREDDD SCORE: {user.score}</div>
       </div>
       <div className="ml-2 flex flex-col gap-y-[10px]">
         {user.groups.map((group, i) => (

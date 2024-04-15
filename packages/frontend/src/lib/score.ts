@@ -1,136 +1,133 @@
 import prisma from '@/lib/prisma';
 
-const K_WHALE = 5e2;
-const K_EARLY = 1;
-const K_BELIEVER = 1e-2; // NOTE: applies to $TICKER too for now
-const K_NFT = 5e4;
-
-// NOTE: this is to keep scores 5 digits for display purposes
-const SCORE_NORM = 1e-8;
-
-interface ScoreResult {
-  score: number;
+/**
+ * Returns a list of suggested follows for a given user.
+ * Suggested follows are the first 3 highest score users that the user is not following.
+ * @param followingFids List of FIDs that the user is following.
+ */
+export async function getSuggestedFollows(followingFids: number[]) {
+  return await prisma.user.findMany({
+    select: {
+      fid: true,
+      score: true,
+    },
+    where: {
+      NOT: {
+        fid: {
+          in: followingFids,
+        },
+      },
+    },
+    orderBy: {
+      score: 'desc',
+    },
+    take: 3,
+  });
 }
 
-export async function getUserScore(fid: number): Promise<number> {
-  const result = await prisma.$queryRaw<ScoreResult[]>`
-    WITH "user_creddd" AS (
-        SELECT
-          fid,
-          "treeId"
-        FROM
-          "FidAttestation"
-        WHERE fid = ${fid}
-        UNION
-        SELECT
-          fid,
-          "treeId"
-        FROM
-          "IntrinsicCreddd"
-        WHERE fid = ${fid}
-      ),
-      "distinct_user_creddd" AS (
-        SELECT DISTINCT ON (fid,
-          "Group".id)
-          fid,
-          "Group"."typeId",
-          "Group"."displayName",
-          "Group".score
-        FROM
-          "user_creddd"
-        LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
-        LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-        WHERE "Group".state = 'Recordable'
-      )
-    SELECT
-        (SUM(
-          CASE WHEN "typeId" = 'AllHolders' THEN
-            score * ${K_NFT} --- k for 'AllHolders'
-          WHEN "typeId" = 'EarlyHolder' THEN
-            score * ${K_EARLY} --- k for 'EarlyHolder'
-          WHEN "typeId" = 'Whale' THEN
-            score * ${K_WHALE} --- k for 'Whale'
-          when "typeId" = 'Believer' THEN
-            score * ${K_BELIEVER} --- k for 'Believer'
-          when "typeId" = 'Ticker' THEN
-            score * ${K_BELIEVER} --- k for 'Ticker'
-          ELSE
-            0
-          END) * COUNT(*) )AS score
-      FROM
-        "distinct_user_creddd"
-  `;
+/**
+ * Returns the number of non-zero score users that the given user is following.
+ */
+export async function getNonZeroFollowCount(
+  followingFids: number[]
+): Promise<number> {
+  const result = await prisma.user.count({
+    where: {
+      fid: {
+        in: followingFids,
+      },
+      score: {
+        gt: 0,
+      },
+    },
+  });
 
-  if (result.length === 0) {
-    return 0;
+  return result;
+}
+
+/**
+ * Returns the average non-zero scores of the given FIDs.
+ */
+export async function getNonzeroAverageScore(fids: number[]): Promise<number> {
+  const result = await prisma.user.aggregate({
+    _avg: {
+      score: true,
+    },
+    where: {
+      fid: {
+        in: fids,
+      },
+      score: {
+        gt: 0,
+      },
+    },
+  });
+
+  return Math.round(result._avg.score ?? 0);
+}
+
+/**
+ * Returns the median non-zero scores of the given FIDs.
+ */
+export async function getNonzeroMedianScore(fids: number[]): Promise<number> {
+  const result = await prisma.user.findMany({
+    select: {
+      score: true,
+    },
+    where: {
+      fid: {
+        in: fids,
+      },
+      score: {
+        gt: 0,
+      },
+    },
+  });
+
+  // Get the median
+
+  // The score won't realistically overflow
+  result.sort((a, b) => Number(a.score) - Number(b.score));
+  const mid = Math.floor(result.length / 2);
+
+  if (result.length % 2 === 0) {
+    return (Number(result[mid - 1].score) + Number(result[mid].score)) / 2;
+  } else {
+    return Number(result[mid].score);
+  }
+}
+
+/**
+ * Returns the score of the user.
+ * Returns 0 if the user does not exist.
+ */
+export async function getUserScore(fid: number): Promise<bigint> {
+  const result = await prisma.user.findUnique({
+    select: {
+      score: true,
+    },
+    where: {
+      fid,
+    },
+  });
+
+  if (!result) {
+    return BigInt(0);
   }
 
-  return result[0].score * SCORE_NORM;
+  return result.score;
 }
 
-interface LeaderboardResult {
-  fid: number;
-  score: number;
-  creddd: string[];
-}
-
-export async function getLeaderboardUsers(): Promise<LeaderboardResult[]> {
-  const result = await prisma.$queryRaw<LeaderboardResult[]>`
-      WITH "user_creddd" AS (
-        SELECT
-          fid,
-          "treeId"
-        FROM
-          "FidAttestation"
-        UNION
-        SELECT
-          fid,
-          "treeId"
-        FROM
-          "IntrinsicCreddd"
-      ),
-      "distinct_user_creddd" AS (
-        SELECT DISTINCT ON (fid,
-          "Group".id)
-          fid,
-          "Group"."typeId",
-          "Group"."displayName",
-          "Group".score
-        FROM
-          "user_creddd"
-        LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
-        LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-        WHERE "Group".state = 'Recordable'
-      )
-   SELECT
-      fid,
-      (SUM(
-        CASE WHEN "typeId" = 'AllHolders' THEN
-          score * ${K_NFT} --- k for 'AllHolders'
-        WHEN "typeId" = 'EarlyHolder' THEN
-          score * ${K_EARLY} --- k for 'EarlyHolder'
-        WHEN "typeId" = 'Whale' THEN
-          score * ${K_WHALE} --- k for 'Whale'
-        when "typeId" = 'Believer' THEN
-          score * ${K_BELIEVER} --- k for 'Believer'
-        when "typeId" = 'Ticker' THEN
-          score * ${K_BELIEVER} --- k for 'Ticker'
-        ELSE
-          0
-        END) * COUNT(*)) AS score,
-      ARRAY_AGG("displayName") AS creddd
-    FROM
-      "distinct_user_creddd"
-    GROUP BY
-      fid
-    ORDER BY
-      score DESC
-    LIMIT 15
-  `;
-
-  return result.map(record => ({
-    fid: record.fid,
-    score: record.score * SCORE_NORM,
-    creddd: record.creddd,
-  }));
+export async function getLeaderboardUsers() {
+  return await prisma.user.findMany({
+    select: {
+      fid: true,
+      score: true,
+      creddd: true,
+    },
+    orderBy: {
+      score: 'desc',
+    },
+    take: 15,
+  });
 }

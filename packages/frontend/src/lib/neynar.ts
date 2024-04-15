@@ -3,6 +3,8 @@ import axios from 'axios';
 import { NeynarUserResponse } from '@/app/types';
 import NodeCache from 'node-cache';
 
+import { PrismaClient } from '@prisma/client';
+
 const cacheTTL = process.env.NODE_ENV === 'development' ? 9999999999 : 60;
 console.log('cacheTTL', cacheTTL);
 const cache = new NodeCache({ stdTTL: cacheTTL, checkperiod: 70 });
@@ -14,6 +16,38 @@ const neynar = axios.create({
     api_key: process.env.NEYNAR_API_KEY,
   },
 });
+
+const neynarDb = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.NEYNAR_DB_URL,
+    },
+  },
+});
+
+interface NeynarQueryFollowsResult {
+  target_fid: number;
+}
+
+/**
+ * Get the FIDs that a given FID is following
+ */
+export const getFollowingFids = async (fid: number): Promise<number[]> => {
+  const res = await neynarDb.$queryRaw<
+    NeynarQueryFollowsResult[]
+  >`SELECT DISTINCT
+        target_fid
+      FROM
+        "links"
+      WHERE
+        fid = ${fid}
+        AND TYPE = 'follow'
+        AND target_fid IS NOT NULL
+        AND deleted_at IS NULL`;
+
+  // Realistically, target_fid won't overflow.
+  return res.map(row => Number(row.target_fid));
+};
 
 /**
  * Get user data for a given FID from Neynar

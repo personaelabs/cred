@@ -684,5 +684,12 @@
     "type": "ERC20",
     "fdv_usd": 0,
     "chain": "base"
+  },
+  {
+    "name": "EVMavericks",
+    "address": "0x7ddaa898d33d7ab252ea5f89f96717c47b2fee6e",
+    "type": "ERC721",
+    "chain": "ethereum",
+    "fp_usd": 1487.98 
   }
 ]
