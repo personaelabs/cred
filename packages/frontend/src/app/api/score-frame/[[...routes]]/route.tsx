@@ -4,11 +4,13 @@
 import { getUser } from '@/lib/neynar';
 import { getUserScore } from '@/lib/score';
 import { Button, Frog } from 'frog';
-import { handle } from 'frog/vercel';
+import { handle } from 'frog/next';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
 
-const { VERCEL_ENV } = process.env;
+const { RENDER } = process.env;
+
+const IS_RENDER = RENDER === 'true';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -28,12 +30,12 @@ const CONTAINER_STYLE = {
 
 const app = new Frog({
   // Supply a Hub API URL to enable frame verification.
-  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  verify: IS_RENDER,
   basePath: '/api/score-frame',
   hubApiUrl: 'https://api.hub.wevm.dev',
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: VERCEL_ENV !== 'production',
+    enabled: !IS_RENDER,
   },
 });
 
@@ -89,7 +91,7 @@ const checkScoreFrame = async (c: any, fid: number) => {
     });
   }
 
-  const shareLink = `https://warpcast.com/~/compose?text=are you legit onchain?&embeds[]=https://${process.env.VERCEL_URL}/api/score-frame/user/${fid}`;
+  const shareLink = `https://warpcast.com/~/compose?text=are you legit onchain?&embeds[]=${process.env.RENDER_EXTERNAL_URL}/api/score-frame/user/${fid}`;
 
   return c.res({
     action: '/',
