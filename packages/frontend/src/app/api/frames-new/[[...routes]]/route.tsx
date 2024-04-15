@@ -12,6 +12,7 @@ import {
   getNonzeroAverageScore,
   getSuggestedFollows,
 } from '@/lib/score';
+import { isRender } from '@/lib/utils';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -29,16 +30,14 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const { VERCEL_ENV } = process.env;
-
 const app = new Frog({
   basePath: '/api/frames-new',
   // Supply a Hub API URL to enable frame verification.
   hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: VERCEL_ENV === 'production' || VERCEL_ENV === 'preview',
+  verify: isRender(),
   secret: process.env.FROG_SECRET || '',
   dev: {
-    enabled: VERCEL_ENV !== 'production',
+    enabled: !isRender(),
   },
 });
 
@@ -165,9 +164,14 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
   // Monitor the suggested follows the users see
   console.log('fid suggested follows', fid, suggestedFollows);
 
+  // Get the host URL.
+  // We need to be compatible with both Vercel and Render deployments,
+  // because some frame urls still point to the Vercel deployments.
   const host = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
+    : process.env.RENDER_EXTERNAL_URL
+      ? process.env.RENDER_EXTERNAL_URL
+      : 'http://localhost:3000';
 
   return c.res({
     action: '/',
