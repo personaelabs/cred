@@ -133,8 +133,8 @@ importers:
         specifier: ^16.3.1
         version: 16.4.1
       frog:
-        specifier: ^0.8.1
-        version: 0.8.1(@types/node@20.11.16)(hono@4.0.8)(typescript@5.2.2)
+        specifier: ^0.8.4
+        version: 0.8.4(@types/node@20.11.16)(hono@4.0.8)(typescript@5.2.2)
       hono:
         specifier: ^4.0.8
         version: 4.0.8
@@ -7690,8 +7690,8 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /frog@0.8.1(@types/node@20.11.16)(hono@4.0.8)(typescript@5.2.2):
-    resolution: {integrity: sha512-BnuTEiL7qJ0HdDOR+akP5rjONY+sjHSznwmeW7G9vhPIkK4nIvvxuo4ageDm/LUxpPJFk0Szgq1IGAotI5H+Ug==}
+  /frog@0.8.4(@types/node@20.11.16)(hono@4.0.8)(typescript@5.2.2):
+    resolution: {integrity: sha512-FOwj4UicBfRARi0PxzpMi9DFy3eW7i/M6ZNwGGJ0/dfG/4SWaIXhpYJ+12UKG9vIA0g5/Pf84CRyZ80NKoUpKw==}
     hasBin: true
     peerDependencies:
       hono: ^4
@@ -7712,7 +7712,7 @@ packages:
       fast-glob: 3.3.2
       fs-extra: 11.2.0
       hono: 4.0.8
-      hono-og: 0.0.26(hono@4.0.8)
+      hono-og: 0.0.27(hono@4.0.8)
       jose: 5.2.2
       lz-string: 1.5.0
       path-browserify: 1.0.1
@@ -8064,8 +8064,8 @@ packages:
       react-is: 16.13.1
     dev: false
 
-  /hono-og@0.0.26(hono@4.0.8):
-    resolution: {integrity: sha512-YUaLj+T06fWpykgPoeMbxnRMuEA+L83p5+PcBzlM2P/Rj889wnapvVDtT//81iJhRVLCkdjEkAHfcZaJ67cI8w==}
+  /hono-og@0.0.27(hono@4.0.8):
+    resolution: {integrity: sha512-FtsUmDCG7xKXD8InxzHcdzX5IIe9MrDPFHih0CUd6Hog0NcDV6tksc1cZ1sAAuftSTedmC4LV6Oi1uK6VXvZgQ==}
     peerDependencies:
       hono: '>=3'
     dependencies:
