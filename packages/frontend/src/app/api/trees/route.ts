@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import prisma from '@/lib/prisma';
+import { withHandler } from '@/lib/utils';
 import { GroupType } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
@@ -38,7 +39,8 @@ export type MerkleTreeSelect = {
 };
 // Get all groups from the database
 export async function GET(_req: NextRequest) {
-  const result = await prisma.$queryRaw<MerkleTreeQueryResult[]>`
+  return withHandler(async () => {
+    const result = await prisma.$queryRaw<MerkleTreeQueryResult[]>`
     SELECT DISTINCT ON ("Group".id)
     "MerkleTree".id,
     "bloomFilter",
@@ -59,21 +61,22 @@ export async function GET(_req: NextRequest) {
     "MerkleTree"."blockNumber" DESC
   `;
 
-  const merkleTrees = result.map(tree => ({
-    id: tree.id,
-    bloomFilter: tree.bloomFilter,
-    bloomSipKeys: tree.bloomSipKeys,
-    bloomNumHashes: tree.bloomNumHashes,
-    bloomNumBits: tree.bloomNumBits,
-    Group: {
-      id: tree.groupId,
-      displayName: tree.groupName,
-      score: tree.groupScore,
-      typeId: tree.groupType,
-    },
-  }));
+    const merkleTrees = result.map(tree => ({
+      id: tree.id,
+      bloomFilter: tree.bloomFilter,
+      bloomSipKeys: tree.bloomSipKeys,
+      bloomNumHashes: tree.bloomNumHashes,
+      bloomNumBits: tree.bloomNumBits,
+      Group: {
+        id: tree.groupId,
+        displayName: tree.groupName,
+        score: tree.groupScore,
+        typeId: tree.groupType,
+      },
+    }));
 
-  return Response.json(merkleTrees, {
-    status: 200,
+    return Response.json(merkleTrees, {
+      status: 200,
+    });
   });
 }

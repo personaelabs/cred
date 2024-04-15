@@ -12,6 +12,7 @@ import {
   getNonzeroAverageScore,
   getSuggestedFollows,
 } from '@/lib/score';
+import { logger } from '@/lib/utils';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -46,12 +47,16 @@ app.frame('/', async c => {
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'checkStats' && frameData) {
-    console.log('check stats click', frameData.fid);
+    logger.info('check stats click', {
+      fid: frameData.fid,
+    });
     return showStatsFrame(c, frameData.fid);
   }
 
   if (buttonValue === 'suggestedFollows' && frameData) {
-    console.log('suggested follows click', frameData.fid);
+    logger.info('suggested follows click', {
+      fid: frameData.fid,
+    });
     return suggestedFollowsFrame(c, frameData.fid);
   }
 
@@ -84,7 +89,10 @@ const showStatsFrame = async (c: any, fid: number) => {
   ];
 
   // Monitor the stats the users see
-  console.log('your feed stats', fid, stats);
+  logger.info('feed stats', {
+    fid,
+    stats,
+  });
 
   return c.res({
     action: '/',
@@ -163,7 +171,10 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   // Monitor the suggested follows the users see
-  console.log('fid suggested follows', fid, suggestedFollows);
+  logger.info('fid suggested follows', {
+    fid,
+    suggestedFollows,
+  });
 
   const host = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`

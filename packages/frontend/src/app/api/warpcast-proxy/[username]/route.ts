@@ -1,3 +1,4 @@
+import { logger, withHandler } from '@/lib/utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -13,6 +14,8 @@ export async function GET(
     };
   }
 ) {
-  console.log('warpcast-proxy', params.username);
-  return NextResponse.redirect(`https://warpcast.com/${params.username}`);
+  return withHandler(async () => {
+    logger.info('warpcast-proxy', { username: params.username });
+    return NextResponse.redirect(`https://warpcast.com/${params.username}`);
+  });
 }

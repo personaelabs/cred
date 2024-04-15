@@ -4,10 +4,22 @@ import { Hex, keccak256 } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
+import pino from 'pino';
+
+export const logger = pino();
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const withHandler = (fn: () => Promise<Response>): Promise<Response> => {
+  try {
+    return fn();
+  } catch (error) {
+    logger.error(error);
+    throw error;
+  }
+};
 
 /**
  * - Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46

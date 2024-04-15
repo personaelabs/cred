@@ -1,109 +1,112 @@
 export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
+import { withHandler } from '@/lib/utils';
 import { MerkleTree, MerkleTreeList } from '@/proto/merkle_tree_pb';
 import { NextRequest, NextResponse } from 'next/server';
 
 const MAX_TREES_PRE_REQUEST = 5;
 
 export async function GET(req: NextRequest) {
-  const idsString = req.nextUrl.searchParams.get('ids');
+  return withHandler(async () => {
+    const idsString = req.nextUrl.searchParams.get('ids');
 
-  if (!idsString) {
-    return Response.json(
-      {
-        error: 'No ids provided',
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const ids = idsString.split(',').map(Number);
-
-  if (ids.length > MAX_TREES_PRE_REQUEST) {
-    return Response.json(
-      {
-        error: 'Too many ids provided',
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const merkleTrees = await prisma.merkleTree.findMany({
-    select: {
-      id: true,
-      treeProtoBuf: true,
-    },
-    where: {
-      id: {
-        in: ids,
-      },
-    },
-  });
-
-  for (const id of ids) {
-    if (!merkleTrees.some(tree => tree.id === id)) {
+    if (!idsString) {
       return Response.json(
         {
-          error: `Merkle Tree with id ${id} not found`,
+          error: 'No ids provided',
         },
         {
           status: 400,
         }
       );
     }
-  }
 
-  // Sort the trees by the order of the provided ids
-  const sortedMerkleTrees = merkleTrees.sort((a, b) => {
-    return ids.indexOf(a.id) - ids.indexOf(b.id);
-  });
+    const ids = idsString.split(',').map(Number);
 
-  const treeBuffers = [];
-
-  // Check the validity of each tree and add them to the list
-  for (const tree of sortedMerkleTrees) {
-    if (!tree.treeProtoBuf) {
+    if (ids.length > MAX_TREES_PRE_REQUEST) {
       return Response.json(
         {
-          error: `Merkle tree with id ${tree.id} is empty`,
+          error: 'Too many ids provided',
         },
         {
-          status: 500,
+          status: 400,
         }
       );
     }
 
-    if (tree.treeProtoBuf.length === 0) {
-      return Response.json(
-        {
-          error: `Merkle tree with id ${tree.id} is empty`,
+    const merkleTrees = await prisma.merkleTree.findMany({
+      select: {
+        id: true,
+        treeProtoBuf: true,
+      },
+      where: {
+        id: {
+          in: ids,
         },
-        {
-          status: 500,
-        }
-      );
+      },
+    });
+
+    for (const id of ids) {
+      if (!merkleTrees.some(tree => tree.id === id)) {
+        return Response.json(
+          {
+            error: `Merkle Tree with id ${id} not found`,
+          },
+          {
+            status: 400,
+          }
+        );
+      }
     }
 
-    treeBuffers.push(tree.treeProtoBuf);
-  }
+    // Sort the trees by the order of the provided ids
+    const sortedMerkleTrees = merkleTrees.sort((a, b) => {
+      return ids.indexOf(a.id) - ids.indexOf(b.id);
+    });
 
-  // Build the MerkleTreeList protobuf
+    const treeBuffers = [];
 
-  const treeList = new MerkleTreeList();
-  treeList.setTreesList(
-    treeBuffers.map(treeBuffer => MerkleTree.deserializeBinary(treeBuffer))
-  );
+    // Check the validity of each tree and add them to the list
+    for (const tree of sortedMerkleTrees) {
+      if (!tree.treeProtoBuf) {
+        return Response.json(
+          {
+            error: `Merkle tree with id ${tree.id} is empty`,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
 
-  // Serialize the MerkleTreeList protobuf
-  const response = treeList.serializeBinary();
+      if (tree.treeProtoBuf.length === 0) {
+        return Response.json(
+          {
+            error: `Merkle tree with id ${tree.id} is empty`,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
 
-  return new NextResponse(response, {
-    headers: {
-      'Content-Type': 'application/x-protobuf',
-    },
+      treeBuffers.push(tree.treeProtoBuf);
+    }
+
+    // Build the MerkleTreeList protobuf
+
+    const treeList = new MerkleTreeList();
+    treeList.setTreesList(
+      treeBuffers.map(treeBuffer => MerkleTree.deserializeBinary(treeBuffer))
+    );
+
+    // Serialize the MerkleTreeList protobuf
+    const response = treeList.serializeBinary();
+
+    return new NextResponse(response, {
+      headers: {
+        'Content-Type': 'application/x-protobuf',
+      },
+    });
   });
 }

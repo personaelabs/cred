@@ -5,6 +5,7 @@ import { NextRequest } from 'next/server';
 import * as neynar from '@/lib/neynar';
 import { NeynarUserResponse } from '@/app/types';
 import { getUserScore } from '@/lib/score';
+import { withHandler } from '@/lib/utils';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -40,41 +41,43 @@ export async function GET(
     };
   }
 ) {
-  const fid = Number(params.fid);
+  return withHandler(async () => {
+    const fid = Number(params.fid);
 
-  const userCredddGroupIds = (await prisma.user.findUnique({
-    select: {
-      groupIds: true,
-    },
-    where: {
-      fid,
-    },
-  })) ?? { groupIds: [] };
-
-  // Get the `Group` records that match the user's `creddd`.
-  // TODO: This and the above query should be combined into a single query for performance.
-  const userGroups = await prisma.group.findMany({
-    select: groupSelect,
-    where: {
-      id: {
-        in: userCredddGroupIds.groupIds,
+    const userCredddGroupIds = (await prisma.user.findUnique({
+      select: {
+        groupIds: true,
       },
-    },
-  });
+      where: {
+        fid,
+      },
+    })) ?? { groupIds: [] };
 
-  const score = await getUserScore(fid);
+    // Get the `Group` records that match the user's `creddd`.
+    // TODO: This and the above query should be combined into a single query for performance.
+    const userGroups = await prisma.group.findMany({
+      select: groupSelect,
+      where: {
+        id: {
+          in: userCredddGroupIds.groupIds,
+        },
+      },
+    });
 
-  // Get user data from Neynar
-  const user = await neynar.getUser(fid);
+    const score = await getUserScore(fid);
 
-  if (!user) {
-    return Response.json('User not found', { status: 404 });
-  }
+    // Get user data from Neynar
+    const user = await neynar.getUser(fid);
 
-  // Return user data and attestations
-  return Response.json({
-    ...user,
-    score: score,
-    groups: userGroups,
+    if (!user) {
+      return Response.json('User not found', { status: 404 });
+    }
+
+    // Return user data and attestations
+    return Response.json({
+      ...user,
+      score: score,
+      groups: userGroups,
+    });
   });
 }

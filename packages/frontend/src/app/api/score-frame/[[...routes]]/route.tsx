@@ -7,6 +7,7 @@ import { Button, Frog } from 'frog';
 import { handle } from 'frog/vercel';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
+import { logger } from '@/lib/utils';
 
 const { VERCEL_ENV } = process.env;
 
@@ -42,7 +43,7 @@ app.frame('/', c => {
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'check' && frameData) {
-    console.log('check score click', frameData.fid);
+    logger.info('check score click', { fid: frameData.fid });
     return checkScoreFrame(c, frameData.fid);
   }
 
