@@ -239,6 +239,21 @@ export const getFidAttestationHashV1 = (
   return keccak256(input);
 };
 
+/**
+ * Returns true if the runtime is Render.
+ */
+export const isRender = (): boolean => {
+  const { RENDER, VERCEL_ENV } = process.env;
+
+  // If we're on Vercel, return true for production and preview deployments.
+  // This is necessary because some frames url still point to the Vercel deployments.
+  if (VERCEL_ENV === 'production' || VERCEL_ENV === 'preview') {
+    return true;
+  }
+
+  return RENDER === 'true';
+};
+
 export const PRECOMPUTED_HASHES = [
   [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
