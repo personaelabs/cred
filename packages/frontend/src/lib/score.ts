@@ -63,7 +63,7 @@ export async function getNonzeroAverageScore(fids: number[]): Promise<number> {
     },
   });
 
-  return result._avg.score ?? 0;
+  return Math.round(result._avg.score ?? 0);
 }
 
 /**
