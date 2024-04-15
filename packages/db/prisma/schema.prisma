@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -141,4 +142,11 @@ model IntrinsicCreddd {
   updatedAt DateTime @updatedAt
 
   @@unique([fid, treeId])
+}
+
+view User {
+  fid      Int      @unique
+  score    BigInt
+  creddd   String[]
+  groupIds String[]
 }

@@ -42,31 +42,25 @@ export async function GET(
 ) {
   const fid = Number(params.fid);
 
-  const userGroups = await prisma.$queryRaw<GroupSelect[]>`
-  WITH "user_creddd" AS (
-      SELECT
-        fid,
-        "treeId"
-      FROM
-        "FidAttestation"
-      WHERE
-        fid = ${fid}
-      UNION
-      SELECT
-        fid,
-        "treeId"
-      FROM
-        "IntrinsicCreddd"
-      WHERE
-        fid = ${fid}
-    ) SELECT DISTINCT ON ("Group".id)
-      "Group".id, "Group"."displayName", "Group"."typeId"
-    FROM
-      "user_creddd"
-      LEFT JOIN "MerkleTree" ON "user_creddd"."treeId" = "MerkleTree".id
-      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-    WHERE "Group"."state" = 'Recordable'
-    `;
+  const userCredddGroupIds = (await prisma.user.findUnique({
+    select: {
+      groupIds: true,
+    },
+    where: {
+      fid,
+    },
+  })) ?? { groupIds: [] };
+
+  // Get the `Group` records that match the user's `creddd`.
+  // TODO: This and the above query should be combined into a single query for performance.
+  const userGroups = await prisma.group.findMany({
+    select: groupSelect,
+    where: {
+      id: {
+        in: userCredddGroupIds.groupIds,
+      },
+    },
+  });
 
   const score = await getUserScore(fid);
 
