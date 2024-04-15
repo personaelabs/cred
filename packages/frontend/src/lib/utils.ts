@@ -16,7 +16,7 @@ export const withHandler = (fn: () => Promise<Response>): Promise<Response> => {
   try {
     return fn();
   } catch (error) {
-    logger.error(error);
+    logger.error(error, JSON.stringify(error));
     throw error;
   }
 };
