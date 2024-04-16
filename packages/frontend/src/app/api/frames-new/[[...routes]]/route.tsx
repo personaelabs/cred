@@ -45,22 +45,16 @@ app.frame('/', async c => {
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'checkStats' && frameData) {
-    logger.info(
-      {
-        fid: frameData.fid,
-      },
-      'check stats click'
-    );
+    logger.info('check stats click', {
+      fid: frameData.fid,
+    });
     return showStatsFrame(c, frameData.fid);
   }
 
   if (buttonValue === 'suggestedFollows' && frameData) {
-    logger.info(
-      {
-        fid: frameData.fid,
-      },
-      'suggested follows click'
-    );
+    logger.info('suggested follows click', {
+      fid: frameData.fid,
+    });
     return suggestedFollowsFrame(c, frameData.fid);
   }
 
@@ -93,13 +87,10 @@ const showStatsFrame = async (c: any, fid: number) => {
   ];
 
   // Monitor the stats the users see
-  logger.info(
-    {
-      fid,
-      stats,
-    },
-    'feed stats'
-  );
+  logger.info('feed stats', {
+    fid,
+    stats,
+  });
 
   return c.res({
     action: '/',
@@ -178,13 +169,10 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   // Monitor the suggested follows the users see
-  logger.info(
-    {
-      fid,
-      suggestedFollows,
-    },
-    'fid suggested follows'
-  );
+  logger.info('fid suggested follows', {
+    fid,
+    suggestedFollows,
+  });
 
   // Get the host URL.
   // We need to be compatible with both Vercel and Render deployments,

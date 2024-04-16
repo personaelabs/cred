@@ -4,21 +4,27 @@ import { Hex, keccak256 } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
-import pino from 'pino';
-
 import winston, { createLogger } from 'winston';
 
-export const winstonLogger = createLogger({
-  defaultMeta: { component: 'winston' },
-  transports: [new winston.transports.Console()],
-});
+const winstonTransports: any[] = [new winston.transports.Console()];
 
-export const logger = pino({
-  formatters: {
-    level(level) {
-      return { level };
-    },
-  },
+const { DATADOG_API_KEY } = process.env;
+if (DATADOG_API_KEY) {
+  const { RENDER_EXTERNAL_HOSTNAME } = process.env;
+
+  winstonTransports.push(
+    new winston.transports.Http({
+      host: 'http-intake.logs.datadoghq.com',
+      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&service=cred-frontend&hostname=${RENDER_EXTERNAL_HOSTNAME || 'localhost'}`,
+      ssl: true,
+    })
+  );
+}
+
+export const logger = createLogger({
+  defaultMeta: { component: 'winston' },
+  transports: winstonTransports,
+  format: winston.format.json(),
 });
 
 export function cn(...inputs: ClassValue[]) {
@@ -32,7 +38,7 @@ export const withHandler = async (
     const result = await fn();
     return result;
   } catch (error) {
-    winstonLogger.error('api error', error);
+    logger.error('api error', error);
     throw error;
   }
 };
