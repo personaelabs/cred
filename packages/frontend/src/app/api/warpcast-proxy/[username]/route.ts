@@ -15,7 +15,7 @@ export async function GET(
   }
 ) {
   return withHandler(async () => {
-    logger.info('warpcast-proxy', { username: params.username });
+    logger.info({ username: params.username }, 'warpcast-proxy');
     return NextResponse.redirect(`https://warpcast.com/${params.username}`);
   });
 }

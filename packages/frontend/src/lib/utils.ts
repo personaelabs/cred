@@ -12,11 +12,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const withHandler = (fn: () => Promise<Response>): Promise<Response> => {
+export const withHandler = async (
+  fn: () => Promise<Response>
+): Promise<Response> => {
   try {
-    return fn();
+    const result = await fn();
+    return result;
   } catch (error) {
-    logger.error(error, JSON.stringify(error));
+    logger.error(error);
     throw error;
   }
 };

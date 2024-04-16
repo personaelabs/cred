@@ -45,7 +45,7 @@ app.frame('/', c => {
   const { buttonValue, frameData } = c;
 
   if (buttonValue === 'check' && frameData) {
-    logger.info('check score click', { fid: frameData.fid });
+    logger.info({ fid: frameData.fid }, 'check score click');
     return checkScoreFrame(c, frameData.fid);
   }
 
