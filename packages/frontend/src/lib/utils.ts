@@ -6,7 +6,13 @@ import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
 import pino from 'pino';
 
-export const logger = pino(process.stdout);
+export const logger = pino({
+  formatters: {
+    level(level) {
+      return { level };
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
