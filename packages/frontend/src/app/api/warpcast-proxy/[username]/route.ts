@@ -1,10 +1,11 @@
+import { logger, withHandler } from '@/lib/utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Redirect to the Warpcast profile page
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   {
     params,
   }: {
@@ -13,6 +14,11 @@ export async function GET(
     };
   }
 ) {
-  console.log('warpcast-proxy', params.username);
-  return NextResponse.redirect(`https://warpcast.com/${params.username}`);
+  return withHandler(async () => {
+    // This is the fid that clicked the link
+    const fid = req.nextUrl.searchParams.get('fid');
+
+    logger.info('warpcast-proxy', { username: params.username, fid });
+    return NextResponse.redirect(`https://warpcast.com/${params.username}`);
+  });
 }

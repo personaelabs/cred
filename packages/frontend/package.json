@@ -45,7 +45,8 @@
     "ts-protoc-gen": "^0.15.0",
     "vaul": "^0.8.0",
     "viem": "^2.8.14",
-    "wagmi": "^2.5.11"
+    "wagmi": "^2.5.11",
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@sentry/utils": "^7.101.1",

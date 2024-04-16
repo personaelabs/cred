@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { GroupState, Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { MerkleTree, MerkleTreeList } from '@/proto/merkle_tree_pb';
+import { withHandler } from '@/lib/utils';
 
 const MAX_TREES_PRE_REQUEST = 5;
 
@@ -112,46 +113,48 @@ const handleGetGroupLatestMerkleTrees = async (
 };
 
 export async function GET(req: NextRequest) {
-  const groupIds = req.nextUrl.searchParams.get('groupIds')?.split(',');
+  return withHandler(async () => {
+    const groupIds = req.nextUrl.searchParams.get('groupIds')?.split(',');
 
-  if (groupIds) {
-    // If groupIds are provided,
-    // return the specified groups with their latest merkle tree
+    if (groupIds) {
+      // If groupIds are provided,
+      // return the specified groups with their latest merkle tree
 
-    // Check if the number of groupIds is within the limit.
-    // We need this limit because the server refuses to return a response if
-    // the response is too large.
-    if (groupIds.length > MAX_TREES_PRE_REQUEST) {
-      return Response.json(
-        {
-          error: 'Too many ids provided',
-        },
-        {
-          status: 400,
-        }
-      );
-    }
+      // Check if the number of groupIds is within the limit.
+      // We need this limit because the server refuses to return a response if
+      // the response is too large.
+      if (groupIds.length > MAX_TREES_PRE_REQUEST) {
+        return Response.json(
+          {
+            error: 'Too many ids provided',
+          },
+          {
+            status: 400,
+          }
+        );
+      }
 
-    return await handleGetGroupLatestMerkleTrees(groupIds);
-  } else {
-    // If no groupIds are provided,
-    // only return the metadata of the groups. (Don't include the merkle trees)
-    const groups = await prisma.group.findMany({
-      select: groupSelect,
-      where: {
-        state: GroupState.Recordable,
-        merkleTrees: {
-          some: {
-            treeProtoBuf: {
-              not: null,
+      return await handleGetGroupLatestMerkleTrees(groupIds);
+    } else {
+      // If no groupIds are provided,
+      // only return the metadata of the groups. (Don't include the merkle trees)
+      const groups = await prisma.group.findMany({
+        select: groupSelect,
+        where: {
+          state: GroupState.Recordable,
+          merkleTrees: {
+            some: {
+              treeProtoBuf: {
+                not: null,
+              },
             },
           },
         },
-      },
-    });
+      });
 
-    return Response.json(groups, {
-      status: 200,
-    });
-  }
+      return Response.json(groups, {
+        status: 200,
+      });
+    }
+  });
 }

@@ -4,10 +4,44 @@ import { Hex, keccak256 } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
+import winston, { createLogger } from 'winston';
+
+const winstonTransports: any[] = [new winston.transports.Console()];
+
+const { DATADOG_API_KEY } = process.env;
+if (DATADOG_API_KEY) {
+  const { RENDER_EXTERNAL_HOSTNAME } = process.env;
+
+  winstonTransports.push(
+    new winston.transports.Http({
+      host: 'http-intake.logs.datadoghq.com',
+      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&service=cred-frontend&hostname=${RENDER_EXTERNAL_HOSTNAME || 'localhost'}`,
+      ssl: true,
+    })
+  );
+}
+
+export const logger = createLogger({
+  defaultMeta: { component: 'winston' },
+  transports: winstonTransports,
+  format: winston.format.json(),
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const withHandler = async (
+  fn: () => Promise<Response>
+): Promise<Response> => {
+  try {
+    const result = await fn();
+    return result;
+  } catch (error) {
+    logger.error('api error', error);
+    throw error;
+  }
+};
 
 /**
  * - Copied from https://github.com/ethereumjs/ethereumjs-monorepo/blob/8ca49a1c346eb7aa61acf550f8fe213445ef71ab/packages/util/src/signature.ts#L46

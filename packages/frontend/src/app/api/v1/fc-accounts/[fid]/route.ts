@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
+import { withHandler } from '@/lib/utils';
 import { NextRequest } from 'next/server';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
@@ -21,34 +22,36 @@ export async function GET(
     };
   }
 ) {
-  const fid = Number(params.fid);
+  return withHandler(async () => {
+    const fid = Number(params.fid);
 
-  const user = await prisma.user.findUnique({
-    select: {
-      fid: true,
-      score: true,
-      creddd: true,
-    },
-    where: {
-      fid,
-    },
-  });
-
-  if (!user) {
-    return Response.json(
-      {
-        fid,
-        score: 0,
-        creddd: [],
+    const user = await prisma.user.findUnique({
+      select: {
+        fid: true,
+        score: true,
+        creddd: true,
       },
-      {
-        status: 404,
-      }
-    );
-  }
+      where: {
+        fid,
+      },
+    });
 
-  // Return user data and attestations
-  return Response.json(user, {
-    status: 200,
+    if (!user) {
+      return Response.json(
+        {
+          fid,
+          score: 0,
+          creddd: [],
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    // Return user data and attestations
+    return Response.json(user, {
+      status: 200,
+    });
   });
 }
