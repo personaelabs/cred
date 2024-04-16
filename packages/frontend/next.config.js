@@ -17,6 +17,8 @@ const nextConfig = {
       layers: true,
     };
 
+    config.resolve.fallback = { fs: false };
+
     return config;
   },
 };

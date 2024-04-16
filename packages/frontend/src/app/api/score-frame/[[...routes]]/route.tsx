@@ -7,7 +7,7 @@ import { Button, Frog } from 'frog';
 import { handle } from 'frog/next';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
-import { logger } from '@/lib/utils';
+import { logger, winstonLogger } from '@/lib/utils';
 
 const { RENDER } = process.env;
 
@@ -46,6 +46,7 @@ app.frame('/', c => {
 
   if (buttonValue === 'check' && frameData) {
     logger.info({ fid: frameData.fid }, 'check score click');
+    winstonLogger.info('check score click', { fid: frameData.fid });
     return checkScoreFrame(c, frameData.fid);
   }
 

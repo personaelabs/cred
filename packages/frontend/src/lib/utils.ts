@@ -6,6 +6,13 @@ import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
 import pino from 'pino';
 
+import winston, { createLogger } from 'winston';
+
+export const winstonLogger = createLogger({
+  defaultMeta: { component: 'winston' },
+  transports: [new winston.transports.Console()],
+});
+
 export const logger = pino({
   formatters: {
     level(level) {
@@ -25,7 +32,7 @@ export const withHandler = async (
     const result = await fn();
     return result;
   } catch (error) {
-    logger.error(error);
+    winstonLogger.error('api error', error);
     throw error;
   }
 };
