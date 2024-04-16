@@ -215,11 +215,22 @@ pub async fn save_tree(
         )
         .await?;
 
-    // Set bloom filter and the tree body to null for older trees
+    // Delete unused trees older than the current block number
 
     let statement = r#"
-        UPDATE "MerkleTree" SET "bloomFilter" = NULL, "treeProtoBuf" = NULL
-        WHERE "groupId" = $1 AND "blockNumber" < $2
+        DELETE
+        FROM
+            "MerkleTree"
+        WHERE
+            id NOT in(
+                SELECT
+                    "treeId" FROM "FidAttestation"
+                UNION
+                SELECT
+                    "treeId" FROM "IntrinsicCreddd"
+                )
+            AND "groupId" = $1
+            AND "blockNumber" < $2
         "#;
 
     pg_client
