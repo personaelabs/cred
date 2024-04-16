@@ -6,7 +6,7 @@ import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
 import pino from 'pino';
 
-export const logger = pino();
+export const logger = pino(process.stdout);
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
