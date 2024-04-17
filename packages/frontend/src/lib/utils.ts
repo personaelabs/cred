@@ -5,10 +5,12 @@ import * as Sentry from '@sentry/nextjs';
 import { GroupType } from '@prisma/client';
 import { AttestationType } from '@/app/types';
 import winston, { createLogger } from 'winston';
+import { neynar as neynarHub } from 'frog/hubs';
 
 const winstonTransports: any[] = [new winston.transports.Console()];
 
-const { DATADOG_API_KEY } = process.env;
+const { DATADOG_API_KEY, NEYNAR_API_KEY } = process.env;
+
 if (DATADOG_API_KEY) {
   const { RENDER_EXTERNAL_HOSTNAME } = process.env;
 
@@ -274,6 +276,27 @@ export const isRender = (): boolean => {
   }
 
   return RENDER === 'true';
+};
+
+/**
+ * Returns the configuration for a Frog instance.
+ */
+export const getFrogConfig = (basePath: string) => {
+  if (!NEYNAR_API_KEY) {
+    throw new Error('NEYNAR_API_KEY is required');
+  }
+
+  return {
+    verify: isRender(),
+    basePath,
+    hub: neynarHub({
+      apiKey: NEYNAR_API_KEY,
+    }),
+    secret: process.env.FROG_SECRET || '',
+    dev: {
+      enabled: !isRender(),
+    },
+  };
 };
 
 export const PRECOMPUTED_HASHES = [
