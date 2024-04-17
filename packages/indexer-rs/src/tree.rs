@@ -237,6 +237,24 @@ pub async fn save_tree(
         .query(statement, &[&group_id, &block_number])
         .await?;
 
+    // Nullify old trees for the group
+
+    let statement = r#"
+            UPDATE
+                "MerkleTree"
+            SET
+                "treeProtoBuf" = NULL,
+                "bloomFilter" = NULL,
+                "bloomSipKeys" = NULL
+            WHERE
+                "groupId" = $1
+                AND "blockNumber" < $2
+        "#;
+
+    pg_client
+        .query(statement, &[&group_id, &block_number])
+        .await?;
+
     info!(
         "${} New Merkle tree saved at block {}",
         group_id, block_number
