@@ -4,6 +4,7 @@ use crate::{
     utils::format_address,
     Error, Fid, TreeId,
 };
+use chrono::prelude::*;
 use log::{error, info};
 use prost::Message;
 use std::{
@@ -120,12 +121,17 @@ impl IntrinsicCredddSyncEngine {
             return Ok(());
         }
 
+        let utc: DateTime<Utc> = chrono::Utc::now();
+
+        // Format datetime as ISO 8601 string
+        let now = utc.to_rfc3339();
+
         let params = fid_to_trees
             .iter()
             .flat_map(|(fid, trees)| {
                 trees
                     .iter()
-                    .map(|tree_id| format!("({}, {}, NOW())", fid, tree_id))
+                    .map(|tree_id| format!("({}, {}, '{}')", fid, tree_id, now))
                     .collect::<Vec<String>>()
             })
             .collect::<Vec<String>>()
@@ -135,12 +141,28 @@ impl IntrinsicCredddSyncEngine {
             r#"
             INSERT INTO "IntrinsicCreddd" ("fid", "treeId", "updatedAt")
             VALUES {}
-            ON CONFLICT DO NOTHING
+            ON CONFLICT ("fid", "treeId") DO UPDATE
+            SET "updatedAt" = EXCLUDED."updatedAt"
         "#,
             params
         );
 
         self.pg_client.execute(query.as_str(), &[]).await?;
+
+        // Delete the old entries
+        self.pg_client
+            .execute(
+                format!(
+                    r#"
+                    DELETE FROM "IntrinsicCreddd"
+                    WHERE "updatedAt" < '{}'
+                "#,
+                    now
+                )
+                .as_str(),
+                &[],
+            )
+            .await?;
 
         Ok(())
     }
