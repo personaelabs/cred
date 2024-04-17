@@ -20,7 +20,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog(getFrogConfig('api/frames'));
+const app = new Frog(getFrogConfig('/api/frames'));
 
 app.frame('/', c => {
   return c.res({

@@ -30,7 +30,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog(getFrogConfig('api/feed-score-frame'));
+const app = new Frog(getFrogConfig('/api/feed-score-frame'));
 
 app.frame('/', async c => {
   const { buttonValue, frameData } = c;
