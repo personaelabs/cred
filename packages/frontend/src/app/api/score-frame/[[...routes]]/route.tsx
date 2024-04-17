@@ -25,7 +25,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog(getFrogConfig('/api/score-frames'));
+const app = new Frog(getFrogConfig('/api/score-frame'));
 
 app.frame('/', c => {
   c.url.replace(':10000', '');

@@ -21,7 +21,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog(getFrogConfig('/api/rsvp-frame'));
+const app = new Frog(getFrogConfig('/api/rsvp-frames'));
 
 /**
  * Check if the user has any creddd
