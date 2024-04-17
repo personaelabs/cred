@@ -278,14 +278,14 @@ export const isRender = (): boolean => {
   return RENDER === 'true';
 };
 
-if (!NEYNAR_API_KEY) {
-  throw new Error('NEYNAR_API_KEY is required');
-}
-
 /**
  * Returns the configuration for a Frog instance.
  */
 export const getFrogConfig = (basePath: string) => {
+  if (!NEYNAR_API_KEY) {
+    throw new Error('NEYNAR_API_KEY is required');
+  }
+
   return {
     verify: isRender(),
     basePath,
