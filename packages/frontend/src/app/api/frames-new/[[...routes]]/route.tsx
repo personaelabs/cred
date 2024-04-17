@@ -12,7 +12,7 @@ import {
   getNonzeroAverageScore,
   getSuggestedFollows,
 } from '@/lib/score';
-import { logger, isRender } from '@/lib/utils';
+import { logger, getFrogConfig } from '@/lib/utils';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -30,16 +30,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog({
-  basePath: '/api/frames-new',
-  // Supply a Hub API URL to enable frame verification.
-  hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: isRender(),
-  secret: process.env.FROG_SECRET || '',
-  dev: {
-    enabled: !isRender(),
-  },
-});
+const app = new Frog(getFrogConfig('api/frames-new'));
 
 app.frame('/', async c => {
   const { buttonValue, frameData } = c;

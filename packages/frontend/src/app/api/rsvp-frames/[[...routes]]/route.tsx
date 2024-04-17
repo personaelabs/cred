@@ -3,7 +3,7 @@
 import { Button, Frog } from 'frog';
 import { handle } from 'frog/next';
 import prisma from '@/lib/prisma';
-import { isRender } from '@/lib/utils';
+import { getFrogConfig } from '@/lib/utils';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -21,16 +21,7 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog({
-  basePath: '/api/rsvp-frames',
-  // Supply a Hub API URL to enable frame verification.
-  hubApiUrl: 'https://api.hub.wevm.dev',
-  verify: isRender(),
-  secret: process.env.FROG_SECRET || '',
-  dev: {
-    enabled: !isRender(),
-  },
-});
+const app = new Frog(getFrogConfig('/api/rsvp-frame'));
 
 /**
  * Check if the user has any creddd

@@ -6,7 +6,6 @@ import NodeCache from 'node-cache';
 import { PrismaClient } from '@prisma/client';
 
 const cacheTTL = process.env.NODE_ENV === 'development' ? 9999999999 : 60;
-console.log('cacheTTL', cacheTTL);
 const cache = new NodeCache({ stdTTL: cacheTTL, checkperiod: 70 });
 
 const neynar = axios.create({
