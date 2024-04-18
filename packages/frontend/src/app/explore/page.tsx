@@ -1,6 +1,5 @@
 'use client';
 import { Input } from '@/components/ui/input';
-import useGroups from '@/hooks/useGroups';
 import { getCredddDescription } from '@/lib/utils';
 import { Info, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -13,9 +12,10 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import useGroupsQuery from '@/hooks/useGroupsQuery';
 
 const ExplorePage = () => {
-  const { groupsByType } = useGroups();
+  const { data: groupsByType } = useGroupsQuery();
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState<string>('');

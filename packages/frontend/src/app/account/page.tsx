@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useUser } from '@/context/UserContext';
 import CredddBadge from '@/components/CredddBadge';
 import { GetUserResponse } from '../api/fc-accounts/[fid]/route';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 interface AddedCredddListProps {
   user: GetUserResponse | null;
@@ -30,7 +30,7 @@ const AddedCredddList = (props: AddedCredddListProps) => {
 };
 
 export default function AccountPage() {
-  const { user } = useUser();
+  const { data: user } = useSignedInUser();
 
   if (!user) {
     return (

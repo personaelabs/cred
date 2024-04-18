@@ -13,17 +13,17 @@ import SwitchAccountsModal from '@/components/SwitchAccountsModal';
 import { useMediaQuery } from '@/context/MediaQueryContext';
 import { toast } from 'sonner';
 import { trimAddress } from '@/lib/utils';
-import { useUser } from '@/context/UserContext';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 const EligibleCredddList = () => {
-  const { user } = useUser();
+  const { data: user } = useSignedInUser();
   const [accounts, setAccounts] = useState<Hex[]>([]);
   const [disconnectTriggered, setDisconnectTriggered] =
     useState<boolean>(false);
   const { addresses, connector } = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<Hex | null>(null);
   const [metamaskProvider, setMetamaskProvider] = useState<any | null>(null);
-  const { eligibleGroups } = useEligibleGroups(addresses as Hex[] | undefined);
+  const { data: eligibleGroups } = useEligibleGroups();
   const [isSwitchAccountsModalOpen, setIsSwitchAccountsModalOpen] =
     useState(false);
   const { openConnectModal } = useConnectModal();

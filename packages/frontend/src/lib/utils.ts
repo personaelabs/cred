@@ -166,8 +166,13 @@ export const buildSiwfMessage = ({
 };
 
 export const captureFetchError = async (response: Response) => {
-  const error = await response.json();
-  Sentry.captureException(new Error(JSON.stringify(error)));
+  try {
+    // Try to parse the error response as JSON
+    const error = await response.json();
+    Sentry.captureException(new Error(JSON.stringify(error)));
+  } catch (err) {
+    Sentry.captureException(new Error(`Fetch error: ${response.statusText}`));
+  }
 };
 
 /**

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import useLeaderBoard from '@/hooks/useLeaderBoard';
+import useLeaderBoardQuery from '@/hooks/useLeaderBoardQuery';
 import { LeaderBoardRecord } from '../types';
 import Link from 'next/link';
 import {
@@ -116,7 +116,7 @@ const LeaderBoardRow = ({ record, rank }: LeaderBoardRowProps) => {
 };
 
 const LeaderBoardPage = () => {
-  const leaderBoard = useLeaderBoard();
+  const { data: leaderBoard } = useLeaderBoardQuery();
 
   return (
     <div className="px-[20px] md:px-[200px] flex flex-col items-center">

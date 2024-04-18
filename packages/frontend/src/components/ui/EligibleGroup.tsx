@@ -1,13 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import useProver from '@/hooks/useProver';
-import { captureFetchError, getCredddDescription, postJSON } from '@/lib/utils';
+import { getCredddDescription } from '@/lib/utils';
 import { Info, Loader2 } from 'lucide-react';
-import { useUser } from '@/context/UserContext';
-import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
-import { EligibleGroup } from '@/app/types';
+import type { EligibleGroup } from '@/app/types';
 import { Connector } from 'wagmi';
 import { useAddingCredddModal } from '@/context/AddingCredddModalContext';
 
@@ -18,41 +16,12 @@ interface WalletViewProps {
 }
 
 const EligibleGroup: React.FC<WalletViewProps> = ({ connector, group }) => {
-  const { refetchUser } = useUser();
   const { setIsOpen: setIsAddingCredddModalOpen } = useAddingCredddModal();
-  const prover = useProver(group);
-  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const { mutateAsync: prove, isPending: isAdding } = useProver(group);
 
   const addGroup = async () => {
-    setIsAdding(true);
-    const proof = await prover.prove(connector);
-
-    if (proof) {
-      const response = await postJSON({
-        method: 'POST',
-        url: '/api/attestations',
-        body: proof,
-      });
-
-      if (response.ok) {
-        // Close the "Adding Creddd" modal
-        setIsAddingCredddModalOpen(false);
-
-        setIsAdding(false);
-        refetchUser();
-        toast.success('creddd added', {
-          duration: 10000,
-          closeButton: true,
-        });
-      } else {
-        toast.error('Failed to add creddd', {
-          duration: 100000,
-          closeButton: true,
-        });
-        await captureFetchError(response);
-      }
-    }
-
+    setIsAddingCredddModalOpen(true);
+    await prove(connector);
     setIsAddingCredddModalOpen(false);
   };
 

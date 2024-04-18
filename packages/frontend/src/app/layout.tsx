@@ -3,7 +3,6 @@ import '@rainbow-me/rainbowkit/styles.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { UserProvider } from '@/context/UserContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
@@ -17,6 +16,7 @@ import MobileHeader from '@/components/MobileHeader';
 import DesktopHeader from '@/components/DesktopHeader';
 import MobileFooter from '@/components/MobileFooter';
 import DesktopFooter from '@/components/DesktopFooter';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient();
 
@@ -63,25 +63,22 @@ export default function RootLayout({
       <body className="bg-background mb-[70px]">
         <WagmiProvider config={wagmicConfig}>
           <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools initialIsOpen={true} />
             <RainbowKitProvider modalSize="wide">
               <TooltipProvider>
                 <MediaQueryProvider>
                   <AddingCredddModalProvider>
-                    <UserProvider>
-                      <AuthKitProvider config={config}>
-                        <ThemeProvider attribute="class" defaultTheme="dark">
-                          <MobileHeader></MobileHeader>
-                          <DesktopHeader></DesktopHeader>
-                          <div className="flex flex-row justify-center w-full">
-                            <div className="w-full flex flex-col">
-                              {children}
-                            </div>
-                          </div>
-                          <MobileFooter></MobileFooter>
-                          <DesktopFooter></DesktopFooter>
-                        </ThemeProvider>
-                      </AuthKitProvider>
-                    </UserProvider>
+                    <AuthKitProvider config={config}>
+                      <ThemeProvider attribute="class" defaultTheme="dark">
+                        <MobileHeader></MobileHeader>
+                        <DesktopHeader></DesktopHeader>
+                        <div className="flex flex-row justify-center w-full">
+                          <div className="w-full flex flex-col">{children}</div>
+                        </div>
+                        <MobileFooter></MobileFooter>
+                        <DesktopFooter></DesktopFooter>
+                      </ThemeProvider>
+                    </AuthKitProvider>
                   </AddingCredddModalProvider>
                 </MediaQueryProvider>
               </TooltipProvider>

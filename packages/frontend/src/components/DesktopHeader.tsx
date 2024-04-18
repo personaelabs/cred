@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { useUser } from '@/context/UserContext';
+import useSignedInUser from '@/hooks/useSignedInUser';
 import Link from 'next/link';
 
 const DesktopHeader = () => {
-  const { user } = useUser();
+  const { data: user } = useSignedInUser();
 
   return (
     <div className="hidden md:flex h-[80px] w-[100vw] flex-row justify-between items-center gap-8 px-[20px] md:px-[100px]">

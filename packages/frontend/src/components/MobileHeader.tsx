@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { useUser } from '@/context/UserContext';
+import useSignedInUser from '@/hooks/useSignedInUser';
 import Link from 'next/link';
 
 const MobileHeader = () => {
-  const { user } = useUser();
+  const { data: user } = useSignedInUser();
 
   return (
     <div className="md:hidden flex flex-row justify-between h-[80px] w-[100vw] p-[24px]">

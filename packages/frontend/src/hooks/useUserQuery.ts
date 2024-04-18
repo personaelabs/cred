@@ -1,14 +1,12 @@
 import { GetUserResponse } from '@/app/api/fc-accounts/[fid]/route';
-import { useEffect, useState } from 'react';
 import OG_USERS from '@/lib/creddd1Users';
+import { useQuery } from '@tanstack/react-query';
 import { captureFetchError } from '@/lib/utils';
-import { toast } from 'sonner';
 
-const useUser = (fid: string) => {
-  const [user, setUser] = useState<GetUserResponse | null>(null);
-
-  useEffect(() => {
-    (async () => {
+const useUserQuery = (fid: string) =>
+  useQuery({
+    queryKey: ['user', { fid }],
+    queryFn: async () => {
       const fidIsOgUsername = !!OG_USERS[fid];
       // If the user is creddd 1.0 user, there's no data to fetch
       if (!fidIsOgUsername) {
@@ -17,16 +15,14 @@ const useUser = (fid: string) => {
         });
         if (response.ok) {
           const data = (await response.json()) as GetUserResponse;
-          setUser(data);
+
+          return data;
         } else {
-          toast.error('Failed to fetch user data');
           await captureFetchError(response);
+          throw new Error('Failed to fetch user data');
         }
       }
-    })();
-  }, [fid]);
+    },
+  });
 
-  return user;
-};
-
-export default useUser;
+export default useUserQuery;

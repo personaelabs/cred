@@ -1,6 +1,8 @@
 import { Hex } from 'viem';
 import { MerkleTreeSelect } from './api/trees/route';
 import { Group } from '@prisma/client';
+import { StatusAPIResponse } from '@farcaster/auth-client';
+import { GetUserResponse } from './api/fc-accounts/[fid]/route';
 
 /**
  * Witness to pass to the prover
@@ -78,3 +80,7 @@ export enum AttestationType {
   // eslint-disable-next-line no-unused-vars
   FidAttestation = 1,
 }
+
+export type SignedInUser = GetUserResponse & {
+  siwfResponse: StatusAPIResponse;
+};
