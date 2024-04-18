@@ -93,6 +93,112 @@ const getMerkleProof = (
   };
 };
 
+const getEligibleGroups = async (
+  addresses: readonly Hex[],
+  merkleTrees: MerkleTreeSelect[]
+) => {
+  // @ts-ignore
+  const circuit = await import('circuit-web');
+  circuit.init_panic_hook();
+
+  // Mapping of group IDs to the addresses that matched the bloom filter
+  const bloomFilterMatchedGroups = new Map<string, Hex[]>();
+
+  // Fill `bloomFilterMatchedGroups`
+  for (const address of addresses) {
+    for (const merkleTree of merkleTrees) {
+      if (
+        merkleTree.bloomFilter &&
+        merkleTree.bloomNumBits &&
+        merkleTree.bloomNumHashes &&
+        merkleTree.bloomSipKeys
+      ) {
+        const sipKeys = Buffer.concat([
+          Buffer.from(merkleTree.bloomSipKeys[0]),
+          Buffer.from(merkleTree.bloomSipKeys[1]),
+        ]);
+
+        const addressBytes = hexToBytes(address);
+
+        // Check if the address is a member using the bloom filter
+        const isMember = circuit.bloom_check(
+          // @ts-ignore
+          merkleTree.bloomFilter.data,
+          BigInt(merkleTree.bloomNumBits),
+          merkleTree.bloomNumHashes,
+          sipKeys,
+          addressBytes
+        );
+
+        if (isMember) {
+          // Add the address to the list of matched addresses for the tree
+          bloomFilterMatchedGroups.set(
+            merkleTree.Group.id,
+            (bloomFilterMatchedGroups.get(merkleTree.Group.id) || []).concat(
+              address
+            )
+          );
+        }
+      } else {
+        console.log('Bloom filter not available');
+      }
+    }
+  }
+
+  // Get the tree IDs that had a match in the bloom filter
+  const bloomFilterMatchedGroupIds = Array.from(
+    bloomFilterMatchedGroups.keys()
+  );
+
+  const _eligibleGroups: EligibleGroup[] = [];
+
+  // Get and check for false positives in batches
+  for (
+    let i = 0;
+    i < bloomFilterMatchedGroupIds.length;
+    i += MAX_TREES_PRE_REQUEST
+  ) {
+    const ids = bloomFilterMatchedGroupIds.slice(i, i + MAX_TREES_PRE_REQUEST);
+
+    const merkleTreeList = await getMerkleTrees(ids);
+
+    const merkleTreesProtoBufs = merkleTreeList.getTreesList();
+
+    for (let j = 0; j < merkleTreesProtoBufs.length; j++) {
+      const merkleTreeProtoBuf = merkleTreesProtoBufs[j];
+      const groupId = ids[j];
+
+      // Get the addresses that matched the group bloom filter
+      const addresses = bloomFilterMatchedGroups.get(groupId) || [];
+
+      // Check for false positives
+      for (const address of addresses) {
+        const merkleProof = getMerkleProof(merkleTreeProtoBuf, address);
+        if (merkleProof === null) {
+          console.log('Bloom filter false positive');
+        } else {
+          // It's now confirmed that the address is in the tree
+
+          // Get the `Group` object
+          const group = merkleTrees.find(
+            tree => tree.Group.id === groupId
+          )!.Group;
+
+          _eligibleGroups.push({
+            ...group,
+            address,
+            merkleProof,
+          });
+
+          // We only need one address to be eligible for the group
+          break;
+        }
+      }
+    }
+  }
+  return _eligibleGroups;
+};
+
 /**
  * Get all Merkle trees and their bloom filters
  */
@@ -122,109 +228,7 @@ const useEligibleGroups = () => {
     queryKey: ['eligible-groups'],
     queryFn: async (): Promise<EligibleGroup[] | null> => {
       if (addresses && merkleTrees) {
-        // @ts-ignore
-        const circuit = await import('circuit-web');
-        circuit.init_panic_hook();
-
-        // Mapping of group IDs to the addresses that matched the bloom filter
-        const bloomFilterMatchedGroups = new Map<string, Hex[]>();
-
-        // Fill `bloomFilterMatchedGroups`
-        for (const address of addresses) {
-          for (const merkleTree of merkleTrees) {
-            if (
-              merkleTree.bloomFilter &&
-              merkleTree.bloomNumBits &&
-              merkleTree.bloomNumHashes &&
-              merkleTree.bloomSipKeys
-            ) {
-              const sipKeys = Buffer.concat([
-                Buffer.from(merkleTree.bloomSipKeys[0]),
-                Buffer.from(merkleTree.bloomSipKeys[1]),
-              ]);
-
-              const addressBytes = hexToBytes(address);
-
-              // Check if the address is a member using the bloom filter
-              const isMember = circuit.bloom_check(
-                // @ts-ignore
-                merkleTree.bloomFilter.data,
-                BigInt(merkleTree.bloomNumBits),
-                merkleTree.bloomNumHashes,
-                sipKeys,
-                addressBytes
-              );
-
-              if (isMember) {
-                // Add the address to the list of matched addresses for the tree
-                bloomFilterMatchedGroups.set(
-                  merkleTree.Group.id,
-                  (
-                    bloomFilterMatchedGroups.get(merkleTree.Group.id) || []
-                  ).concat(address)
-                );
-              }
-            } else {
-              console.log('Bloom filter not available');
-            }
-          }
-        }
-
-        // Get the tree IDs that had a match in the bloom filter
-        const bloomFilterMatchedGroupIds = Array.from(
-          bloomFilterMatchedGroups.keys()
-        );
-
-        const _eligibleGroups: EligibleGroup[] = [];
-
-        // Get and check for false positives in batches
-        for (
-          let i = 0;
-          i < bloomFilterMatchedGroupIds.length;
-          i += MAX_TREES_PRE_REQUEST
-        ) {
-          const ids = bloomFilterMatchedGroupIds.slice(
-            i,
-            i + MAX_TREES_PRE_REQUEST
-          );
-
-          const merkleTreeList = await getMerkleTrees(ids);
-
-          const merkleTreesProtoBufs = merkleTreeList.getTreesList();
-
-          for (let j = 0; j < merkleTreesProtoBufs.length; j++) {
-            const merkleTreeProtoBuf = merkleTreesProtoBufs[j];
-            const groupId = ids[j];
-
-            // Get the addresses that matched the group bloom filter
-            const addresses = bloomFilterMatchedGroups.get(groupId) || [];
-
-            // Check for false positives
-            for (const address of addresses) {
-              const merkleProof = getMerkleProof(merkleTreeProtoBuf, address);
-              if (merkleProof === null) {
-                console.log('Bloom filter false positive');
-              } else {
-                // It's now confirmed that the address is in the tree
-
-                // Get the `Group` object
-                const group = merkleTrees.find(
-                  tree => tree.Group.id === groupId
-                )!.Group;
-
-                _eligibleGroups.push({
-                  ...group,
-                  address,
-                  merkleProof,
-                });
-
-                // We only need one address to be eligible for the group
-                break;
-              }
-            }
-          }
-        }
-        return _eligibleGroups;
+        return await getEligibleGroups(addresses, merkleTrees);
       } else {
         return null;
       }
