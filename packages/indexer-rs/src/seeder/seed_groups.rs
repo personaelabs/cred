@@ -20,10 +20,13 @@ fn calculate_group_score(group_type: GroupType, contract_inputs: &[&str]) -> i64
         .find(|a| a.address.to_lowercase() == contract_address.to_lowercase());
 
     if contract.is_none() {
-        panic!(
+        println!(
             "Contract not found in assets_with_prices.json: {}",
             contract_address
         );
+
+        // If the contract doesn't exist in asset_with_prices.json, just return 0 for now.
+        return 0;
     }
 
     let contract = contract.unwrap();
