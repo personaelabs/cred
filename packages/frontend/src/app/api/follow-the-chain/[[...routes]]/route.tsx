@@ -63,10 +63,10 @@ app.frame('/', async c => {
           as crypto heats up, you need to know who to follow
         </span>
         <hr />
-        <span>use this tool to follow the chain...</span>
+        <span>use me to follow the chain...</span>
       </div>
     ),
-    intents: [<Button value="checkFeed">check your feed</Button>],
+    intents: [<Button value="checkFeed">score your feed</Button>],
   });
 });
 
@@ -128,7 +128,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
               whiteSpace: 'pre',
             }}
           >
-            we have some suggestisons for you...
+            check out our suggestions below
           </span>
         )}
 
