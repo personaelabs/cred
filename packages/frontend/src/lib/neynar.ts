@@ -32,9 +32,7 @@ interface NeynarQueryFollowsResult {
  * Get the FIDs that a given FID is following
  */
 export const getFollowingFids = async (fid: number): Promise<number[]> => {
-  const res = await neynarDb.$queryRaw<
-    NeynarQueryFollowsResult[]
-  >`SELECT DISTINCT
+  const res = await neynarDb.$queryRaw<NeynarQueryFollowsResult[]>`SELECT
         target_fid
       FROM
         "links"
@@ -42,7 +40,7 @@ export const getFollowingFids = async (fid: number): Promise<number[]> => {
         fid = ${fid}
         AND TYPE = 'follow'
         AND target_fid IS NOT NULL
-        AND deleted_at IS NULL`;
+        AND deleted_at IS NULL`; // NOTE: do not commit this!
 
   // Realistically, target_fid won't overflow.
   return res.map(row => Number(row.target_fid));

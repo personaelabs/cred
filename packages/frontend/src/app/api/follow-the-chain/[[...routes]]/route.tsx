@@ -66,7 +66,7 @@ app.frame('/', async c => {
         <span>use me to follow the chain...</span>
       </div>
     ),
-    intents: [<Button value="checkFeed">score your feed</Button>],
+    intents: [<Button value="checkFeed">rate your feed</Button>],
   });
 });
 
@@ -85,6 +85,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
     feedScore,
   });
 
+  // TODO: require them to be in creddd channel first?
   return c.res({
     action: '/',
     image: (
@@ -100,16 +101,26 @@ const checkFeedFrame = async (c: any, fid: number) => {
             whiteSpace: 'pre',
           }}
         >
-          your feed is
+          your feed is rated
           <span
             style={{
               color: frameInfo.color,
             }}
           >
             {' '}
-            {frameInfo.label} (avg. onchain score= {feedScore})
+            {frameInfo.label}
           </span>
         </span>
+        <span>
+          <span
+            style={{
+              fontSize: 24,
+            }}
+          >
+            (avg. onchain score= {feedScore})
+          </span>
+        </span>
+
         <hr />
 
         <span
@@ -120,6 +131,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
           {frameInfo.msg}
         </span>
         <hr />
+        <hr />
 
         {category !== FeedScoreCategory.ELITE && (
           <span
@@ -128,7 +140,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
               whiteSpace: 'pre',
             }}
           >
-            check out our suggestions below
+            check out some follow suggestions below
           </span>
         )}
 
