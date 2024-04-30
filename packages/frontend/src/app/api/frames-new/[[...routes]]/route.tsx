@@ -154,7 +154,7 @@ const showStatsFrame = async (c: any, fid: number) => {
 
 const suggestedFollowsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
-  const suggestedFollows = await getSuggestedFollows(followingFids, 3);
+  const suggestedFollows = await getSuggestedFollows(followingFids, null, 3);
 
   // Get user data for the suggested follows
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
