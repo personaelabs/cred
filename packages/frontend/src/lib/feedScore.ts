@@ -72,7 +72,7 @@ export const categoryToFrameInfo = {
 const scoreBreakpoints = [
   5000, // mid
   10000, // degenerate
-  50000, // elite
+  25000, // elite
 ];
 
 export const scoreToCategory = (score: number): FeedScoreCategory => {

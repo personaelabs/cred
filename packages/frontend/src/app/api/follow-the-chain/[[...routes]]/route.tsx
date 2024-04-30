@@ -63,10 +63,12 @@ app.frame('/', async c => {
           as crypto heats up, you need to know who to follow
         </span>
         <hr />
-        <span>use me to follow the chain...</span>
+        <span>follow the chain ⬇️</span>
       </div>
     ),
-    intents: [<Button value="checkFeed">rate your feed</Button>],
+    intents: [
+      <Button value="checkFeed">check how onchain your feed is</Button>,
+    ],
   });
 });
 
@@ -148,7 +150,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
               whiteSpace: 'pre',
             }}
           >
-            check out some follow suggestions below
+            to level up, here are some follow suggestions
           </span>
         )}
 
@@ -210,7 +212,7 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
               color: TEXT_COLOR,
             }}
           >
-            follow these extremely onchain accounts:
+            follow more extremely onchain accounts:
           </span>
           {suggestedFollows.map(({ fid, score }) => {
             const user = suggestedUsers.find(user => user.fid === fid)!;
