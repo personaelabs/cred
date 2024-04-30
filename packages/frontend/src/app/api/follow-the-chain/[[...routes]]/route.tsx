@@ -6,12 +6,11 @@ import { handle } from 'frog/next';
 
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
-import { getFollowingFids, getUsers } from '@/lib/neynar';
+import { getFollowingFids } from '@/lib/neynar';
 import { logger, getFrogConfig } from '@/lib/utils';
 import {
   FeedScoreCategory,
   categoryToFrameInfo,
-  getActiveSuggestedFollows,
   scoreToCategory,
 } from '@/lib/feedScore';
 import { getAverageScore } from '@/lib/score';
@@ -160,10 +159,13 @@ const checkFeedFrame = async (c: any, fid: number) => {
 };
 
 const suggestedFollowsFrame = async (c: any, fid: number) => {
-  const followingFids = await getFollowingFids(fid);
+  // NOTE: testing without any lag
+  // const followingFids = await getFollowingFids(fid);
+  // const suggestedFollows = await getActiveSuggestedFollows(followingFids);
+  // const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
-  const suggestedFollows = await getActiveSuggestedFollows(followingFids);
-  const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
+  const suggestedFollows: any[] = [];
+  const suggestedUsers: any[] = [];
 
   // Monitor the suggested follows the users see
   logger.info('fid suggested follows', {
