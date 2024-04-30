@@ -21,14 +21,10 @@ export async function getActiveSuggestedFollows(
   followingFids: number[],
   take: number = 3
 ) {
-  const allSuggested = await getSuggestedFollows(followingFids);
-  const activeAllSuggested = allSuggested.filter(({ fid }) =>
-    ACTIVE_FIDS.includes(fid)
-  );
+  const allSuggested = await getSuggestedFollows(followingFids, ACTIVE_FIDS, 3);
+  console.log(`found ${allSuggested.length} active suggested follows`);
 
-  console.log(`found ${activeAllSuggested.length} active suggested follows`);
-
-  return activeAllSuggested.slice(0, take);
+  return allSuggested.slice(0, take);
 }
 
 export enum FeedScoreCategory {

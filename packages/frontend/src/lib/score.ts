@@ -3,10 +3,57 @@ import prisma from '@/lib/prisma';
 /**
  * Returns a list of suggested follows for a given user.
  * Suggested follows are the first `limit` highest score users that the user is not following.
- * @param followingFids List of FIDs that the user is following.
+ * @param excludeFids List of FIDs that the user is following.
  * @param limit Maximum number of suggested follows to return.
  */
-export async function getSuggestedFollows(followingFids: number[], limit = -1) {
+export async function getSuggestedFollows(
+  excludeFids: number[],
+  includeFids: number[] | null = null,
+  limit = -1
+) {
+  const baseQuery: any = {
+    select: {
+      fid: true,
+      score: true,
+    },
+    where: {
+      NOT: {
+        fid: {
+          in: excludeFids,
+        },
+      },
+    },
+    orderBy: {
+      score: 'desc',
+    },
+  };
+
+  if (includeFids) {
+    baseQuery.where = {
+      AND: [
+        {
+          NOT: {
+            fid: {
+              in: excludeFids,
+            },
+          },
+        },
+        {
+          fid: {
+            in: includeFids,
+          },
+        },
+      ],
+    };
+  }
+  if (limit !== -1) {
+    baseQuery['take'] = limit;
+  }
+
+  console.log('query:', baseQuery);
+
+  return await prisma.user.findMany(baseQuery);
+
   if (limit === -1) {
     return await prisma.user.findMany({
       select: {
@@ -16,7 +63,7 @@ export async function getSuggestedFollows(followingFids: number[], limit = -1) {
       where: {
         NOT: {
           fid: {
-            in: followingFids,
+            in: excludeFids,
           },
         },
       },
@@ -33,7 +80,7 @@ export async function getSuggestedFollows(followingFids: number[], limit = -1) {
       where: {
         NOT: {
           fid: {
-            in: followingFids,
+            in: excludeFids,
           },
         },
       },
