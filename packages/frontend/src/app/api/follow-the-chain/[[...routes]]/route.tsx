@@ -76,6 +76,9 @@ const checkFeedFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
   const feedScore = await getAverageScore(followingFids);
 
+  console.log(`checking score for fid ${fid}`);
+  console.log(`found ${followingFids.length} following fids`);
+
   const category: FeedScoreCategory = scoreToCategory(feedScore);
   const frameInfo = categoryToFrameInfo[category];
 
