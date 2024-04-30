@@ -53,43 +53,6 @@ export async function getSuggestedFollows(
   console.log('query:', baseQuery);
 
   return await prisma.user.findMany(baseQuery);
-
-  if (limit === -1) {
-    return await prisma.user.findMany({
-      select: {
-        fid: true,
-        score: true,
-      },
-      where: {
-        NOT: {
-          fid: {
-            in: excludeFids,
-          },
-        },
-      },
-      orderBy: {
-        score: 'desc',
-      },
-    });
-  } else {
-    return await prisma.user.findMany({
-      select: {
-        fid: true,
-        score: true,
-      },
-      where: {
-        NOT: {
-          fid: {
-            in: excludeFids,
-          },
-        },
-      },
-      orderBy: {
-        score: 'desc',
-      },
-      take: limit,
-    });
-  }
 }
 
 /**
