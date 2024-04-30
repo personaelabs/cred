@@ -1,18 +1,14 @@
-// TODO: function for finding active follows
-// get suggested follows based on creddd+exclude followingFids, then join with active from neynar
-// groups of 100 take top 3
-
 import { filterActive } from './neynar';
 import { getSuggestedFollows } from './score';
 
-const MAX_NEYNAR_QUERIES = 20;
+const MAX_NEYNAR_QUERIES = 20; // NOTE: to ensure that this query doesn't run forever
 const NEYNAR_CHUNK_SIZE = 99;
 
 export async function getActiveSuggestedFollows(
   followingFids: number[],
   take: number = 3
 ) {
-  let ret = [];
+  let ret: any[] = [];
 
   const allSuggested = await getSuggestedFollows(followingFids);
 
