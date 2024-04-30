@@ -73,11 +73,12 @@ export const categoryToFrameInfo = {
   },
 };
 
+// TODO: set these based on actual user distributions. maximize the chance few elites, few degens
 // feed score breakpoints for each category
 const scoreBreakpoints = [
-  100, // mid
-  1000, // degenerate
-  10000, // elite
+  5000, // mid
+  10000, // degenerate
+  50000, // elite
 ];
 
 export const scoreToCategory = (score: number): FeedScoreCategory => {
