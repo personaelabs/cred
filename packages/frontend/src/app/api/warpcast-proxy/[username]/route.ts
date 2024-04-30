@@ -18,7 +18,10 @@ export async function GET(
     // This is the fid that clicked the link
     const fid = req.nextUrl.searchParams.get('fid');
 
-    logger.info('warpcast-proxy', { username: params.username, fid });
+    logger.info('warpcast-follow', {
+      followee: params.username,
+      follower: fid,
+    });
     return NextResponse.redirect(`https://warpcast.com/${params.username}`);
   });
 }
