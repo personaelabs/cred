@@ -1,36 +1,34 @@
-import { filterActive } from './neynar';
+import axios from 'axios';
 import { getSuggestedFollows } from './score';
 
-const MAX_NEYNAR_QUERIES = 20; // NOTE: to ensure that this query doesn't run forever
-const NEYNAR_CHUNK_SIZE = 99;
+async function getActiveFids() {
+  const resp = await axios.get('https://api.warpcast.com/v2/power-badge-users');
+
+  if (!resp.data) {
+    console.log(`Error fetching active fids: ${resp}`);
+    return [];
+  }
+
+  return resp.data.result.fids;
+}
+
+let ACTIVE_FIDS: number[] = [];
+getActiveFids().then((fids: number[]) => {
+  ACTIVE_FIDS = fids;
+});
 
 export async function getActiveSuggestedFollows(
   followingFids: number[],
   take: number = 3
 ) {
-  let ret: any[] = [];
-
   const allSuggested = await getSuggestedFollows(followingFids);
+  const activeAllSuggested = allSuggested.filter(({ fid }) =>
+    ACTIVE_FIDS.includes(fid)
+  );
 
-  let numIterations = 0;
-  for (let i = 0; i < allSuggested.length; i += NEYNAR_CHUNK_SIZE) {
-    const slice = allSuggested.slice(i, i + NEYNAR_CHUNK_SIZE);
-    const activeFids = await filterActive(slice.map(({ fid }) => fid));
+  console.log(`found ${activeAllSuggested.length} active suggested follows`);
 
-    ret = ret.concat(slice.filter(({ fid }) => activeFids.includes(fid)));
-
-    numIterations++;
-
-    if (ret.length >= take || numIterations > MAX_NEYNAR_QUERIES) {
-      break;
-    }
-  }
-
-  if (ret.length === 0) {
-    return allSuggested.slice(0, take);
-  } else {
-    return ret.slice(0, take);
-  }
+  return activeAllSuggested.slice(0, take);
 }
 
 export enum FeedScoreCategory {
