@@ -102,6 +102,10 @@ export async function getAverageScore(
 
   const result = await prisma.user.aggregate(query);
 
+  if (!result._avg) {
+    return 0;
+  }
+
   return Math.round(result._avg.score ?? 0);
 }
 
