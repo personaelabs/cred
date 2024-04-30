@@ -49,6 +49,26 @@ export const getFollowingFids = async (fid: number): Promise<number[]> => {
 };
 
 /**
+ * Filter a list of fids to those with the active badge on neynar
+ * @param fids
+ */
+export const filterActive = async (fids: number[]) => {
+  // enumerate active, then filter to those that are active
+  const result = await neynar.get<{ users: NeynarUserResponse[] }>(
+    `/user/bulk?fids=${fids.join(',')}`
+  );
+
+  if (!result.data.users.length) {
+    return [];
+  }
+
+  const activeFids = result.data.users
+    .filter(user => user['active_status'] === 'active')
+    .map(user => user.fid);
+  return activeFids;
+};
+
+/**
  * Get user data for a given FID from Neynar
  * The data is cached for 60 seconds in production, and forever in development
  */

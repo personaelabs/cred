@@ -2,27 +2,47 @@ import prisma from '@/lib/prisma';
 
 /**
  * Returns a list of suggested follows for a given user.
- * Suggested follows are the first 3 highest score users that the user is not following.
+ * Suggested follows are the first `limit` highest score users that the user is not following.
  * @param followingFids List of FIDs that the user is following.
+ * @param limit Maximum number of suggested follows to return.
  */
-export async function getSuggestedFollows(followingFids: number[]) {
-  return await prisma.user.findMany({
-    select: {
-      fid: true,
-      score: true,
-    },
-    where: {
-      NOT: {
-        fid: {
-          in: followingFids,
+export async function getSuggestedFollows(followingFids: number[], limit = -1) {
+  if (limit === -1) {
+    return await prisma.user.findMany({
+      select: {
+        fid: true,
+        score: true,
+      },
+      where: {
+        NOT: {
+          fid: {
+            in: followingFids,
+          },
         },
       },
-    },
-    orderBy: {
-      score: 'desc',
-    },
-    take: 3,
-  });
+      orderBy: {
+        score: 'desc',
+      },
+    });
+  } else {
+    return await prisma.user.findMany({
+      select: {
+        fid: true,
+        score: true,
+      },
+      where: {
+        NOT: {
+          fid: {
+            in: followingFids,
+          },
+        },
+      },
+      orderBy: {
+        score: 'desc',
+      },
+      take: limit,
+    });
+  }
 }
 
 /**
@@ -48,20 +68,39 @@ export async function getNonZeroFollowCount(
 /**
  * Returns the average non-zero scores of the given FIDs.
  */
-export async function getNonzeroAverageScore(fids: number[]): Promise<number> {
-  const result = await prisma.user.aggregate({
-    _avg: {
-      score: true,
-    },
-    where: {
-      fid: {
-        in: fids,
+export async function getAverageScore(
+  fids: number[],
+  nonzero: boolean = true
+): Promise<number> {
+  let query = {};
+  if (nonzero) {
+    query = {
+      _avg: {
+        score: true,
       },
-      score: {
-        gt: 0,
+      where: {
+        fid: {
+          in: fids,
+        },
+        score: {
+          gt: 0,
+        },
       },
-    },
-  });
+    };
+  } else {
+    query = {
+      _avg: {
+        score: true,
+      },
+      where: {
+        fid: {
+          in: fids,
+        },
+      },
+    };
+  }
+
+  const result = await prisma.user.aggregate(query);
 
   return Math.round(result._avg.score ?? 0);
 }

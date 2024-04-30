@@ -7,12 +7,14 @@ import { handle } from 'frog/next';
 import { devtools } from 'frog/dev';
 import { serveStatic } from 'frog/serve-static';
 import { getFollowingFids, getUsers } from '@/lib/neynar';
-import {
-  getNonZeroFollowCount,
-  getAverageScore,
-  getSuggestedFollows,
-} from '@/lib/score';
 import { logger, getFrogConfig } from '@/lib/utils';
+import {
+  FeedScoreCategory,
+  categoryToFrameInfo,
+  getActiveSuggestedFollows,
+  scoreToCategory,
+} from '@/lib/feedScore';
+import { getAverageScore } from '@/lib/score';
 
 const TEXT_COLOR = '#FDA174';
 const CONTAINER_STYLE = {
@@ -30,16 +32,20 @@ const CONTAINER_STYLE = {
   borderColor: TEXT_COLOR,
 };
 
-const app = new Frog(getFrogConfig('/api/frames-new'));
+const app = new Frog(getFrogConfig('/api/follow-the-chain'));
 
 app.frame('/', async c => {
+  // NOTE: for testing
+  // return checkFeedFrame(c, 54);
+  // return suggestedFollowsFrame(c, 54);
+
   const { buttonValue, frameData } = c;
 
-  if (buttonValue === 'checkStats' && frameData) {
-    logger.info('check stats click', {
+  if (buttonValue === 'checkFeed' && frameData) {
+    logger.info('check feed click', {
       fid: frameData.fid,
     });
-    return showStatsFrame(c, frameData.fid);
+    return checkFeedFrame(c, frameData.fid);
   }
 
   if (buttonValue === 'suggestedFollows' && frameData) {
@@ -52,35 +58,31 @@ app.frame('/', async c => {
   return c.res({
     action: '/',
     image: (
-      <div style={{ ...CONTAINER_STYLE, fontSize: 60 }}>
-        how onchain is your feed?
+      <div style={{ ...CONTAINER_STYLE, fontSize: 48 }}>
+        <span style={{ textAlign: 'center' }}>
+          as crypto heats up, you need to know who to follow
+        </span>
+        <hr />
+        <span>use this tool to follow the chain...</span>
       </div>
     ),
-    intents: [<Button value="checkStats">check</Button>],
+    intents: [<Button value="checkFeed">check your feed</Button>],
   });
 });
 
-const showStatsFrame = async (c: any, fid: number) => {
+// display group, score, recommended follows
+// as well as 'what is score?' link
+const checkFeedFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
+  const feedScore = await getAverageScore(followingFids);
 
-  const numNonZeroFollows = await getNonZeroFollowCount(followingFids);
-  const averageScore = await getAverageScore(followingFids);
-
-  const stats = [
-    {
-      label: 'follows with nonzero creddd scores',
-      value: `${numNonZeroFollows.toLocaleString('en-US')} / ${followingFids.length.toLocaleString('en-US')}`,
-    },
-    {
-      label: 'follow mean creddd score',
-      value: averageScore.toLocaleString('en-US'),
-    },
-  ];
+  const category: FeedScoreCategory = scoreToCategory(feedScore);
+  const frameInfo = categoryToFrameInfo[category];
 
   // Monitor the stats the users see
-  logger.info('feed stats', {
+  logger.info('feed score', {
     fid,
-    stats,
+    feedScore,
   });
 
   return c.res({
@@ -90,73 +92,61 @@ const showStatsFrame = async (c: any, fid: number) => {
         style={{
           ...CONTAINER_STYLE,
           alignItems: 'flex-start',
-          gap: 30,
         }}
       >
         <span
           style={{
             fontSize: 48,
+            whiteSpace: 'pre',
           }}
         >
-          stats of ppl you follow. a mean score greater than 20k is elite
+          your feed is
+          <span
+            style={{
+              color: frameInfo.color,
+            }}
+          >
+            {' '}
+            {frameInfo.label} (avg. onchain score= {feedScore})
+          </span>
         </span>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
+        <hr />
 
-            color: 'white',
-            fontSize: 40,
-            width: '100%',
-            gap: 16,
+        <span
+          style={{
+            fontSize: 36,
           }}
         >
-          {stats.map(({ label, value }) => (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                width: '100%',
-                gap: 20,
-              }}
-            >
-              <span
-                style={{
-                  opacity: 0.6,
-                }}
-              >
-                {label}
-              </span>
-              :
-              <span
-                style={{
-                  fontWeight: 'bold',
-                  color: TEXT_COLOR,
-                }}
-              >
-                {value}
-              </span>
-            </div>
-          ))}
-        </div>
+          {frameInfo.msg}
+        </span>
+        <hr />
+
+        {category !== FeedScoreCategory.ELITE && (
+          <span
+            style={{
+              fontSize: 36,
+              whiteSpace: 'pre',
+            }}
+          >
+            we have some suggestisons for you...
+          </span>
+        )}
+
+        <hr />
       </div>
     ),
     intents: [
-      <Button value="suggestedFollows">who should I follow?</Button>,
-      <Button.Link href="https://www.notion.so/personae-labs/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20?pvs=4#cd4ceb802403436fab01ea1f6d5478f0">
-        what is creddd score?
-      </Button.Link>,
+      <Button value="suggestedFollows">suggested follows</Button>,
+      // TODO: fill in this notion
+      <Button.Link href="">what is onchain score?</Button.Link>,
     ],
   });
 };
 
 const suggestedFollowsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
-  const suggestedFollows = await getSuggestedFollows(followingFids, 3);
 
-  // Get user data for the suggested follows
+  const suggestedFollows = await getActiveSuggestedFollows(followingFids);
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   // Monitor the suggested follows the users see
@@ -199,7 +189,7 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
               color: TEXT_COLOR,
             }}
           >
-            suggested follows to make your feed more onchain
+            follow these extremely onchain accounts:
           </span>
           {suggestedFollows.map(({ fid, score }) => {
             const user = suggestedUsers.find(user => user.fid === fid)!;
@@ -233,6 +223,8 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
                     alignItems: 'center',
                     fontSize: 32,
                     gap: 32,
+                    justifyContent: 'space-between',
+                    width: '100%',
                   }}
                 >
                   <span>{user.display_name}</span>
@@ -243,10 +235,17 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
                       opacity: 0.6,
                       alignItems: 'center',
                       gap: 5,
+                      paddingRight: 60, // jank, but it works...
                     }}
                   >
-                    <span>creddd score:</span>
-                    <span>{Number(score).toLocaleString('en-US')}</span>
+                    <span>onchain score:</span>
+                    <span
+                      style={{
+                        alignItems: 'flex-end',
+                      }}
+                    >
+                      {Number(score).toLocaleString('en-US')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -256,7 +255,6 @@ const suggestedFollowsFrame = async (c: any, fid: number) => {
       </div>
     ),
     intents: [
-      <Button value="checkStats">back</Button>,
       suggestedUsers.map(user => (
         <Button.Link
           href={`${host}/api/warpcast-proxy/${user.username}?fid=${fid}`}

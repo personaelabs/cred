@@ -9,7 +9,7 @@ import { serveStatic } from 'frog/serve-static';
 import { getFollowingFids, getUsers } from '@/lib/neynar';
 import {
   getNonZeroFollowCount,
-  getNonzeroAverageScore,
+  getAverageScore,
   getSuggestedFollows,
 } from '@/lib/score';
 import { logger, getFrogConfig } from '@/lib/utils';
@@ -64,7 +64,7 @@ const showStatsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
 
   const numNonZeroFollows = await getNonZeroFollowCount(followingFids);
-  const averageScore = await getNonzeroAverageScore(followingFids);
+  const averageScore = await getAverageScore(followingFids);
 
   const stats = [
     {
@@ -154,7 +154,7 @@ const showStatsFrame = async (c: any, fid: number) => {
 
 const suggestedFollowsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
-  const suggestedFollows = await getSuggestedFollows(followingFids);
+  const suggestedFollows = await getSuggestedFollows(followingFids, 3);
 
   // Get user data for the suggested follows
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
