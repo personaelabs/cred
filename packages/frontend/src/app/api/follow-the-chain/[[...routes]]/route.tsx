@@ -117,7 +117,15 @@ const checkFeedFrame = async (c: any, fid: number) => {
               fontSize: 24,
             }}
           >
-            (avg. onchain score= {feedScore})
+            (avg. onchain score=
+            <span
+              style={{
+                color: frameInfo.color,
+              }}
+            >
+              {feedScore}
+            </span>
+            )
           </span>
         </span>
 
