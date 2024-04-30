@@ -149,8 +149,9 @@ const checkFeedFrame = async (c: any, fid: number) => {
     ),
     intents: [
       <Button value="suggestedFollows">suggested follows</Button>,
-      // TODO: fill in this notion
-      <Button.Link href="">what is onchain score?</Button.Link>,
+      <Button.Link href="https://www.notion.so/personae-labs/Creddd-9cdf710a1cf84a388d8a45bf14ecfd20?pvs=4#0fce619d11be4084b2cf6cc7b7a9c02b">
+        what is onchain score?
+      </Button.Link>,
     ],
   });
 };
