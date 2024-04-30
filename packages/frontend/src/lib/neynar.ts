@@ -32,9 +32,7 @@ interface NeynarQueryFollowsResult {
  * Get the FIDs that a given FID is following
  */
 export const getFollowingFids = async (fid: number): Promise<number[]> => {
-  const res = await neynarDb.$queryRaw<
-    NeynarQueryFollowsResult[]
-  >`SELECT DISTINCT
+  const res = await neynarDb.$queryRaw<NeynarQueryFollowsResult[]>`SELECT
         target_fid
       FROM
         "links"
@@ -42,10 +40,30 @@ export const getFollowingFids = async (fid: number): Promise<number[]> => {
         fid = ${fid}
         AND TYPE = 'follow'
         AND target_fid IS NOT NULL
-        AND deleted_at IS NULL`;
+        AND deleted_at IS NULL`; // NOTE: do not commit this!
 
   // Realistically, target_fid won't overflow.
   return res.map(row => Number(row.target_fid));
+};
+
+/**
+ * Filter a list of fids to those with the active badge on neynar
+ * @param fids
+ */
+export const filterActive = async (fids: number[]) => {
+  // enumerate active, then filter to those that are active
+  const result = await neynar.get<{ users: NeynarUserResponse[] }>(
+    `/user/bulk?fids=${fids.join(',')}`
+  );
+
+  if (!result.data.users.length) {
+    return [];
+  }
+
+  const activeFids = result.data.users
+    .filter(user => user['active_status'] === 'active')
+    .map(user => user.fid);
+  return activeFids;
 };
 
 /**
