@@ -167,7 +167,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
 const suggestedFollowsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
 
-  const suggestedFollows = await getActiveSuggestedFollows(followingFids);
+  const suggestedFollows = await getActiveSuggestedFollows(fid, followingFids);
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   // Monitor the suggested follows the users see
