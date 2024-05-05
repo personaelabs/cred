@@ -18,10 +18,15 @@ getActiveFids().then((fids: number[]) => {
 });
 
 export async function getActiveSuggestedFollows(
+  fid: number,
   followingFids: number[],
   take: number = 3
 ) {
-  const allSuggested = await getSuggestedFollows(followingFids, ACTIVE_FIDS, 3);
+  const allSuggested = await getSuggestedFollows(
+    followingFids.concat([fid]),
+    ACTIVE_FIDS,
+    3
+  );
   console.log(`found ${allSuggested.length} active suggested follows`);
 
   return allSuggested.slice(0, take);
