@@ -1,6 +1,7 @@
 import { Hex } from 'viem';
 import { MerkleTreeSelect } from './api/trees/route';
 import { Group } from '@prisma/client';
+import { StatusAPIResponse } from '@farcaster/auth-kit';
 
 /**
  * Witness to pass to the prover
@@ -20,13 +21,9 @@ export interface WitnessInput {
  * Request body of POST /api/attestations
  */
 export interface FidAttestationRequestBody {
-  signInSigNonce: string;
-  signInSig: Hex;
-  proof: Hex;
-  fid: number;
   groupId: string;
-  custody: Hex;
-  issuedAt: string;
+  proof: Hex;
+  siwfResponse: StatusAPIResponse;
 }
 
 export interface NeynarUserResponse {

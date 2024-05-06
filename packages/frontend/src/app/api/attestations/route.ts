@@ -10,6 +10,7 @@ import {
 } from '@farcaster/auth-client';
 import { NextRequest } from 'next/server';
 import {
+  Hex,
   bytesToHex,
   hashMessage,
   hexToBytes,
@@ -18,11 +19,7 @@ import {
 } from 'viem';
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
-import {
-  buildSiwfMessage,
-  getFidAttestationHashV1,
-  withHandler,
-} from '@/lib/utils';
+import { getFidAttestationHashV1, withHandler } from '@/lib/utils';
 
 let circuitInitialized = false;
 
@@ -39,22 +36,12 @@ export async function POST(req: NextRequest) {
   return withHandler(async () => {
     const body = (await req.json()) as FidAttestationRequestBody;
 
-    // Build the SIWF message that is expected to be signed by the user
-    const siweMessage = buildSiwfMessage({
-      domain: 'creddd.xyz',
-      address: body.custody,
-      siweUri: 'http://creddd.xyz/login',
-      nonce: body.signInSigNonce,
-      issuedAt: body.issuedAt,
-      fid: body.fid,
-    });
-
     // 1. Verify `signInSig`
     const { success, fid } = await verifySignInMessage(client, {
-      nonce: body.signInSigNonce,
-      message: siweMessage,
+      nonce: body.siwfResponse.nonce,
+      message: body.siwfResponse.message as string,
       domain: 'creddd.xyz',
-      signature: body.signInSig,
+      signature: body.siwfResponse.signature as Hex,
     });
 
     if (!success) {
@@ -64,7 +51,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (fid !== Number(body.fid)) {
+    if (fid !== Number(body.siwfResponse.fid)) {
       return Response.json({ error: 'Invalid FID' }, { status: 400 });
     }
 
@@ -81,7 +68,9 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Invalid proof' }, { status: 400 });
     }
 
-    const signInSigSInBody = hexToCompactSignature(body.signInSig).yParityAndS;
+    const signInSigSInBody = hexToCompactSignature(
+      body.siwfResponse.signature as Hex
+    ).yParityAndS;
 
     // 3. Verify that the `signInSig` in the POST body matches the `signInSig` in the proof
     const signInSigS = toHex(await circuit.get_sign_in_sig(proofBytes));
@@ -150,7 +139,7 @@ export async function POST(req: NextRequest) {
       data: {
         hash: attestationHash,
         fid: fid,
-        signInSig: Buffer.from(hexToBytes(body.signInSig)),
+        signInSig: Buffer.from(hexToBytes(body.siwfResponse.signature as Hex)),
         attestation: Buffer.from(proofBytes),
         treeId: groupMerkleTree.id,
       },
