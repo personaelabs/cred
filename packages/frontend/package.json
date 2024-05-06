@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@farcaster/auth-client": "^0.1.0",
-    "@farcaster/auth-kit": "^0.2.0",
+    "@farcaster/auth-kit": "^0.2.2",
     "@prisma/client": "5.12.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-dialog": "^1.0.5",

@@ -108,23 +108,10 @@ const useProver = (eligibleGroup: EligibleGroup) => {
       const proof = await prover.prove(witness);
 
       if (proof) {
-        // Extract the `issuedAt` from the SIWF message
-        const issuedAt = siwfResponse.message?.match(
-          /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
-        );
-
-        if (!issuedAt || issuedAt.length === 0) {
-          throw new Error('Could not extract `issuedAt` from SIWF message');
-        }
-
         return {
           proof: toHexString(proof),
-          signInSig: siwfResponse.signature,
-          custody: siwfResponse.custody!,
-          signInSigNonce: siwfResponse.nonce,
-          fid: user.fid,
           groupId: eligibleGroup.id,
-          issuedAt: issuedAt[0],
+          siwfResponse,
         };
       }
 
