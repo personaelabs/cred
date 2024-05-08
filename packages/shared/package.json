@@ -1,0 +1,24 @@
+{
+  "name": "@cred/shared",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "./out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
+  "scripts": {
+    "build": "tsc -d",
+    "build:watch": "tsc -d --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "firebase": "^10.11.1"
+  }
+}
