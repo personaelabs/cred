@@ -33,7 +33,7 @@ const startSyncGroups = async () => {
     console.time('syncGroups');
     await syncGroups();
     console.timeEnd('syncGroups');
-    await sleep(1000 * 60 * 5); // 10 minutes
+    await sleep(1000 * 60 * 60 * 24); // 1 Day
   }
 };
 

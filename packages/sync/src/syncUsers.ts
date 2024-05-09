@@ -64,7 +64,7 @@ const syncUsers = async () => {
 
   const stream = fs
     .createReadStream(path.join(__dirname, './output.csv'))
-    .pipe(csv(['fid', 'fname', 'display_name', 'avatar_url']));
+    .pipe(csv(['fid', 'display_name', 'avatar_url', 'fname']));
 
   const chunkSize = 10000;
   let chunk: CsvRow[] = [];
@@ -93,7 +93,7 @@ const startSyncUsers = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await syncUsers();
-    await sleep(1000 * 60 * 15); // 15 minutes
+    await sleep(1000 * 60 * 60 * 24); // 1 Day
   }
 };
 
