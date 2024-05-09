@@ -30,7 +30,7 @@ const useSignIn = () => {
 
   const _signIn = useCallback(
     async (statusApiResponse: StatusAPIResponse) => {
-      signIn(statusApiResponse);
+      await signIn(statusApiResponse);
       await queryClient.invalidateQueries({ queryKey: ['signed-in-user'] });
     },
     [queryClient]
