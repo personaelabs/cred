@@ -102,6 +102,9 @@ importers:
       firebase:
         specifier: ^10.11.1
         version: 10.11.1(@react-native-async-storage/async-storage@1.23.0(react-native@0.73.6(@babel/core@7.24.1)(@babel/preset-env@7.24.1(@babel/core@7.24.1))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@6.0.3)))
+      firebase-admin:
+        specifier: ^12.1.0
+        version: 12.1.0
       lucide-react:
         specifier: ^0.331.0
         version: 0.331.0(react@18.2.0)

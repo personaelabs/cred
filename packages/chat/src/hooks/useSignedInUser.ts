@@ -30,7 +30,7 @@ const useSignedInUser = () => {
 
       if (!(await isAuthenticated(signedInUser.fid!))) {
         console.log('User is not authenticated, redirecting to signin');
-        router.push('SignIn');
+        router.push('/signin');
         return null;
       }
 
