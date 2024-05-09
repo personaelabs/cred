@@ -12,7 +12,7 @@ const createGroupRoom = async (
   creatorFid: number,
   invitedFids: number[]
 ) => {
-  const roomData: Omit<Room, "id"> = {
+  const roomData: Omit<Room, 'id'> = {
     name,
     fids: [creatorFid],
     adminFids: [creatorFid],
@@ -56,7 +56,7 @@ const useCreateGroupRoom = () => {
         throw new Error('User not signed in');
       }
 
-      return await createGroupRoom(db, name, imageUri, signedInUser.fid, fids);
+      return await createGroupRoom(db, name, imageUri, signedInUser.fid!, fids);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
