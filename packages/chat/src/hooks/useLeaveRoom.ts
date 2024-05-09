@@ -4,7 +4,7 @@ import useSignedInUser from './useSignedInUser';
 import db from '@/lib/firestore';
 
 const leaveRoom = async (db: Firestore, roomId: string, fid: number) => {
-  console.log(`Leaving room ${roomId} with fid ${fid}`)
+  console.log(`Leaving room ${roomId} with fid ${fid}`);
   await updateDoc(doc(db, 'rooms', roomId), {
     fids: arrayRemove(fid),
   });
@@ -17,7 +17,11 @@ const useLeaveRoom = () => {
 
   return useMutation({
     mutationFn: async (roomId: string) => {
-      return await leaveRoom(db, roomId, signedInUser.fid);
+      if (!signedInUser) {
+        throw new Error('User not signed in');
+      }
+
+      return await leaveRoom(db, roomId, signedInUser.fid!);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });

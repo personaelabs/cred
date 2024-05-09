@@ -14,6 +14,7 @@ const PATHNAME_TO_TITLE: {
 
 const MobileHeader = () => {
   const pathname = usePathname();
+  console.log({ pathname });
 
   const title = PATHNAME_TO_TITLE[pathname] || '';
 

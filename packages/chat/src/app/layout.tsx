@@ -7,7 +7,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthKitProvider } from '@farcaster/auth-kit';
-import MobileHeader from '@/components/MobileHeader';
 import DesktopHeader from '@/components/DesktopHeader';
 import MobileFooter from '@/components/MobileFooter';
 import DesktopFooter from '@/components/DesktopFooter';
@@ -126,7 +125,6 @@ export default function RootLayout({
             <TooltipProvider>
               <MinChatUiProvider theme="#FDA783" colorSet={myColorSet}>
                 <AuthKitProvider config={config}>
-                  <MobileHeader></MobileHeader>
                   <DesktopHeader></DesktopHeader>
                   <div style={{ height: `calc(${height}px - 130px)` }}>
                     {children}

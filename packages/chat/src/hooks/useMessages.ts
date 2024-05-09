@@ -3,21 +3,25 @@ import {
   collection,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   startAfter,
 } from 'firebase/firestore';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Message, messageConverter } from '@cred/shared';
 import db from '@/lib/firestore';
-import MessageType from '@minchat/react-chat-ui/dist/types/MessageType';
 import * as logger from '@/lib/logger';
+import { useEffect, useState } from 'react';
+import useSignedInUser from './useSignedInUser';
+import { ChatMessage } from '@/types';
 
-const toMessageType = (message: Message): MessageType => {
+const toMessageType = (message: Message): ChatMessage => {
   return {
     user: {
       id: message.fid.toString(),
       name: '',
+      avatarUrl: '',
     },
     id: message.id,
     text: message.body,
@@ -50,10 +54,10 @@ const getMessages = async (
   return { messages, lastDoc: docs[messages.length - 1] || null };
 };
 
-/*
-const useRealtimeMessages = (roomId: string) => {
+const useListenToMessages = ({ roomId }: { roomId: string }) => {
   const queryClient = useQueryClient();
   const { data: signedInUser } = useSignedInUser();
+  const [newMessages, setNewMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -61,39 +65,18 @@ const useRealtimeMessages = (roomId: string) => {
         collection(db, 'rooms', roomId, 'messages').withConverter(
           messageConverter
         ),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(10)
       );
 
       const unsubscribe = onSnapshot(messagesRef, async snapshot => {
-        const addedMessages: MessageType[] = [];
         for (const change of snapshot.docChanges()) {
           const docData = change.doc.data();
           if (change.type === 'added') {
             const message = toMessageType(docData);
-
-            if (!addedMessages.some(m => m.id === message.id)) {
-              addedMessages.push(message);
-            }
+            setNewMessages(prev => [message, ...prev]);
           }
         }
-
-        const messagesInCache = (queryClient.getQueryData([
-          'messages',
-          { roomId },
-        ]) || []) as MessageType[];
-
-        // Combine the new messages with the messages already in the cache.
-        const messages = [
-          ...addedMessages.filter(
-            // Some messages are duplicated in the cache, so we need to check if
-            // the message is already in the cache before adding it.
-            m => !messagesInCache.some(mInCache => mInCache.id === m.id)
-          ),
-          ...messagesInCache,
-        ];
-
-        queryClient.setQueryData(['messages', { roomId }], messages);
-        queryClient.invalidateQueries({ queryKey: ['messages', { roomId }] });
       });
 
       return () => {
@@ -101,15 +84,19 @@ const useRealtimeMessages = (roomId: string) => {
       };
     }
   }, [roomId, signedInUser, queryClient]);
+
+  return { newMessages };
 };
-*/
 
 const useMessages = (roomId: string) => {
   // Start listening for new messages after the first fetch
+  const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
-  // useRealtimeMessages(roomId);
+  const { newMessages } = useListenToMessages({
+    roomId,
+  });
 
-  return useInfiniteQuery({
+  const result = useInfiniteQuery({
     queryKey: ['messages', { roomId }],
     queryFn: async ({
       pageParam,
@@ -123,6 +110,28 @@ const useMessages = (roomId: string) => {
     getNextPageParam: ({ lastDoc }, _) => lastDoc,
     // staleTime: Infinity,
   });
+
+  // Merge new messages with the existing messages
+  useEffect(() => {
+    const fetchedMessages = result.data?.pages.flatMap(p => p.messages) || [];
+
+    const _allMessages = newMessages
+      ? [...fetchedMessages, ...newMessages]
+      : fetchedMessages;
+
+    setAllMessages(
+      _allMessages
+        .filter(
+          (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
+        )
+        .sort(
+          (a, b) =>
+            (a.createdAt as Date).getTime() - (b.createdAt as Date).getTime()
+        )
+    );
+  }, [result.data, newMessages]);
+
+  return { ...result, messages: allMessages };
 };
 
 export default useMessages;

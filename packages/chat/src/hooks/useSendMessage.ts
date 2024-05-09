@@ -20,7 +20,7 @@ const sendMessage = async ({
     messageConverter
   );
 
-  const data: Message = {
+  const data: Omit<Message, 'id'> = {
     roomId,
     body: message,
     fid: sender,
