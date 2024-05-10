@@ -15,7 +15,7 @@ const MobileHeader2 = (props: MobileHeader2Props) => {
     <div className="md:hidden px-4 flex flex-row justify-between items-center h-[60px] w-[100vw] bg-background border-b-2">
       <div
         onClick={() => {
-          router.push('/rooms');
+          router.back();
         }}
       >
         {showBackButton ? <ChevronLeft /> : <></>}

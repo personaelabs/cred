@@ -1,3 +1,4 @@
+import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -27,4 +28,12 @@ export const postJSON = async <T>({
   });
 
   return result;
+};
+
+export const log = async (message: string) => {
+  if (process.env.NODE_ENV !== 'production') {
+    await axios.post('api/log', {
+      message,
+    });
+  }
 };

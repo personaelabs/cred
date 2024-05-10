@@ -2,22 +2,25 @@
 import useMessages from '@/hooks/useMessages';
 import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
 import Avatar from '@/components/Avatar';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import * as logger from '@/lib/logger';
+import Link from 'next/link';
+import useRoom from '@/hooks/useRoom';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
-  const searchParams = useSearchParams();
 
   const { data: signedInUser } = useSignedInUser();
   const { mutate: sendMessage } = useSendMessage(params.roomId);
   const { setOptions } = useHeaderOptions();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const { data: room } = useRoom(params.roomId);
 
   const { messages, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useMessages({
@@ -25,19 +28,23 @@ const Room = () => {
     });
 
   useEffect(() => {
-    setOptions({
-      title: searchParams.get('name') || '',
-      headerRight: (
-        <Avatar
-          size={30}
-          imageUrl={searchParams.get('imageUrl')}
-          alt="profile image"
-          name={searchParams.get('name') || ''}
-        ></Avatar>
-      ),
-      showBackButton: true,
-    });
-  }, [searchParams, setOptions]);
+    if (room) {
+      setOptions({
+        title: room.name,
+        headerRight: (
+          <Link href={`/rooms/${params.roomId}/roomInfo`}>
+            <Avatar
+              size={30}
+              imageUrl={room.imageUrl}
+              alt="profile image"
+              name={room.name}
+            ></Avatar>
+          </Link>
+        ),
+        showBackButton: true,
+      });
+    }
+  }, [params.roomId, room, setOptions]);
 
   useEffect(() => {
     if (error) {

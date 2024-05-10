@@ -12,17 +12,15 @@ const AvatarWithFallback = (props: AvatarProps) => {
   const { imageUrl, size, alt, name } = props;
 
   return (
-    <div
+    <Avatar
       style={{
         width: `${size}px`,
         height: `${size}px`,
       }}
     >
-      <Avatar>
-        <AvatarImage src={imageUrl || undefined} alt={alt} />
-        <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-      </Avatar>
-    </div>
+      <AvatarImage src={imageUrl || undefined} alt={alt} />
+      <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
+    </Avatar>
   );
 };
 

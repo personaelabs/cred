@@ -20,6 +20,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
+      gcTime: 1000 * 60 * 60 * 24,
     },
   },
 });
