@@ -7,10 +7,12 @@ import db from '@/lib/firestore';
 const sendMessage = async ({
   roomId,
   message,
+  replyTo,
   sender,
 }: {
   roomId: string;
   message: string;
+  replyTo: string | null;
   sender: number;
 }) => {
   console.log(`Sending message ${message} to ${roomId}`);
@@ -26,6 +28,7 @@ const sendMessage = async ({
     fid: sender,
     createdAt: serverTimestamp(),
     readBy: [],
+    replyTo,
   };
 
   await addDoc(messagesRef, data);
@@ -36,7 +39,13 @@ const useSendMessage = (roomId: string) => {
 
   return useMutation({
     mutationKey: ['sendMessage', { roomId }],
-    mutationFn: async (message: string) => {
+    mutationFn: async ({
+      replyTo,
+      message,
+    }: {
+      replyTo: string | null;
+      message: string;
+    }) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
       }
@@ -44,6 +53,7 @@ const useSendMessage = (roomId: string) => {
       await sendMessage({
         roomId,
         message,
+        replyTo,
         sender: signedInUser.fid!,
       });
     },

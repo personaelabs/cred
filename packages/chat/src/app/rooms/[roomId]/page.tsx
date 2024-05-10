@@ -1,9 +1,9 @@
 'use client';
-import useMessages from '@/hooks/useMessages';
+import useMessages, { toMessageType } from '@/hooks/useMessages';
 import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
 import Avatar from '@/components/Avatar';
@@ -12,19 +12,35 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { type ChatMessage as IChatMessage } from '@/types';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
 
   const { data: signedInUser } = useSignedInUser();
-  const { mutate: sendMessage } = useSendMessage(params.roomId);
+  const {
+    mutate: sendMessage,
+    isSuccess,
+    reset,
+    error: sendError,
+  } = useSendMessage(params.roomId);
   const { setOptions } = useHeaderOptions();
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const { data: room } = useRoom(params.roomId);
+  const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
+  const [fromMessage, setFromMessage] = useState<IChatMessage | null>(null);
 
   const { messages, error, hasNextPage, fetchNextPage } = useMessages({
     roomId: params.roomId,
+    initMessage: fromMessage,
   });
+
+  useEffect(() => {
+    if (sendError) {
+      console.error('Error sending message', sendError);
+    }
+  }, [sendError]);
 
   useEffect(() => {
     if (room) {
@@ -51,11 +67,22 @@ const Room = () => {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      reset();
+    }
+  }, [isSuccess, reset]);
+
   const onSendClick = useCallback(
     (_message: string) => {
-      sendMessage(_message);
+      sendMessage({
+        message: _message,
+        replyTo: replyTo ? replyTo.id : null,
+      });
+      setReplyTo(null);
     },
-    [sendMessage]
+    [replyTo, sendMessage]
   );
 
   if (!signedInUser || !messages) {
@@ -84,19 +111,39 @@ const Room = () => {
             scrollableTarget="scrollableDiv"
           >
             {messages.map((message, i) => (
-              <div key={message.id} className="w-[100%]">
+              <div
+                key={message.id}
+                className="w-[100%]"
+                ref={i === messages.length - 1 ? bottomRef : null}
+              >
                 <ChatMessage
+                  roomId={params.roomId}
                   {...message}
                   isSender={message.user.id === signedInUser.fid?.toString()}
                   renderAvatar={
                     i === 0 || message.user.id !== messages[i - 1].user.id
                   }
+                  onReplySelect={message => {
+                    setReplyTo(message);
+                  }}
+                  onViewReplyClick={_message => {
+                    console.log('view click');
+                    setFromMessage(toMessageType(_message));
+                    // const snapshot =  QueryDocumentSnapshot()
+                    // setFromMessage(message.id);
+                  }}
                 />
               </div>
             ))}
           </InfiniteScroll>
         </div>
-        <ChatMessageInput onSend={onSendClick}></ChatMessageInput>
+        <ChatMessageInput
+          replyTo={replyTo ? replyTo.text : undefined}
+          onSend={onSendClick}
+          onCancelReply={() => {
+            setReplyTo(null);
+          }}
+        ></ChatMessageInput>
       </div>
     </div>
   );

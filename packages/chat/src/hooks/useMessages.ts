@@ -1,5 +1,4 @@
 import {
-  QueryDocumentSnapshot,
   collection,
   getDocs,
   limit,
@@ -11,13 +10,12 @@ import {
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Message, messageConverter } from '@cred/shared';
 import db from '@/lib/firestore';
-import * as logger from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
 import { ChatMessage } from '@/types';
 import useUsers from './useUsers';
 
-const toMessageType = (message: Message): ChatMessage => {
+export const toMessageType = (message: Message): ChatMessage => {
   return {
     user: {
       id: message.fid.toString(),
@@ -27,24 +25,22 @@ const toMessageType = (message: Message): ChatMessage => {
     id: message.id,
     text: message.body,
     createdAt: (message.createdAt || new Date()) as Date,
+    replyToId: message.replyTo,
   };
 };
 
 const PAGE_SIZE = 20;
-const getMessages = async (
-  roomId: string,
-  lastDoc: QueryDocumentSnapshot | null
-) => {
-  logger.log(`Getting messages for room ${roomId} from ${lastDoc?.id}`);
+const getMessages = async (roomId: string, lastMessage: ChatMessage | null) => {
+  console.log({ lastDocId: lastMessage?.text });
   const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
     messageConverter
   );
 
-  const q = lastDoc
+  const q = lastMessage
     ? query(
         messagesRef,
         orderBy('createdAt', 'desc'),
-        startAfter(lastDoc),
+        startAfter(lastMessage.createdAt),
         limit(PAGE_SIZE)
       )
     : query(messagesRef, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
@@ -53,7 +49,7 @@ const getMessages = async (
   console.log(`Got ${docs.length} messages`);
   const messages = docs.map(doc => toMessageType(doc.data()));
 
-  return { messages, lastDoc: docs[messages.length - 1] || null };
+  return messages;
 };
 
 const useListenToMessages = ({ roomId }: { roomId: string }) => {
@@ -90,7 +86,13 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
   return { newMessages };
 };
 
-const useMessages = ({ roomId }: { roomId: string }) => {
+const useMessages = ({
+  roomId,
+  initMessage,
+}: {
+  roomId: string;
+  initMessage: ChatMessage | null;
+}) => {
   // Start listening for new messages after the first fetch
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
@@ -100,23 +102,18 @@ const useMessages = ({ roomId }: { roomId: string }) => {
 
   const result = useInfiniteQuery({
     queryKey: ['messages', { roomId }],
-    queryFn: async ({
-      pageParam,
-    }: {
-      pageParam: QueryDocumentSnapshot | null;
-    }) => {
+    queryFn: async ({ pageParam }: { pageParam: ChatMessage | null }) => {
       const messages = await getMessages(roomId, pageParam);
       return messages;
     },
-    initialPageParam: null,
-    getNextPageParam: ({ lastDoc }, _) => lastDoc,
+    initialPageParam: initMessage,
+    getNextPageParam: (lastPage, _) => lastPage[lastPage.length - 1],
     // staleTime: Infinity,
   });
 
   // Merge new messages with the existing messages
   useEffect(() => {
-    const fetchedMessages =
-      result.data?.pages.flatMap(p => p.messages).reverse() || [];
+    const fetchedMessages = result.data?.pages.flat().reverse() || [];
 
     const _allMessages = newMessages
       ? [...fetchedMessages, ...newMessages]

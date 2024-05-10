@@ -4,7 +4,7 @@ import { db } from '../lib/firebase';
 import { faker } from '@faker-js/faker';
 import { FieldValue } from 'firebase-admin/firestore';
 
-const NUM_MESSAGES = 10;
+const NUM_MESSAGES = 100;
 const MAX_FID = 500000;
 const TEST_ROOM_ID = 'test';
 
@@ -35,6 +35,41 @@ const addToRoom = async (fid: number) => {
   addedFids.add(fid);
 };
 
+const populateReplies = async () => {
+  const messagesCollection = db
+    .collection('rooms')
+    .doc(TEST_ROOM_ID)
+    .collection('messages')
+    .withConverter(messageConverter);
+
+  const messages = await messagesCollection.get();
+
+  await Promise.all(
+    messages.docs.map(async doc => {
+      if (Math.random() < 0.1) {
+        return;
+      }
+
+      const replyMessage: Message = {
+        id: '',
+        roomId: TEST_ROOM_ID,
+        body: faker.lorem.sentence(),
+        fid: Math.floor(Math.random() * MAX_FID) + 1,
+        createdAt: faker.date.between({
+          from: doc.data().createdAt as Date,
+          to: new Date(),
+        }),
+        readBy: [],
+        replyTo: doc.id,
+      };
+
+      await addToRoom(replyMessage.fid);
+      const replyRef = await messagesCollection.add(replyMessage);
+      console.log(`Added reply with ID: ${replyRef.id}`);
+    })
+  );
+};
+
 const populateMessages = async () => {
   // Delete the room if it already exists
   await db.collection('rooms').doc(TEST_ROOM_ID).delete();
@@ -43,13 +78,14 @@ const populateMessages = async () => {
 
   for (let i = 0; i < NUM_MESSAGES; i++) {
     const message: Message = {
+      id: '',
       roomId: TEST_ROOM_ID,
       body: faker.lorem.sentence(),
       fid: Math.floor(Math.random() * MAX_FID) + 1,
-      createdAt: new Date(),
+      createdAt: faker.date.past(),
       readBy: [],
+      replyTo: null,
     };
-    console.log(message);
     messages.push(message);
   }
 
@@ -70,6 +106,12 @@ const populateMessages = async () => {
   );
 };
 
-populateMessages().then(() => {
-  console.log('Messages populated successfully');
+const populate = async () => {
+  await populateMessages();
+  await populateReplies();
+};
+
+populate().then(() => {
+  console.log('Done populating messages');
+  process.exit(0);
 });

@@ -17,7 +17,7 @@ import MobileHeader2 from '@/components/MobileHeader2';
 import { usePathname } from 'next/navigation';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useEffect } from 'react';
-import { requestNotificationToken } from '@/lib/notification';
+// import { requestNotificationToken } from '@/lib/notification';
 import { NotificationsContextProvider } from '@/contexts/NotificationContext';
 import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
 
@@ -55,6 +55,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     (async () => {
+      /*
       if (signedInUser) {
         const token = await requestNotificationToken();
 
@@ -65,6 +66,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
           });
         }
       }
+      */
     })();
   }, [registerNotification, signedInUser]);
 

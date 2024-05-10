@@ -10,6 +10,7 @@ export interface ChatUser {
 
 export interface ChatMessage {
   id: string;
+  replyToId: string | null;
   text: string;
   user: ChatUser;
   createdAt: Date;

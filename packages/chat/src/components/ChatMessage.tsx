@@ -1,50 +1,95 @@
 import { type ChatMessage } from '@/types';
-import { Tooltip } from '@radix-ui/react-tooltip';
-import { TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { useState } from 'react';
 import Avatar from './Avatar';
+import { Ellipsis } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useState } from 'react';
+import useMessage from '@/hooks/useMessage';
+import { Message } from '@cred/shared';
 
 type ChatMessageProps = ChatMessage & {
   isSender: boolean;
   renderAvatar: boolean;
+  onReplySelect: (_message: ChatMessage) => void;
+  onViewReplyClick: (_message: Message) => void;
+  roomId: string;
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender } = props;
-  const [isTooltipOpen, setIsToolTipOpen] = useState(false);
+  const { isSender, roomId, replyToId, onViewReplyClick } = props;
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  const { data: replyToMessage } = useMessage({
+    roomId,
+    messageId: replyToId,
+  });
 
   return (
     <div
-      className={`flex items-end ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
+      className={`flex items-end mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
-        <Avatar
-          size={40}
-          imageUrl={props.user.avatarUrl}
-          alt="profile image"
-          name={props.user.name}
-        ></Avatar>
+        <div className="mb-5">
+          <Avatar
+            size={40}
+            imageUrl={props.user.avatarUrl}
+            alt="profile image"
+            name={props.user.name}
+          ></Avatar>
+        </div>
       ) : (
         <></>
       )}
-      <div
-        className="max-w-[70%]"
-        onClick={() => {
-          // Send reply to chat
-        }}
-      >
-        <Tooltip open={isTooltipOpen}>
-          <TooltipTrigger
-            onClick={() => {
-              setIsToolTipOpen(!isTooltipOpen);
+      <div className="max-w-[70%]">
+        <div className="flex flex-col">
+          {replyToMessage?.body ? (
+            <div className="px-3 py-1">
+              <div
+                className="opacity-70 p-2 border-l-2 border-[#FDA174]"
+                onClick={() => {
+                  onViewReplyClick(replyToMessage);
+                }}
+              >
+                <div className="w-[100%]">{replyToMessage?.body}</div>
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
+          <div className="mx-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
+            {props.text}
+          </div>
+        </div>
+        <div className="flex flex-row items-center justify-between">
+          <div className="opacity-50 px-4 mt-1 text-xs">
+            {new Date(props.createdAt).toLocaleString()}
+          </div>
+          <Tooltip
+            open={isTooltipOpen}
+            onOpenChange={open => {
+              setIsTooltipOpen(open);
             }}
           >
-            <div className="mx-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
-              {props.text}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom"></TooltipContent>
-        </Tooltip>
+            <TooltipTrigger
+              onClick={() => {
+                setIsTooltipOpen(!isTooltipOpen);
+              }}
+            >
+              {isSender ? <></> : <Ellipsis className="mr-4 opacity-60" />}
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="bg-background">
+              <div className="flex flex-col">
+                <div
+                  onClick={() => {
+                    setIsTooltipOpen(false);
+                    props.onReplySelect(props);
+                  }}
+                >
+                  Reply
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );
