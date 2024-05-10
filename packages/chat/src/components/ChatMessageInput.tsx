@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { ArrowUpCircle } from 'lucide-react';
+import theme from '@/lib/theme';
 
 interface ChatMessageInputProps {
   onSend: (_message: string) => void;
@@ -18,11 +19,13 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
         placeholder="Message"
         value={input}
         onChange={e => setInput(e.target.value)}
+        onFocusCapture={e => e.preventDefault()}
+        onFocus={e => e.preventDefault()}
       />
       <ArrowUpCircle
         size={28}
         className="cursor-pointer mr-4"
-        color="#FDA174"
+        color={theme.orange}
         onClick={() => {
           onSend(input);
           setInput('');

@@ -4,11 +4,12 @@ import { useRouter } from 'next/navigation';
 
 interface MobileHeader2Props {
   title: string;
+  showBackButton?: boolean;
   headerRight?: React.ReactNode;
 }
 
 const MobileHeader2 = (props: MobileHeader2Props) => {
-  const { headerRight, title } = props;
+  const { headerRight, title, showBackButton } = props;
   const router = useRouter();
   return (
     <div className="md:hidden px-4 flex flex-row justify-between items-center h-[60px] w-[100vw] bg-background border-b-2">
@@ -17,7 +18,7 @@ const MobileHeader2 = (props: MobileHeader2Props) => {
           router.push('/rooms');
         }}
       >
-        <ChevronLeft />
+        {showBackButton ? <ChevronLeft /> : <></>}
       </div>
       <div>{title}</div>
       <div className="font-bold text-lg">

@@ -17,6 +17,7 @@ const getRooms = async (userId: string) => {
 
 const useRooms = (userId: string | null) => {
   const queryClient = useQueryClient();
+
   useEffect(() => {
     if (userId) {
       queryClient.invalidateQueries({
@@ -32,7 +33,7 @@ const useRooms = (userId: string | null) => {
       return rooms;
     },
     enabled: !!userId,
-    // staleTime: Infinity,
+    staleTime: Infinity,
   });
 };
 

@@ -15,6 +15,7 @@ import * as logger from '@/lib/logger';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
 import { ChatMessage } from '@/types';
+import useUsers from './useUsers';
 
 const toMessageType = (message: Message): ChatMessage => {
   return {
@@ -88,7 +89,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
   return { newMessages };
 };
 
-const useMessages = (roomId: string) => {
+const useMessages = ({ roomId }: { roomId: string }) => {
   // Start listening for new messages after the first fetch
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
@@ -131,7 +132,25 @@ const useMessages = (roomId: string) => {
     );
   }, [result.data, newMessages]);
 
-  return { ...result, messages: allMessages };
+  // Get user images
+  const usersQueryResult = useUsers(allMessages.map(m => m.user.id));
+
+  // Merge user data with messages
+  const messagesWithUserData = allMessages.map(msg => {
+    const user = usersQueryResult.find(
+      u => u.data?.fid.toString() === msg.user.id
+    );
+    return {
+      ...msg,
+      user: {
+        ...msg.user,
+        name: user?.data?.displayName || '',
+        avatarUrl: user?.data?.pfpUrl || '',
+      },
+    };
+  });
+
+  return { ...result, messages: messagesWithUserData };
 };
 
 export default useMessages;
