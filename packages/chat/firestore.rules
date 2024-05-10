@@ -2,8 +2,32 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    function isInRoom(roomId) {
+      return request.auth.uid != null && int(request.auth.uid) in get(/databases/$(database)/documents/rooms/$(roomId)).data.fids;
+    }
+
+    function isRoomAdmin(roomId) {
+      return request.auth.uid != null && int(request.auth.uid) in get(/databases/$(database)/documents/rooms/$(roomId)).data.adminFids;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow write: if isRoomAdmin(roomId);
+    }
+
+    match /rooms/{roomId}/messages/{messageId} {
+      allow read: if isInRoom(roomId);
+      allow write: if int(request.auth.uid) == request.resource.data.fid && request.resource.data.roomId == roomId;
+    }
+
+    match /users/{fid} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /groups/{groupId} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }
