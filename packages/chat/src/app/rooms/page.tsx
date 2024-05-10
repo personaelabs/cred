@@ -1,4 +1,5 @@
 'use client';
+import AvatarWithFallback from '@/components/Avatar';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useRooms from '@/hooks/useRooms';
@@ -18,11 +19,12 @@ const RoomItem = (props: RoomItemProps) => {
   return (
     <Link href={`/rooms/${id}`} className="w-[100%] no-underline">
       <div className="flex flex-row gap-4 items-center px-5">
-        <img
-          src={imageUrl || ''}
+        <AvatarWithFallback
+          imageUrl={imageUrl}
+          size={60}
           alt="profile image"
-          className="w-[60px] h-[60px] rounded-full object-cover"
-        ></img>
+          name={name}
+        ></AvatarWithFallback>
         <div className="text-lg">{name}</div>
       </div>
     </Link>

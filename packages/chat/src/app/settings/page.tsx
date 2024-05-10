@@ -1,4 +1,5 @@
 'use client';
+import AvatarWithFallback from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 import useSignOut from '@/hooks/useSignOut';
 /* eslint-disable @next/next/no-img-element */
@@ -22,16 +23,17 @@ const Settings = () => {
   };
 
   if (!signedInUser || !user) {
-    return <div className='bg-background h-[100%]'></div>;
+    return <div className="bg-background h-[100%]"></div>;
   }
 
   return (
     <div className="flex flex-col items-center gap-4 pt-8 bg-background h-[100%]">
-      <img
-        src={user.pfpUrl}
+      <AvatarWithFallback
+        imageUrl={user.pfpUrl}
+        size={60}
         alt="profile image"
-        className="w-[60px] h-[60px] rounded-full object-cover"
-      ></img>
+        name={user.displayName}
+      ></AvatarWithFallback>
       <div className="text-2xl font-bold">{user.displayName}</div>
       <Button variant="link" onClick={onSignOutClick}>
         Sign out
