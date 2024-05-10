@@ -18,7 +18,7 @@ const MobileHeader2 = (props: MobileHeader2Props) => {
           router.back();
         }}
       >
-        {showBackButton ? <ChevronLeft /> : <></>}
+        {showBackButton && window.history.length > 1 ? <ChevronLeft /> : <></>}
       </div>
       <div>{title}</div>
       <div className="font-bold text-lg">

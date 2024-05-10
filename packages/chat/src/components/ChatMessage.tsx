@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useState } from 'react';
 import useMessage from '@/hooks/useMessage';
 import { Message } from '@cred/shared';
+import Link from 'next/link';
 
 type ChatMessageProps = ChatMessage & {
   isSender: boolean;
@@ -15,7 +16,7 @@ type ChatMessageProps = ChatMessage & {
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, roomId, replyToId, onViewReplyClick } = props;
+  const { isSender, roomId, replyToId, onViewReplyClick, user } = props;
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const { data: replyToMessage } = useMessage({
@@ -29,12 +30,14 @@ const ChatMessage = (props: ChatMessageProps) => {
     >
       {!isSender ? (
         <div className="mb-5">
-          <Avatar
-            size={40}
-            imageUrl={props.user.avatarUrl}
-            alt="profile image"
-            name={props.user.name}
-          ></Avatar>
+          <Link className="no-underline" href={`/users/${user.id}`}>
+            <Avatar
+              size={40}
+              imageUrl={user.avatarUrl}
+              alt="profile image"
+              name={user.name}
+            ></Avatar>
+          </Link>
         </div>
       ) : (
         <></>
