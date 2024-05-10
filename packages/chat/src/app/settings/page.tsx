@@ -1,11 +1,13 @@
 'use client';
 import AvatarWithFallback from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
+import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useSignOut from '@/hooks/useSignOut';
 /* eslint-disable @next/next/no-img-element */
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -21,6 +23,15 @@ const Settings = () => {
     await mutateAsync();
     router.push('/signin');
   };
+
+  const { setOptions } = useHeaderOptions();
+
+  useEffect(() => {
+    setOptions({
+      title: 'Settings',
+      showBackButton: false,
+    });
+  }, [setOptions]);
 
   if (!signedInUser || !user) {
     return <div className="bg-background h-[100%]"></div>;
