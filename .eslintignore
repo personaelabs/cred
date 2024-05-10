@@ -2,3 +2,5 @@
 
 packages/circuit/circuit-web/**
 packages/circuit/circuit-node/**
+
+firebase-messaging-sw.js

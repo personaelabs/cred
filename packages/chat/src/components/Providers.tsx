@@ -15,6 +15,11 @@ import {
 } from '@/contexts/HeaderContext';
 import MobileHeader2 from '@/components/MobileHeader2';
 import { usePathname } from 'next/navigation';
+import useSignedInUser from '@/hooks/useSignedInUser';
+import { useEffect } from 'react';
+import { requestNotificationToken } from '@/lib/notification';
+import { NotificationsContextProvider } from '@/contexts/NotificationContext';
+import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,7 +48,25 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { options } = useHeaderOptions();
   const pathname = usePathname();
 
+  const { mutate: registerNotification } = useRegisterNotificationToken();
+
   const hideFooter = ['/signin'].includes(pathname);
+  const { data: signedInUser } = useSignedInUser();
+
+  useEffect(() => {
+    (async () => {
+      if (signedInUser) {
+        const token = await requestNotificationToken();
+
+        if (token) {
+          registerNotification({
+            fid: signedInUser.fid!,
+            token,
+          });
+        }
+      }
+    })();
+  }, [registerNotification, signedInUser]);
 
   return (
     <div className="h-[100%]">
@@ -61,17 +84,19 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthKitProvider config={config}>
-            <DesktopHeader></DesktopHeader>
-            <HeaderContextProvider>
-              <Main>{children}</Main>
-            </HeaderContextProvider>
-          </AuthKitProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-      <Toaster richColors expand></Toaster>
+      <NotificationsContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <AuthKitProvider config={config}>
+              <DesktopHeader></DesktopHeader>
+              <HeaderContextProvider>
+                <Main>{children}</Main>
+              </HeaderContextProvider>
+            </AuthKitProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+        <Toaster richColors expand></Toaster>
+      </NotificationsContextProvider>
     </ThemeProvider>
   );
 }
