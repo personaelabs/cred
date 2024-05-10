@@ -1,5 +1,6 @@
 import { getMessaging, getToken } from 'firebase/messaging';
 import app from './firebase';
+import * as Sentry from '@sentry/nextjs';
 
 export const requestNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
@@ -24,6 +25,7 @@ export const requestNotificationToken = async (): Promise<string | null> => {
 
     return token;
   } catch (err) {
+    Sentry.captureException(err);
     alert('Error requesting permission');
     return null;
   }

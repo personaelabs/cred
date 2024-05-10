@@ -48,3 +48,5 @@ public/worker-*.js*
 .sentryclirc
 
 firebase-service-account.json
+# Sentry Config File
+.sentryclirc
