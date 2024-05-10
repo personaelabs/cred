@@ -16,10 +16,7 @@ const RoomItem = (props: RoomItemProps) => {
   const { id, name, imageUrl } = props;
 
   return (
-    <Link
-      href={`/rooms/${id}?name=${name}&imageUrl=${imageUrl}`}
-      className="w-[100%] no-underline"
-    >
+    <Link href={`/rooms/${id}`} className="w-[100%] no-underline">
       <div className="flex flex-row gap-4 items-center px-5">
         <img
           src={imageUrl || ''}

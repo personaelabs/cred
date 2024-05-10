@@ -30,6 +30,7 @@ const toMessageType = (message: Message): ChatMessage => {
   };
 };
 
+const PAGE_SIZE = 20;
 const getMessages = async (
   roomId: string,
   lastDoc: QueryDocumentSnapshot | null
@@ -44,9 +45,9 @@ const getMessages = async (
         messagesRef,
         orderBy('createdAt', 'desc'),
         startAfter(lastDoc),
-        limit(10)
+        limit(PAGE_SIZE)
       )
-    : query(messagesRef, orderBy('createdAt', 'desc'), limit(10));
+    : query(messagesRef, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
 
   const docs = (await getDocs(q)).docs;
   console.log(`Got ${docs.length} messages`);
@@ -75,7 +76,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
           const docData = change.doc.data();
           if (change.type === 'added') {
             const message = toMessageType(docData);
-            setNewMessages(prev => [message, ...prev]);
+            setNewMessages(prev => [...prev, message]);
           }
         }
       });
@@ -114,21 +115,17 @@ const useMessages = ({ roomId }: { roomId: string }) => {
 
   // Merge new messages with the existing messages
   useEffect(() => {
-    const fetchedMessages = result.data?.pages.flatMap(p => p.messages) || [];
+    const fetchedMessages =
+      result.data?.pages.flatMap(p => p.messages).reverse() || [];
 
     const _allMessages = newMessages
       ? [...fetchedMessages, ...newMessages]
       : fetchedMessages;
 
     setAllMessages(
-      _allMessages
-        .filter(
-          (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
-        )
-        .sort(
-          (a, b) =>
-            (a.createdAt as Date).getTime() - (b.createdAt as Date).getTime()
-        )
+      _allMessages.filter(
+        (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
+      )
     );
   }, [result.data, newMessages]);
 
