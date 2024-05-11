@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withPWA = require('next-pwa')({
-  dest: 'public',
-});
 
 const nextConfig = {
   images: {
@@ -27,15 +24,13 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA(nextConfig);
-
 // Injected content via Sentry wizard below
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { withSentryConfig } = require('@sentry/nextjs');
 
 module.exports = withSentryConfig(
-  module.exports,
+  nextConfig,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options

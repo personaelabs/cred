@@ -15,7 +15,7 @@ import {
 } from '@/contexts/HeaderContext';
 import MobileHeader2 from '@/components/MobileHeader2';
 import { usePathname } from 'next/navigation';
-import useSignedInUser from '@/hooks/useSignedInUser';
+// import useSignedInUser from '@/hooks/useSignedInUser';
 import { useEffect } from 'react';
 // import { requestNotificationToken } from '@/lib/notification';
 import { NotificationsContextProvider } from '@/contexts/NotificationContext';
@@ -52,22 +52,20 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { mutate: registerNotification } = useRegisterNotificationToken();
 
   const hideFooter = ['/signin'].includes(pathname);
-  const { data: signedInUser } = useSignedInUser();
+  // const { data: signedInUser } = useSignedInUser();
 
   useEffect(() => {
     (async () => {
-      if (signedInUser) {
-        const token = await requestNotificationToken();
+      const token = await requestNotificationToken();
 
-        if (token) {
-          registerNotification({
-            fid: signedInUser.fid!,
-            token,
-          });
-        }
+      if (token) {
+        registerNotification({
+          fid: 12783,
+          token,
+        });
       }
     })();
-  }, [registerNotification, signedInUser]);
+  }, [registerNotification]);
 
   return (
     <div className="h-[100%]">
