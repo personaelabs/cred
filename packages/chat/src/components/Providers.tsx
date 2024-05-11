@@ -20,6 +20,7 @@ import { useEffect } from 'react';
 // import { requestNotificationToken } from '@/lib/notification';
 import { NotificationsContextProvider } from '@/contexts/NotificationContext';
 import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
+import { requestNotificationToken } from '@/lib/notification';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,7 +56,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     (async () => {
-      /*
       if (signedInUser) {
         const token = await requestNotificationToken();
 
@@ -66,7 +66,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
           });
         }
       }
-      */
     })();
   }, [registerNotification, signedInUser]);
 
