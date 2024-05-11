@@ -9,6 +9,7 @@ export const messageConverter = {
       fid: message.fid,
       body: message.body,
       createdAt: message.createdAt,
+      replyTo: message.replyTo || null,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -25,6 +26,7 @@ export const messageConverter = {
       body: data.body,
       createdAt,
       readBy: data.readBy,
+      replyTo: data.replyTo || null,
     };
 
     return message;

@@ -54,6 +54,7 @@ export interface Message {
   body: string;
   createdAt: FirestoreTimestamp | FieldValue | Date | null;
   readBy: number[];
+  replyTo: string | null;
 }
 
 export interface Room {
