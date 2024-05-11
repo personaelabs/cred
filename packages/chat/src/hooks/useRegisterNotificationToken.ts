@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import db from '@/lib/firestore';
 import { log } from '@/lib/logger';
+import { setNotificationConfigured } from '@/lib/notification';
 
 const registerNotificationToken = async (fid: number, token: string) => {
   const notificationTokenDoc = doc(
@@ -52,6 +53,9 @@ const useRegisterNotificationToken = () => {
     mutationKey: ['register-notification-token'],
     mutationFn: async ({ fid, token }: { fid: number; token: string }) => {
       await registerNotificationToken(fid, token);
+    },
+    onSuccess: () => {
+      setNotificationConfigured();
     },
   });
 };

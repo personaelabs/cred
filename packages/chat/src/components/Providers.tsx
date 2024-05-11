@@ -14,13 +14,10 @@ import {
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
 import MobileHeader2 from '@/components/MobileHeader2';
-import { usePathname } from 'next/navigation';
-// import useSignedInUser from '@/hooks/useSignedInUser';
-import { useEffect } from 'react';
-// import { requestNotificationToken } from '@/lib/notification';
+import { usePathname, useRouter } from 'next/navigation';
 import { NotificationsContextProvider } from '@/contexts/NotificationContext';
-import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
-import { requestNotificationToken } from '@/lib/notification';
+import { useEffect } from 'react';
+import { isNotificationConfigured } from '@/lib/notification';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,24 +45,15 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { height } = useWindowDimensions();
   const { options } = useHeaderOptions();
   const pathname = usePathname();
-
-  const { mutate: registerNotification } = useRegisterNotificationToken();
+  const router = useRouter();
 
   const hideFooter = ['/signin'].includes(pathname);
-  // const { data: signedInUser } = useSignedInUser();
 
   useEffect(() => {
-    (async () => {
-      const token = await requestNotificationToken();
-
-      if (token) {
-        registerNotification({
-          fid: 12783,
-          token,
-        });
-      }
-    })();
-  }, [registerNotification]);
+    if (!isNotificationConfigured()) {
+      router.push('/enable-notifications');
+    }
+  }, [router]);
 
   return (
     <div className="h-[100%]">
