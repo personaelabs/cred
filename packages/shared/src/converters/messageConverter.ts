@@ -6,7 +6,7 @@ export const messageConverter = {
   toFirestore: (message: Message) => {
     return {
       roomId: message.roomId,
-      fid: message.fid,
+      userId: message.userId,
       body: message.body,
       createdAt: message.createdAt,
       replyTo: message.replyTo || null,
@@ -22,7 +22,7 @@ export const messageConverter = {
     const message: Message = {
       id: doc.id,
       roomId: data.roomId,
-      fid: data.fid,
+      userId: data.userId,
       body: data.body,
       createdAt,
       readBy: data.readBy,

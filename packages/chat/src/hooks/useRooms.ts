@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 const getRooms = async (userId: string) => {
   const q = query(
     collection(db, 'rooms').withConverter(roomConverter),
-    where('fids', 'array-contains', parseInt(userId))
+    where('userIds', 'array-contains', parseInt(userId))
   );
 
   const docs = await getDocs(q);

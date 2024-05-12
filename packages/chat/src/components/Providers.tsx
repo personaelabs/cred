@@ -1,6 +1,7 @@
 'use client';
-// import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-// import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import '@rainbow-me/rainbowkit/styles.css';
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -14,13 +15,15 @@ import {
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
 import MobileHeader2 from '@/components/MobileHeader2';
-import { usePathname } from 'next/navigation';
-import useSignedInUser from '@/hooks/useSignedInUser';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-// import { requestNotificationToken } from '@/lib/notification';
-import { NotificationsContextProvider } from '@/contexts/NotificationContext';
-import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
-import { requestNotificationToken } from '@/lib/notification';
+import { isNotificationConfigured } from '@/lib/notification';
+import useSignedInUser from '@/hooks/useSignedInUser';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { WagmiProvider } from 'wagmi';
+import useIsPwa from '@/hooks/useIsPwa';
+import wagmiConfig from '@/lib/wagmiConfig';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,12 +33,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-/*
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-});
-*/
 
 const config = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -48,26 +45,29 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { height } = useWindowDimensions();
   const { options } = useHeaderOptions();
   const pathname = usePathname();
-
-  const { mutate: registerNotification } = useRegisterNotificationToken();
-
-  const hideFooter = ['/signin'].includes(pathname);
+  const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
+  const isPwa = useIsPwa();
+  const hideFooter = ['/signin'].includes(pathname);
 
   useEffect(() => {
-    (async () => {
-      if (signedInUser) {
-        const token = await requestNotificationToken();
+    if (signedInUser && isPwa && !isNotificationConfigured()) {
+      router.replace('/enable-notifications');
+    } else if (signedInUser && !isPwa) {
+      router.replace('/');
+    }
+  }, [isPwa, router, signedInUser]);
 
-        if (token) {
-          registerNotification({
-            fid: signedInUser.fid!,
-            token,
-          });
-        }
-      }
-    })();
-  }, [registerNotification, signedInUser]);
+  useEffect(() => {
+    const localStoragePersister = createSyncStoragePersister({
+      storage: window.localStorage,
+    });
+
+    persistQueryClient({
+      queryClient,
+      persister: localStoragePersister,
+    });
+  }, []);
 
   return (
     <div className="h-[100%]">
@@ -85,19 +85,21 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <NotificationsContextProvider>
+      <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <AuthKitProvider config={config}>
-              <DesktopHeader></DesktopHeader>
-              <HeaderContextProvider>
-                <Main>{children}</Main>
-              </HeaderContextProvider>
-            </AuthKitProvider>
-          </TooltipProvider>
+          <RainbowKitProvider>
+            <TooltipProvider>
+              <AuthKitProvider config={config}>
+                <DesktopHeader></DesktopHeader>
+                <HeaderContextProvider>
+                  <Main>{children}</Main>
+                </HeaderContextProvider>
+              </AuthKitProvider>
+            </TooltipProvider>
+          </RainbowKitProvider>
         </QueryClientProvider>
-        <Toaster richColors expand></Toaster>
-      </NotificationsContextProvider>
+      </WagmiProvider>
+      <Toaster richColors expand></Toaster>
     </ThemeProvider>
   );
 }

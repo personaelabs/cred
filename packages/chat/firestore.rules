@@ -12,7 +12,7 @@ service cloud.firestore {
 
     match /rooms/{roomId} {
       allow read: if true;
-      allow write: if isRoomAdmin(roomId);
+      allow write: if false;
     }
 
     match /rooms/{roomId}/messages/{messageId} {

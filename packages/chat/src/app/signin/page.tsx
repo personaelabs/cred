@@ -49,7 +49,7 @@ const SignIn = () => {
           onSuccess={async statusApiResponse => {
             setIsSigningIn(true);
             await signIn(statusApiResponse);
-            router.push('/');
+            router.replace('/');
             setIsSigningIn(false);
           }}
         />

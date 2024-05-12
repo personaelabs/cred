@@ -1,6 +1,8 @@
 import { StatusAPIResponse } from '@farcaster/auth-client';
 
-export type SignedInUser = StatusAPIResponse;
+export type SignedInUser = {
+  id: string;
+} & StatusAPIResponse;
 
 export interface ChatUser {
   id: string;

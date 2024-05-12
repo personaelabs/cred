@@ -2,20 +2,17 @@ import { getMessaging, getToken } from 'firebase/messaging';
 import app from './firebase';
 import * as Sentry from '@sentry/nextjs';
 
+export const isNotificationConfigured = () => {
+  return localStorage.getItem('notificationConfigured') === 'true';
+};
+
+export const setNotificationConfigured = () => {
+  localStorage.setItem('notificationConfigured', 'true');
+};
+
 export const requestNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
   console.log('Requesting permission...');
-
-  /*
-  const permission = await Notification.requestPermission();
-
-  console.log('Permission:', permission);
-  if (permission !== 'granted') {
-    alert('Permission not granted');
-    console.error('Permission not granted');
-    return null;
-  }
-  */
 
   try {
     const token = await getToken(messaging, {
@@ -24,9 +21,9 @@ export const requestNotificationToken = async (): Promise<string | null> => {
     });
 
     return token;
-  } catch (err) {
+  } catch (err: any) {
     Sentry.captureException(err);
-    alert('Error requesting permission');
+    alert(`Error: ${err.message}`);
     return null;
   }
 };

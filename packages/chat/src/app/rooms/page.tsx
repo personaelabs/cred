@@ -33,7 +33,7 @@ const RoomItem = (props: RoomItemProps) => {
 
 const Rooms = () => {
   const { data: signedInUser } = useSignedInUser();
-  const { data: rooms } = useRooms(signedInUser?.fid!.toString() || null);
+  const { data: rooms } = useRooms(signedInUser?.id!.toString() || null);
   const { setOptions } = useHeaderOptions();
 
   useEffect(() => {

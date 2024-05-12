@@ -33,7 +33,7 @@ const RoomInfo = () => {
       });
     }
 
-    if (room && signedInUser && room.adminFids.includes(signedInUser.fid!)) {
+    if (room && signedInUser && room.adminUserIds.includes(signedInUser.id!)) {
       setOptions({
         title: room.name,
         showBackButton: true,

@@ -1,6 +1,8 @@
-importScripts('https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js');
 importScripts(
-  'https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js'
+  'https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js'
+);
+importScripts(
+  'https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging-compat.js'
 );
 
 firebase.initializeApp({
@@ -15,6 +17,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+/*
 firebase.messaging().setBackgroundMessageHandler(payload => {
   console.log(
     '[firebase-messaging-sw.js] Received background message ',
@@ -22,8 +25,9 @@ firebase.messaging().setBackgroundMessageHandler(payload => {
   );
 });
 console.log('firebase-messaging-sw.js loaded!');
+*/
 
-onBackgroundMessage(messaging, payload => {
+messaging.onBackgroundMessage(messaging, payload => {
   alert('onBackgroundMessage');
   console.log(
     '[firebase-messaging-sw.js] Received background message ',

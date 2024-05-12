@@ -9,14 +9,14 @@ const createGroupRoom = async (
   db: Firestore,
   name: string,
   imageUri: string | null,
-  creatorFid: number,
-  invitedFids: number[]
+  creatorId: string,
+  invitedUserIds: string[]
 ) => {
   const roomData: Omit<Room, 'id'> = {
     name,
-    fids: [creatorFid],
-    adminFids: [creatorFid],
-    invitedFids: invitedFids.filter(fid => fid !== creatorFid),
+    userIds: [creatorId],
+    adminUserIds: [creatorId],
+    invitedUserIds: invitedUserIds.filter(userId => userId !== creatorId),
     imageUrl: null,
   };
   console.log(`Creating group room ${JSON.stringify(roomData)}`);
@@ -45,18 +45,24 @@ const useCreateGroupRoom = () => {
   return useMutation({
     mutationFn: async ({
       name,
-      fids,
+      userIds,
       imageUri,
     }: {
       name: string;
-      fids: number[];
+      userIds: string[];
       imageUri: string | null;
     }) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
       }
 
-      return await createGroupRoom(db, name, imageUri, signedInUser.fid!, fids);
+      return await createGroupRoom(
+        db,
+        name,
+        imageUri,
+        signedInUser.id!,
+        userIds
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });

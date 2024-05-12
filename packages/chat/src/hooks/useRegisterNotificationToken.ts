@@ -10,11 +10,12 @@ import {
 } from 'firebase/firestore';
 import db from '@/lib/firestore';
 import { log } from '@/lib/logger';
+import { setNotificationConfigured } from '@/lib/notification';
 
-const registerNotificationToken = async (fid: number, token: string) => {
+const registerNotificationToken = async (userId: string, token: string) => {
   const notificationTokenDoc = doc(
     collection(db, 'notificationTokens'),
-    fid.toString()
+    userId.toString()
   );
   const userTokens = await getDoc(notificationTokenDoc);
 
@@ -29,7 +30,7 @@ const registerNotificationToken = async (fid: number, token: string) => {
     }
   } else {
     await setDoc(notificationTokenDoc, {
-      fid,
+      userId,
       tokens: [],
     });
   }
@@ -37,21 +38,28 @@ const registerNotificationToken = async (fid: number, token: string) => {
   log('Registring notification token');
   console.log('Registring notification token');
   await updateDoc(notificationTokenDoc, {
-    fid,
+    userId,
     tokens: arrayUnion({
       token,
       createdAt: new Date(),
     }),
   });
-
-  alert('Notification token registered');
 };
 
 const useRegisterNotificationToken = () => {
   return useMutation({
     mutationKey: ['register-notification-token'],
-    mutationFn: async ({ fid, token }: { fid: number; token: string }) => {
-      await registerNotificationToken(fid, token);
+    mutationFn: async ({
+      userId,
+      token,
+    }: {
+      userId: string;
+      token: string;
+    }) => {
+      await registerNotificationToken(userId, token);
+    },
+    onSuccess: () => {
+      setNotificationConfigured();
     },
   });
 };

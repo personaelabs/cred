@@ -8,19 +8,18 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
-  const { mutateAsync } = useSignOut();
+  const { mutateAsync: signOut } = useSignOut();
   const router = useRouter();
 
-  const usersResult = useUsers(
-    signedInUser?.fid ? [signedInUser.fid.toString()] : []
-  );
+  const usersResult = useUsers(signedInUser?.id ? [signedInUser.id] : []);
   const user = usersResult.length > 0 ? usersResult[0].data : null;
 
   const onSignOutClick = async () => {
-    await mutateAsync();
+    await signOut();
     router.push('/signin');
   };
 
@@ -32,6 +31,8 @@ const Settings = () => {
       showBackButton: false,
     });
   }, [setOptions]);
+
+  const { openConnectModal } = useConnectModal();
 
   if (!signedInUser || !user) {
     return <div className="bg-background h-[100%]"></div>;
@@ -46,6 +47,18 @@ const Settings = () => {
         name={user.displayName}
       ></AvatarWithFallback>
       <div className="text-2xl font-bold">{user.displayName}</div>
+      <div>
+        <Button
+          variant="link"
+          onClick={() => {
+            if (openConnectModal) {
+              openConnectModal();
+            }
+          }}
+        >
+          Add
+        </Button>
+      </div>
       <Button variant="link" onClick={onSignOutClick}>
         Sign out
       </Button>
