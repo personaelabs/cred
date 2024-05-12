@@ -44,8 +44,6 @@ const registerNotificationToken = async (userId: string, token: string) => {
       createdAt: new Date(),
     }),
   });
-
-  alert('Notification token registered');
 };
 
 const useRegisterNotificationToken = () => {
