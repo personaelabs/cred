@@ -1,6 +1,6 @@
 'use client';
-// import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-// import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -18,6 +18,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import useIsPwa from '@/hooks/useIsPwa';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,12 +29,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-/*
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-});
-*/
 
 const config = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -47,14 +43,27 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
-
+  const isPwa = useIsPwa();
   const hideFooter = ['/signin'].includes(pathname);
 
   useEffect(() => {
-    if (signedInUser && !isNotificationConfigured()) {
-      router.push('/enable-notifications');
+    if (signedInUser && isPwa && !isNotificationConfigured()) {
+      router.replace('/enable-notifications');
+    } else if (signedInUser && !isPwa) {
+      router.replace('/');
     }
-  }, [router, signedInUser]);
+  }, [isPwa, router, signedInUser]);
+
+  useEffect(() => {
+    const localStoragePersister = createSyncStoragePersister({
+      storage: window.localStorage,
+    });
+
+    persistQueryClient({
+      queryClient,
+      persister: localStoragePersister,
+    });
+  }, []);
 
   return (
     <div className="h-[100%]">
@@ -73,6 +82,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <TooltipProvider>
           <AuthKitProvider config={config}>
             <DesktopHeader></DesktopHeader>
