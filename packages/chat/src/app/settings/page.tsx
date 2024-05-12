@@ -8,6 +8,7 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -31,6 +32,8 @@ const Settings = () => {
     });
   }, [setOptions]);
 
+  const { openConnectModal } = useConnectModal();
+
   if (!signedInUser || !user) {
     return <div className="bg-background h-[100%]"></div>;
   }
@@ -44,6 +47,18 @@ const Settings = () => {
         name={user.displayName}
       ></AvatarWithFallback>
       <div className="text-2xl font-bold">{user.displayName}</div>
+      <div>
+        <Button
+          variant="link"
+          onClick={() => {
+            if (openConnectModal) {
+              openConnectModal();
+            }
+          }}
+        >
+          Add
+        </Button>
+      </div>
       <Button variant="link" onClick={onSignOutClick}>
         Sign out
       </Button>

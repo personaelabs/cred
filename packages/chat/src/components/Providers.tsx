@@ -1,4 +1,5 @@
 'use client';
+import '@rainbow-me/rainbowkit/styles.css';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -18,8 +19,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { WagmiProvider } from 'wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
+import wagmiConfig from '@/lib/wagmiConfig';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,17 +85,20 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools initialIsOpen={false} />
-        <TooltipProvider>
-          <AuthKitProvider config={config}>
-            <DesktopHeader></DesktopHeader>
-            <HeaderContextProvider>
-              <Main>{children}</Main>
-            </HeaderContextProvider>
-          </AuthKitProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            <TooltipProvider>
+              <AuthKitProvider config={config}>
+                <DesktopHeader></DesktopHeader>
+                <HeaderContextProvider>
+                  <Main>{children}</Main>
+                </HeaderContextProvider>
+              </AuthKitProvider>
+            </TooltipProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
       <Toaster richColors expand></Toaster>
     </ThemeProvider>
   );
