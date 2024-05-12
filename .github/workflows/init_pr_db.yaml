@@ -2,6 +2,7 @@ name: Initialize PR Database
 on: 
   pull_request:
     types: [opened]
+  workflow_dispatch:
 
 jobs:
   setup-db:
