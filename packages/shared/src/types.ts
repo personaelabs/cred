@@ -1,38 +1,18 @@
 import { FieldValue } from 'firebase/firestore';
 
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  pfpUrl: string;
+}
+
 export interface UserNotificationTokens {
-  fid: number;
+  userId: string;
   tokens: {
     token: string;
     createdAt: Date | FirestoreTimestamp;
   }[];
-}
-
-export interface NeynarUserResponse {
-  fid: number;
-  username: string;
-  display_name: string;
-  pfp_url: string;
-}
-
-export interface LoginResponse {
-  token: string;
-}
-
-export interface SuggestedUsersJsonResponse {
-  creddd: string[];
-  groupIds: string[];
-  fid: number;
-  score: number;
-}
-[];
-
-export interface User {
-  fid: number;
-  username: string;
-  displayName: string;
-  pfpUrl: string;
-  updatedAt: Date | FirestoreTimestamp;
 }
 
 export interface Group {
@@ -50,7 +30,7 @@ export interface FirestoreTimestamp {
 export interface Message {
   id: string;
   roomId: string;
-  fid: number;
+  userId: string;
   body: string;
   createdAt: FirestoreTimestamp | FieldValue | Date | null;
   readBy: number[];
@@ -60,8 +40,8 @@ export interface Message {
 export interface Room {
   id: string;
   name: string;
-  fids: number[];
-  invitedFids: number[];
+  userIds: string[];
+  invitedUserIds: string[];
   imageUrl: string | null;
-  adminFids: number[];
+  adminUserIds: string[];
 }

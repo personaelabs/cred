@@ -119,7 +119,7 @@ const Room = () => {
                 <ChatMessage
                   roomId={params.roomId}
                   {...message}
-                  isSender={message.user.id === signedInUser.fid?.toString()}
+                  isSender={message.user.id === signedInUser.id.toString()}
                   renderAvatar={
                     i === 0 || message.user.id !== messages[i - 1].user.id
                   }

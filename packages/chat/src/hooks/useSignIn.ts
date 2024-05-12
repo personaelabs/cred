@@ -5,11 +5,14 @@ import { useCallback } from 'react';
 import { authSignedInUser } from '@/lib/auth';
 
 const signIn = async (statusApiResponse: StatusAPIResponse) => {
-  const signedInUser: SignedInUser = statusApiResponse;
-
   if (!statusApiResponse.fid) {
     throw new Error('No fid found in status api response');
   }
+
+  const signedInUser: SignedInUser = {
+    id: statusApiResponse.fid!.toString(),
+    ...statusApiResponse,
+  };
 
   console.log(`Signing in as ${signedInUser.fid}`);
 

@@ -1,7 +1,6 @@
 import axios from './axios';
-import { SignedInUser } from '@/types';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
-import { log } from './logger';
+import { SignedInUser } from '@/types';
 
 /**
  * Authenticate the signed in user to Firestore
@@ -16,13 +15,13 @@ export const authSignedInUser = async (signedInUser: SignedInUser) => {
   await signInWithCustomToken(getAuth(), data.token);
 };
 
-export const isAuthenticated = async (fid: number) => {
+export const isAuthenticated = async (userId: string) => {
   await getAuth().authStateReady();
   const user = getAuth().currentUser;
-  log(`usr ${user?.uid}`);
+
   if (!user) {
     return false;
   }
 
-  return user.uid === fid.toString();
+  return user.uid === userId;
 };

@@ -8,12 +8,12 @@ const sendMessage = async ({
   roomId,
   message,
   replyTo,
-  sender,
+  senderId,
 }: {
   roomId: string;
   message: string;
   replyTo: string | null;
-  sender: number;
+  senderId: string;
 }) => {
   console.log(`Sending message ${message} to ${roomId}`);
   // Create the room if it doens't exit
@@ -25,7 +25,7 @@ const sendMessage = async ({
   const data: Omit<Message, 'id'> = {
     roomId,
     body: message,
-    fid: sender,
+    userId: senderId,
     createdAt: serverTimestamp(),
     readBy: [],
     replyTo,
@@ -54,7 +54,7 @@ const useSendMessage = (roomId: string) => {
         roomId,
         message,
         replyTo,
-        sender: signedInUser.fid!,
+        senderId: signedInUser.id,
       });
     },
   });

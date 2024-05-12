@@ -11,16 +11,14 @@ import { useEffect } from 'react';
 
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
-  const { mutateAsync } = useSignOut();
+  const { mutateAsync: signOut } = useSignOut();
   const router = useRouter();
 
-  const usersResult = useUsers(
-    signedInUser?.fid ? [signedInUser.fid.toString()] : []
-  );
+  const usersResult = useUsers(signedInUser?.id ? [signedInUser.id] : []);
   const user = usersResult.length > 0 ? usersResult[0].data : null;
 
   const onSignOutClick = async () => {
-    await mutateAsync();
+    await signOut();
     router.push('/signin');
   };
 

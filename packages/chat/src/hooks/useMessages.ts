@@ -18,7 +18,7 @@ import useUsers from './useUsers';
 export const toMessageType = (message: Message): ChatMessage => {
   return {
     user: {
-      id: message.fid.toString(),
+      id: message.userId.toString(),
       name: '',
       avatarUrl: '',
     },
@@ -132,7 +132,7 @@ const useMessages = ({
   // Merge user data with messages
   const messagesWithUserData = allMessages.map(msg => {
     const user = usersQueryResult.find(
-      u => u.data?.fid.toString() === msg.user.id
+      u => u.data?.id.toString() === msg.user.id
     );
     return {
       ...msg,

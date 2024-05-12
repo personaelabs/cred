@@ -5,7 +5,7 @@ import { FirestoreTimestamp, UserNotificationTokens } from '../types';
 export const notificationTokensConvert = {
   toFirestore: (token: UserNotificationTokens) => {
     return {
-      fid: token.fid,
+      userId: token.userId,
       tokens: token.tokens,
     };
   },
@@ -34,7 +34,7 @@ export const notificationTokensConvert = {
     );
 
     const userTokens: UserNotificationTokens = {
-      fid: data.fid,
+      userId: data.userId,
       tokens,
     };
 
