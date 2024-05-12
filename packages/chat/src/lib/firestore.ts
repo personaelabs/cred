@@ -1,19 +1,18 @@
 import app from './firebase';
 import { CACHE_SIZE_UNLIMITED, initializeFirestore } from 'firebase/firestore';
 
-/*
-const { NEXT_PUBLIC_DATABASE_ID } = process.env;
-console.log('NEXT_PUBLIC_DATABASE_ID:', NEXT_PUBLIC_DATABASE_ID);
+const VERCEL_GIT_COMMIT_REF = process.env.VERCEL_GIT_COMMIT_REF;
 
-if (!NEXT_PUBLIC_DATABASE_ID) {
-  throw new Error('NEXT_PUBLIC_DATABASE_ID is not defined');
-}
+const NEXT_PUBLIC_DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID;
 
-const DATABASE_ID =
-  NEXT_PUBLIC_DATABASE_ID === 'default' ? undefined : NEXT_PUBLIC_DATABASE_ID;
-  */
+const DATABASE_ID = VERCEL_GIT_COMMIT_REF
+  ? VERCEL_GIT_COMMIT_REF.replaceAll('/', '-')
+  : NEXT_PUBLIC_DATABASE_ID
+    ? NEXT_PUBLIC_DATABASE_ID
+    : undefined;
 
-const DATABASE_ID = undefined;
+console.log('VERCEL_GIT_COMMIT_REF', VERCEL_GIT_COMMIT_REF);
+console.log('DATABASE_ID', DATABASE_ID);
 
 const db = initializeFirestore(
   app,
