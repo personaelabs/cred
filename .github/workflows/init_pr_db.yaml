@@ -18,10 +18,10 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Create service account key
-        working-directory: ./packages/app
+        working-directory: ./packages/chat
         run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' > ./service-account.json
       - name: Deploy Database
-        working-directory: ./packages/app
+        working-directory: ./packages/chat
         run: firebase firestore:databases:create $(echo ${{ github.head_ref }} | sed 's/\//-/g') --location nam5
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./service-account.json
