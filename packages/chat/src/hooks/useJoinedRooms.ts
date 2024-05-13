@@ -4,10 +4,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { query, collection, where, getDocs } from 'firebase/firestore';
 import { useEffect } from 'react';
 
-const getRooms = async (userId: string) => {
+const getJoinedRooms = async (userId: string) => {
   const q = query(
     collection(db, 'rooms').withConverter(roomConverter),
-    where('userIds', 'array-contains', parseInt(userId))
+    where('joinedUserIds', 'array-contains', userId)
   );
 
   const docs = await getDocs(q);
@@ -15,21 +15,21 @@ const getRooms = async (userId: string) => {
   return rooms;
 };
 
-const useRooms = (userId: string | null) => {
+const useJoinedRooms = (userId: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (userId) {
       queryClient.invalidateQueries({
-        queryKey: ['rooms'],
+        queryKey: ['joined-rooms'],
       });
     }
   }, [userId, queryClient]);
 
   return useQuery({
-    queryKey: ['rooms'],
+    queryKey: ['joined-rooms', { userId }],
     queryFn: async () => {
-      const rooms = await getRooms(userId!);
+      const rooms = await getJoinedRooms(userId!);
       return rooms;
     },
     enabled: !!userId,
@@ -37,4 +37,4 @@ const useRooms = (userId: string | null) => {
   });
 };
 
-export default useRooms;
+export default useJoinedRooms;

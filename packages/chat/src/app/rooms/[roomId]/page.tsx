@@ -127,7 +127,6 @@ const Room = () => {
                     setReplyTo(message);
                   }}
                   onViewReplyClick={_message => {
-                    console.log('view click');
                     setFromMessage(toMessageType(_message));
                     // const snapshot =  QueryDocumentSnapshot()
                     // setFromMessage(message.id);

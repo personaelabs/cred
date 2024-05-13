@@ -6,27 +6,38 @@ import { sleep } from './lib/utils';
 const upsertRoom = async ({
   groupId,
   name,
-  userIds,
+  writerIds,
 }: {
   groupId: string;
   name: string;
-  userIds: string[];
+  writerIds: string[];
 }) => {
-  const roomData: Room = {
+  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds'> = {
     id: groupId,
     name,
-    adminUserIds: [],
-    userIds: [],
-    invitedUserIds: userIds,
+    writerIds,
     imageUrl: null,
   };
 
-  console.log('upsertRoom', groupId, name, userIds.length);
-  await db
+  const groupDoc = await db
     .collection('rooms')
     .withConverter(roomConverter)
-    .doc(groupId)
-    .set(roomData);
+    .doc(groupId);
+
+  const group = await groupDoc.get();
+
+  if (group.exists) {
+    console.log('upsertRoom', groupId, name);
+    await groupDoc.update(roomData);
+  } else {
+    const newRoomData: Room = {
+      ...roomData,
+      joinedUserIds: [],
+      readerIds: [],
+    };
+    console.log('createRoom', groupId, name);
+    await groupDoc.set(newRoomData);
+  }
 };
 
 const syncRooms = async () => {
@@ -42,7 +53,7 @@ const syncRooms = async () => {
         return upsertRoom({
           groupId: group.id,
           name: group.displayName,
-          userIds: group.userIds,
+          writerIds: group.fids.map(fid => fid.toString()),
         });
       })
     );

@@ -19,7 +19,7 @@ const db = initializeFirestore(
   {
     cacheSizeBytes: CACHE_SIZE_UNLIMITED,
   },
-  DATABASE_ID
+  DATABASE_ID === 'default' ? undefined : DATABASE_ID
 );
 
 export default db;

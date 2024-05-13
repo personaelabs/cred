@@ -2,7 +2,7 @@
 import AvatarWithFallback from '@/components/Avatar';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
-import useRooms from '@/hooks/useRooms';
+import useJoinedRooms from '@/hooks/useJoinedRooms';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -33,7 +33,7 @@ const RoomItem = (props: RoomItemProps) => {
 
 const Rooms = () => {
   const { data: signedInUser } = useSignedInUser();
-  const { data: rooms } = useRooms(signedInUser?.id!.toString() || null);
+  const { data: rooms } = useJoinedRooms(signedInUser?.id!.toString() || null);
   const { setOptions } = useHeaderOptions();
 
   useEffect(() => {

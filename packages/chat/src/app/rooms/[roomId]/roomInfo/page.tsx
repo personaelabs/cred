@@ -1,6 +1,5 @@
 'use client';
 import AvatarWithFallback from '@/components/Avatar';
-import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useRoom from '@/hooks/useRoom';
 import useSignedInUser from '@/hooks/useSignedInUser';
@@ -20,33 +19,6 @@ const RoomInfo = () => {
       setOptions({
         title: room.name,
         showBackButton: true,
-        headerRight: (
-          <Button
-            variant="link"
-            onClick={() => {
-              router.push(`/rooms/${params.roomId}/editRoomInfo`);
-            }}
-          >
-            Edit
-          </Button>
-        ),
-      });
-    }
-
-    if (room && signedInUser && room.adminUserIds.includes(signedInUser.id!)) {
-      setOptions({
-        title: room.name,
-        showBackButton: true,
-        headerRight: (
-          <Button
-            variant="link"
-            onClick={() => {
-              router.push(`/rooms/${params.roomId}/editRoomInfo`);
-            }}
-          >
-            Edit
-          </Button>
-        ),
       });
     }
   }, [room, setOptions, router, params.roomId, signedInUser]);
