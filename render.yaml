@@ -94,6 +94,29 @@ services:
       - key: DATABASE_ID
         value: default
         previewValue: "null"
+  - type: worker
+    name: credchat-notifier
+    plan: standard
+    previewPlan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i
+    startCommand: pnpm -F notification start
+    rootDir: ./
+    buildFilter:
+      paths:
+        - packages/notification/**
+        - packages/shared/**
+      ignoredPaths:
+        - packages/chat/**
+        - packages/app/**
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - fromGroup: credchat
+      - key: DATABASE_ID
+        value: default
+        previewValue: "null"
 
 
 databases:

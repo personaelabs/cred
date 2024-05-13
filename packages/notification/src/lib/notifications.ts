@@ -6,16 +6,16 @@ import {
   notificationTokensConvert,
   roomConverter,
 } from '@cred/shared';
+
 import { getMessaging } from 'firebase-admin/messaging';
 import firebaseAdmin from './firebase';
 
-const IS_PROD = process.env.VERCEL_ENV === 'production';
-
+const IS_PROD = process.env.RENDER === 'true';
 console.log('IS_PROD', IS_PROD);
 
 const messaging = getMessaging(firebaseAdmin);
 
-const notificationTokens = new Map<number, UserNotificationTokens['tokens']>();
+const notificationTokens = new Map<string, UserNotificationTokens['tokens']>();
 
 const startNotificationTokensSync = () => {
   const unsubscribe = db
@@ -25,8 +25,8 @@ const startNotificationTokensSync = () => {
       snapshot.docs.forEach(async doc => {
         const data = doc.data();
 
-        console.log(`Found notification token for ${data.fid}`);
-        notificationTokens.set(data.fid, data.tokens);
+        console.log(`Found notification token for ${data.userId}`);
+        notificationTokens.set(data.userId, data.tokens);
       });
     });
 
@@ -73,7 +73,7 @@ const sendNotifications = () => {
         if (roomId === 'test' || !roomId) {
           return;
         }
-        console.log(`New message from ${message.fid}`);
+        console.log(`New message from ${message.userId}`);
 
         const room = await getRoom(roomId);
 
@@ -82,13 +82,15 @@ const sendNotifications = () => {
           return;
         }
 
-        const fidsToNotify = room.fids.filter(fid => message.fid !== fid);
+        const userIdsToNotify = room.joinedUserIds.filter(
+          fid => message.userId !== fid
+        );
 
-        for (const fid of fidsToNotify) {
-          const tokens = notificationTokens.get(fid);
+        for (const userId of userIdsToNotify) {
+          const tokens = notificationTokens.get(userId);
 
           if (tokens) {
-            console.log(`Found ${tokens.length} tokens for ${fid}`);
+            console.log(`Found ${tokens.length} tokens for ${userId}`);
             for (const token of tokens) {
               const idempotencyKey = `${token.token}:${doc.id}`;
 
@@ -101,13 +103,13 @@ const sendNotifications = () => {
 
               if (message.createdAt < token.createdAt) {
                 console.log(
-                  `Notification token for ${fid} newer than message ${message.createdAt} < ${token.createdAt}`
+                  `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
                 );
                 continue;
               }
 
               if (!(await idempotencyKeyExsits(idempotencyKey))) {
-                console.log(`Sending notification to ${fid}`);
+                console.log(`Sending notification to ${userId}`);
 
                 if (IS_PROD) {
                   const messageId = await messaging.send({
@@ -116,7 +118,7 @@ const sendNotifications = () => {
                       body: message.body,
                     },
                     data: {
-                      fid: message.fid.toString(),
+                      fid: message.userId.toString(),
                       path: `/rooms/${roomId}`,
                     },
                     token: token.token,
@@ -143,4 +145,4 @@ const startNotificationJobs = async () => {
   await Promise.all([sendNotifications(), startNotificationTokensSync()]);
 };
 
-startNotificationJobs();
+export default startNotificationJobs;

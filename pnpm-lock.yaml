@@ -384,6 +384,25 @@ importers:
         specifier: ^5
         version: 5.2.2
 
+  packages/notifications:
+    dependencies:
+      '@cred/shared':
+        specifier: workspace:*
+        version: link:../shared
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
+      firebase-admin:
+        specifier: ^12.1.0
+        version: 12.1.0(encoding@0.1.13)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.11.19
+      tsx:
+        specifier: ^4.7.1
+        version: 4.9.3
+
   packages/shared:
     dependencies:
       firebase:
