@@ -6,9 +6,11 @@ const app = initializeApp({
 });
 
 const RENDER_GIT_BRANCH = process.env.RENDER_GIT_BRANCH;
-const DATABASE_ID = RENDER_GIT_BRANCH
-  ? RENDER_GIT_BRANCH.replaceAll('/', '-')
-  : 'default';
+
+const DATABASE_ID =
+  RENDER_GIT_BRANCH && RENDER_GIT_BRANCH !== 'main'
+    ? RENDER_GIT_BRANCH.replaceAll('/', '-')
+    : 'default';
 
 console.log('DATABASE_ID', DATABASE_ID);
 
