@@ -2,7 +2,6 @@
   "name": "@cred-chat/sync",
   "scripts": {
     "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
-    "sendTestMessage": "tsx src/scripts/sendTestMessage.ts",
     "populateMessages": "tsx src/scripts/populateMessages.ts"
   },
   "dependencies": {
