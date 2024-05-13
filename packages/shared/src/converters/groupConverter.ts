@@ -7,7 +7,7 @@ export const groupConverter = {
     return {
       displayName: group.displayName,
       id: group.id,
-      fids: group.fids,
+      userIds: group.userIds,
       updatedAt: group.updatedAt,
     };
   },
@@ -21,7 +21,7 @@ export const groupConverter = {
     const group: Group = {
       displayName: data.displayName,
       id: data.id,
-      fids: data.fids,
+      userIds: data.userIds,
       updatedAt,
     };
 

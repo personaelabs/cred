@@ -11,8 +11,12 @@ export const credddDb = new Client({
   connectionString: CREDDD_DB_URL,
 });
 
-export const getGroups = async () => {
-  const groupsWithFids = await credddDb.query<Omit<Group, 'updatedAt'>>(`
+export const getGroups = async (): Promise<Omit<Group, 'updatedAt'>[]> => {
+  const groupsWithFids = await credddDb.query<{
+    fids: number[];
+    id: string;
+    displayName: string;
+  }>(`
      WITH user_creddd AS (
       SELECT
         "FidAttestation".fid,
@@ -49,5 +53,13 @@ export const getGroups = async () => {
         "displayName")
       `);
 
-  return groupsWithFids.rows;
+  return groupsWithFids.rows.map(row => {
+    const group: Omit<Group, 'updatedAt'> = {
+      id: row.id,
+      displayName: row.displayName,
+      userIds: row.fids.map(fid => fid.toString()),
+    };
+
+    return group;
+  });
 };
