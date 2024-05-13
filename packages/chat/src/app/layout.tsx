@@ -29,7 +29,14 @@ export default function RootLayout({
           sizes="16x16"
           href="/favicon-16x16.png"
         />
-        <link rel="manifest" href="/manifest.json" />
+        <link
+          rel="manifest"
+          href={
+            process.env.NODE_ENV === 'production'
+              ? '/manifest.json'
+              : '/manifest-dev.json'
+          }
+        />
       </head>
       <body className="h-[100%] overflow-hidden bg-background">
         <Providers>{children}</Providers>
