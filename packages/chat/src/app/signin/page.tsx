@@ -1,10 +1,8 @@
 'use client';
 import '@farcaster/auth-kit/styles.css';
 import { SignInButton } from '@farcaster/auth-kit';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import firebaseApp from '@/lib/firebase';
 import useSignIn from '@/hooks/useSignIn';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { Loader2 } from 'lucide-react';
@@ -23,15 +21,6 @@ const SignIn = () => {
       headerRight: null,
     });
   }, [setOptions]);
-
-  useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        router.push('/');
-      }
-    });
-  }, [router]);
 
   return (
     <div className="flex flex-col items-center justify-center h-[100%] bg-background">
