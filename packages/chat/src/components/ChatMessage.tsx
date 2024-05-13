@@ -43,7 +43,9 @@ const ChatMessage = (props: ChatMessageProps) => {
         <></>
       )}
       <div className="max-w-[70%]">
-        <div className="flex flex-col items-end">
+        <div
+          className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}
+        >
           {replyToMessage?.body ? (
             <div className="px-3 py-1">
               <div
