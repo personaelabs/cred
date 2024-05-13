@@ -5,7 +5,10 @@ const app = initializeApp({
   credential: applicationDefault(),
 });
 
-const DATABASE_ID = 'default';
+const RENDER_GIT_BRANCH = process.env.RENDER_GIT_BRANCH;
+const DATABASE_ID = RENDER_GIT_BRANCH
+  ? RENDER_GIT_BRANCH.replaceAll('/', '-')
+  : 'default';
 
 console.log('DATABASE_ID', DATABASE_ID);
 
