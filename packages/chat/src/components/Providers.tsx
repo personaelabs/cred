@@ -25,15 +25,18 @@ import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
+const NODE_ENV = process.env.NODE_ENV;
+console.log('NODE_ENV', NODE_ENV);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      throwOnError: true,
-      retry: false,
-      // gcTime: 1000 * 60 * 60 * 24,
+      throwOnError: NODE_ENV === 'development',
+      retry: NODE_ENV === 'development' ? false : 3,
+      gcTime: 1000 * 60 * 60 * 24,
     },
     mutations: {
-      throwOnError: true,
+      throwOnError: NODE_ENV === 'development',
     },
   },
 });
@@ -52,13 +55,19 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
-  const hideFooter = ['/signin'].includes(pathname);
+  const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
 
   useEffect(() => {
-    if (signedInUser && isPwa && !isNotificationConfigured()) {
-      router.replace('/enable-notifications');
-    } else if (signedInUser && !isPwa) {
-      router.replace('/');
+    if (!isPwa) {
+      router.push('/install-pwa');
+    }
+
+    if (signedInUser && isPwa) {
+      if (isNotificationConfigured()) {
+        router.replace('/');
+      } else {
+        router.replace('/enable-notifications');
+      }
     }
   }, [isPwa, router, signedInUser]);
 

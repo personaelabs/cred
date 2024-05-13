@@ -1,11 +1,17 @@
 import 'dotenv/config';
-import { Message, Room, messageConverter, roomConverter } from '@cred/shared';
+import {
+  Message,
+  Room,
+  User,
+  messageConverter,
+  roomConverter,
+} from '@cred/shared';
 import { db } from '../lib/firebase';
 import { faker } from '@faker-js/faker';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const NUM_MESSAGES = 100;
-const MAX_FID = 500000;
+const NUM_USERS = 10;
 const TEST_ROOM_ID = 'test';
 
 const createTestRoom = async () => {
@@ -20,6 +26,18 @@ const createTestRoom = async () => {
   console.log('Creating test room');
   const roomRef = db.collection('rooms').doc(TEST_ROOM_ID);
   await roomRef.withConverter(roomConverter).set(room);
+};
+
+const registerUser = async (userId: string) => {
+  const userRef = db.collection('users').doc(userId);
+  const userData: User = {
+    id: userId,
+    displayName: faker.person.fullName(),
+    username: faker.internet.userName(),
+    pfpUrl: faker.image.avatar(),
+  };
+
+  await userRef.set(userData);
 };
 
 const addedUserIds = new Set<string>();
@@ -54,7 +72,7 @@ const populateReplies = async () => {
         id: '',
         roomId: TEST_ROOM_ID,
         body: faker.lorem.sentence(),
-        userId: (Math.floor(Math.random() * MAX_FID) + 1).toString(),
+        userId: `${FAKE_USER_PREFIX}${Math.floor(Math.random() * NUM_USERS).toString()}`,
         createdAt: faker.date.between({
           from: doc.data().createdAt as Date,
           to: new Date(),
@@ -70,9 +88,37 @@ const populateReplies = async () => {
   );
 };
 
+const FAKE_USER_PREFIX = 'fake-user:';
+
+const populateUsers = async () => {
+  for (let i = 0; i < NUM_USERS; i++) {
+    await registerUser(`${FAKE_USER_PREFIX}${i}`);
+  }
+};
+
+const deleteMessages = async () => {
+  const messagesCollection = db
+    .collection('rooms')
+    .doc(TEST_ROOM_ID)
+    .collection('messages');
+
+  const messages = await messagesCollection.get();
+
+  const batch = db.batch();
+
+  await Promise.all(
+    messages.docs.map(async doc => {
+      batch.delete(doc.ref);
+    })
+  );
+
+  await batch.commit();
+};
+
 const populateMessages = async () => {
+  await deleteMessages();
   // Delete the room if it already exists
-  await db.collection('rooms').doc(TEST_ROOM_ID).delete();
+  await db.collection('rooms').doc(TEST_ROOM_ID);
 
   const messages: Message[] = [];
 
@@ -81,7 +127,7 @@ const populateMessages = async () => {
       id: '',
       roomId: TEST_ROOM_ID,
       body: faker.lorem.sentence(),
-      userId: (Math.floor(Math.random() * MAX_FID) + 1).toString(),
+      userId: `${FAKE_USER_PREFIX}${Math.floor(Math.random() * NUM_USERS).toString()}`,
       createdAt: faker.date.past(),
       readBy: [],
       replyTo: null,
@@ -107,6 +153,7 @@ const populateMessages = async () => {
 };
 
 const populate = async () => {
+  await populateUsers();
   await populateMessages();
   await populateReplies();
 };

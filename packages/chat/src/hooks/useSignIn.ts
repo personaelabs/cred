@@ -4,7 +4,9 @@ import { StatusAPIResponse } from '@farcaster/auth-kit';
 import { useCallback } from 'react';
 import { authSignedInUser } from '@/lib/auth';
 
-const signIn = async (statusApiResponse: StatusAPIResponse) => {
+const signIn = async (
+  statusApiResponse: StatusAPIResponse
+): Promise<SignedInUser> => {
   if (!statusApiResponse.fid) {
     throw new Error('No fid found in status api response');
   }
@@ -26,6 +28,8 @@ const signIn = async (statusApiResponse: StatusAPIResponse) => {
     console.error(e);
     throw e;
   }
+
+  return signedInUser;
 };
 
 const useSignIn = () => {

@@ -4,10 +4,8 @@ import useRegisterNotificationToken from '@/hooks/useRegisterNotificationToken';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import {
   isNotificationConfigured,
-  requestNotificationToken,
   setNotificationConfigured,
 } from '@/lib/notification';
-import theme from '@/lib/theme';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
@@ -20,18 +18,11 @@ const EnableNotifications = () => {
 
   const onEnableNotificationsClick = useCallback(async () => {
     if (signedInUser) {
-      const token = await requestNotificationToken();
+      await registerNotification({
+        userId: signedInUser.id,
+      });
 
-      if (token) {
-        await registerNotification({
-          userId: signedInUser.id,
-          token,
-        });
-
-        router.replace('/');
-      } else {
-        alert('Failed enable notification');
-      }
+      router.replace('/');
     }
   }, [registerNotification, router, signedInUser]);
 
@@ -53,7 +44,7 @@ const EnableNotifications = () => {
           <Loader2
             className="mr-2 animate-spin"
             size={16}
-            color={theme.orange}
+            color="#000000"
           ></Loader2>
         ) : (
           <></>
