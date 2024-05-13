@@ -21,7 +21,7 @@ const useJoinedRooms = (userId: string | null) => {
   useEffect(() => {
     if (userId) {
       queryClient.invalidateQueries({
-        queryKey: ['joined-rooms'],
+        queryKey: ['joined-rooms', { userId }],
       });
     }
   }, [userId, queryClient]);
@@ -33,7 +33,6 @@ const useJoinedRooms = (userId: string | null) => {
       return rooms;
     },
     enabled: !!userId,
-    staleTime: Infinity,
   });
 };
 

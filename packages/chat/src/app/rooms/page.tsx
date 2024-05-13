@@ -38,7 +38,7 @@ const Rooms = () => {
 
   useEffect(() => {
     setOptions({
-      title: 'Rooms',
+      title: 'Chats',
       showBackButton: false,
       headerRight: null,
     });
