@@ -2,15 +2,12 @@
   "name": "@cred-chat/sync",
   "scripts": {
     "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
-    "sendTestMessage": "tsx src/scripts/sendTestMessage.ts",
-    "notification": "tsx src/lib/notifications.ts",
     "populateMessages": "tsx src/scripts/populateMessages.ts"
   },
   "dependencies": {
     "@cred/shared": "workspace:*",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
-    "expo-server-sdk": "^3.9.0",
     "fast-csv": "^5.0.1",
     "firebase-admin": "^12.1.0",
     "pg": "^8.11.5",

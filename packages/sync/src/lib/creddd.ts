@@ -1,4 +1,3 @@
-import { Group } from '@cred/shared';
 import { Client } from 'pg';
 
 const { CREDDD_DB_URL } = process.env;
@@ -12,7 +11,11 @@ export const credddDb = new Client({
 });
 
 export const getGroups = async () => {
-  const groupsWithFids = await credddDb.query<Omit<Group, 'updatedAt'>>(`
+  const groupsWithFids = await credddDb.query<{
+    fids: number[];
+    id: string;
+    displayName: string;
+  }>(`
      WITH user_creddd AS (
       SELECT
         "FidAttestation".fid,

@@ -12,27 +12,27 @@ const createTestRoom = async () => {
   const room: Room = {
     id: TEST_ROOM_ID,
     name: 'Test Room',
-    fids: [12783],
-    imageUrl: faker.image.avatar(),
-    invitedFids: [],
-    adminFids: [12783],
+    joinedUserIds: ['12783'],
+    readerIds: [],
+    writerIds: ['12783'],
+    imageUrl: null,
   };
-
+  console.log('Creating test room');
   const roomRef = db.collection('rooms').doc(TEST_ROOM_ID);
   await roomRef.withConverter(roomConverter).set(room);
 };
 
-const addedFids = new Set<number>();
-const addToRoom = async (fid: number) => {
-  if (addedFids.has(fid)) {
+const addedUserIds = new Set<string>();
+const addToRoom = async (userId: string) => {
+  if (addedUserIds.has(userId)) {
     return;
   }
   const roomRef = db.collection('rooms').doc(TEST_ROOM_ID);
   await roomRef.update({
-    fids: FieldValue.arrayUnion(fid),
+    joinedUserIds: FieldValue.arrayUnion(userId),
   });
 
-  addedFids.add(fid);
+  addedUserIds.add(userId);
 };
 
 const populateReplies = async () => {
@@ -54,7 +54,7 @@ const populateReplies = async () => {
         id: '',
         roomId: TEST_ROOM_ID,
         body: faker.lorem.sentence(),
-        fid: Math.floor(Math.random() * MAX_FID) + 1,
+        userId: (Math.floor(Math.random() * MAX_FID) + 1).toString(),
         createdAt: faker.date.between({
           from: doc.data().createdAt as Date,
           to: new Date(),
@@ -63,7 +63,7 @@ const populateReplies = async () => {
         replyTo: doc.id,
       };
 
-      await addToRoom(replyMessage.fid);
+      await addToRoom(replyMessage.userId);
       const replyRef = await messagesCollection.add(replyMessage);
       console.log(`Added reply with ID: ${replyRef.id}`);
     })
@@ -81,7 +81,7 @@ const populateMessages = async () => {
       id: '',
       roomId: TEST_ROOM_ID,
       body: faker.lorem.sentence(),
-      fid: Math.floor(Math.random() * MAX_FID) + 1,
+      userId: (Math.floor(Math.random() * MAX_FID) + 1).toString(),
       createdAt: faker.date.past(),
       readBy: [],
       replyTo: null,
@@ -99,7 +99,7 @@ const populateMessages = async () => {
 
   await Promise.all(
     messages.map(async message => {
-      await addToRoom(message.fid);
+      await addToRoom(message.userId);
       const messageRef = await messagesCollection.add(message);
       console.log(`Added message with ID: ${messageRef.id}`);
     })

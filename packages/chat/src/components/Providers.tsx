@@ -28,8 +28,12 @@ import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      throwOnError: true,
       retry: false,
-      gcTime: 1000 * 60 * 60 * 24,
+      // gcTime: 1000 * 60 * 60 * 24,
+    },
+    mutations: {
+      throwOnError: true,
     },
   },
 });

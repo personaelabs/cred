@@ -40,8 +40,8 @@ export interface Message {
 export interface Room {
   id: string;
   name: string;
-  userIds: string[];
-  invitedUserIds: string[];
+  joinedUserIds: string[];
+  readerIds: string[];
+  writerIds: string[];
   imageUrl: string | null;
-  adminUserIds: string[];
 }

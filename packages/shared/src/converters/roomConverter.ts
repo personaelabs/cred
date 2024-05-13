@@ -5,11 +5,11 @@ import { Room } from '../types';
 export const roomConverter = {
   toFirestore: (room: Room) => {
     return {
-      userIds: room.userIds,
-      invitedUserIds: room.invitedUserIds,
+      joinedUserIds: room.joinedUserIds,
+      readerIds: room.readerIds,
+      writerIds: room.writerIds,
       name: room.name,
       imageUrl: room.imageUrl,
-      adminUserIds: room.adminUserIds,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
@@ -17,11 +17,11 @@ export const roomConverter = {
 
     const room: Room = {
       id: snapshot.id,
-      userIds: data.userIds,
-      invitedUserIds: data.invitedUserIds,
+      joinedUserIds: data.joinedUserIds,
+      readerIds: data.readerIds,
+      writerIds: data.writerIds,
       name: data.name,
       imageUrl: data.imageUrl,
-      adminUserIds: data.adminUserIds,
     };
 
     return room;
