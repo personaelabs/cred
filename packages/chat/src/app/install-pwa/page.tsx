@@ -1,9 +1,13 @@
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
+import useIsPwa from '@/hooks/useIsPwa';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const InstallPwaPage = () => {
   const { setOptions } = useHeaderOptions();
+  const isPwa = useIsPwa();
+  const router = useRouter();
 
   useEffect(() => {
     setOptions({
@@ -12,6 +16,12 @@ const InstallPwaPage = () => {
       headerRight: <></>,
     });
   }, [setOptions]);
+
+  useEffect(() => {
+    if (isPwa) {
+      router.replace('/');
+    }
+  }, [isPwa, router]);
 
   return (
     <div className="bg-background h-full flex flex-col items-center justify-center px-4">

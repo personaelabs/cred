@@ -23,7 +23,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth.uid == request.resource.data.id;
     }
   }
 }
