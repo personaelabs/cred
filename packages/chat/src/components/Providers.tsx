@@ -55,13 +55,19 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
-  const hideFooter = ['/signin'].includes(pathname);
+  const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
 
   useEffect(() => {
-    if (signedInUser && isPwa && !isNotificationConfigured()) {
-      router.replace('/enable-notifications');
-    } else if (signedInUser && !isPwa) {
-      router.replace('/');
+    if (!isPwa) {
+      router.push('/install-pwa');
+    }
+
+    if (signedInUser && isPwa) {
+      if (isNotificationConfigured()) {
+        router.replace('/');
+      } else {
+        router.replace('/enable-notifications');
+      }
     }
   }, [isPwa, router, signedInUser]);
 
