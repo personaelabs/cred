@@ -25,15 +25,18 @@ import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
+const NODE_ENV = process.env.NODE_ENV;
+console.log('NODE_ENV', NODE_ENV);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      throwOnError: true,
-      retry: false,
-      // gcTime: 1000 * 60 * 60 * 24,
+      throwOnError: NODE_ENV === 'development',
+      retry: NODE_ENV === 'development' ? false : 3,
+      gcTime: 1000 * 60 * 60 * 24,
     },
     mutations: {
-      throwOnError: true,
+      throwOnError: NODE_ENV === 'development',
     },
   },
 });
