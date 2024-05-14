@@ -24,6 +24,11 @@ import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { FooterContextProvider } from '@/contexts/FooterContext';
+import {
+  MediaQueryProvider,
+  useMediaQuery,
+} from '@/contexts/MediaQueryContext';
+import Image from 'next/image';
 
 const NODE_ENV = process.env.NODE_ENV;
 console.log('NODE_ENV', NODE_ENV);
@@ -56,6 +61,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
+  const { isMobile } = useMediaQuery();
 
   useEffect(() => {
     if (isPwa === false) {
@@ -79,6 +85,22 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       persister: localStoragePersister,
     });
   }, []);
+  console.log({ isMobile });
+  if (!isMobile) {
+    return (
+      <div className="h-[100vh] bg-background flex flex-col items-center justify-center">
+        <Image
+          src="/personae-logo.svg"
+          alt="Personae logo"
+          width={100}
+          height={100}
+        ></Image>
+        <div className="mt-4 text-2xl">
+          Please access this page on a mobile device
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full">
@@ -102,11 +124,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <RainbowKitProvider>
             <TooltipProvider>
               <AuthKitProvider config={config}>
-                <HeaderContextProvider>
-                  <FooterContextProvider>
-                    <Main>{children}</Main>
-                  </FooterContextProvider>
-                </HeaderContextProvider>
+                <MediaQueryProvider>
+                  <HeaderContextProvider>
+                    <FooterContextProvider>
+                      <Main>{children}</Main>
+                    </FooterContextProvider>
+                  </HeaderContextProvider>
+                </MediaQueryProvider>
               </AuthKitProvider>
             </TooltipProvider>
           </RainbowKitProvider>
