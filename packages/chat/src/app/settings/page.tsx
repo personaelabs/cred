@@ -1,4 +1,5 @@
 'use client';
+import { ChevronRight } from 'lucide-react';
 import AvatarWithFallback from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
@@ -8,7 +9,24 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
+import Link from 'next/link';
+
+interface SettingsMenuItemProps {
+  text: string;
+  to: string;
+}
+
+const SettingsMenuItem = (props: SettingsMenuItemProps) => {
+  const { text, to } = props;
+  return (
+    <Link href={to} className="no-underline w-[50%]">
+      <div className="w-full flex flex-row items-center justify-between border-2 border-opacity-50 py-1  border-gray-200 rounded-md">
+        <div className="ml-4 text-lg">{text}</div>
+        <ChevronRight className="w-5 h-5 opacity-50 mr-2"></ChevronRight>
+      </div>
+    </Link>
+  );
+};
 
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -32,34 +50,25 @@ const Settings = () => {
     });
   }, [setOptions]);
 
-  const { openConnectModal } = useConnectModal();
-
   if (!signedInUser || !user) {
     return <div className="bg-background h-[100%]"></div>;
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 pt-8 bg-background h-[100%]">
-      <AvatarWithFallback
-        imageUrl={user.pfpUrl}
-        size={60}
-        alt="profile image"
-        name={user.displayName}
-      ></AvatarWithFallback>
-      <div className="text-2xl font-bold">{user.displayName}</div>
-      <div>
-        <Button
-          variant="link"
-          onClick={() => {
-            if (openConnectModal) {
-              openConnectModal();
-            }
-          }}
-        >
-          Add
-        </Button>
+    <div className="flex flex-col items-center pt-8 bg-background h-full w-full">
+      <div className="flex flex-col items-center gap-4">
+        <AvatarWithFallback
+          imageUrl={user.pfpUrl}
+          size={60}
+          alt="profile image"
+          name={user.displayName}
+        ></AvatarWithFallback>
+        <div className="text-2xl font-bold">{user.displayName}</div>
       </div>
-      <Button variant="link" onClick={onSignOutClick}>
+      <div className="flex flex-col items-center mt-10 w-full">
+        <SettingsMenuItem text="My creddd" to="/user-creddd"></SettingsMenuItem>
+      </div>
+      <Button variant="link" className="mt-10" onClick={onSignOutClick}>
         Sign out
       </Button>
     </div>
