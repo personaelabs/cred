@@ -102,17 +102,15 @@ const Rooms = () => {
   }
 
   return (
-    <div className="h-[100%]">
-      <div className="flex flex-col items-start bg-background h-[100%">
-        {rooms.map(room => (
-          <RoomItem
-            id={room.id}
-            key={room.id}
-            name={room.name}
-            imageUrl={room.imageUrl}
-          ></RoomItem>
-        ))}
-      </div>
+    <div className="flex flex-col items-start bg-background h-full overflow-scroll">
+      {rooms.map(room => (
+        <RoomItem
+          id={room.id}
+          key={room.id}
+          name={room.name}
+          imageUrl={room.imageUrl}
+        ></RoomItem>
+      ))}
     </div>
   );
 };

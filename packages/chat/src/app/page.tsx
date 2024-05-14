@@ -9,6 +9,8 @@ import { useCallback, useEffect } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
 
 type PurchasableRoomItemProps = {
   id: string;
@@ -89,7 +91,7 @@ export default function Home() {
   return (
     <div className="h-[100%]">
       <div
-        className="flex flex-col bg-background py-4 overflow-auto w-[100%] h-[100%]"
+        className="flex flex-col bg-background overflow-auto w-[100%] h-[100%]"
         id="scrollableDiv"
       >
         <InfiniteScroll
@@ -101,6 +103,14 @@ export default function Home() {
           scrollThreshold={0.5}
           scrollableTarget="scrollableDiv"
         >
+          <Alert>
+            <AlertTitle className="flex flx-row justify-between items-center">
+              <div className="opacity-70">Add creddd to join more rooms</div>
+              <Link href="/add-creddd">
+                <Button variant="secondary">Add</Button>
+              </Link>
+            </AlertTitle>
+          </Alert>
           {writableRooms.map(room => (
             <WritableRoomItem
               id={room.id}

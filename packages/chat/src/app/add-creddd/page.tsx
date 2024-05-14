@@ -99,23 +99,24 @@ const AddCredddPage = () => {
           ) : (
             <></>
           )}
-          {eligibleCreddd?.map(creddd => (
-            <div
-              key={creddd.id}
-              className="flex flex-row items-center justify-center w-full border-b-2 py-3"
-            >
-              <div className="w-[50%] text-center">{creddd.displayName}</div>
-              <Button
-                className="ml-2"
-                variant="secondary"
-                onClick={() => {
-                  onAddClick(creddd);
-                }}
+          {address &&
+            eligibleCreddd?.map(creddd => (
+              <div
+                key={creddd.id}
+                className="flex flex-row items-center justify-center w-full border-b-2 py-3"
               >
-                Add
-              </Button>
-            </div>
-          ))}
+                <div className="w-[50%] text-center">{creddd.displayName}</div>
+                <Button
+                  className="ml-2"
+                  variant="secondary"
+                  onClick={() => {
+                    onAddClick(creddd);
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
+            ))}
           <div className="gap-y-2 flex flex-col items-center mt-10">
             {address ? (
               <div className="text-center bg-clip-text text-transparent bg-gradient-to-l from-purple-400 to-purple-600">
