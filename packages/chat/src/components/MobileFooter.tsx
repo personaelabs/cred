@@ -34,7 +34,7 @@ const MobileFooter = (props: MobileFooterProps) => {
           {!isHidden ? (
             <>
               <MenuItem
-                icon="UsersRound"
+                icon="UserRoundSearch"
                 onClick={() => {
                   router.push('/');
                 }}

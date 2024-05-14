@@ -6,13 +6,13 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
-import Avatar from '@/components/Avatar';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { type ChatMessage as IChatMessage } from '@/types';
+import { Users } from 'lucide-react';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -48,12 +48,7 @@ const Room = () => {
         title: room.name,
         headerRight: (
           <Link href={`/rooms/${params.roomId}/roomInfo`}>
-            <Avatar
-              size={30}
-              imageUrl={room.imageUrl}
-              alt="profile image"
-              name={room.name}
-            ></Avatar>
+            <Users className="w-5 h-5"></Users>
           </Link>
         ),
         showBackButton: true,

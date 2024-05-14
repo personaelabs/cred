@@ -46,12 +46,15 @@ const RoomInfo = () => {
         scrollableTarget="scrollableDiv2"
         className="w-full h-full flex flex-col items-center py-4"
       >
+        {/**
+           * 
         <AvatarWithFallback
           imageUrl={room.imageUrl}
           alt="Room image"
           name={room.name}
           size={80}
         ></AvatarWithFallback>
+            */}
         <div className="text-xl mt-4">{room.name}</div>
         <div className="mt-4">
           {roomUsersResult
