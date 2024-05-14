@@ -12,6 +12,7 @@ import { EligibleCreddd } from '@/types';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useAccount, useDisconnect } from 'wagmi';
 
 const ConnectButton = () => {
@@ -61,7 +62,11 @@ const AddCredddPage = () => {
   } = useEligibleCreddd();
   const { address } = useAccount();
   const { setOptions } = useHeaderOptions();
-  const { mutateAsync: addCreddd, isPending: isAddingCreddd } = useAddCreddd();
+  const {
+    mutateAsync: addCreddd,
+    isPending: isAddingCreddd,
+    isSuccess,
+  } = useAddCreddd();
 
   useEffect(() => {
     setOptions({
@@ -69,6 +74,15 @@ const AddCredddPage = () => {
       showBackButton: true,
     });
   }, [setOptions]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(`creddd added`, {
+        duration: 60000,
+        closeButton: true,
+      });
+    }
+  }, [isSuccess]);
 
   const onAddClick = useCallback(
     async (creddd: EligibleCreddd) => {
