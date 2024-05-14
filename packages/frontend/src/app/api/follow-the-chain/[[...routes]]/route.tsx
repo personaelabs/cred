@@ -66,9 +66,7 @@ app.frame('/', async c => {
         <span>follow the chain ⬇️</span>
       </div>
     ),
-    intents: [
-      <Button value="checkFeed">check how onchain your feed is</Button>,
-    ],
+    intents: [<Button value="checkFeed">check your feed</Button>],
   });
 });
 
@@ -103,7 +101,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
             whiteSpace: 'pre',
           }}
         >
-          your feed is rated
+          the accounts you follow are rated
           <span
             style={{
               color: frameInfo.color,
@@ -150,7 +148,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
               whiteSpace: 'pre',
             }}
           >
-            to level up, here are some follow suggestions
+            to stay in touch, here are some follow suggestions
           </span>
         )}
 
@@ -169,7 +167,7 @@ const checkFeedFrame = async (c: any, fid: number) => {
 const suggestedFollowsFrame = async (c: any, fid: number) => {
   const followingFids = await getFollowingFids(fid);
 
-  const suggestedFollows = await getActiveSuggestedFollows(followingFids);
+  const suggestedFollows = await getActiveSuggestedFollows(fid, followingFids);
   const suggestedUsers = await getUsers(suggestedFollows.map(({ fid }) => fid));
 
   // Monitor the suggested follows the users see
