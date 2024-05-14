@@ -9,7 +9,14 @@ interface MenuItemProps {
 
 const MenuItem = (props: MenuItemProps) => {
   const Icon = icons[props.icon];
-  return <Icon onClick={props.onClick} className="w-6 h-6"></Icon>;
+  return (
+    <div
+      className="flex justify-center w-full items-center"
+      onClick={props.onClick}
+    >
+      <Icon className="w-6 h-6"></Icon>
+    </div>
+  );
 };
 
 interface MobileFooterProps {
@@ -23,7 +30,7 @@ const MobileFooter = (props: MobileFooterProps) => {
   return (
     <div className="md:hidden h-[70px] w-full bg-background fixed bottom-0 flex flex-col">
       <div className="w-full h-full border-t bg-background">
-        <div className="w-full h-full px-10 justify-between items-center inline-flex">
+        <div className="w-full h-full px-2 justify-between items-center inline-flex">
           {!isHidden ? (
             <>
               <MenuItem
