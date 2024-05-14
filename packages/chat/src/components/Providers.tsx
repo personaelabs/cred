@@ -86,6 +86,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         title={options.title}
         showBackButton={options.showBackButton}
         headerRight={options.headerRight}
+        backTo={options.backTo}
       ></MobileHeader>
       <div style={{ height: `calc(${height}px - 130px)` }}>{children}</div>
       <MobileFooter isHidden={hideFooter}></MobileFooter>

@@ -52,6 +52,7 @@ const Room = () => {
           </Link>
         ),
         showBackButton: true,
+        backTo: '/rooms',
       });
     }
   }, [params.roomId, room, setOptions]);

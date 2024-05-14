@@ -5,6 +5,7 @@ export interface HeaderOptions {
   title: string;
   showBackButton?: boolean;
   headerRight?: React.ReactNode;
+  backTo?: string;
 }
 
 const HeaderContext = createContext<{
