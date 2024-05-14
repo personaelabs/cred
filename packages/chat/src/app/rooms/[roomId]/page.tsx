@@ -1,5 +1,5 @@
 'use client';
-import useMessages, { toMessageType } from '@/hooks/useMessages';
+import useMessages from '@/hooks/useMessages';
 import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
@@ -29,7 +29,7 @@ const Room = () => {
 
   const { data: room } = useRoom(params.roomId);
   const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
-  const [fromMessage, setFromMessage] = useState<IChatMessage | null>(null);
+  const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
 
   const { messages, error, hasNextPage, fetchNextPage } = useMessages({
     roomId: params.roomId,
@@ -124,7 +124,7 @@ const Room = () => {
                     setReplyTo(message);
                   }}
                   onViewReplyClick={_message => {
-                    setFromMessage(toMessageType(_message));
+                    // setFromMessage(toMessageType(_message));
                     // const snapshot =  QueryDocumentSnapshot()
                     // setFromMessage(message.id);
                   }}
