@@ -1,7 +1,7 @@
 'use client';
 import '@farcaster/auth-kit/styles.css';
 import { SignInButton } from '@farcaster/auth-kit';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useSignIn from '@/hooks/useSignIn';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
@@ -11,9 +11,12 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 
 const SignIn = () => {
   const router = useRouter();
-  const { signIn } = useSignIn();
+  const {
+    mutateAsync: signIn,
+    isPending: isSigningIn,
+    isSuccess: signInComplete,
+  } = useSignIn();
   const { setOptions } = useHeaderOptions();
-  const [isSigningIn, setIsSigningIn] = useState(false);
   const { data: signedInUser } = useSignedInUser();
 
   useEffect(() => {
@@ -32,7 +35,7 @@ const SignIn = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-[100%] bg-background">
-      {isSigningIn ? (
+      {isSigningIn || signInComplete ? (
         <div className="flex flex-row items-center">
           <Loader2
             className="mr-2 animate-spin"
@@ -44,10 +47,8 @@ const SignIn = () => {
       ) : (
         <SignInButton
           onSuccess={async statusApiResponse => {
-            setIsSigningIn(true);
             await signIn(statusApiResponse);
             router.replace('/');
-            setIsSigningIn(false);
           }}
         />
       )}
