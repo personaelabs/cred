@@ -7,7 +7,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthKitProvider } from '@farcaster/auth-kit';
-import DesktopHeader from '@/components/DesktopHeader';
 import MobileFooter from '@/components/MobileFooter';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {
@@ -102,7 +101,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <RainbowKitProvider>
             <TooltipProvider>
               <AuthKitProvider config={config}>
-                <DesktopHeader></DesktopHeader>
                 <HeaderContextProvider>
                   <Main>{children}</Main>
                 </HeaderContextProvider>
