@@ -34,7 +34,7 @@ const SignIn = () => {
   }, [signedInUser, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-[100%] bg-background">
+    <div className="flex flex-col items-center justify-center h-full bg-background">
       {isSigningIn || signInComplete ? (
         <div className="flex flex-row items-center">
           <Loader2

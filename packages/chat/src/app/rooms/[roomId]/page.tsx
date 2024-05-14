@@ -1,5 +1,5 @@
 'use client';
-import useMessages, { toMessageType } from '@/hooks/useMessages';
+import useMessages from '@/hooks/useMessages';
 import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
@@ -29,7 +29,7 @@ const Room = () => {
 
   const { data: room } = useRoom(params.roomId);
   const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
-  const [fromMessage, setFromMessage] = useState<IChatMessage | null>(null);
+  const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
 
   const { messages, error, hasNextPage, fetchNextPage } = useMessages({
     roomId: params.roomId,
@@ -52,6 +52,7 @@ const Room = () => {
           </Link>
         ),
         showBackButton: true,
+        backTo: '/rooms',
       });
     }
   }, [params.roomId, room, setOptions]);
@@ -81,14 +82,14 @@ const Room = () => {
   );
 
   if (!signedInUser || !messages) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (
-    <div className="h-[100%]">
-      <div className="bg-background h-[100%] flex flex-col justify-end">
+    <div className="h-full">
+      <div className="bg-background h-full flex flex-col justify-end">
         <div
-          className="flex flex-col-reverse bg-background py-4 overflow-auto w-[100%] h-[100%]"
+          className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
           <InfiniteScroll
@@ -104,11 +105,12 @@ const Room = () => {
             }}
             scrollThreshold={0.5}
             scrollableTarget="scrollableDiv"
+            className="h-full"
           >
             {messages.map((message, i) => (
               <div
                 key={message.id}
-                className="w-[100%]"
+                className="w-full"
                 ref={i === messages.length - 1 ? bottomRef : null}
               >
                 <ChatMessage
@@ -122,7 +124,7 @@ const Room = () => {
                     setReplyTo(message);
                   }}
                   onViewReplyClick={_message => {
-                    setFromMessage(toMessageType(_message));
+                    // setFromMessage(toMessageType(_message));
                     // const snapshot =  QueryDocumentSnapshot()
                     // setFromMessage(message.id);
                   }}

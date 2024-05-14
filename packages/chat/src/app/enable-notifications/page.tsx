@@ -38,7 +38,7 @@ const EnableNotifications = () => {
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2 h-[100%]">
+    <div className="flex flex-col items-center justify-center gap-2 h-full">
       <Button onClick={onEnableNotificationsClick}>
         {isRegistering ? (
           <Loader2

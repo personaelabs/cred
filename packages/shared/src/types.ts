@@ -45,3 +45,8 @@ export interface Room {
   writerIds: string[];
   imageUrl: string | null;
 }
+
+export interface IdempotencyKey {
+  key: string;
+  messageCreatedAt: Date | FirestoreTimestamp;
+}

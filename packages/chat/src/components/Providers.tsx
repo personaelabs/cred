@@ -7,14 +7,13 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthKitProvider } from '@farcaster/auth-kit';
-import DesktopHeader from '@/components/DesktopHeader';
 import MobileFooter from '@/components/MobileFooter';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {
   HeaderContextProvider,
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
-import MobileHeader2 from '@/components/MobileHeader2';
+import MobileHeader from '@/components/MobileHeader';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
@@ -24,9 +23,14 @@ import { WagmiProvider } from 'wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { FooterContextProvider } from '@/contexts/FooterContext';
+import {
+  MediaQueryProvider,
+  useMediaQuery,
+} from '@/contexts/MediaQueryContext';
+import Image from 'next/image';
 
 const NODE_ENV = process.env.NODE_ENV;
-console.log('NODE_ENV', NODE_ENV);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +52,8 @@ const config = {
   relay: 'https://relay.farcaster.xyz',
 };
 
+const HEADER_HEIGHT = 60;
+
 const Main = ({ children }: { children: React.ReactNode }) => {
   const { height } = useWindowDimensions();
   const { options } = useHeaderOptions();
@@ -55,7 +61,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
-  const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
+  const hideFooter =
+    ['/signin', '/install-pwa'].includes(pathname) ||
+    pathname.startsWith('/rooms/');
+
+  const { isMobile } = useMediaQuery();
 
   useEffect(() => {
     if (isPwa === false) {
@@ -80,15 +90,40 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
+  if (!isMobile) {
+    return (
+      <div className="h-[100vh] bg-background flex flex-col items-center justify-center">
+        <Image
+          src="/personae-logo.svg"
+          alt="Personae logo"
+          width={100}
+          height={100}
+        ></Image>
+        <div className="mt-4 text-2xl">
+          Please access this page on a mobile device
+        </div>
+      </div>
+    );
+  }
+
+  const footerHeight = hideFooter ? 0 : 70;
+
   return (
-    <div className="h-[100%]">
-      <MobileHeader2
+    <div className="h-full">
+      <MobileHeader
         title={options.title}
         showBackButton={options.showBackButton}
         headerRight={options.headerRight}
-      ></MobileHeader2>
-      <div style={{ height: `calc(${height}px - 130px)` }}>{children}</div>
-      <MobileFooter isHidden={hideFooter}></MobileFooter>
+        backTo={options.backTo}
+      ></MobileHeader>
+      <div
+        style={{
+          height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
+        }}
+      >
+        {children}
+      </div>
+      {hideFooter ? <></> : <MobileFooter></MobileFooter>}
     </div>
   );
 };
@@ -101,10 +136,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <RainbowKitProvider>
             <TooltipProvider>
               <AuthKitProvider config={config}>
-                <DesktopHeader></DesktopHeader>
-                <HeaderContextProvider>
-                  <Main>{children}</Main>
-                </HeaderContextProvider>
+                <MediaQueryProvider>
+                  <HeaderContextProvider>
+                    <FooterContextProvider>
+                      <Main>{children}</Main>
+                    </FooterContextProvider>
+                  </HeaderContextProvider>
+                </MediaQueryProvider>
               </AuthKitProvider>
             </TooltipProvider>
           </RainbowKitProvider>

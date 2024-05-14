@@ -9,6 +9,9 @@ import { useCallback, useEffect } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
+import { useScrollableRef } from '@/contexts/FooterContext';
 
 type PurchasableRoomItemProps = {
   id: string;
@@ -68,7 +71,7 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
 
 export default function Home() {
   const { data: signedInUser } = useSignedInUser();
-
+  const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
   useEffect(() => {
     setOptions({
@@ -83,14 +86,15 @@ export default function Home() {
   const { data: writableRooms } = useWritableRooms(signedInUser?.id || null);
 
   if (!signedInUser || !purchasableRooms || !writableRooms) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (
-    <div className="h-[100%]">
+    <div className="h-full">
       <div
-        className="flex flex-col bg-background py-4 overflow-auto w-[100%] h-[100%]"
+        className="flex flex-col bg-background overflow-auto w-full h-full"
         id="scrollableDiv"
+        ref={scrollableRef}
       >
         <InfiniteScroll
           loader={<></>}
@@ -101,6 +105,14 @@ export default function Home() {
           scrollThreshold={0.5}
           scrollableTarget="scrollableDiv"
         >
+          <Alert>
+            <AlertTitle className="flex flx-row justify-between items-center">
+              <div className="opacity-70">Add creddd to join more rooms</div>
+              <Link href="/add-creddd">
+                <Button variant="secondary">Add</Button>
+              </Link>
+            </AlertTitle>
+          </Alert>
           {writableRooms.map(room => (
             <WritableRoomItem
               id={room.id}
