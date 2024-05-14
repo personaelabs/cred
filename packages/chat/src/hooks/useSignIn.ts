@@ -1,7 +1,6 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SignedInUser } from '@/types';
 import { StatusAPIResponse } from '@farcaster/auth-kit';
-import { useCallback } from 'react';
 import { authSignedInUser } from '@/lib/auth';
 
 const signIn = async (
@@ -35,15 +34,14 @@ const signIn = async (
 const useSignIn = () => {
   const queryClient = useQueryClient();
 
-  const _signIn = useCallback(
-    async (statusApiResponse: StatusAPIResponse) => {
+  return useMutation({
+    mutationFn: async (statusApiResponse: StatusAPIResponse) => {
       await signIn(statusApiResponse);
+    },
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['signed-in-user'] });
     },
-    [queryClient]
-  );
-
-  return { signIn: _signIn };
+  });
 };
 
 export default useSignIn;

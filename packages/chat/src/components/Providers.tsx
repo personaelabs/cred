@@ -58,14 +58,12 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
 
   useEffect(() => {
-    if (!isPwa) {
+    if (isPwa === false) {
       router.push('/install-pwa');
     }
 
-    if (signedInUser && isPwa) {
-      if (isNotificationConfigured()) {
-        router.replace('/');
-      } else {
+    if (signedInUser && isPwa === true) {
+      if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
     }

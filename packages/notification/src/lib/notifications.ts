@@ -122,6 +122,11 @@ const sendNotifications = () => {
                       path: `/rooms/${roomId}`,
                     },
                     token: token.token,
+                    webpush: {
+                      fcmOptions: {
+                        link: `/rooms/${roomId}`,
+                      },
+                    },
                   });
 
                   console.log(`Message sent with ID: ${messageId}`);
