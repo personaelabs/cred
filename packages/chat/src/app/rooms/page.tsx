@@ -39,7 +39,7 @@ const RoomItem = (props: RoomItemProps) => {
   return (
     <Link
       href={isTooltipOpen ? '' : `/rooms/${id}`}
-      className="w-[100%] no-underline"
+      className="w-full no-underline"
     >
       <div className="flex flex-row justify-between w-full h-full border-b-2">
         <div className="flex flex-col items-start px-5 py-2 mt-1">
@@ -101,7 +101,7 @@ const Rooms = () => {
   }, [setOptions]);
 
   if (!signedInUser || !rooms) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (

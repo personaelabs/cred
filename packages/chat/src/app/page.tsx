@@ -86,13 +86,13 @@ export default function Home() {
   const { data: writableRooms } = useWritableRooms(signedInUser?.id || null);
 
   if (!signedInUser || !purchasableRooms || !writableRooms) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (
-    <div className="h-[100%]">
+    <div className="h-full">
       <div
-        className="flex flex-col bg-background overflow-auto w-[100%] h-[100%]"
+        className="flex flex-col bg-background overflow-auto w-full h-full"
         id="scrollableDiv"
         ref={scrollableRef}
       >

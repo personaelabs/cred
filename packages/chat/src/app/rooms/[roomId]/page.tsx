@@ -82,14 +82,14 @@ const Room = () => {
   );
 
   if (!signedInUser || !messages) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (
-    <div className="h-[100%]">
-      <div className="bg-background h-[100%] flex flex-col justify-end">
+    <div className="h-full">
+      <div className="bg-background h-full flex flex-col justify-end">
         <div
-          className="flex flex-col-reverse bg-background py-4 overflow-auto w-[100%] h-[100%]"
+          className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
           <InfiniteScroll
@@ -110,7 +110,7 @@ const Room = () => {
             {messages.map((message, i) => (
               <div
                 key={message.id}
-                className="w-[100%]"
+                className="w-full"
                 ref={i === messages.length - 1 ? bottomRef : null}
               >
                 <ChatMessage

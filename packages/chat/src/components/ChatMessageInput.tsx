@@ -32,7 +32,7 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
           <></>
         )}
         <TextareaAutosize
-          className="bg-background w-[100%] py-2 px-4 my-1 resize-none rounded-lg border-2 focus:outline-none"
+          className="bg-background w-full py-2 px-4 my-1 resize-none rounded-lg border-2 focus:outline-none"
           placeholder="Message"
           value={input}
           onChange={e => setInput(e.target.value)}

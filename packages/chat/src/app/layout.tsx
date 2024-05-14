@@ -38,7 +38,7 @@ export default function RootLayout({
           }
         />
       </head>
-      <body className="h-[100%] overflow-hidden bg-background">
+      <body className="h-full overflow-hidden bg-background">
         <Providers>{children}</Providers>
       </body>
     </html>

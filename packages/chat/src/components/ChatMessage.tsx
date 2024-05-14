@@ -59,7 +59,7 @@ const ChatMessage = (props: ChatMessageProps) => {
                   onViewReplyClick(replyToMessage);
                 }}
               >
-                <div className="w-[100%]">{replyToMessage?.body}</div>
+                <div className="w-full">{replyToMessage?.body}</div>
               </div>
             </div>
           ) : (

@@ -52,7 +52,7 @@ const Settings = () => {
   }, [setOptions]);
 
   if (!signedInUser || !user) {
-    return <div className="bg-background h-[100%]"></div>;
+    return <div className="bg-background h-full"></div>;
   }
 
   return (
