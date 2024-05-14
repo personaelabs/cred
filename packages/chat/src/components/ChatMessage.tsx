@@ -126,7 +126,7 @@ const ChatMessage = (props: ChatMessageProps) => {
           ) : (
             <></>
           )}
-          <div className="mx-2 mt-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
+          <div className="mx-2 mt-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left whitespace-pre-wrap">
             {props.text}
           </div>
         </div>

@@ -45,7 +45,7 @@ const RoomItem = (props: RoomItemProps) => {
         <div className="flex flex-col items-start px-5 py-2 mt-1">
           <div className="text-lg">{name}</div>
           <div className="opacity-60 mt-1">
-            {firstMessage ? firstMessage.text : ''}
+            {firstMessage ? `${firstMessage.text.slice(0, 75)}...` : ''}
           </div>
         </div>
         <div className="flex justify-center items-center mb-1">
