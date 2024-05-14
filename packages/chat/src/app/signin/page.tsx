@@ -7,12 +7,14 @@ import useSignIn from '@/hooks/useSignIn';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { Loader2 } from 'lucide-react';
 import theme from '@/lib/theme';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 const SignIn = () => {
   const router = useRouter();
   const { signIn } = useSignIn();
   const { setOptions } = useHeaderOptions();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const { data: signedInUser } = useSignedInUser();
 
   useEffect(() => {
     setOptions({
@@ -21,6 +23,12 @@ const SignIn = () => {
       headerRight: null,
     });
   }, [setOptions]);
+
+  useEffect(() => {
+    if (signedInUser) {
+      router.replace('/rooms');
+    }
+  }, [signedInUser, router]);
 
   return (
     <div className="flex flex-col items-center justify-center h-[100%] bg-background">
