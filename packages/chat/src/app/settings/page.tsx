@@ -8,7 +8,7 @@ import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Scrollable from '@/components/Scrollable';
 
@@ -37,10 +37,13 @@ const Settings = () => {
   const usersResult = useUsers(signedInUser?.id ? [signedInUser.id] : []);
   const user = usersResult.length > 0 ? usersResult[0].data : null;
 
-  const onSignOutClick = async () => {
-    await signOut();
-    router.push('/signin');
-  };
+  const onSignOutClick = useCallback(async () => {
+    const confirmed = await window.confirm('Sign out?');
+    if (confirmed) {
+      await signOut();
+      router.push('/signin');
+    }
+  }, [signOut, router]);
 
   const { setOptions } = useHeaderOptions();
 
