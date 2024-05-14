@@ -26,7 +26,7 @@ const ChatMessage = (props: ChatMessageProps) => {
 
   return (
     <div
-      className={`flex items-end mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
+      className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
         <div className="mb-5">
@@ -46,6 +46,11 @@ const ChatMessage = (props: ChatMessageProps) => {
         <div
           className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}
         >
+          {!isSender ? (
+            <div className="text-xs ml-2 text-primary">{user.name}</div>
+          ) : (
+            <></>
+          )}
           {replyToMessage?.body ? (
             <div className="px-3 py-1">
               <div
@@ -60,7 +65,7 @@ const ChatMessage = (props: ChatMessageProps) => {
           ) : (
             <></>
           )}
-          <div className="mx-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
+          <div className="mx-2 mt-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
             {props.text}
           </div>
         </div>
