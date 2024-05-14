@@ -14,7 +14,7 @@ import {
   HeaderContextProvider,
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
-import MobileHeader2 from '@/components/MobileHeader2';
+import MobileHeader from '@/components/MobileHeader';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
@@ -82,11 +82,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="h-[100%]">
-      <MobileHeader2
+      <MobileHeader
         title={options.title}
         showBackButton={options.showBackButton}
         headerRight={options.headerRight}
-      ></MobileHeader2>
+      ></MobileHeader>
       <div style={{ height: `calc(${height}px - 130px)` }}>{children}</div>
       <MobileFooter isHidden={hideFooter}></MobileFooter>
     </div>
