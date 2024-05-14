@@ -2,16 +2,18 @@ import 'dotenv/config';
 import { db } from './firebase';
 import {
   UserNotificationTokens,
+  idempotencyKeyConverter,
   messageConverter,
   notificationTokensConvert,
   roomConverter,
 } from '@cred/shared';
-
 import { getMessaging } from 'firebase-admin/messaging';
 import firebaseAdmin from './firebase';
+import logger from './logger';
+import { Timestamp } from 'firebase-admin/firestore';
 
 const IS_PROD = process.env.RENDER === 'true';
-console.log('IS_PROD', IS_PROD);
+logger.info('IS_PROD', IS_PROD);
 
 const messaging = getMessaging(firebaseAdmin);
 
@@ -54,92 +56,134 @@ const idempotencyKeyExsits = async (key: string) => {
   return keyDoc.exists;
 };
 
-const saveIdempotencyKey = async (key: string) => {
-  await db.collection('idempotencyKeys').doc(key).set({ key });
+const saveIdempotencyKey = async ({
+  key,
+  messageCreatedAt,
+}: {
+  key: string;
+  messageCreatedAt: Date;
+}) => {
+  await db
+    .collection('idempotencyKeys')
+    .withConverter(idempotencyKeyConverter)
+    .doc(key)
+    .set({ key, messageCreatedAt });
 };
 
-const sendNotifications = () => {
-  // Get the last notification message id and start from there
+const getLatestIdempotencyKey = async () => {
+  const keyDoc = await db
+    .collection('idempotencyKeys')
+    .withConverter(idempotencyKeyConverter)
+    .orderBy('messageCreatedAt', 'desc')
+    .limit(1)
+    .get();
+
+  if (keyDoc.docs.length === 0) {
+    return null;
+  }
+
+  return keyDoc.docs[0].data();
+};
+
+const sendNotifications = async () => {
+  // TODO: Get the last notification message id and start from there
+  const latestIdempotencyKey = await getLatestIdempotencyKey();
+
+  const startTimestamp = Timestamp.fromDate(
+    (latestIdempotencyKey?.messageCreatedAt as Date) || new Date(0)
+  );
+  logger.info(`Starting at ${startTimestamp.toDate()}`);
+
   const unsubscribe = db
     .collectionGroup('messages')
     .withConverter(messageConverter)
-    .orderBy('createdAt', 'desc')
-    .onSnapshot(snapshot =>
-      snapshot.docs.forEach(async doc => {
-        // Get user notification token from the db here
-        const message = doc.data();
-        const roomId = message.roomId;
+    .where('createdAt', '>=', startTimestamp)
+    .onSnapshot(async snapshot => {
+      for (const change of snapshot.docChanges()) {
+        logger.info(`Change type: ${change.type}`);
+        if (change.type === 'added') {
+          const doc = change.doc;
+          const message = change.doc.data();
+          const roomId = message.roomId;
 
-        if (roomId === 'test' || !roomId) {
-          return;
-        }
-        console.log(`New message from ${message.userId}`);
+          if (roomId === 'test') {
+            logger.info(`Skipping message ${doc.id} with roomId ${roomId}`);
+            continue;
+          }
 
-        const room = await getRoom(roomId);
+          logger.info(`New message from ${message.userId}`);
 
-        if (!room) {
-          console.error(`Room ${roomId} not found`);
-          return;
-        }
+          const room = await getRoom(roomId);
 
-        const userIdsToNotify = room.joinedUserIds.filter(
-          fid => message.userId !== fid
-        );
+          if (!room) {
+            logger.error(`Room ${roomId} not found`);
+            continue;
+          }
 
-        for (const userId of userIdsToNotify) {
-          const tokens = notificationTokens.get(userId);
+          const userIdsToNotify = room.joinedUserIds.filter(
+            fid => message.userId !== fid
+          );
 
-          if (tokens) {
-            console.log(`Found ${tokens.length} tokens for ${userId}`);
-            for (const token of tokens) {
-              const idempotencyKey = `${token.token}:${doc.id}`;
+          for (const userId of userIdsToNotify) {
+            const tokens = notificationTokens.get(userId);
 
-              console.log(message.createdAt, token.createdAt);
+            if (tokens) {
+              logger.info(`Found ${tokens.length} tokens for ${userId}`);
+              for (const token of tokens) {
+                const idempotencyKey = `${token.token}:${doc.id}`;
 
-              if (message.createdAt === null) {
-                console.error(`message.createdAt is null`);
-                continue;
-              }
-
-              if (message.createdAt < token.createdAt) {
-                console.log(
-                  `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
-                );
-                continue;
-              }
-
-              if (!(await idempotencyKeyExsits(idempotencyKey))) {
-                console.log(`Sending notification to ${userId}`);
-
-                if (IS_PROD) {
-                  const messageId = await messaging.send({
-                    notification: {
-                      title: 'New message',
-                      body: message.body,
-                    },
-                    data: {
-                      fid: message.userId.toString(),
-                      path: `/rooms/${roomId}`,
-                    },
-                    token: token.token,
-                    webpush: {
-                      fcmOptions: {
-                        link: `/rooms/${roomId}`,
-                      },
-                    },
-                  });
-
-                  console.log(`Message sent with ID: ${messageId}`);
-                  await saveIdempotencyKey(idempotencyKey);
+                if (message.createdAt === null) {
+                  logger.error(`message.createdAt is null`);
+                  continue;
                 }
-              } else {
-                console.log(`Idempotency key exists for ${idempotencyKey}`);
+
+                if (message.createdAt < token.createdAt) {
+                  logger.info(
+                    `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
+                  );
+                  continue;
+                }
+
+                if (!(await idempotencyKeyExsits(idempotencyKey))) {
+                  logger.info(`Sending notification to ${userId}`);
+
+                  if (IS_PROD) {
+                    const messageId = await messaging.send({
+                      notification: {
+                        title: 'New message',
+                        body: message.body,
+                      },
+                      data: {
+                        fid: message.userId.toString(),
+                        path: `/rooms/${roomId}`,
+                      },
+                      token: token.token,
+                      webpush: {
+                        fcmOptions: {
+                          link: `/rooms/${roomId}`,
+                        },
+                      },
+                    });
+
+                    logger.info(`Message sent with ID: ${messageId}`);
+                    await saveIdempotencyKey({
+                      key: idempotencyKey,
+                      messageCreatedAt: message.createdAt as Date,
+                    });
+                  } else {
+                    logger.info(
+                      `Skipping notification for ${userId} in dev mode`
+                    );
+                  }
+                } else {
+                  logger.info(`Idempotency key exists for ${idempotencyKey}`);
+                }
               }
             }
           }
         }
-      })
-    );
+      }
+    });
 
   process.on('exit', () => {
     unsubscribe();
