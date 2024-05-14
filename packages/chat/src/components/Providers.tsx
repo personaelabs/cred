@@ -31,7 +31,6 @@ import {
 import Image from 'next/image';
 
 const NODE_ENV = process.env.NODE_ENV;
-console.log('NODE_ENV', NODE_ENV);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +52,8 @@ const config = {
   relay: 'https://relay.farcaster.xyz',
 };
 
+const HEADER_HEIGHT = 60;
+
 const Main = ({ children }: { children: React.ReactNode }) => {
   const { height } = useWindowDimensions();
   const { options } = useHeaderOptions();
@@ -60,7 +61,10 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
-  const hideFooter = ['/signin', '/install-pwa'].includes(pathname);
+  const hideFooter =
+    ['/signin', '/install-pwa'].includes(pathname) ||
+    pathname.startsWith('/rooms/');
+
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
@@ -85,7 +89,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       persister: localStoragePersister,
     });
   }, []);
-  console.log({ isMobile });
+
   if (!isMobile) {
     return (
       <div className="h-[100vh] bg-background flex flex-col items-center justify-center">
@@ -102,6 +106,8 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  const footerHeight = hideFooter ? 0 : 70;
+
   return (
     <div className="h-full">
       <MobileHeader
@@ -110,8 +116,14 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         headerRight={options.headerRight}
         backTo={options.backTo}
       ></MobileHeader>
-      <div style={{ height: `calc(${height}px - 130px)` }}>{children}</div>
-      <MobileFooter isHidden={hideFooter}></MobileFooter>
+      <div
+        style={{
+          height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
+        }}
+      >
+        {children}
+      </div>
+      {hideFooter ? <></> : <MobileFooter></MobileFooter>}
     </div>
   );
 };

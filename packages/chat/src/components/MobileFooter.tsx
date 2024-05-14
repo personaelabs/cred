@@ -20,13 +20,10 @@ const MenuItem = (props: MenuItemProps) => {
   );
 };
 
-interface MobileFooterProps {
-  isHidden: boolean;
-}
+interface MobileFooterProps {}
 
-const MobileFooter = (props: MobileFooterProps) => {
+const MobileFooter = (_props: MobileFooterProps) => {
   const router = useRouter();
-  const { isHidden } = props;
   const pathname = usePathname();
   const { scrollableRef } = useScrollableRef();
 
@@ -41,33 +38,27 @@ const MobileFooter = (props: MobileFooterProps) => {
   };
 
   return (
-    <div className="md:hidden h-[70px] w-full bg-background fixed bottom-0 flex flex-col">
+    <div className="h-[70px] w-full bg-background fixed bottom-0 flex flex-col">
       <div className="w-full h-full border-t bg-background">
         <div className="w-full h-full px-2 justify-between items-center inline-flex">
-          {!isHidden ? (
-            <>
-              <MenuItem
-                icon="UserRoundSearch"
-                onClick={() => {
-                  onClickMenuItem('/');
-                }}
-              ></MenuItem>
-              <MenuItem
-                icon="MessageCircleMore"
-                onClick={() => {
-                  onClickMenuItem('/rooms');
-                }}
-              ></MenuItem>
-              <MenuItem
-                icon="Settings"
-                onClick={() => {
-                  onClickMenuItem('/settings');
-                }}
-              ></MenuItem>
-            </>
-          ) : (
-            <></>
-          )}
+          <MenuItem
+            icon="UserRoundSearch"
+            onClick={() => {
+              onClickMenuItem('/');
+            }}
+          ></MenuItem>
+          <MenuItem
+            icon="MessageCircleMore"
+            onClick={() => {
+              onClickMenuItem('/rooms');
+            }}
+          ></MenuItem>
+          <MenuItem
+            icon="Settings"
+            onClick={() => {
+              onClickMenuItem('/settings');
+            }}
+          ></MenuItem>
         </div>
       </div>
     </div>
