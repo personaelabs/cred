@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
 import Scrollable from '@/components/Scrollable';
+import { useScrollableRef } from '@/contexts/FooterContext';
 
 type RoomItemProps = {
   id: string;
@@ -89,6 +90,7 @@ const Rooms = () => {
   const { data: signedInUser } = useSignedInUser();
   const { data: rooms } = useJoinedRooms(signedInUser?.id!.toString() || null);
   const { setOptions } = useHeaderOptions();
+  const { scrollableRef } = useScrollableRef();
 
   useEffect(() => {
     setOptions({
@@ -104,7 +106,10 @@ const Rooms = () => {
 
   return (
     <Scrollable>
-      <div className="flex flex-col items-start bg-background h-full overflow-scroll">
+      <div
+        className="flex flex-col items-start bg-background h-full overflow-scroll"
+        ref={scrollableRef}
+      >
         {rooms.map(room => (
           <RoomItem
             id={room.id}

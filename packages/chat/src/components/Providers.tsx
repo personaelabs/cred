@@ -23,6 +23,7 @@ import { WagmiProvider } from 'wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { FooterContextProvider } from '@/contexts/FooterContext';
 
 const NODE_ENV = process.env.NODE_ENV;
 console.log('NODE_ENV', NODE_ENV);
@@ -80,7 +81,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <div className="h-[100%]">
+    <div className="h-full">
       <MobileHeader
         title={options.title}
         showBackButton={options.showBackButton}
@@ -102,7 +103,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <TooltipProvider>
               <AuthKitProvider config={config}>
                 <HeaderContextProvider>
-                  <Main>{children}</Main>
+                  <FooterContextProvider>
+                    <Main>{children}</Main>
+                  </FooterContextProvider>
                 </HeaderContextProvider>
               </AuthKitProvider>
             </TooltipProvider>

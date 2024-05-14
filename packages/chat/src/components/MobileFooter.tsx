@@ -1,6 +1,7 @@
 'use client';
+import { useScrollableRef } from '@/contexts/FooterContext';
 import { icons } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface MenuItemProps {
   icon: keyof typeof icons;
@@ -26,6 +27,18 @@ interface MobileFooterProps {
 const MobileFooter = (props: MobileFooterProps) => {
   const router = useRouter();
   const { isHidden } = props;
+  const pathname = usePathname();
+  const { scrollableRef } = useScrollableRef();
+
+  const onClickMenuItem = (path: string) => {
+    if (path === pathname) {
+      if (scrollableRef?.current) {
+        scrollableRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      router.replace(path);
+    }
+  };
 
   return (
     <div className="md:hidden h-[70px] w-full bg-background fixed bottom-0 flex flex-col">
@@ -36,19 +49,19 @@ const MobileFooter = (props: MobileFooterProps) => {
               <MenuItem
                 icon="UserRoundSearch"
                 onClick={() => {
-                  router.push('/');
+                  onClickMenuItem('/');
                 }}
               ></MenuItem>
               <MenuItem
                 icon="MessageCircleMore"
                 onClick={() => {
-                  router.push('/rooms');
+                  onClickMenuItem('/rooms');
                 }}
               ></MenuItem>
               <MenuItem
                 icon="Settings"
                 onClick={() => {
-                  router.push(`/settings`);
+                  onClickMenuItem('/settings');
                 }}
               ></MenuItem>
             </>

@@ -11,6 +11,7 @@ import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
+import { useScrollableRef } from '@/contexts/FooterContext';
 
 type PurchasableRoomItemProps = {
   id: string;
@@ -70,7 +71,7 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
 
 export default function Home() {
   const { data: signedInUser } = useSignedInUser();
-
+  const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
   useEffect(() => {
     setOptions({
@@ -93,6 +94,7 @@ export default function Home() {
       <div
         className="flex flex-col bg-background overflow-auto w-[100%] h-[100%]"
         id="scrollableDiv"
+        ref={scrollableRef}
       >
         <InfiniteScroll
           loader={<></>}
