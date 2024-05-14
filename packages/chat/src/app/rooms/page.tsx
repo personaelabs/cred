@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
+import Scrollable from '@/components/Scrollable';
 
 type RoomItemProps = {
   id: string;
@@ -102,16 +103,18 @@ const Rooms = () => {
   }
 
   return (
-    <div className="flex flex-col items-start bg-background h-full overflow-scroll">
-      {rooms.map(room => (
-        <RoomItem
-          id={room.id}
-          key={room.id}
-          name={room.name}
-          imageUrl={room.imageUrl}
-        ></RoomItem>
-      ))}
-    </div>
+    <Scrollable>
+      <div className="flex flex-col items-start bg-background h-full overflow-scroll">
+        {rooms.map(room => (
+          <RoomItem
+            id={room.id}
+            key={room.id}
+            name={room.name}
+            imageUrl={room.imageUrl}
+          ></RoomItem>
+        ))}
+      </div>
+    </Scrollable>
   );
 };
 

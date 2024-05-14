@@ -1,6 +1,7 @@
 'use client';
 
 import AddingCredddModal from '@/components/AddingCredddModal';
+import Scrollable from '@/components/Scrollable';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useEligibleCreddd from '@/hooks/useEligibleCreddd';
@@ -79,60 +80,64 @@ const AddCredddPage = () => {
 
   return (
     <>
-      <div className="h-full flex flex-col items-center overflow-auto">
-        <div className="flex flex-col mt-3 w-full">
-          {isSearchingCreddd ? (
-            <div className="flex flex-row items-center justify-center mt-3">
-              <Loader2
-                className="mr-2 w-4 h-4 animate-spin"
-                color={theme.orange}
-              ></Loader2>
-              <div>Searching eligible creddd...</div>
-            </div>
-          ) : (
-            <></>
-          )}
-          {!isSearchingCreddd && eligibleCreddd?.length === 0 ? (
-            <div className="flex flex-row items-center justify-center mt-3 opacity-60">
-              <div>No eligible creddd found</div>
-            </div>
-          ) : (
-            <></>
-          )}
-          {address &&
-            eligibleCreddd?.map(creddd => (
-              <div
-                key={creddd.id}
-                className="flex flex-row items-center justify-center w-full border-b-2 py-3"
-              >
-                <div className="w-[50%] text-center">{creddd.displayName}</div>
-                <Button
-                  className="ml-2"
-                  variant="secondary"
-                  onClick={() => {
-                    onAddClick(creddd);
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
-            ))}
-          <div className="gap-y-2 flex flex-col items-center mt-10">
-            {address ? (
-              <div className="text-center bg-clip-text text-transparent bg-gradient-to-l from-purple-400 to-purple-600">
-                Connected: {trimAddress(address)}
+      <Scrollable>
+        <div className="h-full flex flex-col items-center overflow-auto">
+          <div className="flex flex-col mt-3 w-full">
+            {isSearchingCreddd ? (
+              <div className="flex flex-row items-center justify-center mt-3">
+                <Loader2
+                  className="mr-2 w-4 h-4 animate-spin"
+                  color={theme.orange}
+                ></Loader2>
+                <div>Searching eligible creddd...</div>
               </div>
             ) : (
               <></>
             )}
-            {address ? (
-              <SwitchAddressButton></SwitchAddressButton>
+            {!isSearchingCreddd && eligibleCreddd?.length === 0 ? (
+              <div className="flex flex-row items-center justify-center mt-3 opacity-60">
+                <div>No eligible creddd found</div>
+              </div>
             ) : (
-              <ConnectButton></ConnectButton>
+              <></>
             )}
+            {address &&
+              eligibleCreddd?.map(creddd => (
+                <div
+                  key={creddd.id}
+                  className="flex flex-row items-center justify-center w-full border-b-2 py-3"
+                >
+                  <div className="w-[50%] text-center">
+                    {creddd.displayName}
+                  </div>
+                  <Button
+                    className="ml-2"
+                    variant="secondary"
+                    onClick={() => {
+                      onAddClick(creddd);
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+              ))}
+            <div className="gap-y-2 flex flex-col items-center mt-10">
+              {address ? (
+                <div className="text-center bg-clip-text text-transparent bg-gradient-to-l from-purple-400 to-purple-600">
+                  Connected: {trimAddress(address)}
+                </div>
+              ) : (
+                <></>
+              )}
+              {address ? (
+                <SwitchAddressButton></SwitchAddressButton>
+              ) : (
+                <ConnectButton></ConnectButton>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </Scrollable>
       <AddingCredddModal isOpen={isAddingCreddd}></AddingCredddModal>
     </>
   );

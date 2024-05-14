@@ -104,6 +104,7 @@ const Room = () => {
             }}
             scrollThreshold={0.5}
             scrollableTarget="scrollableDiv"
+            className="h-full"
           >
             {messages.map((message, i) => (
               <div

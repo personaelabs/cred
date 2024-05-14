@@ -1,8 +1,8 @@
-import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { CircleArrowUp } from 'lucide-react';
 import theme from '@/lib/theme';
 import { X } from 'lucide-react';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface ChatMessageInputProps {
   onSend: (_message: string) => void;
@@ -31,9 +31,8 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
         ) : (
           <></>
         )}
-        <Input
-          className="w-[100%]"
-          type="text"
+        <TextareaAutosize
+          className="bg-background w-[100%] py-2 px-4 my-1 resize-none rounded-lg border-2 focus:outline-none"
           placeholder="Message"
           value={input}
           onChange={e => setInput(e.target.value)}

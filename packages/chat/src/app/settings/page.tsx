@@ -10,6 +10,7 @@ import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
+import Scrollable from '@/components/Scrollable';
 
 interface SettingsMenuItemProps {
   text: string;
@@ -55,23 +56,28 @@ const Settings = () => {
   }
 
   return (
-    <div className="flex flex-col items-center pt-8 bg-background h-full w-full">
-      <div className="flex flex-col items-center gap-4">
-        <AvatarWithFallback
-          imageUrl={user.pfpUrl}
-          size={60}
-          alt="profile image"
-          name={user.displayName}
-        ></AvatarWithFallback>
-        <div className="text-2xl font-bold">{user.displayName}</div>
+    <Scrollable>
+      <div className="flex flex-col items-center pt-8 bg-background h-full w-full">
+        <div className="flex flex-col items-center gap-4">
+          <AvatarWithFallback
+            imageUrl={user.pfpUrl}
+            size={60}
+            alt="profile image"
+            name={user.displayName}
+          ></AvatarWithFallback>
+          <div className="text-2xl font-bold">{user.displayName}</div>
+        </div>
+        <div className="flex flex-col items-center mt-10 w-full">
+          <SettingsMenuItem
+            text="My creddd"
+            to="/user-creddd"
+          ></SettingsMenuItem>
+        </div>
+        <Button variant="link" className="mt-10" onClick={onSignOutClick}>
+          Sign out
+        </Button>
       </div>
-      <div className="flex flex-col items-center mt-10 w-full">
-        <SettingsMenuItem text="My creddd" to="/user-creddd"></SettingsMenuItem>
-      </div>
-      <Button variant="link" className="mt-10" onClick={onSignOutClick}>
-        Sign out
-      </Button>
-    </div>
+    </Scrollable>
   );
 };
 
