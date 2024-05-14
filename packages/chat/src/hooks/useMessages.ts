@@ -132,7 +132,7 @@ const useMessages = ({
   // Merge user data with messages
   const messagesWithUserData = allMessages.map(msg => {
     const user = usersQueryResult.find(
-      u => u.data?.id.toString() === msg.user.id
+      u => u.data?.id?.toString() === msg.user.id
     );
     return {
       ...msg,

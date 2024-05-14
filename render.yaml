@@ -35,6 +35,7 @@ services:
         - packages/cred_bot/**
       ignoredPaths:
         - packages/circuit/**
+        - packages/notification/**
         - packages/frontend/**
         - packages/indexer/**
         - packages/db/**
@@ -60,6 +61,7 @@ services:
         - packages/indexer-rs/**
         - packages/db/**
       ignoredPaths:
+        - packages/notification/**
         - packages/circuit/**
         - packages/frontend/**
     envVars:

@@ -6,6 +6,10 @@ import {
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import firebaseAdmin from '@/lib/firebaseAdmin';
+import { getFirestore } from 'firebase-admin/firestore';
+import { User } from '@cred/shared';
+
+const db = getFirestore(firebaseAdmin);
 
 // Initialize the SIWF client
 const client = createClient({
@@ -35,6 +39,15 @@ export async function POST(req: NextRequest) {
 
   const uid = fid.toString();
   const token = await auth.createCustomToken(uid);
+
+  const userData: User = {
+    id: uid,
+    displayName: body.displayName,
+    username: body.username,
+    pfpUrl: body.pfpUrl,
+  };
+
+  await db.collection('users').doc(uid).set(userData);
 
   return Response.json({ token }, { status: 200 });
 }
