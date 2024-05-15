@@ -53,6 +53,11 @@ export async function POST(req: NextRequest) {
     displayName: body.displayName,
     username: body.username,
     pfpUrl: body.pfpUrl,
+    config: {
+      notification: {
+        mutedRoomIds: [],
+      },
+    },
   };
 
   await db.collection('users').doc(uid).set(userData);
