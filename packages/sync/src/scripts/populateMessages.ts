@@ -5,10 +5,10 @@ import {
   User,
   messageConverter,
   roomConverter,
-  initAdminApp,
 } from '@cred/shared';
 import { faker } from '@faker-js/faker';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { initAdminApp } from '@cred/firebase';
 
 const firebaseAdmin = initAdminApp();
 const db = getFirestore(firebaseAdmin);
