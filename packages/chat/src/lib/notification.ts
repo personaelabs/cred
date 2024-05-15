@@ -2,6 +2,12 @@ import { getMessaging, getToken } from 'firebase/messaging';
 import app from './firebase';
 import * as Sentry from '@sentry/nextjs';
 
+const NEXT_PUBLIC_VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_KEY;
+
+if (!NEXT_PUBLIC_VAPID_KEY) {
+  throw new Error('NEXT_PUBLIC_VAPID_KEY key not found');
+}
+
 export const isNotificationConfigured = () => {
   return localStorage.getItem('notificationConfigured') === 'true';
 };
@@ -15,8 +21,7 @@ export const requestNotificationToken = async (): Promise<string | null> => {
 
   try {
     const token = await getToken(messaging, {
-      vapidKey:
-        'BHaVlakB8SbeMEprNB2e6FQtlPMFjyWEhMnBH8dKn-q2epYPi--NNCWM2EZmsjaXUQ0FbKpPuppmC-Od6xL0M88',
+      vapidKey: NEXT_PUBLIC_VAPID_KEY,
     });
 
     return token;
