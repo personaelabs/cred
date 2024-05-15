@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@cred/shared": "workspace:*",
+    "@cred/firebase": "workspace:*",
     "@farcaster/auth-client": "^0.1.0",
     "@farcaster/auth-kit": "^0.2.2",
     "@prisma/client": "5.12.1",

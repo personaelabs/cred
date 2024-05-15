@@ -30,6 +30,9 @@ importers:
 
   packages/chat:
     dependencies:
+      '@cred/firebase':
+        specifier: workspace:*
+        version: link:../firebase
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -239,6 +242,16 @@ importers:
         specifier: ^5.12.1
         version: 5.12.1
 
+  packages/firebase:
+    dependencies:
+      firebase-admin:
+        specifier: ^12.1.0
+        version: 12.1.0(encoding@0.1.13)
+    devDependencies:
+      typescript:
+        specifier: ^5.1.3
+        version: 5.2.2
+
   packages/frontend:
     dependencies:
       '@farcaster/auth-client':
@@ -392,6 +405,9 @@ importers:
 
   packages/notification:
     dependencies:
+      '@cred/firebase':
+        specifier: workspace:*
+        version: link:../firebase
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -417,6 +433,9 @@ importers:
       firebase:
         specifier: ^10.11.1
         version: 10.11.1(@react-native-async-storage/async-storage@1.23.0(react-native@0.73.6(@babel/core@7.24.1)(@babel/preset-env@7.24.1(@babel/core@7.24.1))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@6.0.3)))
+      firebase-admin:
+        specifier: ^12.1.0
+        version: 12.1.0(encoding@0.1.13)
     devDependencies:
       typescript:
         specifier: ^5.1.3
@@ -424,27 +443,21 @@ importers:
 
   packages/sync:
     dependencies:
+      '@cred/firebase':
+        specifier: workspace:*
+        version: link:../firebase
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
-      csv-parser:
-        specifier: ^3.0.0
-        version: 3.0.0
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
-      fast-csv:
-        specifier: ^5.0.1
-        version: 5.0.1
       firebase-admin:
         specifier: ^12.1.0
         version: 12.1.0(encoding@0.1.13)
       pg:
         specifier: ^8.11.5
         version: 8.11.5
-      pg-copy-streams:
-        specifier: ^6.0.6
-        version: 6.0.6
     devDependencies:
       '@faker-js/faker':
         specifier: ^8.4.1
@@ -455,9 +468,6 @@ importers:
       '@types/pg':
         specifier: ^8.11.5
         version: 8.11.6
-      '@types/pg-copy-streams':
-        specifier: ^1.2.5
-        version: 1.2.5
       tsx:
         specifier: ^4.7.1
         version: 4.9.3
@@ -1598,12 +1608,6 @@ packages:
     peerDependencies:
       react: '>= 17'
       react-dom: '>= 17'
-
-  '@fast-csv/format@5.0.0':
-    resolution: {integrity: sha512-IyMpHwYIOGa2f0BJi6Wk55UF0oBA5urdIydoEDYxPo88LFbeb3Yr4rgpu98OAO1glUWheSnNtUgS80LE+/dqmw==}
-
-  '@fast-csv/parse@5.0.0':
-    resolution: {integrity: sha512-ecF8tCm3jVxeRjEB6VPzmA+1wGaJ5JgaUX2uesOXdXD6qQp0B3EdshOIed4yT1Xlj/F2f8v4zHSo0Oi31L697g==}
 
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
@@ -3357,9 +3361,6 @@ packages:
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
-  '@types/pg-copy-streams@1.2.5':
-    resolution: {integrity: sha512-7D6/GYW2uHIaVU6S/5omI+6RZnwlZBpLQDZAH83xX1rjxAOK0f6/deKyyUTewxqts145VIGn6XWYz1YGf50G5g==}
-
   '@types/pg@8.11.6':
     resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
 
@@ -4413,11 +4414,6 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
-  csv-parser@3.0.0:
-    resolution: {integrity: sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==}
-    engines: {node: '>= 10'}
-    hasBin: true
-
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
 
@@ -4921,10 +4917,6 @@ packages:
   farmhash@3.3.1:
     resolution: {integrity: sha512-XUizHanzlr/v7suBr/o85HSakOoWh6HKXZjFYl5C2+Gj0f0rkw+XTUZzrd9odDsgI9G5tRUcF4wSbKaX04T0DQ==}
     engines: {node: '>=10'}
-
-  fast-csv@5.0.1:
-    resolution: {integrity: sha512-Q43zC4NdQD5MAWOVQOF8KA+D6ddvTJjX2ib8zqysm74jZhtk6+dc8C75/OqRV6Y9CLc4kgvbC3PLG8YL4YZfgw==}
-    engines: {node: '>=10.0.0'}
 
   fast-deep-equal@2.0.1:
     resolution: {integrity: sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==}
@@ -5977,12 +5969,6 @@ packages:
   lodash.debounce@4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
 
-  lodash.escaperegexp@4.1.2:
-    resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
-
-  lodash.groupby@4.6.0:
-    resolution: {integrity: sha512-5dcWxm23+VAoz+awKmBaiBvzox8+RqMgFhi7UvX9DHZr2HdxHXM/Wrf8cfKpsW37RNrvtPn6hSwNqurSILbmJw==}
-
   lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
 
@@ -5992,14 +5978,8 @@ packages:
   lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
 
-  lodash.isfunction@3.0.9:
-    resolution: {integrity: sha512-AirXNj15uRIMMPihnkInB4i3NHeb4iBtNg9WRWuK2o31S+ePwwNmDPaTL3o7dTJ+VXNZim7rFs4rxN4YU1oUJw==}
-
   lodash.isinteger@4.0.4:
     resolution: {integrity: sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==}
-
-  lodash.isnil@4.0.0:
-    resolution: {integrity: sha512-up2Mzq3545mwVnMhTDMdfoG1OurpA/s5t88JmQX809eH3C8491iu2sfKhTfhQtKY78oPNhiaHJUpT/dUDAAtng==}
 
   lodash.isnumber@3.0.3:
     resolution: {integrity: sha512-QYqzpfwO3/CWf3XP+Z+tkQsfaLL/EnUlXWVkIk5FUPc4sBdTehEqZONuyRt2P67PXAk+NXmTBcc97zw9t1FQrw==}
@@ -6009,9 +5989,6 @@ packages:
 
   lodash.isstring@4.0.1:
     resolution: {integrity: sha512-0wJxfxH1wgO3GrbuP+dTTk7op+6L41QCXbGINEmD+ny/G/eCqGzxyCsh7159S+mgDDcoarnBw6PC1PS5+wUGgw==}
-
-  lodash.isundefined@3.0.1:
-    resolution: {integrity: sha512-MXB1is3s899/cD8jheYYE2V9qTHwKvt+npCwpD+1Sxm3Q3cECXCiYHjeHWXNwr6Q0SOBPrYUDxendrO6goVTEA==}
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
@@ -6024,9 +6001,6 @@ packages:
 
   lodash.throttle@4.1.1:
     resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
-
-  lodash.uniq@4.5.0:
-    resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
@@ -6688,9 +6662,6 @@ packages:
 
   pg-connection-string@2.6.4:
     resolution: {integrity: sha512-v+Z7W/0EO707aNMaAEfiGnGL9sxxumwLl2fJvCQtMn9Fxsg+lPpPkdcyBSv/KFgpGdYkMfn+EI1Or2EHjpgLCA==}
-
-  pg-copy-streams@6.0.6:
-    resolution: {integrity: sha512-Z+Dd2C2NIDTsjyFKmc6a9QLlpM8tjpERx+43RSx0WmL7j3uNChERi3xSvZUL0hWJ1oRUn4S3fhyt3apdSrTyKQ==}
 
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
@@ -9705,23 +9676,6 @@ snapshots:
       - utf-8-validate
       - viem
 
-  '@fast-csv/format@5.0.0':
-    dependencies:
-      lodash.escaperegexp: 4.1.2
-      lodash.isboolean: 3.0.3
-      lodash.isequal: 4.5.0
-      lodash.isfunction: 3.0.9
-      lodash.isnil: 4.0.0
-
-  '@fast-csv/parse@5.0.0':
-    dependencies:
-      lodash.escaperegexp: 4.1.2
-      lodash.groupby: 4.6.0
-      lodash.isfunction: 3.0.9
-      lodash.isnil: 4.0.0
-      lodash.isundefined: 3.0.1
-      lodash.uniq: 4.5.0
-
   '@fastify/busboy@2.1.1': {}
 
   '@firebase/analytics-compat@0.2.8(@firebase/app-compat@0.2.32)(@firebase/app@0.10.2)':
@@ -12065,11 +12019,6 @@ snapshots:
 
   '@types/parse-json@4.0.2': {}
 
-  '@types/pg-copy-streams@1.2.5':
-    dependencies:
-      '@types/node': 20.11.19
-      '@types/pg': 8.11.6
-
   '@types/pg@8.11.6':
     dependencies:
       '@types/node': 20.11.19
@@ -13523,10 +13472,6 @@ snapshots:
 
   csstype@3.1.3: {}
 
-  csv-parser@3.0.0:
-    dependencies:
-      minimist: 1.2.8
-
   damerau-levenshtein@1.0.8: {}
 
   date-fns@2.30.0:
@@ -14233,11 +14178,6 @@ snapshots:
     dependencies:
       node-addon-api: 5.1.0
       prebuild-install: 7.1.2
-
-  fast-csv@5.0.1:
-    dependencies:
-      '@fast-csv/format': 5.0.0
-      '@fast-csv/parse': 5.0.0
 
   fast-deep-equal@2.0.1: {}
 
@@ -15530,29 +15470,19 @@ snapshots:
 
   lodash.debounce@4.0.8: {}
 
-  lodash.escaperegexp@4.1.2: {}
-
-  lodash.groupby@4.6.0: {}
-
   lodash.includes@4.3.0: {}
 
   lodash.isboolean@3.0.3: {}
 
   lodash.isequal@4.5.0: {}
 
-  lodash.isfunction@3.0.9: {}
-
   lodash.isinteger@4.0.4: {}
-
-  lodash.isnil@4.0.0: {}
 
   lodash.isnumber@3.0.3: {}
 
   lodash.isplainobject@4.0.6: {}
 
   lodash.isstring@4.0.1: {}
-
-  lodash.isundefined@3.0.1: {}
 
   lodash.merge@4.6.2: {}
 
@@ -15561,8 +15491,6 @@ snapshots:
   lodash.sortby@4.7.0: {}
 
   lodash.throttle@4.1.1: {}
-
-  lodash.uniq@4.5.0: {}
 
   lodash@4.17.21: {}
 
@@ -16316,10 +16244,6 @@ snapshots:
     optional: true
 
   pg-connection-string@2.6.4: {}
-
-  pg-copy-streams@6.0.6:
-    dependencies:
-      obuf: 1.1.2
 
   pg-int8@1.0.1: {}
 

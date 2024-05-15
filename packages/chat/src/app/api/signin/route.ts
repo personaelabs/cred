@@ -5,11 +5,21 @@ import {
 } from '@farcaster/auth-client';
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
-import firebaseAdmin from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
+import { initAdminApp } from '@cred/firebase';
+import { App, getApps } from 'firebase-admin/app';
 
-const db = getFirestore(firebaseAdmin);
+let app: App;
+if (getApps().length === 0) {
+  app = initAdminApp();
+} else {
+  app = getApps()[0];
+  console.log('Firebase app already initialized.');
+}
+
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Initialize the SIWF client
 const client = createClient({
@@ -18,8 +28,6 @@ const client = createClient({
     rpcUrl: 'https://mainnet.optimism.io',
   }),
 });
-
-const auth = getAuth(firebaseAdmin);
 
 export async function POST(req: NextRequest) {
   const body = await req.json();

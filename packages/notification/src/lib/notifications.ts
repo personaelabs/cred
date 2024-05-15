@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { db } from './firebase';
 import {
   UserNotificationTokens,
   idempotencyKeyConverter,
@@ -8,14 +7,17 @@ import {
   roomConverter,
 } from '@cred/shared';
 import { getMessaging } from 'firebase-admin/messaging';
-import firebaseAdmin from './firebase';
 import logger from './logger';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp, getFirestore } from 'firebase-admin/firestore';
+import { initAdminApp } from '@cred/firebase';
 
 const IS_PROD = process.env.RENDER === 'true';
 logger.info('IS_PROD', IS_PROD);
 
+const firebaseAdmin = initAdminApp();
+
 const messaging = getMessaging(firebaseAdmin);
+const db = getFirestore(firebaseAdmin);
 
 const notificationTokens = new Map<string, UserNotificationTokens['tokens']>();
 

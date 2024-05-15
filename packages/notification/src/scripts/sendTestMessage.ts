@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import { Message, Room, messageConverter, roomConverter } from '@cred/shared';
-import { db } from '../lib/firebase';
+import { initAdminApp } from '@cred/firebase';
+import { getFirestore } from 'firebase-admin/firestore';
+
+const firebaseAdmin = initAdminApp();
+const db = getFirestore(firebaseAdmin);
 
 const ADMIN_FIDS = ['1', '12783'];
 
