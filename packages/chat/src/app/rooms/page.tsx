@@ -1,10 +1,5 @@
 'use client';
-import { Ellipsis } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Ellipsis, SquareArrowLeft } from 'lucide-react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useJoinedRooms from '@/hooks/useJoinedRooms';
@@ -12,11 +7,16 @@ import useMessages from '@/hooks/useMessages';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
 import Scrollable from '@/components/Scrollable';
 import { useScrollableRef } from '@/contexts/FooterContext';
 import { cutoffMessage } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type RoomItemProps = {
   id: string;
@@ -28,7 +28,7 @@ const RoomItem = (props: RoomItemProps) => {
   const { id, name } = props;
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
-  const { mutateAsync: leaveRoom, isPending: isLeaving } = useLeaveRoom();
+  const { mutateAsync: leaveRoom } = useLeaveRoom();
 
   const { data: messages } = useMessages({
     roomId: id,
@@ -40,7 +40,7 @@ const RoomItem = (props: RoomItemProps) => {
   return (
     <Link
       href={isTooltipOpen ? '' : `/rooms/${id}`}
-      className="w-full no-underline"
+      className="w-full no-underline focus:opacity-60 hover:opacity-60"
     >
       <div className="flex flex-row justify-between w-full h-full border-b-2">
         <div className="flex flex-col items-start px-5 py-2 mt-1">
@@ -50,13 +50,13 @@ const RoomItem = (props: RoomItemProps) => {
           </div>
         </div>
         <div className="flex justify-center items-center mb-1">
-          <Tooltip
+          <DropdownMenu
             open={isTooltipOpen}
             onOpenChange={open => {
               setIsTooltipOpen(open);
             }}
           >
-            <TooltipTrigger
+            <DropdownMenuTrigger
               onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -64,23 +64,19 @@ const RoomItem = (props: RoomItemProps) => {
               }}
             >
               <Ellipsis className="mr-4 opacity-60" />
-            </TooltipTrigger>
-            <TooltipContent side="left" className="bg-background">
-              <div className="flex flex-col">
-                <Button
-                  className="no-underline"
-                  disabled={isLeaving}
-                  variant="ghost"
-                  onClick={async () => {
-                    await leaveRoom(id);
-                    setIsTooltipOpen(false);
-                  }}
-                >
-                  Leave
-                </Button>
-              </div>
-            </TooltipContent>
-          </Tooltip>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="left" className="bg-background">
+              <DropdownMenuItem
+                onClick={async () => {
+                  await leaveRoom(id);
+                  setIsTooltipOpen(false);
+                }}
+              >
+                <SquareArrowLeft className="mr-2 w-4 h-4 text-red-500"></SquareArrowLeft>
+                <div className="text-red-500">Leave</div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </Link>

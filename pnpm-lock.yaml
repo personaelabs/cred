@@ -147,6 +147,9 @@ importers:
       ts-protoc-gen:
         specifier: ^0.15.0
         version: 0.15.0
+      use-long-press:
+        specifier: ^3.2.0
+        version: 3.2.0(react@18.2.0)
       vaul:
         specifier: ^0.8.0
         version: 0.8.9(@types/react-dom@18.2.18)(@types/react@18.2.55)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -7763,6 +7766,11 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  use-long-press@3.2.0:
+    resolution: {integrity: sha512-uq5o2qFR1VRjHn8Of7Fl344/AGvgk7C5Mcb4aSb1ZRVp6PkgdXJJLdRrlSTJQVkkQcDuqFbFc3mDX4COg7mRTA==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   use-sidecar@1.1.2:
     resolution: {integrity: sha512-epTbsLuzZ7lPClpz2TyryBfztm7m+28DlEv2ZCQ3MDr5ssiwyOwGH/e5F9CkfWjJ1t4clvI58yF822/GUkjjhw==}
@@ -17205,6 +17213,10 @@ snapshots:
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.55)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.55
+
+  use-long-press@3.2.0(react@18.2.0):
+    dependencies:
+      react: 18.2.0
 
   use-sidecar@1.1.2(@types/react@18.2.55)(react@18.2.0):
     dependencies:

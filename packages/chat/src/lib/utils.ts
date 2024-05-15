@@ -7,6 +7,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// This is the function we wrote earlier
+export const copyTextToClipboard = async (text: string) => {
+  if ('clipboard' in navigator) {
+    return await navigator.clipboard.writeText(text);
+  } else {
+    return document.execCommand('copy', true, text);
+  }
+};
+
 export const cutoffMessage = (message: string, length: number) => {
   if (message.length > length) {
     return `${message.slice(0, length)}...`;

@@ -27,10 +27,13 @@ const useLeaveRoom = () => {
         throw new Error('User not signed in');
       }
 
-      return await leaveRoom({
-        roomId,
-        userId: signedInUser.id,
-      });
+      const confirmed = await window.confirm('Leave room?');
+      if (confirmed) {
+        await leaveRoom({
+          roomId,
+          userId: signedInUser.id,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
