@@ -12,7 +12,6 @@ interface MobileHeaderProps {
 const MobileHeader = (props: MobileHeaderProps) => {
   const { headerRight, title, showBackButton, backTo } = props;
   const router = useRouter();
-  console.log(backTo);
 
   return (
     <div className="md:hidden px-4 flex flex-row justify-between items-center h-[60px] w-[100vw] bg-background border-b-2">

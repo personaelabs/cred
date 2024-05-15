@@ -12,7 +12,6 @@ export const setNotificationConfigured = () => {
 
 export const requestNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
-  console.log('Requesting permission...');
 
   try {
     const token = await getToken(messaging, {

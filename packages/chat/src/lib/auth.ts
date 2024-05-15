@@ -3,7 +3,7 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth';
 import { SignedInUser } from '@/types';
 
 /**
- * Authenticate the signed in user to Firestore
+ * Authenticate the signed in user to Firebase
  */
 export const authSignedInUser = async (signedInUser: SignedInUser) => {
   const { data } = await axios.post<{ token: string }>(
@@ -15,6 +15,9 @@ export const authSignedInUser = async (signedInUser: SignedInUser) => {
   await signInWithCustomToken(getAuth(), data.token);
 };
 
+/**
+ * Returns true if the user is authenticated to the given user ID on Firebase
+ */
 export const isAuthenticated = async (userId: string) => {
   await getAuth().authStateReady();
   const user = getAuth().currentUser;

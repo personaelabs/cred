@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-/* eslint-disable @next/next/no-img-element */
 interface AvatarProps {
   imageUrl: string | null;
   size: number;
