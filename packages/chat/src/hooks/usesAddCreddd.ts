@@ -48,11 +48,11 @@ const submitProof = async ({
 };
 
 const useAddCreddd = () => {
-  const { signMessageAsync } = useSignMessage();
+  const { signMessageAsync, data } = useSignMessage({});
   const { data: signedInUser } = useSignedInUser();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const result = useMutation({
     mutationFn: async (creddd: EligibleCreddd) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
@@ -121,6 +121,8 @@ const useAddCreddd = () => {
       await queryClient.invalidateQueries({ queryKey: ['eligible-creddd'] });
     },
   });
+
+  return { ...result, hasSignedMessage: !!data };
 };
 
 export default useAddCreddd;
