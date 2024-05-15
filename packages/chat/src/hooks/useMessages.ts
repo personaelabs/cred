@@ -31,7 +31,6 @@ export const toMessageType = (message: Message): ChatMessage => {
 
 const PAGE_SIZE = 20;
 const getMessages = async (roomId: string, lastMessage: ChatMessage | null) => {
-  console.log({ lastDocId: lastMessage?.text });
   const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
     messageConverter
   );
@@ -46,7 +45,6 @@ const getMessages = async (roomId: string, lastMessage: ChatMessage | null) => {
     : query(messagesRef, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
 
   const docs = (await getDocs(q)).docs;
-  console.log(`Got ${docs.length} messages`);
   const messages = docs.map(doc => toMessageType(doc.data()));
 
   return messages;
