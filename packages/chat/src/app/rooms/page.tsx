@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
 import Scrollable from '@/components/Scrollable';
 import { useScrollableRef } from '@/contexts/FooterContext';
+import { cutoffMessage } from '@/lib/utils';
 
 type RoomItemProps = {
   id: string;
@@ -45,9 +46,7 @@ const RoomItem = (props: RoomItemProps) => {
         <div className="flex flex-col items-start px-5 py-2 mt-1">
           <div className="text-lg">{name}</div>
           <div className="opacity-60 mt-1">
-            {firstMessage
-              ? `${firstMessage.text.slice(0, 75)}${firstMessage.text.length > 75 ? '...' : ''}`
-              : ''}
+            {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
           </div>
         </div>
         <div className="flex justify-center items-center mb-1">

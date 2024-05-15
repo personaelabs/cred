@@ -6,6 +6,7 @@ import { useState } from 'react';
 import useMessage from '@/hooks/useMessage';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { cutoffMessage } from '@/lib/utils';
 
 interface ChatToolTipProps {
   shown: boolean;
@@ -71,7 +72,9 @@ const ReplyPreview = (props: ReplyPreviewProps) => {
         className="opacity-70 p-2 border-l-2 border-[#FDA174]"
         onClick={onClickOnPreview}
       >
-        <div className="w-full">{replyToMessage?.body}</div>
+        <div className="w-full">
+          {cutoffMessage(replyToMessage?.body || '', 80)}
+        </div>
       </div>
     </div>
   );
@@ -93,7 +96,7 @@ const ChatMessage = (props: ChatMessageProps) => {
       className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
-        <div className="mb-5">
+        <div className="mb-5 ml-1">
           <Link className="no-underline" href={`/users/${user.id}`}>
             <Avatar
               size={40}

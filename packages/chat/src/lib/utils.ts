@@ -7,6 +7,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const cutoffMessage = (message: string, length: number) => {
+  if (message.length > length) {
+    return `${message.slice(0, length)}...`;
+  }
+  return message;
+};
+
 export const trimAddress = (address: Hex) => {
   const start = address.substring(0, 6); // "0x" + first 4 chars
   const end = address.substring(address.length - 4); // last 4 chars
