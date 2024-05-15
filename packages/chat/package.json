@@ -8,7 +8,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "cd ../shared && pnpm build",
     "build:proto": "sh ./scripts/build_proto.sh"
   },
   "dependencies": {
