@@ -22,31 +22,36 @@ import { useRouter } from 'next/navigation';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
+  showMuteToggle: boolean;
   isMuted: boolean;
   onToggleMuteClick: () => void;
 }
 
 const RoomItemDropdownContent = (props: RoomItemDropdownContentProps) => {
-  const { onLeaveClick, isMuted, onToggleMuteClick } = props;
+  const { onLeaveClick, isMuted, onToggleMuteClick, showMuteToggle } = props;
   return (
     <DropdownMenuContent side="left" className="bg-background">
       <DropdownMenuItem onClick={onLeaveClick}>
         <SquareArrowLeft className="mr-2 w-4 h-4 text-red-500"></SquareArrowLeft>
         <div className="text-red-500">Leave</div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={onToggleMuteClick}>
-        {isMuted ? (
-          <>
-            <Bell className="mr-2 w-4 h-4"></Bell>
-            <div>Unmute</div>
-          </>
-        ) : (
-          <>
-            <BellOff className="mr-2 w-4 h-4"></BellOff>
-            <div>Mute</div>
-          </>
-        )}
-      </DropdownMenuItem>
+      {showMuteToggle ? (
+        <DropdownMenuItem onClick={onToggleMuteClick}>
+          {isMuted ? (
+            <>
+              <Bell className="mr-2 w-4 h-4"></Bell>
+              <div>Unmute</div>
+            </>
+          ) : (
+            <>
+              <BellOff className="mr-2 w-4 h-4"></BellOff>
+              <div>Mute</div>
+            </>
+          )}
+        </DropdownMenuItem>
+      ) : (
+        <></>
+      )}
     </DropdownMenuContent>
   );
 };
@@ -56,10 +61,11 @@ type RoomItemProps = {
   name: string;
   imageUrl: string | null;
   isMuted: boolean;
+  showMuteToggle: boolean;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { id, name, isMuted } = props;
+  const { id, name, isMuted, showMuteToggle } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const router = useRouter();
@@ -109,6 +115,7 @@ const RoomItem = (props: RoomItemProps) => {
               <Ellipsis className="mr-4 opacity-60" />
             </DropdownMenuTrigger>
             <RoomItemDropdownContent
+              showMuteToggle={showMuteToggle}
               onLeaveClick={async () => {
                 await leaveRoom(id);
                 setIsMenuOpen(false);
@@ -132,6 +139,9 @@ const Rooms = () => {
   const { data: rooms } = useJoinedRooms(signedInUser?.id!.toString() || null);
   const { setOptions } = useHeaderOptions();
   const { scrollableRef } = useScrollableRef();
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState<
+    null | boolean
+  >(null);
 
   useEffect(() => {
     setOptions({
@@ -140,6 +150,12 @@ const Rooms = () => {
       headerRight: null,
     });
   }, [setOptions]);
+
+  useEffect(() => {
+    if (typeof Notification !== 'undefined') {
+      setIsNotificationsEnabled(Notification.permission === 'granted');
+    }
+  }, []);
 
   if (!signedInUser || !rooms || !singedInUserData) {
     return <div className="bg-background h-full"></div>;
@@ -157,6 +173,7 @@ const Rooms = () => {
             key={room.id}
             name={room.name}
             imageUrl={room.imageUrl}
+            showMuteToggle={isNotificationsEnabled !== null}
             isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
               room.id
             )}

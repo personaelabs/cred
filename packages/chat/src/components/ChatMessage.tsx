@@ -1,7 +1,7 @@
 import { type ChatMessage } from '@/types';
 import Avatar from './Avatar';
 import { Copy, Reply } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import useMessage from '@/hooks/useMessage';
 import Link from 'next/link';
 import { copyTextToClipboard, cutoffMessage } from '@/lib/utils';
@@ -12,6 +12,7 @@ import {
 } from './ui/dropdown-menu';
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
+import { useLongPress } from 'use-long-press';
 
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
@@ -85,6 +86,10 @@ type ChatMessageProps = ChatMessage & {
 
 const ChatMessage = (props: ChatMessageProps) => {
   const { isSender, roomId, replyToId, onViewReplyClick, user } = props;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const bind = useLongPress(() => {
+    setIsMenuOpen(true);
+  });
 
   const onClickCopyToClipboard = useCallback(async () => {
     await copyTextToClipboard(props.text);
@@ -130,8 +135,17 @@ const ChatMessage = (props: ChatMessageProps) => {
             <></>
           )}
           <div className="mx-2 mt-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="text-left  whitespace-pre-wrap">
+            <DropdownMenu
+              open={isMenuOpen}
+              onOpenChange={open => {
+                setIsMenuOpen(open);
+              }}
+            >
+              <DropdownMenuTrigger
+                disabled
+                {...bind()}
+                className="text-left  whitespace-pre-wrap focus:outline-none"
+              >
                 {props.text}
               </DropdownMenuTrigger>
               {isSender ? (
