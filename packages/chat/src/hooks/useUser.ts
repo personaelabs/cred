@@ -14,7 +14,7 @@ const getUser = async (userId: string) => {
   return roomDoc.data();
 };
 
-const useUser = (userId: string) => {
+const useUser = (userId: string | null) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -28,9 +28,10 @@ const useUser = (userId: string) => {
   return useQuery({
     queryKey: ['user', { userId }],
     queryFn: async () => {
-      const user = await getUser(userId);
+      const user = await getUser(userId!);
       return user;
     },
+    enabled: !!userId,
     staleTime: Infinity,
   });
 };

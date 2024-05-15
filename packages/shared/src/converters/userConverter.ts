@@ -1,6 +1,12 @@
 import { SnapshotOptions, DocumentData } from 'firebase/firestore';
 import { User } from '../types';
 
+const defaultConfig: User['config'] = {
+  notification: {
+    mutedRoomIds: [],
+  },
+};
+
 export const userConverter = {
   toFirestore: (user: User) => {
     return {
@@ -8,6 +14,7 @@ export const userConverter = {
       username: user.username,
       displayName: user.displayName,
       pfpUrl: user.pfpUrl,
+      config: user.config,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -18,6 +25,7 @@ export const userConverter = {
       username: data.username,
       displayName: data.displayName,
       pfpUrl: data.pfpUrl,
+      config: data.config || defaultConfig,
     };
 
     return user;
