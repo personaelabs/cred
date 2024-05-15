@@ -6,9 +6,12 @@ import {
   messageConverter,
   roomConverter,
 } from '@cred/shared';
-import { db } from '../lib/firebase';
 import { faker } from '@faker-js/faker';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { initAdminApp } from '@cred/firebase';
+
+const firebaseAdmin = initAdminApp();
+const db = getFirestore(firebaseAdmin);
 
 const NUM_MESSAGES = 100;
 const NUM_USERS = 10;

@@ -2,6 +2,10 @@
 import React, { createContext, useContext, useRef } from 'react';
 
 const FooterContext = createContext<{
+  /**
+   * The ref of the scrollable container of the current screen.
+   * This is used to scroll to the top when the footer menu is clicked.
+   */
   scrollableRef: React.RefObject<HTMLDivElement> | null;
 }>({
   scrollableRef: null,

@@ -7,6 +7,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// This is the function we wrote earlier
+export const copyTextToClipboard = async (text: string) => {
+  if ('clipboard' in navigator) {
+    return await navigator.clipboard.writeText(text);
+  } else {
+    return document.execCommand('copy', true, text);
+  }
+};
+
+export const cutoffMessage = (message: string, length: number) => {
+  if (message.length > length) {
+    return `${message.slice(0, length)}...`;
+  }
+  return message;
+};
+
 export const trimAddress = (address: Hex) => {
   const start = address.substring(0, 6); // "0x" + first 4 chars
   const end = address.substring(address.length - 4); // last 4 chars

@@ -5,6 +5,11 @@ export interface User {
   username: string;
   displayName: string;
   pfpUrl: string;
+  config: {
+    notification: {
+      mutedRoomIds: string[];
+    };
+  };
 }
 
 export interface UserNotificationTokens {

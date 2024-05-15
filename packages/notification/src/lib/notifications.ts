@@ -1,21 +1,24 @@
 import 'dotenv/config';
-import { db } from './firebase';
 import {
   UserNotificationTokens,
   idempotencyKeyConverter,
   messageConverter,
   notificationTokensConvert,
   roomConverter,
+  userConverter,
 } from '@cred/shared';
 import { getMessaging } from 'firebase-admin/messaging';
-import firebaseAdmin from './firebase';
 import logger from './logger';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp, getFirestore } from 'firebase-admin/firestore';
+import { initAdminApp } from '@cred/firebase';
 
 const IS_PROD = process.env.RENDER === 'true';
 logger.info('IS_PROD', IS_PROD);
 
+const firebaseAdmin = initAdminApp();
+
 const messaging = getMessaging(firebaseAdmin);
+const db = getFirestore(firebaseAdmin);
 
 const notificationTokens = new Map<string, UserNotificationTokens['tokens']>();
 
@@ -43,12 +46,16 @@ const getRoom = async (roomId: string) => {
     .withConverter(roomConverter)
     .doc(roomId)
     .get();
-
-  if (!roomDoc.exists) {
-    throw new Error(`Room ${roomDoc.id} doesn't exist`);
-  }
-
   return roomDoc.data();
+};
+
+const getUser = async (userId: string) => {
+  const userDoc = await db
+    .collection('users')
+    .withConverter(userConverter)
+    .doc(userId)
+    .get();
+  return userDoc.data();
 };
 
 const idempotencyKeyExsits = async (key: string) => {
@@ -125,6 +132,17 @@ const sendNotifications = async () => {
           );
 
           for (const userId of userIdsToNotify) {
+            const user = await getUser(userId);
+            if (!user) {
+              logger.error(`User ${userId} not found`);
+              continue;
+            }
+
+            if (user.config.notification.mutedRoomIds.includes(roomId)) {
+              logger.info(`User ${userId} muted room ${roomId}`);
+              continue;
+            }
+
             const tokens = notificationTokens.get(userId);
 
             if (tokens) {

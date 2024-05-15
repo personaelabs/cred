@@ -134,7 +134,7 @@ const Room = () => {
           </InfiniteScroll>
         </div>
         <ChatMessageInput
-          replyTo={replyTo ? replyTo.text : undefined}
+          replyToText={replyTo ? replyTo.text : undefined}
           onSend={onSendClick}
           onCancelReply={() => {
             setReplyTo(null);

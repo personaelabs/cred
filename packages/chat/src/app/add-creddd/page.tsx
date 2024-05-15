@@ -66,6 +66,7 @@ const AddCredddPage = () => {
     mutateAsync: addCreddd,
     isPending: isAddingCreddd,
     isSuccess,
+    hasSignedMessage,
   } = useAddCreddd();
 
   useEffect(() => {
@@ -152,7 +153,10 @@ const AddCredddPage = () => {
           </div>
         </div>
       </Scrollable>
-      <AddingCredddModal isOpen={isAddingCreddd}></AddingCredddModal>
+      <AddingCredddModal
+        isOpen={isAddingCreddd}
+        hasSignedMessage={hasSignedMessage}
+      ></AddingCredddModal>
     </>
   );
 };

@@ -1,8 +1,31 @@
 import 'dotenv/config';
-import { Message, Room, messageConverter, roomConverter } from '@cred/shared';
-import { db } from '../lib/firebase';
+import {
+  Message,
+  Room,
+  User,
+  messageConverter,
+  roomConverter,
+} from '@cred/shared';
+import { initAdminApp } from '@cred/firebase';
+import { getFirestore } from 'firebase-admin/firestore';
+
+const firebaseAdmin = initAdminApp();
+const db = getFirestore(firebaseAdmin);
 
 const ADMIN_FIDS = ['1', '12783'];
+
+const registerFid1 = async () => {
+  const USER_ID = '1';
+  const userRef = db.collection('users').doc(USER_ID);
+  const userData: User = {
+    id: USER_ID,
+    displayName: 'Farcaster',
+    username: 'farcaster',
+    pfpUrl: 'https://i.imgur.com/I2rEbPF.png',
+  };
+
+  await userRef.set(userData);
+};
 
 const createNotificationTestRoom = async () => {
   const roomData: Room = {
@@ -50,6 +73,7 @@ const sendMessage = async ({
 };
 
 const sendTestMessage = async () => {
+  await registerFid1();
   await createNotificationTestRoom();
   await sendMessage({
     roomId: 'test-notification',

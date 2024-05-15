@@ -1,23 +1,20 @@
 {
-  "name": "@cred-chat/sync",
+  "name": "@cred/sync",
   "scripts": {
     "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
     "populateMessages": "tsx src/scripts/populateMessages.ts"
   },
   "dependencies": {
     "@cred/shared": "workspace:*",
-    "csv-parser": "^3.0.0",
+    "@cred/firebase": "workspace:*",
     "dotenv": "^16.4.5",
-    "fast-csv": "^5.0.1",
     "firebase-admin": "^12.1.0",
-    "pg": "^8.11.5",
-    "pg-copy-streams": "^6.0.6"
+    "pg": "^8.11.5"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.5",
-    "@types/pg-copy-streams": "^1.2.5",
     "tsx": "^4.7.1"
   }
 }
