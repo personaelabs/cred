@@ -119,6 +119,7 @@ const useAddCreddd = () => {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['user-creddd'] });
       await queryClient.invalidateQueries({ queryKey: ['eligible-creddd'] });
+      await queryClient.invalidateQueries({ queryKey: ['writable-rooms'] });
     },
   });
 
