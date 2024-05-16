@@ -1,14 +1,15 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/proto/**/*.ts"],
   "compilerOptions": {
     "outDir": "out",
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "types": ["node"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
     "resolveJsonModule": true,
-  }
+    "skipLibCheck": true
+  },
+  "paths": {
+    "@/*": ["./src/*"]
+  },
 }

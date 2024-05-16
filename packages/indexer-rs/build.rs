@@ -9,5 +9,9 @@ fn main() -> Result<()> {
         ],
         &["../protobufs/schemas"],
     )?;
+
+    tonic_build::compile_protos("../protobufs/services/group_data.proto")?;
+    tonic_build::compile_protos("../protobufs/services/groups.proto")?;
+
     Ok(())
 }

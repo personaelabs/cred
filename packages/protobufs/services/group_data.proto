@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package group_data;
+
+service GroupData {
+    rpc get (GroupDataRequest) returns (GroupDataResponse);
+}
+
+message GroupDataRequest {
+  string id = 1;
+}
+
+message GroupDataResponse {
+  string display_name = 1;
+  bytes latest_merkle_tree = 2;
+  bytes bloom_filter = 3;
+  repeated bytes bloom_sip_keys = 4;
+  uint32 bloom_num_bits = 5;
+  uint32 bloom_num_hashes = 6;
+  uint64 block_number = 7;
+}
+

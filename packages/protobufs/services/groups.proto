@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package groups;
+
+service Groups {
+    rpc all (GroupsRequest) returns (GroupsResponse);
+}
+
+message GroupsRequest {}
+
+message Group {
+    string id = 1;
+    string displayName = 2;
+}
+
+message GroupsResponse {
+    repeated Group groups = 1;
+}

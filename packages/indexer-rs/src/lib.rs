@@ -18,6 +18,7 @@ pub mod seeder;
 pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
+pub mod grpc;
 pub mod utils;
 
 #[cfg(test)]

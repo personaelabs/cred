@@ -1,7 +1,7 @@
 use crate::{
     contract::{get_contracts, Contract},
     utils::{get_group_id, is_prod},
-    GroupId, GroupState, GroupType,
+    BlockNum, GroupId, GroupState, GroupType,
 };
 
 const PREVIEW_GROUP_IDS: [&str; 6] = [
@@ -150,4 +150,60 @@ pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
             .cloned()
             .collect()
     }
+}
+
+pub struct GroupWithMembers {
+    pub display_name: String,
+    pub tree_proto_buf: Vec<u8>,
+    pub bloom_filter: Vec<u8>,
+    pub bloom_sip_keys: Vec<Vec<u8>>,
+    pub bloom_num_bits: u32,
+    pub bloom_num_hashes: u32,
+    pub block_number: BlockNum,
+}
+
+/// Get a group by its id
+pub async fn get_group_with_members(
+    group_id: &str,
+    pg_client: &tokio_postgres::Client,
+) -> Result<GroupWithMembers, crate::Error> {
+    let result = pg_client
+        .query_one(
+            r#"SELECT
+                "Group"."displayName",
+                "MerkleTree"."treeProtoBuf",
+                "MerkleTree"."bloomFilter",
+                "MerkleTree"."bloomSipKeys",
+                "MerkleTree"."bloomNumBits",
+                "MerkleTree"."bloomNumHashes",
+                "MerkleTree"."blockNumber"
+            FROM
+                "Group"
+                LEFT JOIN "MerkleTree" ON "MerkleTree"."groupId" = "Group".id
+            WHERE
+                "Group".id = $1
+            ORDER BY
+                "MerkleTree"."blockNumber" DESC
+            LIMIT 1 "#,
+            &[&group_id],
+        )
+        .await?;
+
+    let group_name: String = result.get("displayName");
+    let tree_proto_buf: Vec<u8> = result.get("treeProtoBuf");
+    let bloom_filter: Vec<u8> = result.get("bloomFilter");
+    let bloom_sip_keys: Vec<Vec<u8>> = result.get("bloomSipKeys");
+    let bloom_num_bits: i32 = result.get("bloomNumBits");
+    let bloom_num_hashes: i32 = result.get("bloomNumHashes");
+    let block_number: i64 = result.get("blockNumber");
+
+    Ok(GroupWithMembers {
+        display_name: group_name,
+        tree_proto_buf,
+        bloom_filter,
+        bloom_sip_keys,
+        bloom_num_bits: bloom_num_bits as u32,
+        bloom_num_hashes: bloom_num_hashes as u32,
+        block_number: block_number as BlockNum,
+    })
 }

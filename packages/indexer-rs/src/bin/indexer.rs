@@ -3,6 +3,7 @@ use futures::join;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
 use indexer_rs::group::get_groups;
+use indexer_rs::grpc::server::start_grpc_server;
 use indexer_rs::intrinsic_creddd_sync_engine::IntrinsicCredddSyncEngine;
 use indexer_rs::log_sync_engine::LogSyncEngine;
 use indexer_rs::postgres::init_neynar_db;
@@ -155,10 +156,13 @@ async fn main() {
 
     let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
+    let grpc_server = start_grpc_server(pg_client.clone());
+
     // Run the sync and indexing jobs concurrently
     join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
-        intrinsic_creddd_sync_job
+        intrinsic_creddd_sync_job,
+        grpc_server
     );
 }

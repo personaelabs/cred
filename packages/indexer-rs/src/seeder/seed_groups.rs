@@ -5,7 +5,6 @@ use crate::{
         assets_with_prices::get_assets_with_prices,
         seed_contracts::{get_seed_contracts, ContractData},
     },
-    utils::is_prod,
     GroupType,
 };
 /// Calculate the score for a group
