@@ -2,14 +2,22 @@
 import { useScrollableRef } from '@/contexts/FooterContext';
 import { icons } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface MenuItemProps {
   icon: keyof typeof icons;
+  path: string;
   onClick: () => void;
 }
 
 const MenuItem = (props: MenuItemProps) => {
   const Icon = icons[props.icon];
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch(props.path);
+  }, [props.path, router]);
+
   return (
     <div
       className="flex justify-center w-full items-center"
@@ -46,18 +54,21 @@ const MobileFooter = (_props: MobileFooterProps) => {
             onClick={() => {
               onClickMenuItem('/');
             }}
+            path="/"
           ></MenuItem>
           <MenuItem
             icon="MessageCircleMore"
             onClick={() => {
               onClickMenuItem('/rooms');
             }}
+            path="/rooms"
           ></MenuItem>
           <MenuItem
             icon="Settings"
             onClick={() => {
               onClickMenuItem('/settings');
             }}
+            path="/settings"
           ></MenuItem>
         </div>
       </div>
