@@ -29,6 +29,8 @@ import {
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
 import Image from 'next/image';
+import { PrivyProvider } from '@privy-io/react-auth';
+import theme from '@/lib/theme';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -134,17 +136,32 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
-            <TooltipProvider>
-              <AuthKitProvider config={config}>
-                <MediaQueryProvider>
-                  <HeaderContextProvider>
-                    <FooterContextProvider>
-                      <Main>{children}</Main>
-                    </FooterContextProvider>
-                  </HeaderContextProvider>
-                </MediaQueryProvider>
-              </AuthKitProvider>
-            </TooltipProvider>
+            <PrivyProvider
+              appId="clw1tqoyj02yh110vokuu7yc5"
+              config={{
+                appearance: {
+                  theme: 'dark',
+                  accentColor: theme.orange as `#${string}`,
+                  logo: 'https://creddd.xyz/personae-logo.svg',
+                },
+                // Create embedded wallets for users who don't have a wallet
+                embeddedWallets: {
+                  createOnLogin: 'users-without-wallets',
+                },
+              }}
+            >
+              <TooltipProvider>
+                <AuthKitProvider config={config}>
+                  <MediaQueryProvider>
+                    <HeaderContextProvider>
+                      <FooterContextProvider>
+                        <Main>{children}</Main>
+                      </FooterContextProvider>
+                    </HeaderContextProvider>
+                  </MediaQueryProvider>
+                </AuthKitProvider>
+              </TooltipProvider>
+            </PrivyProvider>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

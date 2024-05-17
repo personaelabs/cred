@@ -1,14 +1,18 @@
-import {
-  createClient,
-  verifySignInMessage,
-  viemConnector,
-} from '@farcaster/auth-client';
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
 import { initAdminApp } from '@cred/firebase';
 import { App, getApps } from 'firebase-admin/app';
+import { PrivyClient } from '@privy-io/server-auth';
+
+const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
+
+if (!PRIVY_APP_SECRET) {
+  throw new Error('PRIVY_APP_SECRET is not set');
+}
+
+const privy = new PrivyClient('clw1tqoyj02yh110vokuu7yc5', PRIVY_APP_SECRET);
 
 let app: App;
 if (getApps().length === 0) {
@@ -21,38 +25,35 @@ if (getApps().length === 0) {
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Initialize the SIWF client
-const client = createClient({
-  relay: 'https://relay.farcaster.xyz',
-  ethereum: viemConnector({
-    rpcUrl: 'https://mainnet.optimism.io',
-  }),
-});
-
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const bearerToken = req.headers.get('Authorization');
 
-  // 1. Verify `signInSig`
-  const { success, fid } = await verifySignInMessage(client, {
-    nonce: body.nonce,
-    message: body.message as string,
-    domain: 'creddd.xyz',
-    signature: body.signature as `0x${string}`,
-  });
+  const authToken = bearerToken?.split(' ')[1];
 
-  if (!success) {
-    console.log('Invalid signature');
-    return Response.json({ error: 'Invalid signature' }, { status: 401 });
+  if (!authToken) {
+    throw new Error('No authorization token provided');
   }
 
-  const uid = fid.toString();
-  const token = await auth.createCustomToken(uid);
+  const verifiedClaims = await privy.verifyAuthToken(authToken);
+
+  const user = await privy.getUser(verifiedClaims.userId);
+
+  const token = await auth.createCustomToken(user.id);
+
+  if (!user.farcaster) {
+    throw new Error('User has not linked a Farcaster account');
+  }
+
+  if (!user.wallet) {
+    throw new Error('User has not linked a wallet');
+  }
 
   const userData: User = {
-    id: uid,
-    displayName: body.displayName,
-    username: body.username,
-    pfpUrl: body.pfpUrl,
+    id: user.id,
+    displayName: user.farcaster?.displayName || '',
+    username: user.farcaster?.username || '',
+    pfpUrl: user.farcaster?.pfp || '',
+    privyAddress: user.wallet.address,
     config: {
       notification: {
         mutedRoomIds: [],
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
     },
   };
 
-  await db.collection('users').doc(uid).set(userData);
+  await db.collection('users').doc(user.id).set(userData);
 
   return Response.json({ token }, { status: 200 });
 }

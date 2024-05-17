@@ -1,9 +1,8 @@
 import { StatusAPIResponse } from '@farcaster/auth-client';
 import { Hex } from 'viem';
+import { User } from '@privy-io/react-auth';
 
-export type SignedInUser = {
-  id: string;
-} & StatusAPIResponse;
+export type SignedInUser = User;
 
 export interface ChatUser {
   id: string;
