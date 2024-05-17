@@ -71,9 +71,10 @@ const Room = () => {
   }, [isSuccess, reset]);
 
   const onSendClick = useCallback(
-    (_message: string) => {
+    ({ message, mentions }: { message: string; mentions: string[] }) => {
       sendMessage({
-        message: _message,
+        message,
+        mentions,
         replyTo: replyTo ? replyTo.id : null,
       });
       setReplyTo(null);
@@ -134,6 +135,7 @@ const Room = () => {
           </InfiniteScroll>
         </div>
         <ChatMessageInput
+          roomId={params.roomId}
           replyToText={replyTo ? replyTo.text : undefined}
           onSend={onSendClick}
           onCancelReply={() => {

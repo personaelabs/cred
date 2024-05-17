@@ -140,6 +140,7 @@ const ChatMessage = (props: ChatMessageProps) => {
               onOpenChange={open => {
                 setIsMenuOpen(open);
               }}
+              modal={false}
             >
               <DropdownMenuTrigger
                 disabled
