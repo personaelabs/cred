@@ -129,15 +129,16 @@ const useMessages = ({
 
   // Merge user data with messages
   const messagesWithUserData = allMessages.map(msg => {
-    const user = usersQueryResult.find(
-      u => u.data?.id?.toString() === msg.user.id
+    const user = usersQueryResult.data?.find(
+      u => u?.id?.toString() === msg.user.id
     );
+
     return {
       ...msg,
       user: {
         ...msg.user,
-        name: user?.data?.displayName || '',
-        avatarUrl: user?.data?.pfpUrl || '',
+        name: user?.displayName || '',
+        avatarUrl: user?.pfpUrl || '',
       },
     };
   });

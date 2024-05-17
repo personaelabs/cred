@@ -20,6 +20,7 @@ import {
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
 import { getFidAttestationHashV1, withHandler } from '@/lib/utils';
+import { addWriterToRoom } from '@/lib/firebaseAdmin';
 
 let circuitInitialized = false;
 
@@ -143,6 +144,11 @@ export async function POST(req: NextRequest) {
         attestation: Buffer.from(proofBytes),
         treeId: groupMerkleTree.id,
       },
+    });
+
+    await addWriterToRoom({
+      roomId: body.groupId, // Room ID is the group id for creddd groups
+      userId: fid.toString(),
     });
 
     return Response.json('OK', { status: 200 });

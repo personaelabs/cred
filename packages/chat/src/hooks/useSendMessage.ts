@@ -7,11 +7,13 @@ import db from '@/lib/firestore';
 const sendMessage = async ({
   roomId,
   message,
+  mentions,
   replyTo,
   senderId,
 }: {
   roomId: string;
   message: string;
+  mentions: string[];
   replyTo: string | null;
   senderId: string;
 }) => {
@@ -25,6 +27,7 @@ const sendMessage = async ({
   const data: Omit<Message, 'id'> = {
     roomId,
     body: message,
+    mentions,
     userId: senderId,
     createdAt: serverTimestamp(),
     readBy: [],
@@ -42,9 +45,11 @@ const useSendMessage = (roomId: string) => {
     mutationFn: async ({
       replyTo,
       message,
+      mentions,
     }: {
       replyTo: string | null;
       message: string;
+      mentions: string[];
     }) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
@@ -53,6 +58,7 @@ const useSendMessage = (roomId: string) => {
       await sendMessage({
         roomId,
         message,
+        mentions,
         replyTo,
         senderId: signedInUser.id,
       });

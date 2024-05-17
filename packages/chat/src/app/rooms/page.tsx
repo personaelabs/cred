@@ -1,5 +1,5 @@
 'use client';
-import { Bell, BellOff, Ellipsis, SquareArrowLeft } from 'lucide-react';
+import { Bell, BellOff, Circle, Ellipsis, SquareArrowLeft } from 'lucide-react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useJoinedRooms from '@/hooks/useJoinedRooms';
@@ -19,6 +19,7 @@ import {
 import useUser from '@/hooks/useUser';
 import useToggleMute from '@/hooks/useToggleMute';
 import { useRouter } from 'next/navigation';
+import useReadTicket from '@/hooks/useReadTicket';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
@@ -73,12 +74,24 @@ const RoomItem = (props: RoomItemProps) => {
   const { mutateAsync: leaveRoom } = useLeaveRoom();
   const { mutateAsync: toggleMute } = useToggleMute();
 
+  const { data: readTicket } = useReadTicket(id);
+
   const { data: messages } = useMessages({
     roomId: id,
     initMessage: null,
   });
 
   const firstMessage = messages?.pages?.[0]?.[0];
+
+  let unreadMessageExists = false;
+  if (readTicket && firstMessage) {
+    unreadMessageExists =
+      firstMessage.createdAt > readTicket.latestReadMessageCreatedAt;
+  }
+
+  if (!readTicket && firstMessage) {
+    unreadMessageExists = true;
+  }
 
   return (
     <div
@@ -96,6 +109,11 @@ const RoomItem = (props: RoomItemProps) => {
           <div className="opacity-60 mt-1">
             {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
           </div>
+        </div>
+        <div className="flex justify-center items-center">
+          {unreadMessageExists ? (
+            <Circle className="w-5 h-5 mr-5 opacity-60"></Circle>
+          ) : null}
         </div>
         <div className="flex justify-center items-center mb-1">
           <DropdownMenu

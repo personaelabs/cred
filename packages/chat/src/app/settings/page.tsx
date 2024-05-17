@@ -34,8 +34,8 @@ const Settings = () => {
   const { mutateAsync: signOut } = useSignOut();
   const router = useRouter();
 
-  const usersResult = useUsers(signedInUser?.id ? [signedInUser.id] : []);
-  const user = usersResult.length > 0 ? usersResult[0].data : null;
+  const { data: users } = useUsers(signedInUser?.id ? [signedInUser.id] : []);
+  const user = users.length > 0 ? users[0] : null;
 
   const onSignOutClick = useCallback(async () => {
     const confirmed = await window.confirm('Sign out?');
@@ -70,11 +70,12 @@ const Settings = () => {
           ></AvatarWithFallback>
           <div className="text-2xl font-bold">{user.displayName}</div>
         </div>
-        <div className="flex flex-col items-center mt-10 w-full">
+        <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem
             text="My creddd"
             to="/user-creddd"
           ></SettingsMenuItem>
+          <Button variant="link">Enable notifications</Button>
         </div>
         <Button variant="link" className="mt-10" onClick={onSignOutClick}>
           Sign out
