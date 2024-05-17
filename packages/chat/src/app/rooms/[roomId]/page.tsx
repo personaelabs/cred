@@ -13,6 +13,7 @@ import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { type ChatMessage as IChatMessage } from '@/types';
 import { Users } from 'lucide-react';
+import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -24,6 +25,10 @@ const Room = () => {
     reset,
     error: sendError,
   } = useSendMessage(params.roomId);
+
+  const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
+    useUpdateReadTicket(params.roomId);
+
   const { setOptions } = useHeaderOptions();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,6 +40,18 @@ const Room = () => {
     roomId: params.roomId,
     initMessage: fromMessage,
   });
+
+  useEffect(() => {
+    const latestMessage =
+      (messages && messages.length > 0 && messages[messages.length - 1]) ||
+      null;
+    if (
+      latestMessage &&
+      latestMessage.createdAt !== latestReadMessageCreatedAt
+    ) {
+      updateReadTicket(latestMessage.createdAt);
+    }
+  }, [messages, latestReadMessageCreatedAt, updateReadTicket]);
 
   useEffect(() => {
     if (sendError) {

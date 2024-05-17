@@ -54,9 +54,7 @@ export interface Room {
 
 export interface RoomReadTicket {
   userId: string;
-  messageId: string;
-  roomId: string;
-  messageCreatedAt: Date | FirestoreTimestamp;
+  latestReadMessageCreatedAt: Date | FirestoreTimestamp;
 }
 
 export interface IdempotencyKey {
