@@ -3,7 +3,7 @@ import { CircleArrowUp } from 'lucide-react';
 import theme from '@/lib/theme';
 import { X } from 'lucide-react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { cutoffMessage } from '@/lib/utils';
+import { cutoffMessage, getMentionsFromText } from '@/lib/utils';
 import { User } from '@cred/shared';
 import {
   DropdownMenuContent,
@@ -111,7 +111,7 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
   const onSendClick = useCallback(() => {
     if (input.trim() !== '') {
       // Get mentioned user ids
-      const mentionedUsers = input.match(/@[\w.-]+/g);
+      const mentionedUsers = getMentionsFromText(input);
 
       let mentionedUserIds: string[] = [];
       if (mentionedUsers) {

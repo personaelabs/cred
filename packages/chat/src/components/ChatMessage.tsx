@@ -4,7 +4,11 @@ import { Copy, Reply } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import useMessage from '@/hooks/useMessage';
 import Link from 'next/link';
-import { copyTextToClipboard, cutoffMessage } from '@/lib/utils';
+import {
+  copyTextToClipboard,
+  cutoffMessage,
+  highlightUsernames,
+} from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -146,9 +150,10 @@ const ChatMessage = (props: ChatMessageProps) => {
                 disabled
                 {...bind()}
                 className="text-left  whitespace-pre-wrap focus:outline-none"
-              >
-                {props.text}
-              </DropdownMenuTrigger>
+                dangerouslySetInnerHTML={{
+                  __html: highlightUsernames(props.text),
+                }}
+              ></DropdownMenuTrigger>
               {isSender ? (
                 <SenderMessageDropdownContent
                   onCopyClick={onClickCopyToClipboard}

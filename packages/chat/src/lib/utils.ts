@@ -2,10 +2,21 @@ import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex } from 'viem';
+import * as DOMPurify from 'dompurify';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const highlightUsernames = (text: string) => {
+  return DOMPurify.sanitize(
+    text.replace(/@[\w.-]+/g, '<span class="text-[#fed4bf]">$&</span>')
+  );
+};
+
+export const getMentionsFromText = (text: string) => {
+  return text.match(/@[\w.-]+/g);
+};
 
 // This is the function we wrote earlier
 export const copyTextToClipboard = async (text: string) => {
