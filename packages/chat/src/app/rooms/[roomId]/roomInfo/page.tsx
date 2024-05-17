@@ -57,9 +57,9 @@ const RoomInfo = () => {
             */}
         <div className="text-xl mt-4">{room.name}</div>
         <div className="mt-4">
-          {roomUsersResult
-            ?.filter(({ data: user }) => user)
-            .map(({ data: user }) => {
+          {roomUsersResult?.data
+            .filter(user => user)
+            .map(user => {
               return (
                 <div
                   key={user!.id}

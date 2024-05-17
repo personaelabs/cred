@@ -20,11 +20,17 @@ const getUser = async (userId: string) => {
 const useUsers = (userIds: string[]) => {
   return useQueries({
     queries: userIds.map(id => ({
-      queryKey: ['user',  id],
+      queryKey: ['user', { userId: id }],
       queryFn: async () => {
         return await getUser(id);
       },
     })),
+    combine: results => {
+      return {
+        data: results.map(result => result.data),
+        pending: results.some(result => result.isPending),
+      };
+    },
   });
 };
 
