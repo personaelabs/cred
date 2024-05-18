@@ -12,6 +12,9 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useScrollableRef } from '@/contexts/FooterContext';
+import useBuyKey from '@/hooks/useBuyKey';
+import useKeyPrice from '@/hooks/useKeyPrice';
+import { formatEther } from 'viem';
 
 type PurchasableRoomItemProps = {
   id: string;
@@ -31,14 +34,17 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
   });
   const router = useRouter();
 
+  const { buyKey } = useBuyKey();
+  const { data: keyPrice } = useKeyPrice(id);
+
   const onJoinClick = useCallback(async () => {
     await joinRoom();
     router.replace(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 
   const onPurchaseClick = useCallback(() => {
-    console.log('purchase');
-  }, []);
+    buyKey();
+  }, [buyKey]);
 
   useEffect(() => {
     if (error) {
@@ -48,7 +54,7 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
   });
 
   return (
-    <div className="flex mt-2 flex-row items-center justify-between px-5">
+    <div className="flex mt-4 flex-row items-center justify-between px-5">
       <div
         className={`text-md text-wrap w-[55%] ${canJoin ? 'font-bold' : 'font-normal'} ${canJoin ? 'text-primary' : ''}`}
       >
@@ -60,8 +66,12 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
             Join
           </Button>
         ) : (
-          <Button onClick={onPurchaseClick} variant="link">
-            Buy read access
+          <Button
+            onClick={onPurchaseClick}
+            variant="link"
+            className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
+          >
+            {keyPrice ? formatEther(keyPrice) : ''}ETH
           </Button>
         )}
       </div>

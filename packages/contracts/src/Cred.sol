@@ -26,7 +26,7 @@ contract Cred is ERC1155, Ownable {
     address to,
     uint256 tokenId,
     bytes calldata data
-  ) public payable onlyOwner {
+  ) public payable {
     // TODO: Set max supply and max amount to prevent overflow
     uint256 price = getBuyPrice(tokenId);
 

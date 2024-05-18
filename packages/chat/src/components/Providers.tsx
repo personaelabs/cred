@@ -1,5 +1,4 @@
 'use client';
-import '@rainbow-me/rainbowkit/styles.css';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -19,18 +18,18 @@ import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { FooterContextProvider } from '@/contexts/FooterContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
 import Image from 'next/image';
-import { PrivyProvider } from '@privy-io/react-auth';
+import { PrivyProvider, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
+import { anvil, base } from 'viem/chains';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -92,6 +91,22 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
+  const { ready: walletsReady, wallets } = useWallets();
+  const { setActiveWallet } = useSetActiveWallet();
+  useEffect(() => {
+    if (walletsReady) {
+      const embeddedWallet = wallets.find(
+        wallet => wallet.walletClientType === 'privy'
+      );
+      if (embeddedWallet) {
+        console.log('Setting active wallet', embeddedWallet);
+        setActiveWallet(embeddedWallet);
+      } else {
+        throw new Error('No embedded wallet found');
+      }
+    }
+  }, [walletsReady, wallets, setActiveWallet]);
+
   if (!isMobile) {
     return (
       <div className="h-[100vh] bg-background flex flex-col items-center justify-center">
@@ -133,38 +148,38 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <WagmiProvider config={wagmiConfig}>
+      <PrivyProvider
+        appId="clw1tqoyj02yh110vokuu7yc5"
+        config={{
+          defaultChain: process.env.NODE_ENV === 'development' ? anvil : base,
+          supportedChains: [anvil, base],
+          appearance: {
+            theme: 'dark',
+            accentColor: theme.orange as `#${string}`,
+            logo: 'https://creddd.xyz/personae-logo.svg',
+          },
+          // Create embedded wallets for users who don't have a wallet
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets',
+          },
+        }}
+      >
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            <PrivyProvider
-              appId="clw1tqoyj02yh110vokuu7yc5"
-              config={{
-                appearance: {
-                  theme: 'dark',
-                  accentColor: theme.orange as `#${string}`,
-                  logo: 'https://creddd.xyz/personae-logo.svg',
-                },
-                // Create embedded wallets for users who don't have a wallet
-                embeddedWallets: {
-                  createOnLogin: 'users-without-wallets',
-                },
-              }}
-            >
-              <TooltipProvider>
-                <AuthKitProvider config={config}>
-                  <MediaQueryProvider>
-                    <HeaderContextProvider>
-                      <FooterContextProvider>
-                        <Main>{children}</Main>
-                      </FooterContextProvider>
-                    </HeaderContextProvider>
-                  </MediaQueryProvider>
-                </AuthKitProvider>
-              </TooltipProvider>
-            </PrivyProvider>
-          </RainbowKitProvider>
+          <WagmiProvider config={wagmiConfig}>
+            <TooltipProvider>
+              <AuthKitProvider config={config}>
+                <MediaQueryProvider>
+                  <HeaderContextProvider>
+                    <FooterContextProvider>
+                      <Main>{children}</Main>
+                    </FooterContextProvider>
+                  </HeaderContextProvider>
+                </MediaQueryProvider>
+              </AuthKitProvider>
+            </TooltipProvider>
+          </WagmiProvider>
         </QueryClientProvider>
-      </WagmiProvider>
+      </PrivyProvider>
       <Toaster richColors expand></Toaster>
     </ThemeProvider>
   );
