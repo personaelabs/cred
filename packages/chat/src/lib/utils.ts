@@ -8,6 +8,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const getRoomTokenId = (roomId: string) => {
+  switch (roomId) {
+    case 'test':
+      return BigInt(1);
+    case 'test-notification':
+      return BigInt(2);
+    default:
+      return BigInt(`0x${roomId}`);
+  }
+};
+
 export const highlightUsernames = (text: string) => {
   return DOMPurify.sanitize(
     text.replace(/@[\w.-]+/g, '<span class="text-[#fed4bf]">$&</span>')

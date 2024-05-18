@@ -34,7 +34,7 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
   });
   const router = useRouter();
 
-  const { buyKey } = useBuyKey();
+  const { mutateAsync: buyKey } = useBuyKey(id);
   const { data: keyPrice } = useKeyPrice(id);
 
   const onJoinClick = useCallback(async () => {

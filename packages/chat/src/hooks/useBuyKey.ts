@@ -1,41 +1,64 @@
-import { useCallback } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { CredAbi, CRED_CONTRACT_ADDRESS } from '@cred/shared';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
+import { Hex } from 'viem';
+import axios from '@/lib/axios';
+import { SyncRoomRequestBody } from '@/types';
+import { useMutation } from '@tanstack/react-query';
+import { getRoomTokenId } from '@/lib/utils';
 
-const useBuyKey = () => {
+const sendTransactionId = async ({
+  roomId,
+  txId,
+}: {
+  roomId: string;
+  txId: Hex;
+}) => {
+  const body: SyncRoomRequestBody = {
+    buyTransactionHash: txId,
+  };
+
+  await axios.post(`/api/rooms/${roomId}/sync`, body);
+};
+
+const useBuyKey = (roomId: string) => {
   const { writeContractAsync } = useWriteContract();
   const { address } = useAccount();
 
-  const buyKey = useCallback(async () => {
-    if (!address) {
-      throw new Error('No connected address found.');
-    }
+  return useMutation({
+    mutationFn: async () => {
+      if (!address) {
+        throw new Error('No connected address found.');
+      }
 
-    const value = await readContract(wagmiConfig, {
-      abi: CredAbi,
-      address: CRED_CONTRACT_ADDRESS,
-      functionName: 'getBuyPrice',
-      args: [BigInt(1)],
-    });
+      const roomIdBigInt = getRoomTokenId(roomId);
 
-    if (!value) {
-      throw new Error('Failed to get price of.');
-    }
+      const value = await readContract(wagmiConfig, {
+        abi: CredAbi,
+        address: CRED_CONTRACT_ADDRESS,
+        functionName: 'getBuyPrice',
+        args: [roomIdBigInt],
+      });
 
-    const result = await writeContractAsync({
-      abi: CredAbi,
-      address: CRED_CONTRACT_ADDRESS,
-      functionName: 'buyToken',
-      args: [address, BigInt(1), '0x'],
-      value,
-    });
+      if (!value) {
+        throw new Error('Failed to get price of.');
+      }
 
-    return result;
-  }, [address, writeContractAsync]);
+      const txId = await writeContractAsync({
+        abi: CredAbi,
+        address: CRED_CONTRACT_ADDRESS,
+        functionName: 'buyToken',
+        args: [address, roomIdBigInt, '0x'],
+        value,
+      });
 
-  return { ...writeContractAsync, buyKey };
+      await sendTransactionId({
+        roomId,
+        txId,
+      });
+    },
+  });
 };
 
 export default useBuyKey;

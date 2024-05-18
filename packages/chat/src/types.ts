@@ -74,3 +74,7 @@ export interface UserCredddResponse {
   }[];
   score: number;
 }
+
+export interface SyncRoomRequestBody {
+  buyTransactionHash: Hex;
+}

@@ -2,8 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
-import { initAdminApp } from '@cred/firebase';
-import { App, getApps } from 'firebase-admin/app';
+import app from '@/lib/backend/firebaseAdmin';
 import { PrivyClient } from '@privy-io/server-auth';
 
 const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
@@ -13,14 +12,6 @@ if (!PRIVY_APP_SECRET) {
 }
 
 const privy = new PrivyClient('clw1tqoyj02yh110vokuu7yc5', PRIVY_APP_SECRET);
-
-let app: App;
-if (getApps().length === 0) {
-  app = initAdminApp();
-} else {
-  app = getApps()[0];
-  console.log('Firebase app already initialized.');
-}
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -53,7 +44,7 @@ export async function POST(req: NextRequest) {
     displayName: user.farcaster?.displayName || '',
     username: user.farcaster?.username || '',
     pfpUrl: user.farcaster?.pfp || '',
-    privyAddress: user.wallet.address,
+    privyAddress: user.wallet.address.toLowerCase(),
     config: {
       notification: {
         mutedRoomIds: [],
