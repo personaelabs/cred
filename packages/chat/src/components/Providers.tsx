@@ -94,19 +94,18 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   const { ready: walletsReady, wallets } = useWallets();
   const { setActiveWallet } = useSetActiveWallet();
+
   useEffect(() => {
-    if (walletsReady) {
+    if (walletsReady && signedInUser) {
       const embeddedWallet = wallets.find(
         wallet => wallet.walletClientType === 'privy'
       );
       if (embeddedWallet) {
         console.log('Setting active wallet', embeddedWallet);
         setActiveWallet(embeddedWallet);
-      } else {
-        throw new Error('No embedded wallet found');
       }
     }
-  }, [walletsReady, wallets, setActiveWallet]);
+  }, [walletsReady, wallets, setActiveWallet, signedInUser]);
 
   if (!isMobile) {
     return (
