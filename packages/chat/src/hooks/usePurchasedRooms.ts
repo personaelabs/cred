@@ -21,7 +21,7 @@ const usePurchasedRooms = (userId: string | null) => {
   const { data: joinedRooms } = useJoinedRooms(userId);
 
   return useQuery({
-    queryKey: ['purchased-rooms', { userId }],
+    queryKey: ['purchased-rooms'],
     queryFn: async () => {
       const purchasedRooms = await getPurchasedRooms(userId!);
 

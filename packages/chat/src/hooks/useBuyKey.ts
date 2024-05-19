@@ -8,6 +8,8 @@ import { SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const sendTransactionId = async ({
   roomId,
@@ -27,8 +29,9 @@ const useBuyKey = (roomId: string) => {
   const { writeContractAsync } = useWriteContract();
   const { address } = useAccount();
   const queryClient = useQueryClient();
+  const [isProcessingTx, setIsProcessingTx] = useState(false);
 
-  return useMutation({
+  const result = useMutation({
     mutationFn: async () => {
       if (!address) {
         throw new Error('No connected address found.');
@@ -62,15 +65,24 @@ const useBuyKey = (roomId: string) => {
         value: value + fee,
       });
 
+      setIsProcessingTx(true);
+
       await sendTransactionId({
         roomId,
         txId,
       });
+
+      setIsProcessingTx(false);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
+      queryClient.invalidateQueries({ queryKey: ['purchased-rooms'] });
+
+      toast.success('Purchase complete');
     },
   });
+
+  return { ...result, isProcessingTx };
 };
 
 export default useBuyKey;

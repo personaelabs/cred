@@ -16,6 +16,7 @@ import useBuyKey from '@/hooks/useBuyKey';
 import useKeyPrice from '@/hooks/useKeyPrice';
 import { formatEther } from 'viem';
 import usePurchasedRooms from '@/hooks/usePurchasedRooms';
+import ProcessingTxModal from '@/components/ProcessingTxModal';
 
 type RoomItemProps = {
   id: string;
@@ -35,7 +36,7 @@ const RoomItem = (props: RoomItemProps) => {
   });
   const router = useRouter();
 
-  const { mutateAsync: buyKey } = useBuyKey(id);
+  const { mutateAsync: buyKey, isProcessingTx } = useBuyKey(id);
   const { data: keyPrice } = useKeyPrice(id);
 
   const onJoinClick = useCallback(async () => {
@@ -76,6 +77,7 @@ const RoomItem = (props: RoomItemProps) => {
           </Button>
         )}
       </div>
+      <ProcessingTxModal isOpen={isProcessingTx} />
     </div>
   );
 };
