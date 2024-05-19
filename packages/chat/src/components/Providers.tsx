@@ -70,8 +70,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     pathname.startsWith('/rooms/') ||
     isModalOpen;
 
-  console.log('hideFooter', hideFooter);
-
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {

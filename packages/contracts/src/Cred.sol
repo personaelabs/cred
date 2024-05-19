@@ -7,6 +7,7 @@ import 'forge-std/console.sol';
 contract Cred is ERC1155, Ownable {
   mapping(uint256 => uint256) public tokenIdToSupply;
   uint256 public protocolFeePercentage = 1; // 1%
+  uint256 public unitPirce = 0.0001 ether;
 
   constructor()
     ERC1155('https://creddd.xyz/api/cred/{id}.json')
@@ -14,14 +15,14 @@ contract Cred is ERC1155, Ownable {
   {}
 
   function getBuyPrice(uint256 tokenId) public view returns (uint256) {
-    return 0.01 ether + (tokenIdToSupply[tokenId] * 0.01 ether);
+    return unitPirce + (tokenIdToSupply[tokenId] * unitPirce);
   }
 
   function getSellPrice(uint256 tokenId) public view returns (uint256) {
     assert(tokenIdToSupply[tokenId] > 0);
 
     uint256 supplyAfterSell = tokenIdToSupply[tokenId] - 1;
-    return 0.01 ether + (supplyAfterSell * 0.01 ether);
+    return unitPirce + (supplyAfterSell * unitPirce);
   }
 
   function getProtocolFee(uint256 amount) public view returns (uint256) {
