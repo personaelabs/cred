@@ -27,7 +27,7 @@ import {
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
 import Image from 'next/image';
-import { PrivyProvider, useWallets } from '@privy-io/react-auth';
+import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { base, baseSepolia } from 'viem/chains';
 import { getChain } from '@/lib/utils';
@@ -63,9 +63,14 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
+  const { isModalOpen } = usePrivy();
+
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
-    pathname.startsWith('/rooms/');
+    pathname.startsWith('/rooms/') ||
+    isModalOpen;
+
+  console.log('hideFooter', hideFooter);
 
   const { isMobile } = useMediaQuery();
 

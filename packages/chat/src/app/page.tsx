@@ -36,7 +36,7 @@ const RoomItem = (props: RoomItemProps) => {
   });
   const router = useRouter();
 
-  const { mutateAsync: buyKey, isProcessingTx } = useBuyKey(id);
+  const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
   const { data: keyPrice } = useKeyPrice(id);
 
   const onJoinClick = useCallback(async () => {
@@ -70,6 +70,7 @@ const RoomItem = (props: RoomItemProps) => {
         ) : (
           <Button
             onClick={onPurchaseClick}
+            disabled={isPending}
             variant="link"
             className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
           >
