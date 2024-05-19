@@ -40,6 +40,13 @@ const CredAbi = [
   },
   {
     type: 'function',
+    name: 'getProtocolFee',
+    inputs: [{ name: 'amount', type: 'uint256', internalType: 'uint256' }],
+    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'getSellPrice',
     inputs: [{ name: 'tokenId', type: 'uint256', internalType: 'uint256' }],
     outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
@@ -60,6 +67,13 @@ const CredAbi = [
     name: 'owner',
     inputs: [],
     outputs: [{ name: '', type: 'address', internalType: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'protocolFeePercentage',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
     stateMutability: 'view',
   },
   {
@@ -117,13 +131,6 @@ const CredAbi = [
     name: 'supportsInterface',
     inputs: [{ name: 'interfaceId', type: 'bytes4', internalType: 'bytes4' }],
     outputs: [{ name: '', type: 'bool', internalType: 'bool' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'tokenIdCounter',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
     stateMutability: 'view',
   },
   {

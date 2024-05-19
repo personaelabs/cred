@@ -37,7 +37,7 @@ const useSignedInUser = () => {
     })();
   }, [router, user, ready]);
 
-  return { data: user };
+  return { data: ready ? user : null, ready };
 };
 
 export default useSignedInUser;

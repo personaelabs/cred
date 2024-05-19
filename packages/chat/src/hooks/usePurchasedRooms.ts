@@ -4,10 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import useJoinedRooms from './useJoinedRooms';
 
-const getWritableRooms = async (userId: string) => {
+const getPurchasedRooms = async (userId: string) => {
   const q = query(
     collection(db, 'rooms').withConverter(roomConverter),
-    where('writerIds', 'array-contains', userId)
+    where('readerIds', 'array-contains', userId)
   );
 
   const docs = await getDocs(q);
@@ -17,15 +17,15 @@ const getWritableRooms = async (userId: string) => {
   return rooms;
 };
 
-const useWritableRooms = (userId: string | null) => {
+const usePurchasedRooms = (userId: string | null) => {
   const { data: joinedRooms } = useJoinedRooms(userId);
 
   return useQuery({
-    queryKey: ['writable-rooms', { userId }],
+    queryKey: ['purchased-rooms', { userId }],
     queryFn: async () => {
-      const writableRooms = await getWritableRooms(userId!);
+      const purchasedRooms = await getPurchasedRooms(userId!);
 
-      const rooms = writableRooms.filter(room => {
+      const rooms = purchasedRooms.filter(room => {
         return !joinedRooms!.some(joinedRoom => joinedRoom.id === room.id);
       });
       return rooms;
@@ -35,4 +35,4 @@ const useWritableRooms = (userId: string | null) => {
   });
 };
 
-export default useWritableRooms;
+export default usePurchasedRooms;

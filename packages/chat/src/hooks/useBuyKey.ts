@@ -1,12 +1,13 @@
 import { useAccount, useWriteContract } from 'wagmi';
-import { CredAbi, CRED_CONTRACT_ADDRESS } from '@cred/shared';
+import { CredAbi } from '@cred/shared';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 import { Hex } from 'viem';
 import axios from '@/lib/axios';
 import { SyncRoomRequestBody } from '@/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
+import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
 
 const sendTransactionId = async ({
   roomId,
@@ -25,6 +26,7 @@ const sendTransactionId = async ({
 const useBuyKey = (roomId: string) => {
   const { writeContractAsync } = useWriteContract();
   const { address } = useAccount();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
@@ -41,6 +43,13 @@ const useBuyKey = (roomId: string) => {
         args: [roomIdBigInt],
       });
 
+      const fee = await readContract(wagmiConfig, {
+        abi: CredAbi,
+        address: CRED_CONTRACT_ADDRESS,
+        functionName: 'getProtocolFee',
+        args: [value],
+      });
+
       if (!value) {
         throw new Error('Failed to get price of.');
       }
@@ -50,13 +59,16 @@ const useBuyKey = (roomId: string) => {
         address: CRED_CONTRACT_ADDRESS,
         functionName: 'buyToken',
         args: [address, roomIdBigInt, '0x'],
-        value,
+        value: value + fee,
       });
 
       await sendTransactionId({
         roomId,
         txId,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
     },
   });
 };

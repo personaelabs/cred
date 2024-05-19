@@ -29,7 +29,8 @@ import {
 import Image from 'next/image';
 import { PrivyProvider, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
-import { anvil, base } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
+import { getChain } from '@/lib/utils';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -151,8 +152,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <PrivyProvider
         appId="clw1tqoyj02yh110vokuu7yc5"
         config={{
-          defaultChain: process.env.NODE_ENV === 'development' ? anvil : base,
-          supportedChains: [anvil, base],
+          defaultChain: getChain(),
+          supportedChains: [baseSepolia, base],
           appearance: {
             theme: 'dark',
             accentColor: theme.orange as `#${string}`,

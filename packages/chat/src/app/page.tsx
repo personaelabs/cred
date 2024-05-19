@@ -15,15 +15,16 @@ import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
 import useKeyPrice from '@/hooks/useKeyPrice';
 import { formatEther } from 'viem';
+import usePurchasedRooms from '@/hooks/usePurchasedRooms';
 
-type PurchasableRoomItemProps = {
+type RoomItemProps = {
   id: string;
   name: string;
   imageUrl: string | null;
   canJoin: boolean;
 };
 
-const WritableRoomItem = (props: PurchasableRoomItemProps) => {
+const RoomItem = (props: RoomItemProps) => {
   const { name, canJoin, id } = props;
   const {
     mutateAsync: joinRoom,
@@ -94,8 +95,9 @@ export default function Home() {
     signedInUser?.id || null
   );
   const { data: writableRooms } = useWritableRooms(signedInUser?.id || null);
+  const { data: purchasedRooms } = usePurchasedRooms(signedInUser?.id || null);
 
-  if (!signedInUser || !purchasableRooms || !writableRooms) {
+  if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
   }
 
@@ -124,22 +126,31 @@ export default function Home() {
             </AlertTitle>
           </Alert>
           {writableRooms.map(room => (
-            <WritableRoomItem
+            <RoomItem
               id={room.id}
               key={room.id}
               name={room.name}
               imageUrl={room.imageUrl}
               canJoin={true}
-            ></WritableRoomItem>
+            ></RoomItem>
+          ))}
+          {purchasedRooms.map(room => (
+            <RoomItem
+              id={room.id}
+              key={room.id}
+              name={room.name}
+              imageUrl={room.imageUrl}
+              canJoin={true}
+            ></RoomItem>
           ))}
           {purchasableRooms.map(room => (
-            <WritableRoomItem
+            <RoomItem
               id={room.id}
               key={room.id}
               name={room.name}
               imageUrl={room.imageUrl}
               canJoin={false}
-            ></WritableRoomItem>
+            ></RoomItem>
           ))}
         </InfiniteScroll>
       </div>

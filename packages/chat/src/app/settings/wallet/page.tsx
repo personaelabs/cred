@@ -26,7 +26,7 @@ const WalletPage = () => {
   return (
     <div className="flex flex-col items-center h-full">
       <div className="text-4xl mt-8">
-        {data?.value ? formatEther(data?.value) : ''} ETH
+        {data?.value !== undefined ? formatEther(data?.value) : ''} ETH
       </div>
       <div className="flex text-lg flex-row gap-x-2 items-center mt-8">
         {address ? trimAddress(address as Hex) : ''}
