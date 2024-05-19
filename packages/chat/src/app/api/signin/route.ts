@@ -2,7 +2,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
-import app from '@/lib/backend/firebaseAdmin';
+import { app } from '@cred/firebase';
 import { PrivyClient } from '@privy-io/server-auth';
 
 const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;

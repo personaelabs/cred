@@ -2,10 +2,9 @@ import { Room, roomConverter } from '@cred/shared';
 import { getGroups } from './lib/creddd';
 import { sleep } from './lib/utils';
 import { getFirestore } from 'firebase-admin/firestore';
-import { initAdminApp } from '@cred/firebase';
+import { app } from '@cred/firebase';
 
-const firebaseAdmin = initAdminApp();
-const db = getFirestore(firebaseAdmin);
+const db = getFirestore(app);
 
 const upsertRoom = async ({
   groupId,

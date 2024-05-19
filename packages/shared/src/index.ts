@@ -6,6 +6,7 @@ export * from './converters/notificationTokensConvert';
 export * from './converters/roomConverter';
 export * from './converters/idempotencyKeyConverter';
 export * from './converters/roomReadTicketConverter';
+export * from './utils';
 export { default as CredAbi } from './abi/Cred';
 
 export const CRED_CONTRACT_ADDRESS =

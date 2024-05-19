@@ -1,11 +1,10 @@
-import { Hex } from 'viem';
 import { getFirestore } from 'firebase-admin/firestore';
-import app from './firebaseAdmin';
+import app from './app';
 import { userConverter } from '@cred/shared';
 
 const db = getFirestore(app);
 
-export const getUserByAddress = async (address: Hex) => {
+export const getUserByAddress = async (address: `0x${string}`) => {
   const user = await db
     .collection('users')
     .withConverter(userConverter)
