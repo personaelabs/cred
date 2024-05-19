@@ -1,13 +1,23 @@
 import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex } from 'viem';
+import { Hex, formatEther } from 'viem';
 import * as DOMPurify from 'dompurify';
 import { base, baseSepolia } from 'viem/chains';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const formatEthBalance = (balance: bigint) => {
+  const balanceInEth = formatEther(balance);
+  const balanceNumber = parseFloat(balanceInEth);
+  if (balanceNumber < 0.0001) {
+    return '< 0.0001';
+  }
+
+  return balanceNumber.toPrecision(3);
+};
 
 export const getChain = () => {
   if (
