@@ -28,6 +28,9 @@ COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_pric
 RUN apt-get update -y
 RUN apt-get install libcurl4 -y
 
+EXPOSE 10000
+EXPOSE 50051
+
 # Set the binary as the entrypoint of the container
 CMD ["indexer"]
 
