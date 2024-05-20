@@ -89,7 +89,8 @@ services:
       - key: CREDDD_GRPC_URL
         fromService:
           name: cred-indexer
-          property: RENDER_EXTERNAL_HOSTNAME
+          type: web
+          property: host
       - key: DATABASE_URL
         fromDatabase:
           name: cred
