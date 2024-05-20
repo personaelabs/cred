@@ -12,15 +12,20 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useScrollableRef } from '@/contexts/FooterContext';
+import useBuyKey from '@/hooks/useBuyKey';
+import useKeyPrice from '@/hooks/useKeyPrice';
+import { formatEther } from 'viem';
+import usePurchasedRooms from '@/hooks/usePurchasedRooms';
+import ProcessingTxModal from '@/components/ProcessingTxModal';
 
-type PurchasableRoomItemProps = {
+type RoomItemProps = {
   id: string;
   name: string;
   imageUrl: string | null;
   canJoin: boolean;
 };
 
-const WritableRoomItem = (props: PurchasableRoomItemProps) => {
+const RoomItem = (props: RoomItemProps) => {
   const { name, canJoin, id } = props;
   const {
     mutateAsync: joinRoom,
@@ -31,14 +36,17 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
   });
   const router = useRouter();
 
+  const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
+  const { data: keyPrice } = useKeyPrice(id);
+
   const onJoinClick = useCallback(async () => {
     await joinRoom();
     router.replace(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 
   const onPurchaseClick = useCallback(() => {
-    console.log('purchase');
-  }, []);
+    buyKey();
+  }, [buyKey]);
 
   useEffect(() => {
     if (error) {
@@ -48,7 +56,7 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
   });
 
   return (
-    <div className="flex mt-2 flex-row items-center justify-between px-5">
+    <div className="flex mt-4 flex-row items-center justify-between px-5">
       <div
         className={`text-md text-wrap w-[55%] ${canJoin ? 'font-bold' : 'font-normal'} ${canJoin ? 'text-primary' : ''}`}
       >
@@ -60,11 +68,17 @@ const WritableRoomItem = (props: PurchasableRoomItemProps) => {
             Join
           </Button>
         ) : (
-          <Button onClick={onPurchaseClick} variant="link">
-            Buy read access
+          <Button
+            onClick={onPurchaseClick}
+            disabled={isPending}
+            variant="link"
+            className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
+          >
+            {keyPrice ? formatEther(keyPrice) : ''}ETH
           </Button>
         )}
       </div>
+      <ProcessingTxModal isOpen={isProcessingTx} />
     </div>
   );
 };
@@ -84,8 +98,9 @@ export default function Home() {
     signedInUser?.id || null
   );
   const { data: writableRooms } = useWritableRooms(signedInUser?.id || null);
+  const { data: purchasedRooms } = usePurchasedRooms(signedInUser?.id || null);
 
-  if (!signedInUser || !purchasableRooms || !writableRooms) {
+  if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
   }
 
@@ -114,22 +129,31 @@ export default function Home() {
             </AlertTitle>
           </Alert>
           {writableRooms.map(room => (
-            <WritableRoomItem
+            <RoomItem
               id={room.id}
               key={room.id}
               name={room.name}
               imageUrl={room.imageUrl}
               canJoin={true}
-            ></WritableRoomItem>
+            ></RoomItem>
+          ))}
+          {purchasedRooms.map(room => (
+            <RoomItem
+              id={room.id}
+              key={room.id}
+              name={room.name}
+              imageUrl={room.imageUrl}
+              canJoin={true}
+            ></RoomItem>
           ))}
           {purchasableRooms.map(room => (
-            <WritableRoomItem
+            <RoomItem
               id={room.id}
               key={room.id}
               name={room.name}
               imageUrl={room.imageUrl}
               canJoin={false}
-            ></WritableRoomItem>
+            ></RoomItem>
           ))}
         </InfiniteScroll>
       </div>

@@ -28,6 +28,10 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
+    function isOnlyCreatingFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
     function isOnlyUpdatingFieldsInData(requestData, resourceData, fields) {
       return requestData.diff(resourceData).affectedKeys().hasOnly(fields);
     }
@@ -48,19 +52,25 @@ service cloud.firestore {
       allow create: if false;
       allow delete: if false;
       allow update: if 
-        (
-          // Allow the authenticated user to join the room
-          isAddingValueToArray("joinedUserIds", request.auth.uid) ||
-          // Allow the authenticated user to leave the room
-          isRemovingValueFromArray("joinedUserIds", request.auth.uid)
-        ) &&
-        isOnlyUpdatingFields(["joinedUserIds"]);
+      (
+      // Allow the authenticated user to join the room
+      isAddingValueToArray("joinedUserIds", request.auth.uid) ||
+      // Allow the authenticated user to leave the room
+      isRemovingValueFromArray("joinedUserIds", request.auth.uid)
+      ) &&
+      isOnlyUpdatingFields(["joinedUserIds"]);
     }
-    
+
     match /rooms/{roomId}/readTickets/{userId} {
       allow read: if request.auth.uid == userId;
-      
-      allow write: if isUserAuthorized() && isOnlyUpdatingFields(["latestReadMessageCreatedAt"]);
+
+      allow create: if 
+      isUserAuthorized() && 
+      isOnlyCreatingFields(["userId", "latestReadMessageCreatedAt"]);
+
+      allow update: if 
+      isUserAuthorized() && 
+      isOnlyUpdatingFields(["userId", "latestReadMessageCreatedAt"]);
     }
 
 
@@ -68,31 +78,31 @@ service cloud.firestore {
       allow read: if isInRoom(roomId);
 
       allow write: if 
-        isInRoom(roomId) && 
-        isValidMessage() &&
-        isUserAuthorized() && 
-        request.resource.data.roomId == roomId;
+      isInRoom(roomId) && 
+      isValidMessage() &&
+      isUserAuthorized() && 
+      request.resource.data.roomId == roomId;
     }
 
     match /notificationTokens/{userId} {
       allow read: if request.auth.uid == userId;
-      
+
       allow write: if 
-        isUserAuthorized() &&
-        userId == request.auth.uid &&
-        isOnlyUpdatingFields(["tokens", "userId"]) &&
-        request.resource.data.tokens is list;
+      isUserAuthorized() &&
+      userId == request.auth.uid &&
+      isOnlyUpdatingFields(["tokens", "userId"]) &&
+      request.resource.data.tokens is list;
     }
 
     match /users/{userId} {
       allow read: if true;
-      
+
       allow write: if 
-        request.auth.uid == request.resource.data.id && 
-        isOnlyUpdatingFields(["config"]) &&
-        isOnlyUpdatingFieldsInData(request.resource.data["config"], resource.data["config"], ["notification"]) &&
-        isOnlyUpdatingFieldsInData(request.resource.data["config"]["notification"], resource.data["config"]["notification"], ["mutedRoomIds"]) &&
-        request.resource.data["config"]["notification"]["mutedRoomIds"] is list;
+      request.auth.uid == request.resource.data.id && 
+      isOnlyUpdatingFields(["config"]) &&
+      isOnlyUpdatingFieldsInData(request.resource.data["config"], resource.data["config"], ["notification"]) &&
+      isOnlyUpdatingFieldsInData(request.resource.data["config"]["notification"], resource.data["config"]["notification"], ["mutedRoomIds"]) &&
+      request.resource.data["config"]["notification"]["mutedRoomIds"] is list;
     }
   }
 }

@@ -37,7 +37,7 @@ const useLeaveRoom = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['joined-rooms', { userId: signedInUser!.id }],
+        queryKey: ['joined-rooms'],
       });
     },
   });

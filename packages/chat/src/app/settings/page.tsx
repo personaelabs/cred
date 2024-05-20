@@ -11,18 +11,26 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Scrollable from '@/components/Scrollable';
+import { icons } from 'lucide-react';
+import theme from '@/lib/theme';
 
 interface SettingsMenuItemProps {
+  icon: keyof typeof icons;
+  iconColor: string;
   text: string;
   to: string;
 }
 
 const SettingsMenuItem = (props: SettingsMenuItemProps) => {
-  const { text, to } = props;
+  const Icon = icons[props.icon];
+  const { text, to, iconColor } = props;
   return (
     <Link href={to} className="no-underline w-[50%]">
       <div className="w-full flex flex-row items-center justify-between border-2 border-opacity-50 py-1  border-gray-200 rounded-md">
-        <div className="ml-4 text-lg">{text}</div>
+        <div className="flex flex-row  items-center">
+          <Icon className="w-5 h-5 ml-2" color={iconColor}></Icon>
+          <div className="ml-2 text-lg">{text}</div>
+        </div>
         <ChevronRight className="w-5 h-5 opacity-50 mr-2"></ChevronRight>
       </div>
     </Link>
@@ -72,10 +80,27 @@ const Settings = () => {
         </div>
         <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem
+            icon="Squircle"
             text="My creddd"
             to="/user-creddd"
+            iconColor={theme.orange}
           ></SettingsMenuItem>
-          <Button variant="link">Enable notifications</Button>
+          <SettingsMenuItem
+            icon="Wallet"
+            text="Wallet"
+            to="/settings/wallet"
+            iconColor="#65a7f7"
+          ></SettingsMenuItem>
+          {/*
+
+           
+          <SettingsMenuItem
+            icon="Bell"
+            text="Notifications"
+            to="/settings/notification"
+            iconColor="#65f7b5"
+          ></SettingsMenuItem>
+           */}
         </div>
         <Button variant="link" className="mt-10" onClick={onSignOutClick}>
           Sign out

@@ -47,11 +47,12 @@ const Room = () => {
       null;
     if (
       latestMessage &&
-      latestMessage.createdAt !== latestReadMessageCreatedAt
+      latestMessage.createdAt !== latestReadMessageCreatedAt &&
+      signedInUser
     ) {
       updateReadTicket(latestMessage.createdAt);
     }
-  }, [messages, latestReadMessageCreatedAt, updateReadTicket]);
+  }, [messages, latestReadMessageCreatedAt, updateReadTicket, signedInUser]);
 
   useEffect(() => {
     if (sendError) {
