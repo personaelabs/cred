@@ -11,6 +11,8 @@ import {
 import { Hex } from 'viem';
 import { toast } from 'sonner';
 import { useAccount, useBalance } from 'wagmi';
+import { Button } from '@/components/ui/button';
+import { usePrivy } from '@privy-io/react-auth';
 
 const WalletPage = () => {
   const { setOptions } = useHeaderOptions();
@@ -19,6 +21,7 @@ const WalletPage = () => {
   const { data } = useBalance({
     address,
   });
+  const { exportWallet } = usePrivy();
 
   useEffect(() => {
     setOptions({
@@ -35,15 +38,22 @@ const WalletPage = () => {
       <div className="flex text-lg flex-row gap-x-2 items-center mt-8">
         {address ? trimAddress(address as Hex) : ''}
       </div>
-      <div
-        className="flex flex-row gap-x-2 items-center mt-[100px]"
-        onClick={async () => {
-          copyTextToClipboard(address as string);
-          toast.info(`Copied address ${trimAddress(address as Hex)}`);
-        }}
-      >
-        <CirclePlus className="w-7 h-7" color={theme.orange}></CirclePlus>
-        <div className="text-lg">Deposit on Base</div>
+      <div className="flex flex-col justify-between items-center h-full pb-[40px]">
+        <div
+          className="flex flex-row gap-x-2 items-center mt-[50px]"
+          onClick={async () => {
+            copyTextToClipboard(address as string);
+            toast.info(`Copied address ${trimAddress(address as Hex)}`);
+          }}
+        >
+          <CirclePlus className="w-7 h-7" color={theme.orange}></CirclePlus>
+          <div className="text-lg">Deposit on Base</div>
+        </div>
+        <div className="mt-[50px]">
+          <Button onClick={exportWallet} variant="link">
+            Export wallet
+          </Button>
+        </div>
       </div>
     </div>
   );
