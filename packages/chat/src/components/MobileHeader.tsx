@@ -1,6 +1,7 @@
 'use client';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ClickableBox from './ClickableBox';
 
 interface MobileHeaderProps {
   title: string;
@@ -25,7 +26,9 @@ const MobileHeader = (props: MobileHeaderProps) => {
         }}
       >
         {(showBackButton && window.history.length > 1) || backTo ? (
-          <ChevronLeft />
+          <ClickableBox>
+            <ChevronLeft />
+          </ClickableBox>
         ) : (
           <></>
         )}

@@ -14,6 +14,9 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { type ChatMessage as IChatMessage } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
+import { Skeleton } from '@/components/ui/skeleton';
+import ClickableBox from '@/components/ClickableBox';
+import useDeleteMessage from '@/hooks/useDeleteMessage';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -25,6 +28,7 @@ const Room = () => {
     reset,
     error: sendError,
   } = useSendMessage(params.roomId);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -36,10 +40,13 @@ const Room = () => {
   const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
   const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
 
-  const { messages, error, hasNextPage, fetchNextPage } = useMessages({
-    roomId: params.roomId,
-    initMessage: fromMessage,
-  });
+  const { messages, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useMessages({
+      roomId: params.roomId,
+      initMessage: fromMessage,
+    });
+
+  const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   useEffect(() => {
     const latestMessage =
@@ -65,9 +72,11 @@ const Room = () => {
       setOptions({
         title: room.name,
         headerRight: (
-          <Link href={`/rooms/${params.roomId}/roomInfo`}>
-            <Users className="w-5 h-5"></Users>
-          </Link>
+          <ClickableBox>
+            <Link href={`/rooms/${params.roomId}/roomInfo`}>
+              <Users className="w-5 h-5"></Users>
+            </Link>
+          </ClickableBox>
         ),
         showBackButton: true,
         backTo: '/rooms',
@@ -107,6 +116,14 @@ const Room = () => {
   return (
     <div className="h-full">
       <div className="bg-background h-full flex flex-col justify-end">
+        {isFetchingNextPage ? (
+          <div className="space-y-2 w-full flex flex-col items-center mt-2">
+            <Skeleton className="h-[30px] px-2 w-[96%]" />
+            <Skeleton className="h-[30px] px-2 w-[96%]" />
+          </div>
+        ) : (
+          <></>
+        )}
         <div
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
@@ -122,7 +139,6 @@ const Room = () => {
               logger.log('next');
               fetchNextPage();
             }}
-            scrollThreshold={0.5}
             scrollableTarget="scrollableDiv"
             className="h-full"
           >
@@ -141,11 +157,15 @@ const Room = () => {
                   }
                   onReplySelect={message => {
                     setReplyTo(message);
+                    inputRef.current?.focus();
                   }}
                   onViewReplyClick={_message => {
                     // setFromMessage(toMessageType(_message));
                     // const snapshot =  QueryDocumentSnapshot()
                     // setFromMessage(message.id);
+                  }}
+                  onDeleteClick={messageId => {
+                    deleteMessage(messageId);
                   }}
                 />
               </div>
@@ -153,6 +173,7 @@ const Room = () => {
           </InfiniteScroll>
         </div>
         <ChatMessageInput
+          inputRef={inputRef}
           roomId={params.roomId}
           replyToText={replyTo ? replyTo.text : undefined}
           onSend={onSendClick}

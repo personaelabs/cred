@@ -13,6 +13,7 @@ import Link from 'next/link';
 import Scrollable from '@/components/Scrollable';
 import { icons } from 'lucide-react';
 import theme from '@/lib/theme';
+import ClickableBox from '@/components/ClickableBox';
 
 interface SettingsMenuItemProps {
   icon: keyof typeof icons;
@@ -26,13 +27,13 @@ const SettingsMenuItem = (props: SettingsMenuItemProps) => {
   const { text, to, iconColor } = props;
   return (
     <Link href={to} className="no-underline w-[50%]">
-      <div className="w-full flex flex-row items-center justify-between border-2 border-opacity-50 py-1  border-gray-200 rounded-md">
+      <ClickableBox className="w-full flex flex-row items-center justify-between border-2 border-opacity-50 py-1  border-gray-200 rounded-md">
         <div className="flex flex-row  items-center">
           <Icon className="w-5 h-5 ml-2" color={iconColor}></Icon>
           <div className="ml-2 text-lg">{text}</div>
         </div>
         <ChevronRight className="w-5 h-5 opacity-50 mr-2"></ChevronRight>
-      </div>
+      </ClickableBox>
     </Link>
   );
 };

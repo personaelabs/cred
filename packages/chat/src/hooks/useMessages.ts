@@ -54,6 +54,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
   const queryClient = useQueryClient();
   const { data: signedInUser } = useSignedInUser();
   const [newMessages, setNewMessages] = useState<ChatMessage[]>([]);
+  const [removedMessages, setRemovedMessages] = useState<string[]>([]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -71,6 +72,8 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
           if (change.type === 'added') {
             const message = toMessageType(docData);
             setNewMessages(prev => [...prev, message]);
+          } else if (change.type === 'removed') {
+            setRemovedMessages(prev => [...prev, docData.id]);
           }
         }
       });
@@ -81,7 +84,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
     }
   }, [roomId, signedInUser, queryClient]);
 
-  return { newMessages };
+  return { newMessages, removedMessages };
 };
 
 const useMessages = ({
@@ -94,7 +97,7 @@ const useMessages = ({
   // Start listening for new messages after the first fetch
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
-  const { newMessages } = useListenToMessages({
+  const { newMessages, removedMessages } = useListenToMessages({
     roomId,
   });
 
@@ -118,11 +121,15 @@ const useMessages = ({
       : fetchedMessages;
 
     setAllMessages(
-      _allMessages.filter(
-        (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
-      )
+      _allMessages
+        // Remove duplicates
+        .filter(
+          (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
+        )
+        // Remove deleted messages
+        .filter(msg => !removedMessages.includes(msg.id))
     );
-  }, [result.data, newMessages]);
+  }, [result.data, newMessages, removedMessages]);
 
   // Get user images
   const usersQueryResult = useUsers(allMessages.map(m => m.user.id));

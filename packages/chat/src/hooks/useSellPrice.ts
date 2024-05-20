@@ -5,22 +5,20 @@ import { useQuery } from '@tanstack/react-query';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 
-const useKeyPrice = (roomId: string) => {
+const useSellPrice = (roomId: string) => {
   const roomIdBigInt = getRoomTokenId(roomId);
 
   return useQuery({
-    queryKey: ['key-price', roomId],
+    queryKey: ['sell-price', roomId],
     queryFn: async () => {
-      const result = readContract(wagmiConfig, {
+      return await readContract(wagmiConfig, {
         abi: CredAbi,
         address: CRED_CONTRACT_ADDRESS,
-        functionName: 'getBuyPrice',
+        functionName: 'getSellPrice',
         args: [roomIdBigInt],
       });
-
-      return result;
     },
   });
 };
 
-export default useKeyPrice;
+export default useSellPrice;

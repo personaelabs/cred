@@ -3,6 +3,7 @@ import { useScrollableRef } from '@/contexts/FooterContext';
 import { icons } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import ClickableBox from './ClickableBox';
 
 interface MenuItemProps {
   icon: keyof typeof icons;
@@ -19,12 +20,12 @@ const MenuItem = (props: MenuItemProps) => {
   }, [props.path, router]);
 
   return (
-    <div
+    <ClickableBox
       className="flex justify-center w-full items-center"
       onClick={props.onClick}
     >
       <Icon className="w-6 h-6"></Icon>
-    </div>
+    </ClickableBox>
   );
 };
 

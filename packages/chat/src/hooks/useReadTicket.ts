@@ -39,6 +39,7 @@ const useReadTicket = (roomId: string) => {
         userId: signedInUser.id,
       });
     },
+    enabled: !!signedInUser,
   });
 };
 

@@ -1,6 +1,6 @@
 import { type ChatMessage } from '@/types';
 import Avatar from './Avatar';
-import { Copy, Reply } from 'lucide-react';
+import { Copy, Reply, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import useMessage from '@/hooks/useMessage';
 import Link from 'next/link';
@@ -40,14 +40,21 @@ const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
   );
 };
 
-const SenderMessageDropdownContent = (props: { onCopyClick: () => void }) => {
-  const { onCopyClick } = props;
+const SenderMessageDropdownContent = (props: {
+  onCopyClick: () => void;
+  onDeleteClick: () => void;
+}) => {
+  const { onCopyClick, onDeleteClick } = props;
 
   return (
     <DropdownMenuContent className="bg-background">
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={onDeleteClick} className="text-red-500">
+        <Trash2 className="mr-2 w-4 h-4"></Trash2>
+        <div>Delete</div>
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
@@ -85,11 +92,13 @@ type ChatMessageProps = ChatMessage & {
   renderAvatar: boolean;
   onReplySelect: (_message: ChatMessage) => void;
   onViewReplyClick: (_replyId: string) => void;
+  onDeleteClick: (_messageId: string) => void;
   roomId: string;
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, roomId, replyToId, onViewReplyClick, user } = props;
+  const { isSender, roomId, replyToId, onViewReplyClick, user, onDeleteClick } =
+    props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const bind = useLongPress(() => {
     setIsMenuOpen(true);
@@ -157,6 +166,9 @@ const ChatMessage = (props: ChatMessageProps) => {
               {isSender ? (
                 <SenderMessageDropdownContent
                   onCopyClick={onClickCopyToClipboard}
+                  onDeleteClick={() => {
+                    onDeleteClick(props.id);
+                  }}
                 ></SenderMessageDropdownContent>
               ) : (
                 <ChatMessageDropdownContent

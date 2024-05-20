@@ -13,10 +13,11 @@ import { Alert, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
-import useKeyPrice from '@/hooks/useKeyPrice';
+import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
 import usePurchasedRooms from '@/hooks/usePurchasedRooms';
 import ProcessingTxModal from '@/components/ProcessingTxModal';
+import ConnectAddressesSheet from '@/components/ConnectAddressesSheet';
 
 type RoomItemProps = {
   id: string;
@@ -37,7 +38,7 @@ const RoomItem = (props: RoomItemProps) => {
   const router = useRouter();
 
   const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
-  const { data: keyPrice } = useKeyPrice(id);
+  const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
     await joinRoom();
@@ -105,58 +106,61 @@ export default function Home() {
   }
 
   return (
-    <div className="h-full">
-      <div
-        className="flex flex-col bg-background overflow-auto w-full h-full"
-        id="scrollableDiv"
-        ref={scrollableRef}
-      >
-        <InfiniteScroll
-          loader={<></>}
-          endMessage={<></>}
-          dataLength={purchasableRooms.length}
-          hasMore={false}
-          next={() => {}}
-          scrollThreshold={0.5}
-          scrollableTarget="scrollableDiv"
+    <>
+      <div className="h-full">
+        <div
+          className="flex flex-col bg-background overflow-auto w-full h-full"
+          id="scrollableDiv"
+          ref={scrollableRef}
         >
-          <Alert>
-            <AlertTitle className="flex flx-row justify-between items-center">
-              <div className="opacity-70">Add creddd to join more rooms</div>
-              <Link href="/add-creddd">
-                <Button variant="secondary">Add</Button>
-              </Link>
-            </AlertTitle>
-          </Alert>
-          {writableRooms.map(room => (
-            <RoomItem
-              id={room.id}
-              key={room.id}
-              name={room.name}
-              imageUrl={room.imageUrl}
-              canJoin={true}
-            ></RoomItem>
-          ))}
-          {purchasedRooms.map(room => (
-            <RoomItem
-              id={room.id}
-              key={room.id}
-              name={room.name}
-              imageUrl={room.imageUrl}
-              canJoin={true}
-            ></RoomItem>
-          ))}
-          {purchasableRooms.map(room => (
-            <RoomItem
-              id={room.id}
-              key={room.id}
-              name={room.name}
-              imageUrl={room.imageUrl}
-              canJoin={false}
-            ></RoomItem>
-          ))}
-        </InfiniteScroll>
+          <InfiniteScroll
+            loader={<></>}
+            endMessage={<></>}
+            dataLength={purchasableRooms.length}
+            hasMore={false}
+            next={() => {}}
+            scrollThreshold={0.5}
+            scrollableTarget="scrollableDiv"
+          >
+            <Alert>
+              <AlertTitle className="flex flx-row justify-between items-center">
+                <div className="opacity-70">Add creddd to join more rooms</div>
+                <Link href="/add-creddd">
+                  <Button variant="secondary">Add</Button>
+                </Link>
+              </AlertTitle>
+            </Alert>
+            {writableRooms.map(room => (
+              <RoomItem
+                id={room.id}
+                key={room.id}
+                name={room.name}
+                imageUrl={room.imageUrl}
+                canJoin={true}
+              ></RoomItem>
+            ))}
+            {purchasedRooms.map(room => (
+              <RoomItem
+                id={room.id}
+                key={room.id}
+                name={room.name}
+                imageUrl={room.imageUrl}
+                canJoin={true}
+              ></RoomItem>
+            ))}
+            {purchasableRooms.map(room => (
+              <RoomItem
+                id={room.id}
+                key={room.id}
+                name={room.name}
+                imageUrl={room.imageUrl}
+                canJoin={false}
+              ></RoomItem>
+            ))}
+          </InfiniteScroll>
+        </div>
       </div>
-    </div>
+      <ConnectAddressesSheet />
+    </>
   );
 }
