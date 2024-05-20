@@ -26,6 +26,7 @@ const Room = () => {
     reset,
     error: sendError,
   } = useSendMessage(params.roomId);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -150,6 +151,7 @@ const Room = () => {
                   }
                   onReplySelect={message => {
                     setReplyTo(message);
+                    inputRef.current?.focus();
                   }}
                   onViewReplyClick={_message => {
                     // setFromMessage(toMessageType(_message));
@@ -162,6 +164,7 @@ const Room = () => {
           </InfiniteScroll>
         </div>
         <ChatMessageInput
+          inputRef={inputRef}
           roomId={params.roomId}
           replyToText={replyTo ? replyTo.text : undefined}
           onSend={onSendClick}

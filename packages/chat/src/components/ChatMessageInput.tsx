@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CircleArrowUp } from 'lucide-react';
 import theme from '@/lib/theme';
 import { X } from 'lucide-react';
@@ -68,10 +68,11 @@ interface ChatMessageInputProps {
   }) => void;
   replyToText?: string;
   onCancelReply: () => void;
+  inputRef: React.RefObject<HTMLTextAreaElement>;
 }
 
 const ChatMessageInput = (props: ChatMessageInputProps) => {
-  const { onSend } = props;
+  const { onSend, inputRef } = props;
   const [input, setInput] = useState('');
   const [searchUsername, setSearchUsername] = useState<string | null>(null);
   const [mentionSuggestions, setMentionSuggestions] = useState<User[]>([]);
@@ -88,7 +89,6 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
     },
     [input, searchUsername]
   );
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (searchUsername && !pending) {
