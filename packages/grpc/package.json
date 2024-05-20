@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build:proto": "sh ./scripts/build_proto.sh",
-    "build": "tsc -d",
+    "build": "tsc -d && cp -r ./src/proto ./out/proto",
     "build:watch": "tsc -d --watch",
     "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
     "postinstall": "pnpm run build"
