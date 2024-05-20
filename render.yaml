@@ -89,7 +89,7 @@ services:
       - key: CREDDD_GRPC_URL
         fromService:
           name: cred-indexer
-          property: RENDER_EXTERNAL_URL
+          property: RENDER_EXTERNAL_HOSTNAME
       - key: DATABASE_URL
         fromDatabase:
           name: cred
