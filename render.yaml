@@ -37,7 +37,7 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - key: NEXT_PUBLIC_CHAIN
-        value: "null"
+        value: "sepolia"
         previewValue: "sepolia"
       - fromGroup: cred
   - type: worker
@@ -116,6 +116,9 @@ services:
         fromDatabase:
           name: cred
           property: connectionString
+      - key: CHAIN
+        value: "sepolia"
+        previewValue: "sepolia"
   - type: worker
     name: credchat-notifier
     plan: standard
