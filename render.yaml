@@ -72,7 +72,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i
+    buildCommand: pnpm i && pnpm -F grpc build
     startCommand: pnpm -F sync start
     rootDir: ./
     buildFilter:
@@ -86,6 +86,10 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
+      - key: CREDDD_GRPC_URL
+        fromService:
+          name: cred-indexer
+          property: RENDER_EXTERNAL_URL
       - key: DATABASE_URL
         fromDatabase:
           name: cred

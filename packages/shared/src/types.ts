@@ -11,6 +11,9 @@ export interface User {
       mutedRoomIds: string[];
     };
   };
+  farcaster?: {
+    fid: number;
+  };
 }
 
 export interface UserNotificationTokens {

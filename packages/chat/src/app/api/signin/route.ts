@@ -50,6 +50,9 @@ export async function POST(req: NextRequest) {
         mutedRoomIds: [],
       },
     },
+    farcaster: {
+      fid: user.farcaster.fid,
+    },
   };
 
   await db.collection('users').doc(user.id).set(userData);
