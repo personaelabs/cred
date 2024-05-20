@@ -29,6 +29,8 @@ import { useRouter } from 'next/navigation';
 import useReadTicket from '@/hooks/useReadTicket';
 import useSellKey from '@/hooks/useSellKey';
 import ProcessingTxModal from '@/components/ProcessingTxModal';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
@@ -199,6 +201,19 @@ const Rooms = () => {
 
   if (!signedInUser || !rooms || !singedInUserData) {
     return <div className="bg-background h-full"></div>;
+  }
+
+  if (rooms.length === 0) {
+    return (
+      <div className="flex flex-col justify-center items-center h-full bg-background">
+        <div className="text-xl opacity-60">No chats found</div>
+        <Button className="mt-4" asChild>
+          <Link href="/" className="no-underline">
+            Search rooms
+          </Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
