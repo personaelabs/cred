@@ -62,6 +62,8 @@ services:
         fromDatabase:
           name: cred
           property: connectionString
+      - key: PORT
+        value: 50051
       - fromGroup: cred
     disk:
       name: db
