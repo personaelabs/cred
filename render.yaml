@@ -40,7 +40,7 @@ services:
         value: "sepolia"
         previewValue: "sepolia"
       - fromGroup: cred
-  - type: web
+  - type: pserv
     name: cred-indexer
     plan: pro plus
     previewPlan: starter
@@ -59,7 +59,7 @@ services:
         - packages/frontend/**
     envVars:
       - key: PORT
-        value: 10000
+        value: 50051
       - key: DATABASE_URL
         fromDatabase:
           name: cred
@@ -91,7 +91,7 @@ services:
       - key: CREDDD_GRPC_URL
         fromService:
           name: cred-indexer
-          type: web
+          type: pserv
           property: host
       - key: DATABASE_URL
         fromDatabase:
