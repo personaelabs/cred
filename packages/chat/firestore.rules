@@ -77,11 +77,16 @@ service cloud.firestore {
     match /rooms/{roomId}/messages/{messageId} {
       allow read: if isInRoom(roomId);
 
-      allow write: if 
+      allow create: if 
       isInRoom(roomId) && 
       isValidMessage() &&
       isUserAuthorized() && 
       request.resource.data.roomId == roomId;
+
+      allow delete : if
+      isInRoom(roomId) && 
+      resource.data.userId == request.auth.uid &&
+      resource.data.roomId == roomId;
     }
 
     match /notificationTokens/{userId} {

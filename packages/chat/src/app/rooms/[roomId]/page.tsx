@@ -16,6 +16,7 @@ import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
+import useDeleteMessage from '@/hooks/useDeleteMessage';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -44,6 +45,8 @@ const Room = () => {
       roomId: params.roomId,
       initMessage: fromMessage,
     });
+
+  const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   useEffect(() => {
     const latestMessage =
@@ -160,6 +163,9 @@ const Room = () => {
                     // setFromMessage(toMessageType(_message));
                     // const snapshot =  QueryDocumentSnapshot()
                     // setFromMessage(message.id);
+                  }}
+                  onDeleteClick={messageId => {
+                    deleteMessage(messageId);
                   }}
                 />
               </div>
