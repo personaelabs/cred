@@ -13,7 +13,7 @@ import { Alert, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
-import useKeyPrice from '@/hooks/useKeyPrice';
+import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
 import usePurchasedRooms from '@/hooks/usePurchasedRooms';
 import ProcessingTxModal from '@/components/ProcessingTxModal';
@@ -38,7 +38,7 @@ const RoomItem = (props: RoomItemProps) => {
   const router = useRouter();
 
   const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
-  const { data: keyPrice } = useKeyPrice(id);
+  const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
     await joinRoom();
