@@ -14,6 +14,7 @@ import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
 import useUsers from '@/hooks/useUsers';
 import useRoom from '@/hooks/useRoom';
 import AvatarWithFallback from './Avatar';
+import ClickableBox from './ClickableBox';
 
 interface MentionSuggestionsDropdownProps {
   suggestedUsers: User[];
@@ -182,12 +183,14 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
           }}
         />
       </div>
-      <CircleArrowUp
-        size={28}
-        className="cursor-pointer mr-4"
-        color={theme.orange}
-        onClick={onSendClick}
-      />
+      <ClickableBox>
+        <CircleArrowUp
+          size={28}
+          className="cursor-pointer mr-4"
+          color={theme.orange}
+          onClick={onSendClick}
+        />
+      </ClickableBox>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import { type ChatMessage as IChatMessage } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
+import ClickableBox from '@/components/ClickableBox';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -68,9 +69,11 @@ const Room = () => {
       setOptions({
         title: room.name,
         headerRight: (
-          <Link href={`/rooms/${params.roomId}/roomInfo`}>
-            <Users className="w-5 h-5"></Users>
-          </Link>
+          <ClickableBox>
+            <Link href={`/rooms/${params.roomId}/roomInfo`}>
+              <Users className="w-5 h-5"></Users>
+            </Link>
+          </ClickableBox>
         ),
         showBackButton: true,
         backTo: '/rooms',
