@@ -6,11 +6,10 @@ import {
   messageConverter,
   roomConverter,
 } from '@cred/shared';
-import { initAdminApp } from '@cred/firebase';
+import { app } from '@cred/firebase';
 import { getFirestore } from 'firebase-admin/firestore';
 
-const firebaseAdmin = initAdminApp();
-const db = getFirestore(firebaseAdmin);
+const db = getFirestore(app);
 
 const ADMIN_FIDS = ['1', '12783'];
 
@@ -21,6 +20,7 @@ const registerFid1 = async () => {
     id: USER_ID,
     displayName: 'Farcaster',
     username: 'farcaster',
+    privyAddress: '0x',
     pfpUrl: 'https://i.imgur.com/I2rEbPF.png',
     config: {
       notification: {
