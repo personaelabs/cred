@@ -58,6 +58,7 @@ export const removeUserFromRoom = async ({
     if (roomData.readerIds.includes(userId)) {
       await roomDoc.update({
         readerIds: FieldValue.arrayRemove(userId),
+        joinedUserIds: FieldValue.arrayRemove(userId),
       });
       console.log('Removed reader from room', {
         roomId,

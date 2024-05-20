@@ -1,5 +1,12 @@
 'use client';
-import { Bell, BellOff, Circle, Ellipsis, SquareArrowLeft } from 'lucide-react';
+import {
+  Bell,
+  BellOff,
+  Circle,
+  Ellipsis,
+  KeyRound,
+  SquareArrowLeft,
+} from 'lucide-react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useJoinedRooms from '@/hooks/useJoinedRooms';
@@ -20,21 +27,24 @@ import useUser from '@/hooks/useUser';
 import useToggleMute from '@/hooks/useToggleMute';
 import { useRouter } from 'next/navigation';
 import useReadTicket from '@/hooks/useReadTicket';
+import useSellKey from '@/hooks/useSellKey';
+import ProcessingTxModal from '@/components/ProcessingTxModal';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
   showMuteToggle: boolean;
   isMuted: boolean;
   onToggleMuteClick: () => void;
+  onSellKeyClick: () => void;
 }
 
 const RoomItemDropdownContent = (props: RoomItemDropdownContentProps) => {
   const { onLeaveClick, isMuted, onToggleMuteClick, showMuteToggle } = props;
   return (
     <DropdownMenuContent side="left" className="bg-background">
-      <DropdownMenuItem onClick={onLeaveClick}>
-        <SquareArrowLeft className="mr-2 w-4 h-4 text-red-500"></SquareArrowLeft>
-        <div className="text-red-500">Leave</div>
+      <DropdownMenuItem onClick={props.onSellKeyClick}>
+        <KeyRound className="mr-2 w-4 h-4 text-blue-500"></KeyRound>
+        <div>Sell Key</div>
       </DropdownMenuItem>
       {showMuteToggle ? (
         <DropdownMenuItem onClick={onToggleMuteClick}>
@@ -53,6 +63,10 @@ const RoomItemDropdownContent = (props: RoomItemDropdownContentProps) => {
       ) : (
         <></>
       )}
+      <DropdownMenuItem onClick={onLeaveClick}>
+        <SquareArrowLeft className="mr-2 w-4 h-4 text-red-500"></SquareArrowLeft>
+        <div className="text-red-500">Leave</div>
+      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 };
@@ -72,6 +86,7 @@ const RoomItem = (props: RoomItemProps) => {
   const router = useRouter();
 
   const { mutateAsync: leaveRoom } = useLeaveRoom();
+  const { mutateAsync: sellKey, isProcessingTx } = useSellKey(id);
   const { mutateAsync: toggleMute } = useToggleMute();
 
   const { data: readTicket } = useReadTicket(id);
@@ -94,60 +109,67 @@ const RoomItem = (props: RoomItemProps) => {
   }
 
   return (
-    <div
-      className={`w-full no-underline ${isClicked ? 'opacity-60' : ''}`}
-      onClick={() => {
-        if (!isMenuOpen) {
-          setIsClicked(true);
-          router.push(`/rooms/${id}`);
-        }
-      }}
-    >
-      <div className="flex flex-row justify-between w-full h-full border-b-2">
-        <div className="flex flex-col items-start px-5 py-2 mt-1">
-          <div className="text-lg">{name}</div>
-          <div className="opacity-60 mt-1">
-            {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
+    <>
+      <div
+        className={`w-full no-underline ${isClicked ? 'opacity-60' : ''}`}
+        onClick={() => {
+          if (!isMenuOpen) {
+            setIsClicked(true);
+            router.push(`/rooms/${id}`);
+          }
+        }}
+      >
+        <div className="flex flex-row justify-between w-full h-full border-b-2">
+          <div className="flex flex-col items-start px-5 py-2 mt-1">
+            <div className="text-lg">{name}</div>
+            <div className="opacity-60 mt-1">
+              {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
+            </div>
           </div>
-        </div>
-        <div className="flex justify-center items-center">
-          {unreadMessageExists ? (
-            <Circle className="w-5 h-5 mr-5 opacity-60"></Circle>
-          ) : null}
-        </div>
-        <div className="flex justify-center items-center mb-1">
-          <DropdownMenu
-            open={isMenuOpen}
-            onOpenChange={open => {
-              setIsMenuOpen(open);
-            }}
-          >
-            <DropdownMenuTrigger
-              className="focus:outline-none"
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsMenuOpen(prev => !prev);
+          <div className="flex justify-center items-center">
+            {unreadMessageExists ? (
+              <Circle className="w-5 h-5 mr-5 opacity-60"></Circle>
+            ) : null}
+          </div>
+          <div className="flex justify-center items-center mb-1">
+            <DropdownMenu
+              open={isMenuOpen}
+              onOpenChange={open => {
+                setIsMenuOpen(open);
               }}
             >
-              <Ellipsis className="mr-4 opacity-60" />
-            </DropdownMenuTrigger>
-            <RoomItemDropdownContent
-              showMuteToggle={showMuteToggle}
-              onLeaveClick={async () => {
-                await leaveRoom(id);
-                setIsMenuOpen(false);
-              }}
-              isMuted={isMuted}
-              onToggleMuteClick={async () => {
-                await toggleMute({ roomId: id, mute: !isMuted });
-                setIsMenuOpen(false);
-              }}
-            ></RoomItemDropdownContent>
-          </DropdownMenu>
+              <DropdownMenuTrigger
+                className="focus:outline-none"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsMenuOpen(prev => !prev);
+                }}
+              >
+                <Ellipsis className="mr-4 opacity-60" />
+              </DropdownMenuTrigger>
+              <RoomItemDropdownContent
+                showMuteToggle={showMuteToggle}
+                onLeaveClick={async () => {
+                  await leaveRoom(id);
+                  setIsMenuOpen(false);
+                }}
+                isMuted={isMuted}
+                onToggleMuteClick={async () => {
+                  await toggleMute({ roomId: id, mute: !isMuted });
+                  setIsMenuOpen(false);
+                }}
+                onSellKeyClick={async () => {
+                  await sellKey();
+                  setIsMenuOpen(false);
+                }}
+              ></RoomItemDropdownContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
-    </div>
+      <ProcessingTxModal isOpen={isProcessingTx}></ProcessingTxModal>
+    </>
   );
 };
 

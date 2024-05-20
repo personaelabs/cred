@@ -70,18 +70,21 @@ const syncTrades = async () => {
           continue;
         }
 
-        const toUser = await getUserByAddress(to.toLowerCase() as Hex);
-
-        if (!toUser) {
-          console.warn('toUser not found:', to);
-          continue;
-        }
-
         const roomId = tokenIdToRoomId(id);
-        await addReaderToRoom({
-          roomId,
-          userId: toUser.id,
-        });
+
+        if (to !== zeroAddress) {
+          const toUser = await getUserByAddress(to.toLowerCase() as Hex);
+
+          if (!toUser) {
+            console.warn('toUser not found:', to);
+            continue;
+          }
+
+          await addReaderToRoom({
+            roomId,
+            userId: toUser.id,
+          });
+        }
 
         if (from !== zeroAddress) {
           const fromUser = await getUserByAddress(from.toLowerCase() as Hex);

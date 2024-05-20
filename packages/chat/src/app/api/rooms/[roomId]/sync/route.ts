@@ -1,8 +1,12 @@
 import { NextRequest } from 'next/server';
 import viemClient from '@/lib/backend/viemClient';
-import { addReaderToRoom, getUserByAddress } from '@cred/firebase';
+import {
+  addReaderToRoom,
+  getUserByAddress,
+  removeUserFromRoom,
+} from '@cred/firebase';
 import { SyncRoomRequestBody } from '@/types';
-import { Hex, decodeEventLog, parseAbi } from 'viem';
+import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
 import { tokenIdToRoomId } from '@cred/shared';
 
 const TRANSFER_SINGLE_EVENT_SIG =
@@ -57,19 +61,11 @@ export async function POST(
     topics: log.topics,
   });
 
+  const from = eventLog.args.from;
   const to = eventLog.args.to;
   const tokenId = eventLog.args.id;
 
-  const user = await getUserByAddress(to.toLowerCase() as Hex);
-
-  if (!user) {
-    return Response.json(
-      {
-        error: 'User not found',
-      },
-      { status: 400 }
-    );
-  }
+  console.log('TransferSingle', { from, to, tokenId });
 
   if (!tokenId) {
     return Response.json(
@@ -92,10 +88,41 @@ export async function POST(
     );
   }
 
-  await addReaderToRoom({
-    roomId,
-    userId: user.id,
-  });
+  if (to !== zeroAddress) {
+    const transferToUser = await getUserByAddress(to.toLowerCase() as Hex);
+
+    if (!transferToUser) {
+      return Response.json(
+        {
+          error: '"to" User not found',
+        },
+        { status: 400 }
+      );
+    }
+
+    await addReaderToRoom({
+      roomId,
+      userId: transferToUser.id,
+    });
+  }
+
+  if (from !== zeroAddress) {
+    const transferFromUser = await getUserByAddress(from.toLowerCase() as Hex);
+
+    if (!transferFromUser) {
+      return Response.json(
+        {
+          error: '"from" User not found',
+        },
+        { status: 400 }
+      );
+    }
+
+    await removeUserFromRoom({
+      roomId,
+      userId: transferFromUser.id,
+    });
+  }
 
   return Response.json({}, { status: 200 });
 }
