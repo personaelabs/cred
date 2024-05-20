@@ -12,8 +12,8 @@ import { app } from '@cred/firebase';
 
 const db = getFirestore(app);
 
-const NUM_MESSAGES = 100;
-const NUM_USERS = 10;
+const NUM_MESSAGES = 1000;
+const NUM_USERS = 100;
 const TEST_ROOM_ID = 'test';
 
 const createTestRoom = async () => {
@@ -37,6 +37,12 @@ const registerUser = async (userId: string) => {
     displayName: faker.person.fullName(),
     username: faker.internet.userName(),
     pfpUrl: faker.image.avatar(),
+    privyAddress: '0x',
+    config: {
+      notification: {
+        mutedRoomIds: [],
+      },
+    },
   };
 
   await userRef.set(userData);
@@ -81,6 +87,7 @@ const populateReplies = async () => {
         }),
         readBy: [],
         replyTo: doc.id,
+        mentions: [],
       };
 
       await addToRoom(replyMessage.userId);
@@ -133,6 +140,7 @@ const populateMessages = async () => {
       createdAt: faker.date.past(),
       readBy: [],
       replyTo: null,
+      mentions: [],
     };
     messages.push(message);
   }
