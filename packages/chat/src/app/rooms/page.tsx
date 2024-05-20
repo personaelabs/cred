@@ -35,19 +35,30 @@ import Link from 'next/link';
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
   showMuteToggle: boolean;
+  showSellKey: boolean;
   isMuted: boolean;
   onToggleMuteClick: () => void;
   onSellKeyClick: () => void;
 }
 
 const RoomItemDropdownContent = (props: RoomItemDropdownContentProps) => {
-  const { onLeaveClick, isMuted, onToggleMuteClick, showMuteToggle } = props;
+  const {
+    onLeaveClick,
+    isMuted,
+    onToggleMuteClick,
+    showMuteToggle,
+    showSellKey,
+  } = props;
   return (
     <DropdownMenuContent side="left" className="bg-background">
-      <DropdownMenuItem onClick={props.onSellKeyClick}>
-        <KeyRound className="mr-2 w-4 h-4 text-blue-500"></KeyRound>
-        <div>Sell Key</div>
-      </DropdownMenuItem>
+      {showSellKey ? (
+        <DropdownMenuItem onClick={props.onSellKeyClick}>
+          <KeyRound className="mr-2 w-4 h-4 text-blue-500"></KeyRound>
+          <div>Sell Key</div>
+        </DropdownMenuItem>
+      ) : (
+        <></>
+      )}
       {showMuteToggle ? (
         <DropdownMenuItem onClick={onToggleMuteClick}>
           {isMuted ? (
@@ -79,10 +90,11 @@ type RoomItemProps = {
   imageUrl: string | null;
   isMuted: boolean;
   showMuteToggle: boolean;
+  isPurchasedRoom: boolean;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { id, name, isMuted, showMuteToggle } = props;
+  const { id, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const router = useRouter();
@@ -122,8 +134,12 @@ const RoomItem = (props: RoomItemProps) => {
         }}
       >
         <div className="flex flex-row justify-between w-full h-full border-b-2">
-          <div className="flex flex-col items-start px-5 py-2 mt-1">
-            <div className="text-lg">{name}</div>
+          <div className="flex flex-col items-start px-5 py-2">
+            <div
+              className={`text-lg ${isPurchasedRoom ? '' : 'font-bold text-primary'}`}
+            >
+              {name}
+            </div>
             <div className="opacity-60 mt-1">
               {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
             </div>
@@ -151,6 +167,7 @@ const RoomItem = (props: RoomItemProps) => {
                 <Ellipsis className="mr-4 opacity-60" />
               </DropdownMenuTrigger>
               <RoomItemDropdownContent
+                showSellKey={isPurchasedRoom}
                 showMuteToggle={showMuteToggle}
                 onLeaveClick={async () => {
                   await leaveRoom(id);
@@ -222,18 +239,29 @@ const Rooms = () => {
         className="flex flex-col items-start bg-background h-full overflow-scroll"
         ref={scrollableRef}
       >
-        {rooms.map(room => (
-          <RoomItem
-            id={room.id}
-            key={room.id}
-            name={room.name}
-            imageUrl={room.imageUrl}
-            showMuteToggle={isNotificationsEnabled !== null}
-            isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
-              room.id
-            )}
-          ></RoomItem>
-        ))}
+        {rooms
+          .sort((a, b) => {
+            if (a.readerIds.includes(signedInUser.id)) {
+              return 1;
+            }
+            if (b.readerIds.includes(signedInUser.id)) {
+              return -1;
+            }
+            return 0;
+          })
+          .map(room => (
+            <RoomItem
+              id={room.id}
+              key={room.id}
+              name={room.name}
+              imageUrl={room.imageUrl}
+              showMuteToggle={isNotificationsEnabled !== null}
+              isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
+                room.id
+              )}
+              isPurchasedRoom={room.readerIds.includes(signedInUser.id)}
+            ></RoomItem>
+          ))}
       </div>
     </Scrollable>
   );
