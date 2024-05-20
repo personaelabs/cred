@@ -7,7 +7,7 @@ use tonic::transport::Server;
 
 pub async fn start_grpc_server(pg_client: Arc<tokio_postgres::Client>) {
     // defining address for our service
-    let port = std::env::var("PORT").unwrap_or("50051".to_string());
+    let port = std::env::var("PORT").unwrap_or("10000".to_string());
     let addr = format!("[::0]:{}", port).parse().unwrap();
 
     let group = GroupDataService::new(pg_client.clone());
