@@ -10,15 +10,13 @@ import {
 import { getMessaging } from 'firebase-admin/messaging';
 import logger from './logger';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
-import { initAdminApp } from '@cred/firebase';
+import { app } from '@cred/firebase';
 
 const IS_PROD = process.env.RENDER === 'true';
 logger.info('IS_PROD', IS_PROD);
 
-const firebaseAdmin = initAdminApp();
-
-const messaging = getMessaging(firebaseAdmin);
-const db = getFirestore(firebaseAdmin);
+const messaging = getMessaging(app);
+const db = getFirestore(app);
 
 const notificationTokens = new Map<string, UserNotificationTokens['tokens']>();
 

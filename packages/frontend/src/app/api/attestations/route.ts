@@ -20,7 +20,7 @@ import {
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
 import { getFidAttestationHashV1, withHandler } from '@/lib/utils';
-import { addWriterToRoom } from '@/lib/firebaseAdmin';
+import { addWriterToRoom } from '@cred/firebase';
 
 let circuitInitialized = false;
 

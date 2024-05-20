@@ -8,10 +8,9 @@ import {
 } from '@cred/shared';
 import { faker } from '@faker-js/faker';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { initAdminApp } from '@cred/firebase';
+import { app } from '@cred/firebase';
 
-const firebaseAdmin = initAdminApp();
-const db = getFirestore(firebaseAdmin);
+const db = getFirestore(app);
 
 const NUM_MESSAGES = 100;
 const NUM_USERS = 10;
