@@ -21,7 +21,6 @@
     "@types/node": "^20.11.17"
   },
   "dependencies": {
-    "firebase": "^10.11.1",
-    "firebase-admin": "^12.1.0"
+    "firebase": "^10.11.1"
   }
 }

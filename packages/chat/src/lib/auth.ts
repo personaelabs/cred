@@ -1,14 +1,18 @@
 import axios from './axios';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
-import { SignedInUser } from '@/types';
 
 /**
  * Authenticate the signed in user to Firebase
  */
-export const authSignedInUser = async (signedInUser: SignedInUser) => {
+export const authSignedInUser = async (accessToken: string) => {
   const { data } = await axios.post<{ token: string }>(
     '/api/signin',
-    signedInUser
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
   );
 
   await getAuth().authStateReady();

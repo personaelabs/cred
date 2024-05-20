@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
+
 import * as Comlink from 'comlink';
 import {
   EligibleCreddd,
@@ -19,6 +22,8 @@ import { calculateSigRecovery, concatUint8Arrays } from '@/lib/utils';
 import useSignedInUser from './useSignedInUser';
 import { fromHexString } from './useEligibleCreddd';
 import credddApi from '@/lib/credddApi';
+import { usePrivy } from '@privy-io/react-auth';
+import { StatusAPIResponse } from '@farcaster/auth-client';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
@@ -30,18 +35,18 @@ interface Prover {
 const submitProof = async ({
   proof,
   groupId,
-  signedInUser,
+  siwfResponse,
 }: {
   proof: Uint8Array;
   groupId: string;
-  signedInUser: SignedInUser;
+  siwfResponse: StatusAPIResponse;
 }) => {
   // Submit proof to the backend
 
   const body: FidAttestationRequestBody = {
     groupId,
     proof: toHex(proof),
-    siwfResponse: signedInUser,
+    siwfResponse,
   };
 
   await credddApi.post('/api/attestations', body);
@@ -54,6 +59,7 @@ const useAddCreddd = () => {
 
   const result = useMutation({
     mutationFn: async (creddd: EligibleCreddd) => {
+      /*
       if (!signedInUser) {
         throw new Error('User not signed in');
       }
@@ -83,7 +89,8 @@ const useAddCreddd = () => {
       const msgHash = hashMessage(message);
 
       const { yParityAndS: signInSigS } = hexToCompactSignature(
-        signedInUser.signature!
+        // signedInUser.signature
+        "0x0"
       );
 
       // Construct the witness
@@ -115,10 +122,12 @@ const useAddCreddd = () => {
         groupId: creddd.id,
         signedInUser,
       });
+      */
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['user-creddd'] });
       await queryClient.invalidateQueries({ queryKey: ['eligible-creddd'] });
+      await queryClient.invalidateQueries({ queryKey: ['writable-rooms'] });
     },
   });
 

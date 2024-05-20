@@ -6,24 +6,103 @@ service cloud.firestore {
       return request.auth.uid != null && request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.joinedUserIds;
     }
 
+    function isAddingValueToArray(field, value) {
+      // Check if the field exists in the request and resource
+      return request.resource.data[field] is list &&
+      // Check if only one value is being added
+      request.resource.data[field].size() - resource.data[field].size() == 1 &&
+      // Check if the value is not in the old array but is in the new array
+      !resource.data[field].hasAll([value]) && request.resource.data[field].hasAll([value]);
+    }
+
+    function isRemovingValueFromArray(field, value) {
+      // Check if the field exists in the request and resource
+      return request.resource.data[field] is list &&
+      // Check if only one value is being removed
+      resource.data[field].size() - request.resource.data[field].size() == 1 &&
+      // Check if the value is in the old array but is not in the new array
+      resource.data[field].hasAll([value]) && !request.resource.data[field].hasAll([value]);
+    }
+
+    function isOnlyUpdatingFields(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    function isOnlyCreatingFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isOnlyUpdatingFieldsInData(requestData, resourceData, fields) {
+      return requestData.diff(resourceData).affectedKeys().hasOnly(fields);
+    }
+
+    function isUserAuthorized() {
+      return request.auth.uid != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    function isValidMessage() {
+      return request.resource.data.body is string &&
+      (request.resource.data.replyTo is string || request.resource.data.replyTo == null) &&
+      request.resource.data.mentions is list &&
+      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions"]);
+    }
+
     match /rooms/{roomId} {
       allow read: if true;
-      allow write: if true;
+      allow create: if false;
+      allow delete: if false;
+      allow update: if 
+      (
+      // Allow the authenticated user to join the room
+      isAddingValueToArray("joinedUserIds", request.auth.uid) ||
+      // Allow the authenticated user to leave the room
+      isRemovingValueFromArray("joinedUserIds", request.auth.uid)
+      ) &&
+      isOnlyUpdatingFields(["joinedUserIds"]);
     }
+
+    match /rooms/{roomId}/readTickets/{userId} {
+      allow read: if request.auth.uid == userId;
+
+      allow create: if 
+      isUserAuthorized() && 
+      isOnlyCreatingFields(["userId", "latestReadMessageCreatedAt"]);
+
+      allow update: if 
+      isUserAuthorized() && 
+      isOnlyUpdatingFields(["userId", "latestReadMessageCreatedAt"]);
+    }
+
 
     match /rooms/{roomId}/messages/{messageId} {
       allow read: if isInRoom(roomId);
-      allow write: if isInRoom(roomId) && request.auth.uid == request.resource.data.userId && request.resource.data.roomId == roomId;
+
+      allow write: if 
+      isInRoom(roomId) && 
+      isValidMessage() &&
+      isUserAuthorized() && 
+      request.resource.data.roomId == roomId;
     }
 
-    match /notificationTokens/{tokenId} {
-      allow read: if true;
-      allow write: if true;
+    match /notificationTokens/{userId} {
+      allow read: if request.auth.uid == userId;
+
+      allow write: if 
+      isUserAuthorized() &&
+      userId == request.auth.uid &&
+      isOnlyUpdatingFields(["tokens", "userId"]) &&
+      request.resource.data.tokens is list;
     }
 
     match /users/{userId} {
       allow read: if true;
-      allow write: if request.auth.uid == request.resource.data.id;
+
+      allow write: if 
+      request.auth.uid == request.resource.data.id && 
+      isOnlyUpdatingFields(["config"]) &&
+      isOnlyUpdatingFieldsInData(request.resource.data["config"], resource.data["config"], ["notification"]) &&
+      isOnlyUpdatingFieldsInData(request.resource.data["config"]["notification"], resource.data["config"]["notification"], ["mutedRoomIds"]) &&
+      request.resource.data["config"]["notification"]["mutedRoomIds"] is list;
     }
   }
 }

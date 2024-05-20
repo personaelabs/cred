@@ -22,6 +22,11 @@ const registerFid1 = async () => {
     displayName: 'Farcaster',
     username: 'farcaster',
     pfpUrl: 'https://i.imgur.com/I2rEbPF.png',
+    config: {
+      notification: {
+        mutedRoomIds: [],
+      },
+    },
   };
 
   await userRef.set(userData);
@@ -62,6 +67,7 @@ const sendMessage = async ({
     createdAt: new Date(),
     readBy: [],
     replyTo: null,
+    mentions: [],
   };
 
   await db

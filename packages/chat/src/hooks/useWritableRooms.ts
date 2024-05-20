@@ -5,8 +5,6 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import useJoinedRooms from './useJoinedRooms';
 
 const getWritableRooms = async (userId: string) => {
-  console.log({ userId });
-  // This function will be implemented later
   const q = query(
     collection(db, 'rooms').withConverter(roomConverter),
     where('writerIds', 'array-contains', userId)
@@ -32,6 +30,7 @@ const useWritableRooms = (userId: string | null) => {
       });
       return rooms;
     },
+    initialData: [],
     enabled: !!userId && !!joinedRooms,
   });
 };

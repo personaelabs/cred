@@ -1,5 +1,4 @@
 'use client';
-import '@rainbow-me/rainbowkit/styles.css';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -19,16 +18,19 @@ import { useEffect } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { FooterContextProvider } from '@/contexts/FooterContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
 import Image from 'next/image';
+import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
+import theme from '@/lib/theme';
+import { base, baseSepolia } from 'viem/chains';
+import { getChain } from '@/lib/utils';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -61,9 +63,12 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
+  const { isModalOpen } = usePrivy();
+
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
-    pathname.startsWith('/rooms/');
+    pathname.startsWith('/rooms/') ||
+    isModalOpen;
 
   const { isMobile } = useMediaQuery();
 
@@ -89,6 +94,21 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       persister: localStoragePersister,
     });
   }, []);
+
+  const { ready: walletsReady, wallets } = useWallets();
+  const { setActiveWallet } = useSetActiveWallet();
+
+  useEffect(() => {
+    if (walletsReady && signedInUser) {
+      const embeddedWallet = wallets.find(
+        wallet => wallet.walletClientType === 'privy'
+      );
+      if (embeddedWallet) {
+        console.log('Setting active wallet', embeddedWallet);
+        setActiveWallet(embeddedWallet);
+      }
+    }
+  }, [walletsReady, wallets, setActiveWallet, signedInUser]);
 
   if (!isMobile) {
     return (
@@ -131,9 +151,24 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <WagmiProvider config={wagmiConfig}>
+      <PrivyProvider
+        appId="clw1tqoyj02yh110vokuu7yc5"
+        config={{
+          defaultChain: getChain(),
+          supportedChains: [baseSepolia, base],
+          appearance: {
+            theme: 'dark',
+            accentColor: theme.orange as `#${string}`,
+            logo: 'https://creddd.xyz/personae-logo.svg',
+          },
+          // Create embedded wallets for users who don't have a wallet
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets',
+          },
+        }}
+      >
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
+          <WagmiProvider config={wagmiConfig}>
             <TooltipProvider>
               <AuthKitProvider config={config}>
                 <MediaQueryProvider>
@@ -145,9 +180,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 </MediaQueryProvider>
               </AuthKitProvider>
             </TooltipProvider>
-          </RainbowKitProvider>
+          </WagmiProvider>
         </QueryClientProvider>
-      </WagmiProvider>
+      </PrivyProvider>
       <Toaster richColors expand></Toaster>
     </ThemeProvider>
   );

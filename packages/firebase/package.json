@@ -21,6 +21,7 @@
     "@types/node": "^20.11.17"
   },
   "dependencies": {
-    "firebase-admin": "^12.1.0"
+    "firebase-admin": "^12.1.0",
+    "@cred/shared": "workspace:*"
   }
 }

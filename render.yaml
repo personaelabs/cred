@@ -36,35 +36,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
-      - fromGroup: credchat
-      - key: DATABASE_ID
-        value: default
-        previewValue: "null"
-  - type: worker
-    name: credbot
-    plan: pro
-    previewPlan: starter
-    runtime: node
-    region: oregon
-    buildCommand: pnpm i && pnpm -F db migrate:prod
-    startCommand: NODE_ENV=production pnpm -F cred_bot exec ts-node src/index.ts
-    rootDir: ./
-    buildFilter:
-      paths:
-        - packages/cred_bot/**
-      ignoredPaths:
-        - packages/circuit/**
-        - packages/notification/**
-        - packages/frontend/**
-        - packages/indexer/**
-        - packages/db/**
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: cred
-          property: connectionString
-      - key: NODE_VERSION
-        value: 18.17.0
+      - key: NEXT_PUBLIC_CHAIN
+        value: "sepolia"
+        previewValue: "sepolia"
       - fromGroup: cred
   - type: web
     name: cred-indexer
@@ -111,10 +85,14 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
-      - fromGroup: credchat
-      - key: DATABASE_ID
-        value: default
-        previewValue: "null"
+      - fromGroup: cred
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cred
+          property: connectionString
+      - key: CHAIN
+        value: "sepolia"
+        previewValue: "sepolia"
   - type: worker
     name: credchat-notifier
     plan: standard
@@ -134,11 +112,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
-      - fromGroup: credchat
-      - key: DATABASE_ID
-        value: default
-        previewValue: "null"
-
+      - fromGroup: cred
 
 databases:
   - name: cred

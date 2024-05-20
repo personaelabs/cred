@@ -1,20 +1,19 @@
-import { useSignIn as useFcSignIn } from '@farcaster/auth-kit';
+import { useLogout } from '@privy-io/react-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { signOut as firebaseSignOut, getAuth } from 'firebase/auth';
 
 const signOut = async () => {
   await firebaseSignOut(getAuth());
-  localStorage.removeItem('user');
 };
 
 const useSignOut = () => {
-  const { signOut: fcSignOut } = useFcSignIn({});
+  const { logout } = useLogout();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ['sign-out'],
     mutationFn: async () => {
-      fcSignOut();
+      await logout();
 
       await signOut();
       queryClient.clear();

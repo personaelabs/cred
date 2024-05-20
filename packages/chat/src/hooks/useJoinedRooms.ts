@@ -21,13 +21,13 @@ const useJoinedRooms = (userId: string | null) => {
   useEffect(() => {
     if (userId) {
       queryClient.invalidateQueries({
-        queryKey: ['joined-rooms', { userId }],
+        queryKey: ['joined-rooms'],
       });
     }
   }, [userId, queryClient]);
 
   return useQuery({
-    queryKey: ['joined-rooms', { userId }],
+    queryKey: ['joined-rooms'],
     queryFn: async () => {
       const rooms = await getJoinedRooms(userId!);
       return rooms;

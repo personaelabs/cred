@@ -9,21 +9,19 @@ import useAddCreddd from '@/hooks/usesAddCreddd';
 import theme from '@/lib/theme';
 import { trimAddress } from '@/lib/utils';
 import { EligibleCreddd } from '@/types';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAccount, useDisconnect } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 const ConnectButton = () => {
-  const { openConnectModal } = useConnectModal();
+  const { connectWallet } = usePrivy();
 
   return (
     <Button
       onClick={() => {
-        if (openConnectModal) {
-          openConnectModal();
-        }
+        connectWallet();
       }}
     >
       Connect wallet

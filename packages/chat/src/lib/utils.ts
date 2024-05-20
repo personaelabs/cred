@@ -1,11 +1,55 @@
 import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex } from 'viem';
+import { Hex, formatEther } from 'viem';
+import * as DOMPurify from 'dompurify';
+import { base, baseSepolia } from 'viem/chains';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const formatEthBalance = (balance: bigint) => {
+  const balanceInEth = formatEther(balance);
+  const balanceNumber = parseFloat(balanceInEth);
+  if (balanceNumber < 0.0001) {
+    return '< 0.0001';
+  }
+
+  return balanceNumber.toPrecision(3);
+};
+
+export const getChain = () => {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.NEXT_PUBLIC_CHAIN === 'sepolia'
+  ) {
+    return baseSepolia;
+  }
+
+  return base;
+};
+
+export const getRoomTokenId = (roomId: string) => {
+  switch (roomId) {
+    case 'test':
+      return BigInt(1);
+    case 'test-notification':
+      return BigInt(2);
+    default:
+      return BigInt(`0x${roomId}`);
+  }
+};
+
+export const highlightUsernames = (text: string) => {
+  return DOMPurify.sanitize(
+    text.replace(/@[\w.-]+/g, '<span class="text-[#fed4bf]">$&</span>')
+  );
+};
+
+export const getMentionsFromText = (text: string) => {
+  return text.match(/@[\w.-]+/g);
+};
 
 // This is the function we wrote earlier
 export const copyTextToClipboard = async (text: string) => {

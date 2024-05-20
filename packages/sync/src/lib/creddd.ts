@@ -1,13 +1,13 @@
 import { Client } from 'pg';
 
-const { CREDDD_DB_URL } = process.env;
+const { DATABASE_URL } = process.env;
 
-if (!CREDDD_DB_URL) {
-  throw new Error('CREDDD_DB_URL is not defined');
+if (!DATABASE_URL) {
+  throw new Error('DATABASE_URL is not defined');
 }
 
 export const credddDb = new Client({
-  connectionString: CREDDD_DB_URL,
+  connectionString: DATABASE_URL,
 });
 
 export const getGroups = async () => {

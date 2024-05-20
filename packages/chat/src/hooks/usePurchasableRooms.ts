@@ -30,6 +30,7 @@ const usePurchasableRooms = (userId: string | null) => {
 
       return purchasableRooms;
     },
+    initialData: [],
     enabled: !!userId && !!joinedRooms && !!writableRooms,
   });
 };
