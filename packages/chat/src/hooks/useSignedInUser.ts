@@ -1,8 +1,9 @@
 import { SignedInUser } from '@/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated } from '@/lib/auth';
 import { usePrivy } from '@privy-io/react-auth';
+import { getAuth } from 'firebase/auth';
 
 export const getSignedInUser = (): SignedInUser | null => {
   const result = localStorage.getItem('user');
@@ -17,11 +18,19 @@ export const getSignedInUser = (): SignedInUser | null => {
 
 const useSignedInUser = () => {
   const router = useRouter();
-  const { user, ready } = usePrivy();
+  const { user, ready: privyReady } = usePrivy();
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
     (async () => {
-      if (ready) {
+      await getAuth().authStateReady();
+      setIsAuthReady(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (privyReady) {
         if (!user) {
           console.log('Not logged in, redirecting to signin');
           router.push('/signin');
@@ -35,8 +44,9 @@ const useSignedInUser = () => {
         }
       }
     })();
-  }, [router, user, ready]);
+  }, [router, user, privyReady]);
 
+  const ready = isAuthReady && privyReady;
   return { data: ready ? user : null, ready };
 };
 
