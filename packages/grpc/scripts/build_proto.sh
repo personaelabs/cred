@@ -6,5 +6,11 @@ protoc \
     --js_out="import_style=commonjs,binary:./src/proto" \
     --ts_out="service=grpc-node,mode=grpc-js:./src/proto" \
     --grpc_out="grpc_js:./src/proto" \
-    groups.proto group_data.proto
-   
+    groups.proto group_data.proto &&
+protoc \
+    --plugin="protoc-gen-ts=./node_modules/.bin/protoc-gen-ts" \
+    --proto_path="../protobufs/schemas" \
+    --ts_opt=esModuleInterop=true \
+    --js_out="import_style=commonjs,binary:./src/proto" \
+    --ts_out="./src/proto" \
+    merkle_tree.proto

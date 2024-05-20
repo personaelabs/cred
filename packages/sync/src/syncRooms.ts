@@ -1,24 +1,24 @@
-import { Room, roomConverter } from '@cred/shared';
-import { getGroups } from './lib/creddd';
+import { Room, roomConverter, userConverter } from '@cred/shared';
 import { sleep } from './lib/utils';
 import { getFirestore } from 'firebase-admin/firestore';
-import { app } from '@cred/firebase';
+import { addWriterToRoom, app } from '@cred/firebase';
+import { getGroupData, getGroups, MerkleTree } from '@cred/grpc';
+import { Hex, toHex } from 'viem';
+// import { getVerifiedAddresses } from './lib/neynar';
+import { GroupDataResponse } from '@cred/grpc/out/proto/group_data_pb';
 
 const db = getFirestore(app);
 
 const upsertRoom = async ({
   groupId,
   name,
-  writerIds,
 }: {
   groupId: string;
   name: string;
-  writerIds: string[];
 }) => {
-  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds'> = {
+  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds' | 'writerIds'> = {
     id: groupId,
     name,
-    writerIds,
     imageUrl: null,
   };
 
@@ -37,29 +37,66 @@ const upsertRoom = async ({
       ...roomData,
       joinedUserIds: [],
       readerIds: [],
+      writerIds: [],
     };
     console.log('createRoom', groupId, name);
     await groupDoc.set(newRoomData);
   }
 };
 
+const upsertAdminWriters = async (
+  groupId: string,
+  groupData: GroupDataResponse.AsObject
+) => {
+  const merkleTree = MerkleTree.deserializeBinary(
+    groupData.latestMerkleTree as Uint8Array
+  );
+  const layers = merkleTree.getLayersList();
+  const nodes = layers[0].getNodesList();
+  const addresses = nodes.map(node => toHex(node.getNode()));
+
+  const users = db.collection('users').withConverter(userConverter);
+  const userDocs = await users.get();
+
+  const roomId = groupId;
+
+  const adminWriters = [];
+
+  for (const userDoc of userDocs.docs) {
+    const user = userDoc.data();
+    if (addresses.includes(user.privyAddress as Hex)) {
+      adminWriters.push(user);
+    }
+
+    /*
+    const userFcAddresses = await getVerifiedAddresses(user.id);
+    if (userFcAddresses.some(fcAddress => addresses.includes(fcAddress))) {
+      adminWriters.push(user);
+    }
+    */
+  }
+
+  for (const adminWriter of adminWriters) {
+    // Add user as a admin writer to the group
+    await addWriterToRoom({
+      roomId,
+      userId: adminWriter.id,
+    });
+  }
+};
+
 const syncRooms = async () => {
   const groups = await getGroups();
 
-  const chunkSize = 1000;
+  for (const { id } of groups.groupsList) {
+    const groupData = await getGroupData(id);
 
-  for (let i = 0; i < groups.length; i += chunkSize) {
-    const chunk = groups.slice(i, i + chunkSize);
+    await upsertRoom({
+      groupId: id,
+      name: groupData.displayName,
+    });
 
-    await Promise.all(
-      chunk.map(async group => {
-        return upsertRoom({
-          groupId: group.id,
-          name: group.displayName,
-          writerIds: group.fids.map(fid => fid.toString()),
-        });
-      })
-    );
+    await upsertAdminWriters(id, groupData);
   }
 };
 

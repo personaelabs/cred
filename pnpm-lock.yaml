@@ -492,9 +492,15 @@ importers:
       '@cred/firebase':
         specifier: workspace:*
         version: link:../firebase
+      '@cred/grpc':
+        specifier: workspace:*
+        version: link:../grpc
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
+      axios:
+        specifier: ^1.6.0
+        version: 1.6.7
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
