@@ -1,8 +1,15 @@
 import { useMutation } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore';
 import { Message, messageConverter } from '@cred/shared';
 import db from '@/lib/firestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 const sendMessage = async ({
   roomId,
@@ -10,13 +17,16 @@ const sendMessage = async ({
   mentions,
   replyTo,
   senderId,
+  imageUris,
 }: {
   roomId: string;
   message: string;
   mentions: string[];
   replyTo: string | null;
   senderId: string;
+  imageUris: string[];
 }) => {
+  const storage = getStorage();
   console.log(`Sending message ${message} to ${roomId}`);
   // Create the room if it doens't exit
 
@@ -32,9 +42,26 @@ const sendMessage = async ({
     createdAt: serverTimestamp(),
     readBy: [],
     replyTo,
+    images: [],
   };
+  const messageDoc = await addDoc(messagesRef, data);
 
-  await addDoc(messagesRef, data);
+  const uploadedImageUrls = await Promise.all(
+    imageUris.map(async imageUri => {
+      const imageBlobResult = await fetch(imageUri);
+      const imageBlob = await imageBlobResult.blob();
+      const storageRef = ref(storage, `/users/${senderId}/${uuidv4()}`);
+      const uploadResult = await uploadBytes(storageRef, imageBlob);
+      const uploadedImageUrl = await getDownloadURL(uploadResult.ref);
+      return uploadedImageUrl;
+    })
+  );
+
+  await updateDoc(messageDoc, {
+    images: uploadedImageUrls,
+  });
+
+  console.log(`Message sent to ${roomId}`);
 };
 
 const useSendMessage = (roomId: string) => {
@@ -46,10 +73,12 @@ const useSendMessage = (roomId: string) => {
       replyTo,
       message,
       mentions,
+      imageUris,
     }: {
       replyTo: string | null;
       message: string;
       mentions: string[];
+      imageUris: string[];
     }) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
@@ -61,6 +90,7 @@ const useSendMessage = (roomId: string) => {
         mentions,
         replyTo,
         senderId: signedInUser.id,
+        imageUris,
       });
     },
   });

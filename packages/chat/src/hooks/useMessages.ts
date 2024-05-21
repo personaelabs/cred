@@ -26,6 +26,7 @@ export const toMessageType = (message: Message): ChatMessage => {
     text: message.body,
     createdAt: (message.createdAt || new Date()) as Date,
     replyToId: message.replyTo,
+    images: message.images,
   };
 };
 
@@ -55,6 +56,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
   const { data: signedInUser } = useSignedInUser();
   const [newMessages, setNewMessages] = useState<ChatMessage[]>([]);
   const [removedMessages, setRemovedMessages] = useState<string[]>([]);
+  const [updatedMessages, setUpdatedMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -74,6 +76,12 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
             setNewMessages(prev => [...prev, message]);
           } else if (change.type === 'removed') {
             setRemovedMessages(prev => [...prev, docData.id]);
+          } else if (change.type === 'modified') {
+            const message = toMessageType(docData);
+            setUpdatedMessages(prev => [
+              ...prev.filter(m => m.id !== message.id),
+              message,
+            ]);
           }
         }
       });
@@ -84,7 +92,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
     }
   }, [roomId, signedInUser, queryClient]);
 
-  return { newMessages, removedMessages };
+  return { newMessages, removedMessages, updatedMessages };
 };
 
 const useMessages = ({
@@ -97,9 +105,11 @@ const useMessages = ({
   // Start listening for new messages after the first fetch
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
-  const { newMessages, removedMessages } = useListenToMessages({
-    roomId,
-  });
+  const { newMessages, removedMessages, updatedMessages } = useListenToMessages(
+    {
+      roomId,
+    }
+  );
 
   const result = useInfiniteQuery({
     queryKey: ['messages', { roomId }],
@@ -128,8 +138,9 @@ const useMessages = ({
         )
         // Remove deleted messages
         .filter(msg => !removedMessages.includes(msg.id))
+        .map(msg => updatedMessages.find(m => m.id === msg.id) || msg)
     );
-  }, [result.data, newMessages, removedMessages]);
+  }, [result.data, newMessages, removedMessages, updatedMessages]);
 
   // Get user images
   const usersQueryResult = useUsers(allMessages.map(m => m.user.id));

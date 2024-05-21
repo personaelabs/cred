@@ -43,7 +43,6 @@ const getLinkPreview = async (url: string): Promise<PreviewData | null> => {
 const LinkPreview = (props: LinkPreviewProps) => {
   const { url } = props;
   // State to hold the link preview data and loading status
-  console.log('url', url);
   const { data: previewData } = useQuery({
     queryKey: ['link-preview', url],
     queryFn: async () => {

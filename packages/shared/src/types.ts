@@ -42,6 +42,7 @@ export interface Message {
   readBy: number[];
   replyTo: string | null;
   mentions: string[];
+  images: string[];
 }
 
 export interface Room {

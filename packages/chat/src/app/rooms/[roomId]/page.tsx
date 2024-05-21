@@ -11,7 +11,7 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { type ChatMessage as IChatMessage } from '@/types';
+import { MessageInput, type ChatMessage as IChatMessage } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -98,12 +98,8 @@ const Room = () => {
   }, [isSuccess, reset]);
 
   const onSendClick = useCallback(
-    ({ message, mentions }: { message: string; mentions: string[] }) => {
-      sendMessage({
-        message,
-        mentions,
-        replyTo: replyTo ? replyTo.id : null,
-      });
+    (input: MessageInput) => {
+      sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
     },
     [replyTo, sendMessage]
