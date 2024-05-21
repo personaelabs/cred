@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import { type ChatMessage } from '@/types';
 import Avatar from './Avatar';
 import { Copy, Reply, Trash2 } from 'lucide-react';
@@ -162,13 +164,16 @@ const ChatMessage = (props: ChatMessageProps) => {
             ></div>
             <div className="mt-1 flex flex-col items-center gap-y-1">
               {props.images.map((image, i) => (
-                <img
-                  src={image}
-                  className="rounded-xl"
-                  width={200}
-                  alt="image"
-                  key={i}
-                ></img>
+                <PhotoProvider key={i}>
+                  <PhotoView src={image}>
+                    <img
+                      src={image}
+                      className="rounded-xl"
+                      width={200}
+                      alt="image"
+                    ></img>
+                  </PhotoView>
+                </PhotoProvider>
               ))}
             </div>
           </div>
