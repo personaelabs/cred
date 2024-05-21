@@ -15,7 +15,7 @@ const useSignIn = () => {
         throw new Error('Failed to get access token');
       }
       await authSignedInUser(accessToken);
-      router.push('/');
+      router.push('/enable-notifications');
     },
   });
 

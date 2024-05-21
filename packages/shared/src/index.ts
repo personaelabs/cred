@@ -5,6 +5,7 @@ export * from './converters/messageConverter';
 export * from './converters/notificationTokensConvert';
 export * from './converters/roomConverter';
 export * from './converters/idempotencyKeyConverter';
+export * from './converters/newRoomNotifyIdempotencyKeyConverter';
 export * from './converters/roomReadTicketConverter';
 export * from './utils';
 export { default as CredAbi } from './abi/Cred';

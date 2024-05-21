@@ -62,3 +62,8 @@ export interface IdempotencyKey {
   key: string;
   messageCreatedAt: Date | FirestoreTimestamp;
 }
+
+export interface NewRoomNotifyIdempotencyKey {
+  key: string;
+  createdAt: Date | FirestoreTimestamp;
+}

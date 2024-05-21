@@ -92,7 +92,13 @@ service cloud.firestore {
     match /notificationTokens/{userId} {
       allow read: if request.auth.uid == userId;
 
-      allow write: if 
+      allow create: if 
+      isUserAuthorized() &&
+      userId == request.auth.uid &&
+      isOnlyCreatingFields(["tokens", "userId"]) &&
+      request.resource.data.tokens is list;
+
+      allow update: if
       isUserAuthorized() &&
       userId == request.auth.uid &&
       isOnlyUpdatingFields(["tokens", "userId"]) &&
