@@ -8,7 +8,7 @@ import {
   copyTextToClipboard,
   cutoffMessage,
   extractLinks,
-  highlightUsernames,
+  highlightText,
 } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -162,7 +162,7 @@ const ChatMessage = (props: ChatMessageProps) => {
                 {...bind()}
                 className="text-left  whitespace-pre-wrap focus:outline-none"
                 dangerouslySetInnerHTML={{
-                  __html: highlightUsernames(props.text),
+                  __html: highlightText(props.text),
                 }}
               ></DropdownMenuTrigger>
               {isSender ? (

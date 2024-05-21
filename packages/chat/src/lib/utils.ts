@@ -48,9 +48,14 @@ export const getRoomTokenId = (roomId: string) => {
   }
 };
 
-export const highlightUsernames = (text: string) => {
+export const highlightText = (text: string) => {
   return DOMPurify.sanitize(
-    text.replace(/@[\w.-]+/g, '<span class="text-[#fed4bf]">$&</span>')
+    text
+      .replace(/@[\w.-]+/g, '<span class="text-[#fed4bf]">$&</span>')
+      .replace(
+        /(https?:\/\/[^\s/$.?#].[^\s]*)/g,
+        '<a href="$1" class="text-blue-800 break-all" target="_blank" rel="noopener noreferrer">$1</a>'
+      )
   );
 };
 
