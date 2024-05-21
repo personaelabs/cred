@@ -7,6 +7,7 @@ import Link from 'next/link';
 import {
   copyTextToClipboard,
   cutoffMessage,
+  extractLinks,
   highlightUsernames,
 } from '@/lib/utils';
 import {
@@ -17,6 +18,7 @@ import {
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
 import { useLongPress } from 'use-long-press';
+import LinkPreview from './LinkPreview';
 
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
@@ -181,6 +183,11 @@ const ChatMessage = (props: ChatMessageProps) => {
             </DropdownMenu>
           </div>
         </div>
+        {extractLinks(props.text).map((link, index) => (
+          <div className="p-2" key={index}>
+            <LinkPreview url={link}></LinkPreview>
+          </div>
+        ))}
         <div className="flex flex-row items-center justify-between">
           <div className="opacity-50 px-4 mt-1 text-xs">
             {new Date(props.createdAt).toLocaleString()}

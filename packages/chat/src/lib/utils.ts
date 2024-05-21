@@ -9,6 +9,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const extractLinks = (text: string) => {
+  const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+  const urls = text.match(urlPattern);
+
+  return urls || [];
+};
+
 export const formatEthBalance = (balance: bigint) => {
   const balanceInEth = formatEther(balance);
   const balanceNumber = parseFloat(balanceInEth);
