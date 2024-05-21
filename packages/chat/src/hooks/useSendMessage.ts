@@ -58,10 +58,12 @@ const sendMessage = async ({
     })
   );
 
-  toast.promise(uploadImagesPromise, {
-    loading: 'Sending images...',
-    error: 'Failed to send images',
-  });
+  if (imageUris.length > 0) {
+    toast.promise(uploadImagesPromise, {
+      loading: 'Sending images...',
+      error: 'Failed to send images',
+    });
+  }
 
   await updateDoc(messageDoc, {
     images: await uploadImagesPromise,
