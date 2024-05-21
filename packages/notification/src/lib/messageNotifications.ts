@@ -1,9 +1,7 @@
 import 'dotenv/config';
 import {
-  UserNotificationTokens,
   idempotencyKeyConverter,
   messageConverter,
-  notificationTokensConvert,
   roomConverter,
   userConverter,
 } from '@cred/shared';
@@ -11,32 +9,11 @@ import { getMessaging } from 'firebase-admin/messaging';
 import logger from './logger';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { app } from '@cred/firebase';
-
-const IS_PROD = process.env.RENDER === 'true';
-logger.info('IS_PROD', IS_PROD);
+import { notificationTokens } from './notificationTokens';
+import { IS_PROD } from './utils';
 
 const messaging = getMessaging(app);
 const db = getFirestore(app);
-
-const notificationTokens = new Map<string, UserNotificationTokens['tokens']>();
-
-const startNotificationTokensSync = () => {
-  const unsubscribe = db
-    .collection('notificationTokens')
-    .withConverter(notificationTokensConvert)
-    .onSnapshot(snapshot => {
-      snapshot.docs.forEach(async doc => {
-        const data = doc.data();
-
-        console.log(`Found notification token for ${data.userId}`);
-        notificationTokens.set(data.userId, data.tokens);
-      });
-    });
-
-  process.on('exit', () => {
-    unsubscribe();
-  });
-};
 
 const getRoom = async (roomId: string) => {
   const roomDoc = await db
@@ -90,8 +67,7 @@ const getLatestIdempotencyKey = async () => {
   return keyDoc.docs[0].data();
 };
 
-const sendNotifications = async () => {
-  // TODO: Get the last notification message id and start from there
+export const sendMessageNotifications = async () => {
   const latestIdempotencyKey = await getLatestIdempotencyKey();
 
   const startTimestamp = Timestamp.fromDate(
@@ -205,9 +181,3 @@ const sendNotifications = async () => {
     unsubscribe();
   });
 };
-
-const startNotificationJobs = async () => {
-  await Promise.all([sendNotifications(), startNotificationTokensSync()]);
-};
-
-export default startNotificationJobs;
