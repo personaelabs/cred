@@ -25,7 +25,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import useUser from '@/hooks/useUser';
 import useToggleMute from '@/hooks/useToggleMute';
-import { useRouter } from 'next/navigation';
 import useReadTicket from '@/hooks/useReadTicket';
 import useSellKey from '@/hooks/useSellKey';
 import ProcessingTxModal from '@/components/ProcessingTxModal';
@@ -97,7 +96,6 @@ const RoomItem = (props: RoomItemProps) => {
   const { id, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
-  const router = useRouter();
 
   const { mutateAsync: leaveRoom } = useLeaveRoom();
   const { mutateAsync: sellKey, isProcessingTx } = useSellKey(id);
@@ -124,13 +122,11 @@ const RoomItem = (props: RoomItemProps) => {
 
   return (
     <>
-      <div
+      <Link
+        href={isMenuOpen ? '' : `/rooms/${id}`}
         className={`w-full no-underline ${isClicked ? 'opacity-60' : ''}`}
         onClick={() => {
-          if (!isMenuOpen) {
-            setIsClicked(true);
-            router.push(`/rooms/${id}`);
-          }
+          setIsClicked(true);
         }}
       >
         <div className="flex flex-row justify-between w-full h-full border-b-2">
@@ -186,7 +182,7 @@ const RoomItem = (props: RoomItemProps) => {
             </DropdownMenu>
           </div>
         </div>
-      </div>
+      </Link>
       <ProcessingTxModal isOpen={isProcessingTx}></ProcessingTxModal>
     </>
   );
