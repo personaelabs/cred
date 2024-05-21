@@ -10,6 +10,7 @@ import { Message, messageConverter } from '@cred/shared';
 import db from '@/lib/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
 const sendMessage = async ({
   roomId,
@@ -46,7 +47,7 @@ const sendMessage = async ({
   };
   const messageDoc = await addDoc(messagesRef, data);
 
-  const uploadedImageUrls = await Promise.all(
+  const uploadImagesPromise = Promise.all(
     imageUris.map(async imageUri => {
       const imageBlobResult = await fetch(imageUri);
       const imageBlob = await imageBlobResult.blob();
@@ -57,8 +58,13 @@ const sendMessage = async ({
     })
   );
 
+  toast.promise(uploadImagesPromise, {
+    loading: 'Sending images...',
+    error: 'Failed to send images',
+  });
+
   await updateDoc(messageDoc, {
-    images: uploadedImageUrls,
+    images: await uploadImagesPromise,
   });
 
   console.log(`Message sent to ${roomId}`);
