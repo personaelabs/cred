@@ -18,6 +18,7 @@ const EnableNotifications = () => {
 
   const onEnableNotificationsClick = useCallback(async () => {
     if (signedInUser) {
+      router.prefetch('/');
       await registerNotification({
         userId: signedInUser.id,
       });
