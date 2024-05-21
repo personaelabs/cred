@@ -128,49 +128,55 @@ const Room = () => {
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
-          <InfiniteScroll
-            loader={<></>}
-            endMessage={<></>}
-            dataLength={messages.length}
-            hasMore={hasNextPage}
-            inverse={true}
-            next={() => {
-              console.log('next');
-              logger.log('next');
-              fetchNextPage();
-            }}
-            scrollableTarget="scrollableDiv"
-            className="h-full"
-          >
-            {messages.map((message, i) => (
-              <div
-                key={message.id}
-                className="w-full"
-                ref={i === messages.length - 1 ? bottomRef : null}
-              >
-                <ChatMessage
-                  roomId={params.roomId}
-                  {...message}
-                  isSender={message.user.id === signedInUser.id.toString()}
-                  renderAvatar={
-                    i === 0 || message.user.id !== messages[i - 1].user.id
-                  }
-                  onReplySelect={message => {
-                    setReplyTo(message);
-                    inputRef.current?.focus();
-                  }}
-                  onViewReplyClick={_message => {
-                    // setFromMessage(toMessageType(_message));
-                    // const snapshot =  QueryDocumentSnapshot()
-                    // setFromMessage(message.id);
-                  }}
-                  onDeleteClick={messageId => {
-                    deleteMessage(messageId);
-                  }}
-                />
-              </div>
-            ))}
-          </InfiniteScroll>
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-gray-500">No messages</div>
+            </div>
+          ) : (
+            <InfiniteScroll
+              loader={<></>}
+              endMessage={<></>}
+              dataLength={messages.length}
+              hasMore={hasNextPage}
+              inverse={true}
+              next={() => {
+                console.log('next');
+                logger.log('next');
+                fetchNextPage();
+              }}
+              scrollableTarget="scrollableDiv"
+              className="h-full"
+            >
+              {messages.map((message, i) => (
+                <div
+                  key={message.id}
+                  className="w-full"
+                  ref={i === messages.length - 1 ? bottomRef : null}
+                >
+                  <ChatMessage
+                    roomId={params.roomId}
+                    {...message}
+                    isSender={message.user.id === signedInUser.id.toString()}
+                    renderAvatar={
+                      i === 0 || message.user.id !== messages[i - 1].user.id
+                    }
+                    onReplySelect={message => {
+                      setReplyTo(message);
+                      inputRef.current?.focus();
+                    }}
+                    onViewReplyClick={_message => {
+                      // setFromMessage(toMessageType(_message));
+                      // const snapshot =  QueryDocumentSnapshot()
+                      // setFromMessage(message.id);
+                    }}
+                    onDeleteClick={messageId => {
+                      deleteMessage(messageId);
+                    }}
+                  />
+                </div>
+              ))}
+            </InfiniteScroll>
+          )}
         </div>
         <ChatMessageInput
           inputRef={inputRef}
