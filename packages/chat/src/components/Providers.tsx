@@ -26,7 +26,6 @@ import {
   MediaQueryProvider,
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
-import Image from 'next/image';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { base, baseSepolia } from 'viem/chains';
@@ -73,16 +72,18 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
-    if (isPwa === false) {
+    /*
+    if (isPwa === false && isMobile === true) {
       router.push('/install-pwa');
     }
+    */
 
     if (signedInUser && isPwa === true) {
       if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
     }
-  }, [isPwa, router, signedInUser]);
+  }, [isPwa, router, signedInUser, isMobile]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({
@@ -110,40 +111,26 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     }
   }, [walletsReady, wallets, setActiveWallet, signedInUser]);
 
-  if (!isMobile) {
-    return (
-      <div className="h-[100vh] bg-background flex flex-col items-center justify-center">
-        <Image
-          src="/personae-logo.svg"
-          alt="Personae logo"
-          width={100}
-          height={100}
-        ></Image>
-        <div className="mt-4 text-2xl">
-          Please access this page on a mobile device
-        </div>
-      </div>
-    );
-  }
-
   const footerHeight = hideFooter ? 0 : 70;
 
   return (
-    <div className="h-full">
-      <MobileHeader
-        title={options.title}
-        showBackButton={options.showBackButton}
-        headerRight={options.headerRight}
-        backTo={options.backTo}
-      ></MobileHeader>
-      <div
-        style={{
-          height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
-        }}
-      >
-        {children}
+    <div className="h-full w-full flex flex-col items-center">
+      <div className="h-full w-full md:w-[50%]">
+        <MobileHeader
+          title={options.title}
+          showBackButton={options.showBackButton}
+          headerRight={options.headerRight}
+          backTo={options.backTo}
+        ></MobileHeader>
+        <div
+          style={{
+            height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
+          }}
+        >
+          {children}
+        </div>
+        {hideFooter ? <></> : <MobileFooter></MobileFooter>}
       </div>
-      {hideFooter ? <></> : <MobileFooter></MobileFooter>}
     </div>
   );
 };
