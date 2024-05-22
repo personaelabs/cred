@@ -1,4 +1,3 @@
-import { StatusAPIResponse } from '@farcaster/auth-client';
 import { Hex } from 'viem';
 import { User } from '@privy-io/react-auth';
 
@@ -56,15 +55,6 @@ export interface WitnessInput {
   indices: Uint8Array;
   root: Uint8Array;
   signInSigS: Uint8Array;
-}
-
-/**
- * Request body of POST /api/attestations
- */
-export interface FidAttestationRequestBody {
-  groupId: string;
-  proof: Hex;
-  siwfResponse: StatusAPIResponse;
 }
 
 export interface UserCredddResponse {

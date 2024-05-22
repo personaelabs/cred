@@ -3,9 +3,7 @@ import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthKitProvider } from '@farcaster/auth-kit';
 import MobileFooter from '@/components/MobileFooter';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {
@@ -45,13 +43,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-const config = {
-  rpcUrl: 'https://mainnet.optimism.io',
-  domain: 'creddd.xyz',
-  siweUri: 'http://creddd.xyz/login',
-  relay: 'https://relay.farcaster.xyz',
-};
 
 const HEADER_HEIGHT = 60;
 
@@ -156,17 +147,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       >
         <QueryClientProvider client={queryClient}>
           <WagmiProvider config={wagmiConfig}>
-            <TooltipProvider>
-              <AuthKitProvider config={config}>
-                <MediaQueryProvider>
-                  <HeaderContextProvider>
-                    <FooterContextProvider>
-                      <Main>{children}</Main>
-                    </FooterContextProvider>
-                  </HeaderContextProvider>
-                </MediaQueryProvider>
-              </AuthKitProvider>
-            </TooltipProvider>
+            <MediaQueryProvider>
+              <HeaderContextProvider>
+                <FooterContextProvider>
+                  <Main>{children}</Main>
+                </FooterContextProvider>
+              </HeaderContextProvider>
+            </MediaQueryProvider>
           </WagmiProvider>
         </QueryClientProvider>
       </PrivyProvider>

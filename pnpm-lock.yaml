@@ -36,12 +36,6 @@ importers:
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
-      '@farcaster/auth-client':
-        specifier: ^0.1.0
-        version: 0.1.1(ethers@6.12.1(bufferutil@4.0.8)(utf-8-validate@6.0.3))(viem@2.8.14(bufferutil@4.0.8)(typescript@5.2.2)(utf-8-validate@6.0.3))
-      '@farcaster/auth-kit':
-        specifier: ^0.2.2
-        version: 0.2.2(@types/react@18.2.55)(bufferutil@4.0.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(utf-8-validate@6.0.3)(viem@2.8.14(bufferutil@4.0.8)(typescript@5.2.2)(utf-8-validate@6.0.3))
       '@privy-io/react-auth':
         specifier: ^1.65.0
         version: 1.65.0(@babel/core@7.24.1)(@react-native-async-storage/async-storage@1.23.0(react-native@0.73.6(@babel/core@7.24.1)(@babel/preset-env@7.24.1(@babel/core@7.24.1))(bufferutil@4.0.8)(encoding@0.1.13)(react@18.2.0)(utf-8-validate@6.0.3)))(@types/react@18.2.55)(bufferutil@4.0.8)(react-dom@18.2.0(react@18.2.0))(react-is@18.2.0)(react@18.2.0)(typescript@5.2.2)(utf-8-validate@6.0.3)

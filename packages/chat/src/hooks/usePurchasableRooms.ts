@@ -30,6 +30,7 @@ const usePurchasableRooms = (userId: string | null) => {
 
       return purchasableRooms;
     },
+    staleTime: Infinity,
     initialData: [],
     enabled: !!userId && !!joinedRooms && !!writableRooms,
   });

@@ -30,6 +30,7 @@ const usePurchasedRooms = (userId: string | null) => {
       });
       return rooms;
     },
+    staleTime: Infinity,
     initialData: [],
     enabled: !!userId && !!joinedRooms,
   });

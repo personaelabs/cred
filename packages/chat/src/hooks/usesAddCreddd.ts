@@ -2,12 +2,7 @@
 /* eslint-disable no-unused-vars */
 
 import * as Comlink from 'comlink';
-import {
-  EligibleCreddd,
-  FidAttestationRequestBody,
-  SignedInUser,
-  WitnessInput,
-} from '@/types';
+import { EligibleCreddd, SignedInUser, WitnessInput } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSignMessage } from 'wagmi';
 import {
@@ -23,7 +18,6 @@ import useSignedInUser from './useSignedInUser';
 import { fromHexString } from './useEligibleCreddd';
 import credddApi from '@/lib/credddApi';
 import { usePrivy } from '@privy-io/react-auth';
-import { StatusAPIResponse } from '@farcaster/auth-client';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
@@ -31,26 +25,6 @@ interface Prover {
   prepare(): Promise<void>;
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
-
-const submitProof = async ({
-  proof,
-  groupId,
-  siwfResponse,
-}: {
-  proof: Uint8Array;
-  groupId: string;
-  siwfResponse: StatusAPIResponse;
-}) => {
-  // Submit proof to the backend
-
-  const body: FidAttestationRequestBody = {
-    groupId,
-    proof: toHex(proof),
-    siwfResponse,
-  };
-
-  await credddApi.post('/api/attestations', body);
-};
 
 const useAddCreddd = () => {
   const { signMessageAsync, data } = useSignMessage({});
