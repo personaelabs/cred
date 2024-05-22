@@ -14,6 +14,7 @@ export interface ChatMessage {
   id: string;
   replyToId: string | null;
   text: string;
+  images: string[];
   user: ChatUser;
   createdAt: Date;
 }
@@ -77,4 +78,11 @@ export interface UserCredddResponse {
 
 export interface SyncRoomRequestBody {
   buyTransactionHash: Hex;
+}
+
+export interface MessageInput {
+  message: string;
+  mentions: string[];
+  replyTo: string | null;
+  imageUris: string[];
 }

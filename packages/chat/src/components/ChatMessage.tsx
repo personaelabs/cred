@@ -1,3 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import { type ChatMessage } from '@/types';
 import Avatar from './Avatar';
 import { Copy, Reply, Trash2 } from 'lucide-react';
@@ -7,7 +10,8 @@ import Link from 'next/link';
 import {
   copyTextToClipboard,
   cutoffMessage,
-  highlightUsernames,
+  extractLinks,
+  highlightText,
 } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -17,6 +21,7 @@ import {
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
 import { useLongPress } from 'use-long-press';
+import LinkPreview from './LinkPreview';
 
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
@@ -27,7 +32,7 @@ const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
   const { onReplyClick, onCopyClick } = props;
 
   return (
-    <DropdownMenuContent className="bg-background">
+    <DropdownMenuContent className="bg-background mt-[-20px] ml-[40px]">
       <DropdownMenuItem onClick={onReplyClick}>
         <Reply className="mr-2 w-4 h-4"></Reply>
         <div>Reply</div>
@@ -47,7 +52,7 @@ const SenderMessageDropdownContent = (props: {
   const { onCopyClick, onDeleteClick } = props;
 
   return (
-    <DropdownMenuContent className="bg-background">
+    <DropdownMenuContent className="bg-background mt-[-30px]">
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
@@ -147,40 +152,61 @@ const ChatMessage = (props: ChatMessageProps) => {
           ) : (
             <></>
           )}
-          <div className="mx-2 mt-2 text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left">
-            <DropdownMenu
-              open={isMenuOpen}
-              onOpenChange={open => {
-                setIsMenuOpen(open);
+          <div
+            {...bind()}
+            className={`flex flex-col gap-y-2 mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
+          >
+            <div
+              className={`${props.text ? '' : 'hidden'} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+              dangerouslySetInnerHTML={{
+                __html: highlightText(props.text),
               }}
-              modal={false}
-            >
-              <DropdownMenuTrigger
-                disabled
-                {...bind()}
-                className="text-left  whitespace-pre-wrap focus:outline-none"
-                dangerouslySetInnerHTML={{
-                  __html: highlightUsernames(props.text),
-                }}
-              ></DropdownMenuTrigger>
-              {isSender ? (
-                <SenderMessageDropdownContent
-                  onCopyClick={onClickCopyToClipboard}
-                  onDeleteClick={() => {
-                    onDeleteClick(props.id);
-                  }}
-                ></SenderMessageDropdownContent>
-              ) : (
-                <ChatMessageDropdownContent
-                  onReplyClick={() => {
-                    props.onReplySelect(props);
-                  }}
-                  onCopyClick={onClickCopyToClipboard}
-                ></ChatMessageDropdownContent>
-              )}
-            </DropdownMenu>
+            ></div>
+            <div className="mt-1 flex flex-col items-center gap-y-1">
+              {props.images.map((image, i) => (
+                <PhotoProvider key={i}>
+                  <PhotoView src={image}>
+                    <img
+                      src={image}
+                      className="rounded-xl"
+                      width={200}
+                      alt="image"
+                    ></img>
+                  </PhotoView>
+                </PhotoProvider>
+              ))}
+            </div>
           </div>
         </div>
+        {extractLinks(props.text).map((link, index) => (
+          <div className="p-2" key={index}>
+            <LinkPreview url={link}></LinkPreview>
+          </div>
+        ))}
+        <DropdownMenu
+          open={isMenuOpen}
+          onOpenChange={open => {
+            setIsMenuOpen(open);
+          }}
+          modal={false}
+        >
+          <DropdownMenuTrigger disabled></DropdownMenuTrigger>
+          {isSender ? (
+            <SenderMessageDropdownContent
+              onCopyClick={onClickCopyToClipboard}
+              onDeleteClick={() => {
+                onDeleteClick(props.id);
+              }}
+            ></SenderMessageDropdownContent>
+          ) : (
+            <ChatMessageDropdownContent
+              onReplyClick={() => {
+                props.onReplySelect(props);
+              }}
+              onCopyClick={onClickCopyToClipboard}
+            ></ChatMessageDropdownContent>
+          )}
+        </DropdownMenu>
         <div className="flex flex-row items-center justify-between">
           <div className="opacity-50 px-4 mt-1 text-xs">
             {new Date(props.createdAt).toLocaleString()}

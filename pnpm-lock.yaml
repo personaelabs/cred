@@ -153,6 +153,9 @@ importers:
       react-infinite-scroll-component:
         specifier: ^6.1.0
         version: 6.1.0(react@18.2.0)
+      react-photo-view:
+        specifier: ^1.2.4
+        version: 1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-textarea-autosize:
         specifier: ^8.5.3
         version: 8.5.3(@types/react@18.2.55)(react@18.2.0)
@@ -171,6 +174,9 @@ importers:
       use-long-press:
         specifier: ^3.2.0
         version: 3.2.0(react@18.2.0)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       vaul:
         specifier: ^0.8.0
         version: 0.8.9(@types/react-dom@18.2.18)(@types/react@18.2.55)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -199,6 +205,9 @@ importers:
       '@types/react-window':
         specifier: ^1.8.8
         version: 1.8.8
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       autoprefixer:
         specifier: ^10.0.1
         version: 10.4.17(postcss@8.4.35)
@@ -3571,6 +3580,9 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@types/uuid@9.0.8':
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -7208,6 +7220,12 @@ packages:
     hasBin: true
     peerDependencies:
       react: 18.2.0
+
+  react-photo-view@1.2.4:
+    resolution: {integrity: sha512-8G7yb0YgQuVgEMT3DopiROZyY8cgCDpba+G5MoxDkHNFOyqtw3r5T5tazYeifybPrvHWuKXj/bnAlBtQcpxyzQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-refresh@0.14.0:
     resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
@@ -12629,6 +12647,8 @@ snapshots:
 
   '@types/trusted-types@2.0.7': {}
 
+  '@types/uuid@9.0.8': {}
+
   '@types/yargs-parser@21.0.3': {}
 
   '@types/yargs@15.0.19':
@@ -17452,6 +17472,11 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
+
+  react-photo-view@1.2.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   react-refresh@0.14.0: {}
 

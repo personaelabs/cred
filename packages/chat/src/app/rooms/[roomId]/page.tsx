@@ -11,7 +11,7 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { type ChatMessage as IChatMessage } from '@/types';
+import { MessageInput, type ChatMessage as IChatMessage } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -98,12 +98,8 @@ const Room = () => {
   }, [isSuccess, reset]);
 
   const onSendClick = useCallback(
-    ({ message, mentions }: { message: string; mentions: string[] }) => {
-      sendMessage({
-        message,
-        mentions,
-        replyTo: replyTo ? replyTo.id : null,
-      });
+    (input: MessageInput) => {
+      sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
     },
     [replyTo, sendMessage]
@@ -128,49 +124,55 @@ const Room = () => {
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
-          <InfiniteScroll
-            loader={<></>}
-            endMessage={<></>}
-            dataLength={messages.length}
-            hasMore={hasNextPage}
-            inverse={true}
-            next={() => {
-              console.log('next');
-              logger.log('next');
-              fetchNextPage();
-            }}
-            scrollableTarget="scrollableDiv"
-            className="h-full"
-          >
-            {messages.map((message, i) => (
-              <div
-                key={message.id}
-                className="w-full"
-                ref={i === messages.length - 1 ? bottomRef : null}
-              >
-                <ChatMessage
-                  roomId={params.roomId}
-                  {...message}
-                  isSender={message.user.id === signedInUser.id.toString()}
-                  renderAvatar={
-                    i === 0 || message.user.id !== messages[i - 1].user.id
-                  }
-                  onReplySelect={message => {
-                    setReplyTo(message);
-                    inputRef.current?.focus();
-                  }}
-                  onViewReplyClick={_message => {
-                    // setFromMessage(toMessageType(_message));
-                    // const snapshot =  QueryDocumentSnapshot()
-                    // setFromMessage(message.id);
-                  }}
-                  onDeleteClick={messageId => {
-                    deleteMessage(messageId);
-                  }}
-                />
-              </div>
-            ))}
-          </InfiniteScroll>
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-gray-500">No messages</div>
+            </div>
+          ) : (
+            <InfiniteScroll
+              loader={<></>}
+              endMessage={<></>}
+              dataLength={messages.length}
+              hasMore={hasNextPage}
+              inverse={true}
+              next={() => {
+                console.log('next');
+                logger.log('next');
+                fetchNextPage();
+              }}
+              scrollableTarget="scrollableDiv"
+              className="h-full"
+            >
+              {messages.map((message, i) => (
+                <div
+                  key={message.id}
+                  className="w-full"
+                  ref={i === messages.length - 1 ? bottomRef : null}
+                >
+                  <ChatMessage
+                    roomId={params.roomId}
+                    {...message}
+                    isSender={message.user.id === signedInUser.id.toString()}
+                    renderAvatar={
+                      i === 0 || message.user.id !== messages[i - 1].user.id
+                    }
+                    onReplySelect={message => {
+                      setReplyTo(message);
+                      inputRef.current?.focus();
+                    }}
+                    onViewReplyClick={_message => {
+                      // setFromMessage(toMessageType(_message));
+                      // const snapshot =  QueryDocumentSnapshot()
+                      // setFromMessage(message.id);
+                    }}
+                    onDeleteClick={messageId => {
+                      deleteMessage(messageId);
+                    }}
+                  />
+                </div>
+              ))}
+            </InfiniteScroll>
+          )}
         </div>
         <ChatMessageInput
           inputRef={inputRef}

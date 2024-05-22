@@ -44,7 +44,7 @@ service cloud.firestore {
       return request.resource.data.body is string &&
       (request.resource.data.replyTo is string || request.resource.data.replyTo == null) &&
       request.resource.data.mentions is list &&
-      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions"]);
+      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions", "images"]);
     }
 
     match /rooms/{roomId} {
@@ -87,6 +87,12 @@ service cloud.firestore {
       isInRoom(roomId) && 
       resource.data.userId == request.auth.uid &&
       resource.data.roomId == roomId;
+
+      allow update: if
+      isInRoom(roomId) &&
+      isValidMessage() &&
+      isUserAuthorized() &&
+      request.resource.data.roomId == roomId;
     }
 
     match /notificationTokens/{userId} {
