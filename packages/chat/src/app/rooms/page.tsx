@@ -228,6 +228,15 @@ const Rooms = () => {
       </div>
     );
   }
+  const writableRooms = rooms.filter(room =>
+    room.writerIds.includes(signedInUser.id)
+  );
+
+  const purchasedRooms = rooms.filter(
+    room =>
+      room.readerIds.includes(signedInUser.id) &&
+      !room.writerIds.includes(signedInUser.id)
+  );
 
   return (
     <Scrollable>
@@ -235,32 +244,22 @@ const Rooms = () => {
         className="flex flex-col items-start bg-background h-full overflow-scroll"
         ref={scrollableRef}
       >
-        {rooms
-          .sort((a, b) => {
-            if (a.readerIds.includes(signedInUser.id)) {
-              return 1;
+        {[...writableRooms, ...purchasedRooms].map(room => (
+          <RoomItem
+            id={room.id}
+            key={room.id}
+            name={room.name}
+            imageUrl={room.imageUrl}
+            showMuteToggle={isNotificationsEnabled !== null}
+            isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
+              room.id
+            )}
+            isPurchasedRoom={
+              room.readerIds.includes(signedInUser.id) &&
+              !room.writerIds.includes(signedInUser.id)
             }
-            if (b.readerIds.includes(signedInUser.id)) {
-              return -1;
-            }
-            return 0;
-          })
-          .map(room => (
-            <RoomItem
-              id={room.id}
-              key={room.id}
-              name={room.name}
-              imageUrl={room.imageUrl}
-              showMuteToggle={isNotificationsEnabled !== null}
-              isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
-                room.id
-              )}
-              isPurchasedRoom={
-                room.readerIds.includes(signedInUser.id) &&
-                !room.writerIds.includes(signedInUser.id)
-              }
-            ></RoomItem>
-          ))}
+          ></RoomItem>
+        ))}
       </div>
     </Scrollable>
   );

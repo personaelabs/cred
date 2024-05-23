@@ -5,13 +5,14 @@ import ClickableBox from './ClickableBox';
 
 interface MobileHeaderProps {
   title: string;
+  description?: string;
   showBackButton?: boolean;
   backTo?: string;
   headerRight?: React.ReactNode;
 }
 
 const MobileHeader = (props: MobileHeaderProps) => {
-  const { headerRight, title, showBackButton, backTo } = props;
+  const { headerRight, title, description, showBackButton, backTo } = props;
   const router = useRouter();
 
   return (
@@ -33,7 +34,10 @@ const MobileHeader = (props: MobileHeaderProps) => {
           <></>
         )}
       </div>
-      <div>{title}</div>
+      <div className="flex flex-col justify-center">
+        <div className="text-center">{title}</div>
+        <div className="text-sm opacity-60 text-center">{description}</div>
+      </div>
       <div className="font-bold text-lg">
         {headerRight ? headerRight : <></>}
       </div>

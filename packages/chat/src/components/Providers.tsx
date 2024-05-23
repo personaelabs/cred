@@ -104,6 +104,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       <div className="h-full w-full md:w-[50%]">
         <MobileHeader
           title={options.title}
+          description={options.description}
           showBackButton={options.showBackButton}
           headerRight={options.headerRight}
           backTo={options.backTo}
