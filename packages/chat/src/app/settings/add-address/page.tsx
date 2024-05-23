@@ -1,4 +1,5 @@
 'use client';
+import AddressVerifiedSheet from '@/components/AddressVerifiedSheet';
 import ClickableBox from '@/components/ClickableBox';
 import ConnectFromDifferentDeviceSheet from '@/components/ConnectFromDifferentDeviceSheet';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import theme from '@/lib/theme';
 import { constructAttestationMessage, trimAddress } from '@/lib/utils';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Hex } from 'viem';
 
@@ -19,11 +21,17 @@ const AddAddressPage = () => {
   const { wallets } = useWallets();
   const { data: signedInUser } = useSignedInUser();
   const { data: user } = useUser(signedInUser?.id || null);
-  const { mutateAsync: submitAddress, isPending: isVerifying } =
-    useSubmitAddress();
+  const [isVerifiedSheetOpen, setIsVerifiedSheetOpen] = useState(false);
+  const {
+    mutateAsync: submitAddress,
+    isPending: isVerifying,
+    isSuccess,
+    reset,
+  } = useSubmitAddress();
   const { setOptions } = useHeaderOptions();
   const [differentDeviceSheetOpen, setIsDifferentDeviceSheetOpen] =
     useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setOptions({ title: 'Connect Address', showBackButton: true });
@@ -36,15 +44,21 @@ const AddAddressPage = () => {
   const connectedWallet = user
     ? wallets
         .sort((a, b) => b.connectedAt - a.connectedAt)
-        .find(
-          wallet =>
-            wallet.walletClientType !== 'privy' &&
-            !user.connectedAddresses.includes(wallet.address)
-        )
+        .find(wallet => wallet.walletClientType !== 'privy')
     : null;
 
   const { data: eligibleCreddd, isFetching: isSearchingCreddd } =
     useEligibleCreddd((connectedWallet?.address as Hex) || null);
+
+  useEffect(() => {
+    if (isSuccess) {
+      if (eligibleCreddd && eligibleCreddd.length > 0) {
+        setIsVerifiedSheetOpen(true);
+      } else {
+        router.replace('/settings/connected-addresses');
+      }
+    }
+  }, [eligibleCreddd, isSuccess, router]);
 
   const connectedAddressTrimmed = connectedWallet?.address
     ? trimAddress(connectedWallet?.address as Hex)
@@ -70,7 +84,7 @@ const AddAddressPage = () => {
               <div className="flex flex-col">
                 <div className="opacity-60">
                   The address {connectedAddressTrimmed} <br />
-                  grants you the following creddd
+                  grants you access to the following rooms
                 </div>
                 <div className="mt-4">
                   {eligibleCreddd?.map((creddd, i) => (
@@ -85,7 +99,7 @@ const AddAddressPage = () => {
               </div>
             ) : (
               <div className="opacity-60">
-                No creddd found for {connectedAddressTrimmed}
+                No rooms found for {connectedAddressTrimmed}
               </div>
             )}
           </>
@@ -131,6 +145,7 @@ const AddAddressPage = () => {
                 await submitAddress({
                   address: connectedWallet.address as Hex,
                   signature: sig as Hex,
+                  groupIds: eligibleCreddd?.map(creddd => creddd.id) || [],
                 });
               }}
             >
@@ -161,6 +176,19 @@ const AddAddressPage = () => {
           setIsDifferentDeviceSheetOpen(false);
         }}
       />
+      <AddressVerifiedSheet
+        isOpen={isVerifiedSheetOpen}
+        joinableRooms={
+          eligibleCreddd?.map(creddd => ({
+            id: creddd.id,
+            displayName: creddd.displayName,
+          })) || []
+        }
+        onClose={() => {
+          setIsVerifiedSheetOpen(false);
+          reset();
+        }}
+      ></AddressVerifiedSheet>
     </>
   );
 };

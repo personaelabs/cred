@@ -28,20 +28,14 @@ type RoomItemProps = {
 
 const RoomItem = (props: RoomItemProps) => {
   const { name, canJoin, id } = props;
-  const {
-    mutateAsync: joinRoom,
-    isPending: isJoining,
-    error,
-  } = useJoinRoom({
-    roomId: id,
-  });
+  const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
 
   const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
   const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
-    await joinRoom();
+    await joinRoom(id);
     router.replace(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 

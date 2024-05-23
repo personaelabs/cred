@@ -21,12 +21,12 @@ const joinRoom = async ({
   });
 };
 
-const useJoinRoom = ({ roomId }: { roomId: string }) => {
+const useJoinRoom = () => {
   const { data: signedInUser } = useSignedInUser();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (roomId: string) => {
       if (signedInUser) {
         await joinRoom({
           roomId,

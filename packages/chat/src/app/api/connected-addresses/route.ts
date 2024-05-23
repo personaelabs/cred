@@ -2,6 +2,7 @@ import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
 import privy, { isAuthenticated } from '@/lib/backend/privy';
 import { constructAttestationMessage } from '@/lib/utils';
 import { ConnectAddressRequestBody } from '@/types';
+import { addWriterToRoom } from '@cred/firebase';
 import { NextRequest } from 'next/server';
 import { verifyMessage } from 'viem';
 
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as ConnectAddressRequestBody;
 
   const user = await privy.getUser(verifiedClaims.userId);
-  const { address, signature } = body;
+  const { address, signature, groupIds } = body;
 
   const userPrivyAddress = user.wallet?.address;
 
@@ -35,6 +36,14 @@ export async function POST(req: NextRequest) {
     userId: verifiedClaims.userId,
     address,
   });
+
+  // TODO: Get the group ids from the indexer
+  for (const groupId of groupIds) {
+    await addWriterToRoom({
+      roomId: groupId,
+      userId: verifiedClaims.userId,
+    });
+  }
 
   return new Response('OK');
 }
