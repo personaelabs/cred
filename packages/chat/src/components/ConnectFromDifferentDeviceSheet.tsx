@@ -29,8 +29,10 @@ const ConnectFromDifferentDeviceSheet = (
     >
       <SheetContent side="bottom" className="h-[300px]">
         <SheetHeader>
-          <SheetTitle>Connect on a different device</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-center">
+            Connect on a different device
+          </SheetTitle>
+          <SheetDescription className="text-center">
             You can login to your account from a different device and connect
             your addresses.
             <br></br>
