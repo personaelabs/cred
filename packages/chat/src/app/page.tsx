@@ -82,6 +82,7 @@ export default function Home() {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
+
   useEffect(() => {
     setOptions({
       title: 'Rooms',
@@ -144,6 +145,13 @@ export default function Home() {
                 canJoin={true}
               ></RoomItem>
             ))}
+            {purchasableRooms.length > 0 ? (
+              <div className="mt-[32px] px-5 text-center opacity-60">
+                Buy access to rooms
+              </div>
+            ) : (
+              <></>
+            )}
             {purchasableRooms.map(room => (
               <RoomItem
                 id={room.id}
