@@ -124,9 +124,11 @@ export default function Home() {
           >
             <Alert>
               <AlertTitle className="flex flx-row justify-between items-center">
-                <div className="opacity-70">Add creddd to join more rooms</div>
-                <Link href="/add-creddd">
-                  <Button variant="secondary">Add</Button>
+                <div className="opacity-70">
+                  Connect addresses to join more rooms
+                </div>
+                <Link href="/settings/connected-addresses">
+                  <Button variant="secondary">Connect</Button>
                 </Link>
               </AlertTitle>
             </Alert>
