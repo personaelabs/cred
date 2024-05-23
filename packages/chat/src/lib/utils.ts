@@ -5,6 +5,12 @@ import { Hex, formatEther } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 
+const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+
+export const constructAttestationMessage = (address: string) => {
+  return `\n${SIG_SALT}Personae attest:${address}`;
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -79,9 +85,9 @@ export const cutoffMessage = (message: string, length: number) => {
   return message;
 };
 
-export const trimAddress = (address: Hex) => {
-  const start = address.substring(0, 6); // "0x" + first 4 chars
-  const end = address.substring(address.length - 4); // last 4 chars
+export const trimAddress = (address: Hex, chars: number = 6) => {
+  const start = address.substring(0, chars); // "0x" + first 4 chars
+  const end = address.substring(address.length - (chars - 2)); // last 4 chars
   return `${start}...${end}`;
 };
 
@@ -162,4 +168,15 @@ export const log = async (message: string) => {
       message,
     });
   }
+};
+
+/**
+ * Convert a `Hex` to a Buffer
+ */
+export const fromHexString = (hexString: Hex, size?: number): Buffer => {
+  const padded = size
+    ? hexString.slice(2).padStart(size * 2, '0')
+    : hexString.slice(2);
+
+  return Buffer.from(padded, 'hex');
 };

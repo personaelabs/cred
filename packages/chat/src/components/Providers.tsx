@@ -26,7 +26,6 @@ import {
 } from '@/contexts/MediaQueryContext';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
-import { base, baseSepolia } from 'viem/chains';
 import { getChain } from '@/lib/utils';
 
 const NODE_ENV = process.env.NODE_ENV;
@@ -63,13 +62,9 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
-    /*
     if (isPwa === false && isMobile === true) {
       router.push('/install-pwa');
-    }
-    */
-
-    if (signedInUser && isPwa === true) {
+    } else if (signedInUser && isPwa === true) {
       if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
@@ -84,6 +79,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     persistQueryClient({
       queryClient,
       persister: localStoragePersister,
+      buster: '1',
     });
   }, []);
 
@@ -96,7 +92,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         wallet => wallet.walletClientType === 'privy'
       );
       if (embeddedWallet) {
-        console.log('Setting active wallet', embeddedWallet);
         setActiveWallet(embeddedWallet);
       }
     }
@@ -109,6 +104,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       <div className="h-full w-full md:w-[50%]">
         <MobileHeader
           title={options.title}
+          description={options.description}
           showBackButton={options.showBackButton}
           headerRight={options.headerRight}
           backTo={options.backTo}
@@ -133,7 +129,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         appId="clw1tqoyj02yh110vokuu7yc5"
         config={{
           defaultChain: getChain(),
-          supportedChains: [baseSepolia, base],
+          supportedChains: [getChain()],
           appearance: {
             theme: 'dark',
             accentColor: theme.orange as `#${string}`,

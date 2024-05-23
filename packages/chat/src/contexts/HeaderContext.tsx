@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 export interface HeaderOptions {
   title: string;
+  description?: string;
   showBackButton?: boolean;
   headerRight?: React.ReactNode;
   backTo?: string;

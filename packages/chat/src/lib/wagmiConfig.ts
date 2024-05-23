@@ -1,18 +1,27 @@
-import { base, anvil, baseSepolia } from 'wagmi/chains';
+import { base, baseSepolia } from 'wagmi/chains';
 import { createConfig } from '@privy-io/wagmi';
 import { http } from 'wagmi';
 
-const config = createConfig({
-  chains: [base, anvil, baseSepolia],
+const MAINNET_CONFIG = createConfig({
+  chains: [base],
   transports: {
     [base.id]: http(),
+  },
+});
+
+const SEPOLIA_CONFIG = createConfig({
+  chains: [baseSepolia],
+  transports: {
     [baseSepolia.id]: http(
       `https://base-sepolia.g.alchemy.com/v2/BjrzZCLjdOu3etOMvJrm6HV63zBtxIjA`
     ),
-    [anvil.id]: http(),
-    // For each of your required chains, add an entry to `transports` with
-    // a key of the chain's `id` and a value of `http()`
   },
 });
+
+const config =
+  process.env.NODE_ENV === 'development' ||
+  process.env.NEXT_PUBLIC_CHAIN === 'sepolia'
+    ? SEPOLIA_CONFIG
+    : MAINNET_CONFIG;
 
 export default config;

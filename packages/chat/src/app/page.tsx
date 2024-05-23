@@ -28,20 +28,14 @@ type RoomItemProps = {
 
 const RoomItem = (props: RoomItemProps) => {
   const { name, canJoin, id } = props;
-  const {
-    mutateAsync: joinRoom,
-    isPending: isJoining,
-    error,
-  } = useJoinRoom({
-    roomId: id,
-  });
+  const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
 
   const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
   const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
-    await joinRoom();
+    await joinRoom(id);
     router.replace(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 
@@ -88,6 +82,7 @@ export default function Home() {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
+
   useEffect(() => {
     setOptions({
       title: 'Rooms',
@@ -124,9 +119,11 @@ export default function Home() {
           >
             <Alert>
               <AlertTitle className="flex flx-row justify-between items-center">
-                <div className="opacity-70">Add creddd to join more rooms</div>
-                <Link href="/add-creddd">
-                  <Button variant="secondary">Add</Button>
+                <div className="opacity-70">
+                  Connect addresses to join more rooms
+                </div>
+                <Link href="/settings/connected-addresses">
+                  <Button variant="secondary">Connect</Button>
                 </Link>
               </AlertTitle>
             </Alert>
@@ -148,6 +145,13 @@ export default function Home() {
                 canJoin={true}
               ></RoomItem>
             ))}
+            {purchasableRooms.length > 0 ? (
+              <div className="mt-[32px] px-5 text-center opacity-60">
+                Buy access to rooms
+              </div>
+            ) : (
+              <></>
+            )}
             {purchasableRooms.map(room => (
               <RoomItem
                 id={room.id}

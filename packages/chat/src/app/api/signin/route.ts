@@ -3,29 +3,13 @@ import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
 import { app } from '@cred/firebase';
-import { PrivyClient } from '@privy-io/server-auth';
-
-const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
-
-if (!PRIVY_APP_SECRET) {
-  throw new Error('PRIVY_APP_SECRET is not set');
-}
-
-const privy = new PrivyClient('clw1tqoyj02yh110vokuu7yc5', PRIVY_APP_SECRET);
+import privy, { isAuthenticated } from '@/lib/backend/privy';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 export async function POST(req: NextRequest) {
-  const bearerToken = req.headers.get('Authorization');
-
-  const authToken = bearerToken?.split(' ')[1];
-
-  if (!authToken) {
-    throw new Error('No authorization token provided');
-  }
-
-  const verifiedClaims = await privy.verifyAuthToken(authToken);
+  const verifiedClaims = await isAuthenticated(req);
 
   const user = await privy.getUser(verifiedClaims.userId);
 
@@ -39,20 +23,25 @@ export async function POST(req: NextRequest) {
     throw new Error('User has not linked a wallet');
   }
 
-  const userData: User = {
-    id: user.id,
-    displayName: user.farcaster?.displayName || '',
-    username: user.farcaster?.username || '',
-    pfpUrl: user.farcaster?.pfp || '',
-    privyAddress: user.wallet.address.toLowerCase(),
-    config: {
-      notification: {
-        mutedRoomIds: [],
-      },
-    },
-  };
+  const userExists = await db.collection('users').doc(user.id).get();
 
-  await db.collection('users').doc(user.id).set(userData);
+  if (!userExists.exists) {
+    const userData: User = {
+      id: user.id,
+      displayName: user.farcaster?.displayName || '',
+      username: user.farcaster?.username || '',
+      pfpUrl: user.farcaster?.pfp || '',
+      privyAddress: user.wallet.address.toLowerCase(),
+      config: {
+        notification: {
+          mutedRoomIds: [],
+        },
+      },
+      connectedAddresses: [],
+    };
+
+    await db.collection('users').doc(user.id).set(userData);
+  }
 
   return Response.json({ token }, { status: 200 });
 }

@@ -5,13 +5,13 @@ import { collection, getDoc, doc } from 'firebase/firestore';
 import { useEffect } from 'react';
 
 const getUser = async (userId: string) => {
-  const roomDocRef = doc(
+  const userDocRef = doc(
     collection(db, 'users').withConverter(userConverter),
     userId
   );
 
-  const roomDoc = await getDoc(roomDocRef);
-  return roomDoc.data();
+  const userDoc = await getDoc(userDocRef);
+  return userDoc.data();
 };
 
 const useUser = (userId: string | null) => {

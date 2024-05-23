@@ -80,20 +80,18 @@ const Settings = () => {
         </div>
         <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem
-            icon="Squircle"
-            text="My creddd"
-            to="/user-creddd"
-            iconColor={theme.orange}
-          ></SettingsMenuItem>
-          <SettingsMenuItem
             icon="Wallet"
             text="Wallet"
             to="/settings/wallet"
             iconColor="#65a7f7"
           ></SettingsMenuItem>
+          <SettingsMenuItem
+            icon="Link2"
+            text="Addresses"
+            to="/settings/connected-addresses"
+            iconColor={theme.orange}
+          ></SettingsMenuItem>
           {/*
-
-           
           <SettingsMenuItem
             icon="Bell"
             text="Notifications"

@@ -1,56 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
 import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
-import credddApi from '@/lib/credddApi';
-import { useAccount } from 'wagmi';
-import {
-  MerkleTreeList,
-  MerkleTree as MerkleTreeProto,
-} from '@/proto/merkle_tree_pb';
+import { getAllMerkleTrees, getGroupLatestMerkleTree } from '@/lib/credddApi';
+import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
-import useUserCreddd from './useUserCreddd';
-
-/**
- * Get the latest Merkle trees of the given group IDs
- * @returns Protocol buffer binary of the Merkle trees
- */
-const getGroupLatestMerkleTree = async (
-  groupId: string
-): Promise<MerkleTreeProto> => {
-  const params = new URLSearchParams();
-  params.set('groupIds', groupId);
-  const response = await credddApi.get<ArrayBuffer>(
-    `/api/groups?${params.toString()}`,
-    {
-      responseType: 'arraybuffer',
-    }
-  );
-
-  const responseBuf = await response.data;
-
-  const merkleTreeList = MerkleTreeList.deserializeBinary(
-    new Uint8Array(responseBuf)
-  );
-
-  return merkleTreeList.getTreesList()[0];
-};
-
-const getAllMerkleTrees = async () => {
-  const merkleTrees = await credddApi.get<MerkleTree[]>('/api/trees');
-  return merkleTrees.data;
-};
-
-/**
- * Convert a `Hex` to a Buffer
- */
-export const fromHexString = (hexString: Hex, size?: number): Buffer => {
-  const padded = size
-    ? hexString.slice(2).padStart(size * 2, '0')
-    : hexString.slice(2);
-
-  return Buffer.from(padded, 'hex');
-};
+import { useEffect } from 'react';
+import { fromHexString } from '@/lib/utils';
 
 /**
  * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
@@ -116,9 +72,8 @@ const getEligibleCreddd = async ({
   address: Hex;
   merkleTrees: MerkleTree[];
 }) => {
-  // @ts-ignore
-  const circuit = await import('circuit-web');
-  circuit.init_panic_hook();
+  const circuitWeb = await import('circuit-web');
+  circuitWeb.init_panic_hook();
 
   // Set of group IDs that matched the bloom filter
   const bloomFilterMatchedGroups = new Set<string>();
@@ -138,7 +93,7 @@ const getEligibleCreddd = async ({
       const addressBytes = hexToBytes(address);
 
       // Check if the address is a member using the bloom filter
-      const isMember = circuit.bloom_check(
+      const isMember = circuitWeb.bloom_check(
         // @ts-ignore
         merkleTree.bloomFilter.data,
         BigInt(merkleTree.bloomNumBits),
@@ -182,28 +137,40 @@ const getEligibleCreddd = async ({
   return eligibleGroups;
 };
 
-const useEligibleCreddd = () => {
+const useAllMerkleTrees = () => {
+  return useQuery({
+    queryKey: ['merkle-trees'],
+    queryFn: async () => {
+      return getAllMerkleTrees();
+    },
+  });
+};
+
+const useEligibleCreddd = (address: Hex | null) => {
+  const queryClient = useQueryClient();
   const { data: signedInUser } = useSignedInUser();
-  const { address } = useAccount();
-  const { data: existingCreddd } = useUserCreddd();
+  const { data: merkleTrees } = useAllMerkleTrees();
+
+  useEffect(() => {
+    if (merkleTrees && address) {
+      queryClient.invalidateQueries({
+        queryKey: ['eligible-creddd', { address }],
+      });
+    }
+  }, [merkleTrees, address, queryClient]);
 
   return useQuery({
-    queryKey: ['eligible-creddd'],
+    queryKey: ['eligible-creddd', { address }],
     queryFn: async () => {
-      const merkleTrees = await getAllMerkleTrees();
-
-      const exitingGroups = existingCreddd!.groups.map(group => group.id) ?? [];
-
       const eligibleCreddd = await getEligibleCreddd({
         address: address!,
-        merkleTrees: merkleTrees.filter(
-          tree => !exitingGroups.includes(tree.Group.id)
-        ),
+        merkleTrees: merkleTrees!,
       });
 
       return eligibleCreddd;
     },
-    enabled: !!signedInUser && !!address && !!existingCreddd,
+    enabled: !!signedInUser && !!address && !!merkleTrees,
+    staleTime: Infinity,
   });
 };
 

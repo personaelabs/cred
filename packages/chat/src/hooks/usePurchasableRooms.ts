@@ -1,9 +1,10 @@
 import db from '@/lib/firestore';
 import { roomConverter } from '@cred/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { collection, getDocs, query } from 'firebase/firestore';
 import useJoinedRooms from './useJoinedRooms';
 import useWritableRooms from './useWritableRooms';
+import { useEffect } from 'react';
 
 const getAllRooms = async () => {
   const q = query(collection(db, 'rooms').withConverter(roomConverter));
@@ -16,6 +17,14 @@ const getAllRooms = async () => {
 const usePurchasableRooms = (userId: string | null) => {
   const { data: joinedRooms } = useJoinedRooms(userId);
   const { data: writableRooms } = useWritableRooms(userId);
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.invalidateQueries({
+      queryKey: ['purchasable-rooms', { userId }],
+    });
+  }, [queryClient, userId]);
 
   return useQuery({
     queryKey: ['purchasable-rooms', { userId }],

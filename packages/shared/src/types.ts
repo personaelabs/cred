@@ -6,6 +6,7 @@ export interface User {
   displayName: string;
   pfpUrl: string;
   privyAddress: string;
+  connectedAddresses: string[];
   config: {
     notification: {
       mutedRoomIds: string[];

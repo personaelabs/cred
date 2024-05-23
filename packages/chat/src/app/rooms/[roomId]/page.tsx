@@ -71,6 +71,7 @@ const Room = () => {
     if (room) {
       setOptions({
         title: room.name,
+        description: `${room.joinedUserIds.length} member${room.joinedUserIds.length > 1 ? 's' : ''}`,
         headerRight: (
           <ClickableBox>
             <Link href={`/rooms/${params.roomId}/roomInfo`}>

@@ -36,7 +36,7 @@ const ConnectAddressesSheet = () => {
         <div className="flex flex-col items-center justify-center mt-[40px] mb-4">
           <Button asChild>
             <Link
-              href="/add-creddd"
+              href="/settings/connected-addresses"
               className="no-underline focus:no-underline focus:outline-none"
             >
               <Plus className="w-4 h-4 mr-2"></Plus>

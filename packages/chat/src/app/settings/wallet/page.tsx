@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useEffect, useState } from 'react';
@@ -40,7 +41,7 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
   }
 
   return (
-    <div className="flex flex-row gap-x-2 justify-between px-[32px]">
+    <div className="flex flex-row gap-x-2 py-2 items-end justify-between px-[32px] border-b-2">
       <div>
         <div
           className={`text-xs ${isPurchase ? 'text-green-400' : 'text-blue-400'}`}
@@ -54,9 +55,50 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
   );
 };
 
+const DepositButton = (props: { address: Hex | undefined }) => {
+  const { address } = props;
+
+  return (
+    <ClickableBox
+      className="flex flex-row gap-x-2 items-center mt-[50px]"
+      onClick={async () => {
+        copyTextToClipboard(address as string);
+        toast.info(`Copied address ${trimAddress(address as Hex)}`);
+      }}
+    >
+      <CirclePlus className="w-4 h-4" color={theme.orange}></CirclePlus>
+      <div className="text-md flex flex-row items-center">
+        Deposit on{' '}
+        <img src="/base.png" alt="base" className="w-4 h-4 mx-1"></img>
+        Base
+      </div>
+    </ClickableBox>
+  );
+};
+
+interface WithdrawalButtonProps {
+  onClick: () => void;
+}
+
+const WithdrawalButton = (props: WithdrawalButtonProps) => {
+  const { onClick } = props;
+
+  return (
+    <ClickableBox
+      className="flex flex-row gap-x-2 items-center mt-[20px]"
+      onClick={onClick}
+    >
+      <ArrowDownToLine
+        className="mr-2 w-4 h-4"
+        color={theme.orange}
+      ></ArrowDownToLine>
+      <div className="text-md">Withdrawal</div>
+    </ClickableBox>
+  );
+};
+
 const WalletPage = () => {
   const { setOptions } = useHeaderOptions();
-  // const { wallets } = useWallets();
   const { address } = useAccount();
   const { data } = useBalance({
     address,
@@ -83,37 +125,21 @@ const WalletPage = () => {
             {address ? trimAddress(address as Hex) : ''}
           </div>
           <div className="flex flex-col justify-between items-center h-full  pb-[40px] overflow-auto">
-            <ClickableBox
-              className="flex flex-row gap-x-2 items-center mt-[50px]"
-              onClick={async () => {
-                copyTextToClipboard(address as string);
-                toast.info(`Copied address ${trimAddress(address as Hex)}`);
-              }}
-            >
-              <CirclePlus className="w-4 h-4" color={theme.orange}></CirclePlus>
-              <div className="text-md">Deposit on Base</div>
-            </ClickableBox>
-            <ClickableBox
-              className="flex flex-row gap-x-2 items-center mt-[20px]"
+            <DepositButton address={address}></DepositButton>
+            <WithdrawalButton
               onClick={() => {
                 setIsWithdrawalSheetOpen(true);
               }}
-            >
-              <ArrowDownToLine
-                className="mr-2 w-4 h-4"
-                color={theme.orange}
-              ></ArrowDownToLine>
-              <div className="text-md">Withdrawal</div>
-            </ClickableBox>
+            ></WithdrawalButton>
             <div className="mt-[50px]">
               <Button onClick={exportWallet} variant="link">
                 Export wallet
               </Button>
             </div>
-            <div className="mt-4 opacity-60 text-sm text-left w-full px-4">
+            <div className="mt-[32px] opacity-60 text-sm text-center w-full px-4">
               Activity
             </div>
-            <div className="flex flex-col gap-y-2 mt-[50px]">
+            <div className="flex flex-col mt-[16px]">
               {tradeHistory?.map((log, index) => (
                 <TradeHistoryListItem
                   key={index}
@@ -126,6 +152,9 @@ const WalletPage = () => {
         </div>
       </Scrollable>
       <WithdrawalSheet
+        onClose={() => {
+          setIsWithdrawalSheetOpen(false);
+        }}
         onSuccess={() => {
           setIsWithdrawalSheetOpen(false);
         }}
