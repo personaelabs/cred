@@ -23,20 +23,25 @@ export async function POST(req: NextRequest) {
     throw new Error('User has not linked a wallet');
   }
 
-  const userData: User = {
-    id: user.id,
-    displayName: user.farcaster?.displayName || '',
-    username: user.farcaster?.username || '',
-    pfpUrl: user.farcaster?.pfp || '',
-    privyAddress: user.wallet.address.toLowerCase(),
-    config: {
-      notification: {
-        mutedRoomIds: [],
-      },
-    },
-  };
+  const userExists = await db.collection('users').doc(user.id).get();
 
-  await db.collection('users').doc(user.id).set(userData);
+  if (!userExists.exists) {
+    const userData: User = {
+      id: user.id,
+      displayName: user.farcaster?.displayName || '',
+      username: user.farcaster?.username || '',
+      pfpUrl: user.farcaster?.pfp || '',
+      privyAddress: user.wallet.address.toLowerCase(),
+      config: {
+        notification: {
+          mutedRoomIds: [],
+        },
+      },
+      connectedAddresses: [],
+    };
+
+    await db.collection('users').doc(user.id).set(userData);
+  }
 
   return Response.json({ token }, { status: 200 });
 }
