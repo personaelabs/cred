@@ -13,6 +13,7 @@ import { formatEthBalance } from '@/lib/utils';
 interface WithdrawalProps {
   isOpen: boolean;
   onSuccess: () => void;
+  onClose: () => void;
 }
 
 const ProcessingSheetBody = () => {
@@ -33,7 +34,7 @@ const ProcessingSheetBody = () => {
 };
 
 const WithdrawalSheet = (props: WithdrawalProps) => {
-  const { isOpen, onSuccess } = props;
+  const { isOpen, onSuccess, onClose } = props;
   const [toAddress, setToAddress] = useState('');
   const [amount, setAmount] = useState<bigint | undefined>(undefined);
   const { mutateAsync: withdrawal, isPending } = useWithdrawal();
@@ -57,7 +58,14 @@ const WithdrawalSheet = (props: WithdrawalProps) => {
   }, [amount, onSuccess, toAddress, withdrawal]);
 
   return (
-    <Sheet open={isOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       <SheetContent
         side="bottom"
         className="h-[300px] flex flex-col items-center"

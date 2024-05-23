@@ -255,7 +255,10 @@ const Rooms = () => {
               isMuted={singedInUserData.config.notification.mutedRoomIds.includes(
                 room.id
               )}
-              isPurchasedRoom={room.readerIds.includes(signedInUser.id)}
+              isPurchasedRoom={
+                room.readerIds.includes(signedInUser.id) &&
+                !room.writerIds.includes(signedInUser.id)
+              }
             ></RoomItem>
           ))}
       </div>

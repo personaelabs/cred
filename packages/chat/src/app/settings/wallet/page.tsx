@@ -40,7 +40,7 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
   }
 
   return (
-    <div className="flex flex-row gap-x-2 justify-between px-[32px]">
+    <div className="flex flex-row gap-x-2 py-2 items-end justify-between px-[32px] border-b-2">
       <div>
         <div
           className={`text-xs ${isPurchase ? 'text-green-400' : 'text-blue-400'}`}
@@ -113,7 +113,7 @@ const WalletPage = () => {
             <div className="mt-4 opacity-60 text-sm text-left w-full px-4">
               Activity
             </div>
-            <div className="flex flex-col gap-y-2 mt-[50px]">
+            <div className="flex flex-col mt-[50px]">
               {tradeHistory?.map((log, index) => (
                 <TradeHistoryListItem
                   key={index}
@@ -126,6 +126,9 @@ const WalletPage = () => {
         </div>
       </Scrollable>
       <WithdrawalSheet
+        onClose={() => {
+          setIsWithdrawalSheetOpen(false);
+        }}
         onSuccess={() => {
           setIsWithdrawalSheetOpen(false);
         }}
