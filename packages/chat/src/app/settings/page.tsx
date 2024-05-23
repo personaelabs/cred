@@ -91,9 +91,13 @@ const Settings = () => {
             to="/settings/wallet"
             iconColor="#65a7f7"
           ></SettingsMenuItem>
+          <SettingsMenuItem
+            icon="Link2"
+            text="Addresses"
+            to="/settings/connected-addresses"
+            iconColor={theme.orange}
+          ></SettingsMenuItem>
           {/*
-
-           
           <SettingsMenuItem
             icon="Bell"
             text="Notifications"

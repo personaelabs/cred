@@ -53,12 +53,12 @@ const SwitchAddressButton = () => {
 };
 
 const AddCredddPage = () => {
+  const { address } = useAccount();
   const {
     data: eligibleCreddd,
     isFetching: isSearchingCreddd,
     refetch,
-  } = useEligibleCreddd();
-  const { address } = useAccount();
+  } = useEligibleCreddd(address || null);
   const { setOptions } = useHeaderOptions();
   const {
     mutateAsync: addCreddd,

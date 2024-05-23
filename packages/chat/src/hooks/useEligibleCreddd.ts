@@ -3,7 +3,6 @@ import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
 import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
 import credddApi from '@/lib/credddApi';
-import { useAccount } from 'wagmi';
 import {
   MerkleTreeList,
   MerkleTree as MerkleTreeProto,
@@ -182,13 +181,12 @@ const getEligibleCreddd = async ({
   return eligibleGroups;
 };
 
-const useEligibleCreddd = () => {
+const useEligibleCreddd = (address: Hex | null) => {
   const { data: signedInUser } = useSignedInUser();
-  const { address } = useAccount();
   const { data: existingCreddd } = useUserCreddd();
 
   return useQuery({
-    queryKey: ['eligible-creddd'],
+    queryKey: ['eligible-creddd', { address }],
     queryFn: async () => {
       const merkleTrees = await getAllMerkleTrees();
 

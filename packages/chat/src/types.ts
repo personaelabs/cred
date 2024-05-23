@@ -79,3 +79,8 @@ export interface MessageInput {
 }
 
 export type TradeLog = GetLogsReturnType<typeof TRANSFER_SINGLE_EVENT>[number];
+
+export interface ConnectAddressRequestBody {
+  address: Hex;
+  signature: Hex;
+}
