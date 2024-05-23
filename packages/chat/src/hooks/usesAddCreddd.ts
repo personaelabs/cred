@@ -15,7 +15,7 @@ import {
 } from 'viem';
 import { calculateSigRecovery, concatUint8Arrays } from '@/lib/utils';
 import useSignedInUser from './useSignedInUser';
-import { fromHexString } from './useEligibleCreddd';
+import { fromHexString } from '@/lib/utils';
 import credddApi from '@/lib/credddApi';
 import { usePrivy } from '@privy-io/react-auth';
 
