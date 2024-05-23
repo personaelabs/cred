@@ -5,6 +5,7 @@ import useEligibleCreddd from '@/hooks/useEligibleCreddd';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useSubmitAddress from '@/hooks/useSubmitAddress';
 import useUser from '@/hooks/useUser';
+import theme from '@/lib/theme';
 import { constructAttestationMessage, trimAddress } from '@/lib/utils';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Loader2 } from 'lucide-react';
@@ -39,9 +40,8 @@ const AddAddressPage = () => {
         )
     : null;
 
-  const { data: eligibleCreddd } = useEligibleCreddd(
-    (connectedWallet?.address as Hex) || null
-  );
+  const { data: eligibleCreddd, isFetching: isSearchingCreddd } =
+    useEligibleCreddd((connectedWallet?.address as Hex) || null);
 
   const connectedAddressTrimmed = connectedWallet?.address
     ? trimAddress(connectedWallet?.address as Hex)
@@ -51,17 +51,33 @@ const AddAddressPage = () => {
     <div className="flex flex-col items-center h-[80%] justify-center w-full gap-y-4 py-4">
       {connectedAddressTrimmed ? (
         <>
+          {isSearchingCreddd ? (
+            <div className="flex flex-row items-center">
+              <Loader2
+                className="w-4 h-4 animate-spin mr-2"
+                color={theme.orange}
+              ></Loader2>
+              Searching creddd for {connectedAddressTrimmed}
+            </div>
+          ) : (
+            <></>
+          )}
           {eligibleCreddd && eligibleCreddd.length > 0 ? (
-            <div className="flex flex-col gap-y-2">
+            <div className="flex flex-col">
               <div className="opacity-60">
                 The address {connectedAddressTrimmed} <br />
                 grants you the following creddd
               </div>
-              {eligibleCreddd?.map((creddd, i) => (
-                <div key={i} className="font-bold text-center text-primary">
-                  <div>{creddd.displayName}</div>
-                </div>
-              ))}
+              <div className="mt-4">
+                {eligibleCreddd?.map((creddd, i) => (
+                  <div
+                    key={i}
+                    className={`py-4 font-bold text-center text-primary border-b-2 ${i === 0 ? 'border-t-2' : ''}`}
+                  >
+                    <div>{creddd.displayName}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="opacity-60">
@@ -70,7 +86,16 @@ const AddAddressPage = () => {
           )}
         </>
       ) : (
-        <Button onClick={connectWallet}>Connect Wallet</Button>
+        <div className="flex flex-col items-center gap-y-2">
+          <div className="opacity-80">Connect a new address</div>
+          <Button
+            onClick={() => {
+              connectWallet();
+            }}
+          >
+            Connect Wallet
+          </Button>
+        </div>
       )}
       {connectedWallet ? (
         <>
@@ -109,8 +134,9 @@ const AddAddressPage = () => {
             onClick={() => {
               connectWallet();
             }}
+            className="text-gray-400 underline"
           >
-            Connect another wallet
+            Switch address
           </Button>
         </>
       ) : (

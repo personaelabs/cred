@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
 import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
@@ -8,7 +8,7 @@ import {
   MerkleTree as MerkleTreeProto,
 } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
-import useUserCreddd from './useUserCreddd';
+import { useEffect } from 'react';
 
 /**
  * Get the latest Merkle trees of the given group IDs
@@ -115,9 +115,8 @@ const getEligibleCreddd = async ({
   address: Hex;
   merkleTrees: MerkleTree[];
 }) => {
-  // @ts-ignore
-  const circuit = await import('circuit-web');
-  circuit.init_panic_hook();
+  const circuitWeb = await import('circuit-web');
+  circuitWeb.init_panic_hook();
 
   // Set of group IDs that matched the bloom filter
   const bloomFilterMatchedGroups = new Set<string>();
@@ -137,7 +136,7 @@ const getEligibleCreddd = async ({
       const addressBytes = hexToBytes(address);
 
       // Check if the address is a member using the bloom filter
-      const isMember = circuit.bloom_check(
+      const isMember = circuitWeb.bloom_check(
         // @ts-ignore
         merkleTree.bloomFilter.data,
         BigInt(merkleTree.bloomNumBits),
@@ -181,27 +180,40 @@ const getEligibleCreddd = async ({
   return eligibleGroups;
 };
 
+const useAllMerkleTrees = () => {
+  return useQuery({
+    queryKey: ['merkle-trees'],
+    queryFn: async () => {
+      return getAllMerkleTrees();
+    },
+  });
+};
+
 const useEligibleCreddd = (address: Hex | null) => {
+  const queryClient = useQueryClient();
   const { data: signedInUser } = useSignedInUser();
-  const { data: existingCreddd } = useUserCreddd();
+  const { data: merkleTrees } = useAllMerkleTrees();
+
+  useEffect(() => {
+    if (merkleTrees && address) {
+      queryClient.invalidateQueries({
+        queryKey: ['eligible-creddd', { address }],
+      });
+    }
+  }, [merkleTrees, address, queryClient]);
 
   return useQuery({
     queryKey: ['eligible-creddd', { address }],
     queryFn: async () => {
-      const merkleTrees = await getAllMerkleTrees();
-
-      const exitingGroups = existingCreddd!.groups.map(group => group.id) ?? [];
-
       const eligibleCreddd = await getEligibleCreddd({
         address: address!,
-        merkleTrees: merkleTrees.filter(
-          tree => !exitingGroups.includes(tree.Group.id)
-        ),
+        merkleTrees: merkleTrees!,
       });
 
       return eligibleCreddd;
     },
-    enabled: !!signedInUser && !!address && !!existingCreddd,
+    enabled: !!signedInUser && !!address && !!merkleTrees,
+    staleTime: Infinity,
   });
 };
 
