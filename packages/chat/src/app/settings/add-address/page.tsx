@@ -13,8 +13,32 @@ import { constructAttestationMessage, trimAddress } from '@/lib/utils';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Hex } from 'viem';
+
+const ConnectOnADifferenceDeviceButton = () => {
+  const [differentDeviceSheetOpen, setIsDifferentDeviceSheetOpen] =
+    useState(false);
+
+  return (
+    <>
+      <ClickableBox
+        className="opacity-60 underline mt-4"
+        onClick={() => {
+          setIsDifferentDeviceSheetOpen(true);
+        }}
+      >
+        Connect on a different device
+      </ClickableBox>
+      <ConnectFromDifferentDeviceSheet
+        isOpen={differentDeviceSheetOpen}
+        onClose={() => {
+          setIsDifferentDeviceSheetOpen(false);
+        }}
+      />
+    </>
+  );
+};
 
 const AddAddressPage = () => {
   const { connectWallet } = usePrivy();
@@ -29,8 +53,7 @@ const AddAddressPage = () => {
     reset,
   } = useSubmitAddress();
   const { setOptions } = useHeaderOptions();
-  const [differentDeviceSheetOpen, setIsDifferentDeviceSheetOpen] =
-    useState(false);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -63,6 +86,27 @@ const AddAddressPage = () => {
   const connectedAddressTrimmed = connectedWallet?.address
     ? trimAddress(connectedWallet?.address as Hex)
     : null;
+
+  const onVerifyClick = useCallback(async () => {
+    if (!privyAddress) {
+      // TODO: Report error
+      return;
+    }
+
+    if (!connectedWallet) {
+      // TODO: Report error
+      return;
+    }
+
+    const message = constructAttestationMessage(privyAddress);
+    const sig = await connectedWallet.sign(message);
+
+    await submitAddress({
+      address: connectedWallet.address as Hex,
+      signature: sig as Hex,
+      groupIds: eligibleCreddd?.map(creddd => creddd.id) || [],
+    });
+  }, [connectedWallet, eligibleCreddd, privyAddress, submitAddress]);
 
   return (
     <>
@@ -113,14 +157,7 @@ const AddAddressPage = () => {
             >
               Connect Wallet
             </Button>
-            <ClickableBox
-              className="opacity-60 underline mt-4"
-              onClick={() => {
-                setIsDifferentDeviceSheetOpen(true);
-              }}
-            >
-              Connect on a different device
-            </ClickableBox>
+            <ConnectOnADifferenceDeviceButton />
           </div>
         )}
         {connectedWallet ? (
@@ -128,26 +165,7 @@ const AddAddressPage = () => {
             <Button
               className="mt-4"
               disabled={!connectedWallet || isVerifying}
-              onClick={async () => {
-                if (!privyAddress) {
-                  // TODO: Report error
-                  return;
-                }
-
-                if (!connectedWallet) {
-                  // TODO: Report error
-                  return;
-                }
-
-                const message = constructAttestationMessage(privyAddress);
-                const sig = await connectedWallet.sign(message);
-
-                await submitAddress({
-                  address: connectedWallet.address as Hex,
-                  signature: sig as Hex,
-                  groupIds: eligibleCreddd?.map(creddd => creddd.id) || [],
-                });
-              }}
+              onClick={onVerifyClick}
             >
               {isVerifying ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin"></Loader2>
@@ -170,12 +188,6 @@ const AddAddressPage = () => {
           <></>
         )}
       </div>
-      <ConnectFromDifferentDeviceSheet
-        isOpen={differentDeviceSheetOpen}
-        onClose={() => {
-          setIsDifferentDeviceSheetOpen(false);
-        }}
-      />
       <AddressVerifiedSheet
         isOpen={isVerifiedSheetOpen}
         joinableRooms={
