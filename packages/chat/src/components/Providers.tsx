@@ -63,11 +63,9 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
-    /*
     if (isPwa === false && isMobile === true) {
       router.push('/install-pwa');
     }
-    */
 
     if (signedInUser && isPwa === true) {
       if (!isNotificationConfigured()) {
