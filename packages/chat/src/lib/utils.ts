@@ -2,7 +2,7 @@ import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex, formatEther } from 'viem';
-import * as DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 
 export function cn(...inputs: ClassValue[]) {
