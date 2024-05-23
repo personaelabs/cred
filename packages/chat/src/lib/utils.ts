@@ -169,3 +169,14 @@ export const log = async (message: string) => {
     });
   }
 };
+
+/**
+ * Convert a `Hex` to a Buffer
+ */
+export const fromHexString = (hexString: Hex, size?: number): Buffer => {
+  const padded = size
+    ? hexString.slice(2).padStart(size * 2, '0')
+    : hexString.slice(2);
+
+  return Buffer.from(padded, 'hex');
+};

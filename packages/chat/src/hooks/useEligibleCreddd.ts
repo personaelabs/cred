@@ -2,54 +2,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
 import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
-import credddApi from '@/lib/credddApi';
-import {
-  MerkleTreeList,
-  MerkleTree as MerkleTreeProto,
-} from '@/proto/merkle_tree_pb';
+import { getAllMerkleTrees, getGroupLatestMerkleTree } from '@/lib/credddApi';
+import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
 import { useEffect } from 'react';
-
-/**
- * Get the latest Merkle trees of the given group IDs
- * @returns Protocol buffer binary of the Merkle trees
- */
-const getGroupLatestMerkleTree = async (
-  groupId: string
-): Promise<MerkleTreeProto> => {
-  const params = new URLSearchParams();
-  params.set('groupIds', groupId);
-  const response = await credddApi.get<ArrayBuffer>(
-    `/api/groups?${params.toString()}`,
-    {
-      responseType: 'arraybuffer',
-    }
-  );
-
-  const responseBuf = await response.data;
-
-  const merkleTreeList = MerkleTreeList.deserializeBinary(
-    new Uint8Array(responseBuf)
-  );
-
-  return merkleTreeList.getTreesList()[0];
-};
-
-const getAllMerkleTrees = async () => {
-  const merkleTrees = await credddApi.get<MerkleTree[]>('/api/trees');
-  return merkleTrees.data;
-};
-
-/**
- * Convert a `Hex` to a Buffer
- */
-export const fromHexString = (hexString: Hex, size?: number): Buffer => {
-  const padded = size
-    ? hexString.slice(2).padStart(size * 2, '0')
-    : hexString.slice(2);
-
-  return Buffer.from(padded, 'hex');
-};
+import { fromHexString } from '@/lib/utils';
 
 /**
  * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
