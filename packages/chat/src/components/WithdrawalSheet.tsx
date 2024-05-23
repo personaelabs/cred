@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { useCallback, useState } from 'react';
 import { Input } from './ui/input';
@@ -75,7 +76,17 @@ const WithdrawalSheet = (props: WithdrawalProps) => {
         ) : (
           <>
             <SheetHeader>
-              <SheetTitle>Withdrawal</SheetTitle>
+              <SheetTitle>
+                <div className="text-md flex flex-row items-center">
+                  Withdrawal on{' '}
+                  <img
+                    src="/base.png"
+                    alt="base"
+                    className="w-4 h-4 mx-1"
+                  ></img>
+                  Base
+                </div>
+              </SheetTitle>
             </SheetHeader>
             <div className="flex flex-col items-center gap-y-2 w-full">
               <Input

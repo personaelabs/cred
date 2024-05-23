@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useEffect, useState } from 'react';
@@ -56,7 +57,6 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
 
 const WalletPage = () => {
   const { setOptions } = useHeaderOptions();
-  // const { wallets } = useWallets();
   const { address } = useAccount();
   const { data } = useBalance({
     address,
@@ -91,7 +91,11 @@ const WalletPage = () => {
               }}
             >
               <CirclePlus className="w-4 h-4" color={theme.orange}></CirclePlus>
-              <div className="text-md">Deposit on Base</div>
+              <div className="text-md flex flex-row items-center">
+                Deposit on{' '}
+                <img src="/base.png" alt="base" className="w-4 h-4 mx-1"></img>
+                Base
+              </div>
             </ClickableBox>
             <ClickableBox
               className="flex flex-row gap-x-2 items-center mt-[20px]"
