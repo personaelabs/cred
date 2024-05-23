@@ -26,7 +26,6 @@ import {
 } from '@/contexts/MediaQueryContext';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
-import { base, baseSepolia } from 'viem/chains';
 import { getChain } from '@/lib/utils';
 
 const NODE_ENV = process.env.NODE_ENV;
@@ -93,7 +92,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         wallet => wallet.walletClientType === 'privy'
       );
       if (embeddedWallet) {
-        console.log('Setting active wallet', embeddedWallet);
         setActiveWallet(embeddedWallet);
       }
     }
@@ -130,7 +128,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         appId="clw1tqoyj02yh110vokuu7yc5"
         config={{
           defaultChain: getChain(),
-          supportedChains: [baseSepolia, base],
+          supportedChains: [getChain()],
           appearance: {
             theme: 'dark',
             accentColor: theme.orange as `#${string}`,

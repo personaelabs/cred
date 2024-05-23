@@ -1,8 +1,9 @@
 import db from '@/lib/firestore';
 import { roomConverter } from '@cred/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import useJoinedRooms from './useJoinedRooms';
+import { useEffect } from 'react';
 
 const getPurchasedRooms = async (userId: string) => {
   const q = query(
@@ -19,6 +20,11 @@ const getPurchasedRooms = async (userId: string) => {
 
 const usePurchasedRooms = (userId: string | null) => {
   const { data: joinedRooms } = useJoinedRooms(userId);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['purchased-rooms'] });
+  }, [queryClient]);
 
   return useQuery({
     queryKey: ['purchased-rooms'],
