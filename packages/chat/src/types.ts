@@ -1,5 +1,6 @@
-import { Hex } from 'viem';
+import { GetLogsReturnType, Hex } from 'viem';
 import { User } from '@privy-io/react-auth';
+import { TRANSFER_SINGLE_EVENT } from './lib/contract';
 
 export type SignedInUser = User;
 
@@ -76,3 +77,5 @@ export interface MessageInput {
   replyTo: string | null;
   imageUris: string[];
 }
+
+export type TradeLog = GetLogsReturnType<typeof TRANSFER_SINGLE_EVENT>[number];

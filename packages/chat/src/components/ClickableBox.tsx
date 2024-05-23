@@ -11,6 +11,9 @@ const ClickableBox = (
         scale: 0.95,
       }}
       {...props}
+      style={{
+        cursor: 'pointer',
+      }}
     >
       {children}
     </motion.div>
