@@ -11,46 +11,17 @@ export const credddDb = new Client({
 });
 
 export const getGroups = async () => {
-  const groupsWithFids = await credddDb.query<{
-    fids: number[];
+  const groups = await credddDb.query<{
     id: string;
     displayName: string;
-  }>(`
-     WITH user_creddd AS (
-      SELECT
-        "FidAttestation".fid,
-        "FidAttestation"."treeId"
-      FROM
-        "FidAttestation"
-      UNION
-      SELECT
-        "IntrinsicCreddd".fid,
-        "IntrinsicCreddd"."treeId"
-      FROM
-        "IntrinsicCreddd"
-    ),
-    distinct_user_creddd AS (
-      SELECT DISTINCT ON (user_creddd.fid,
-        "Group".id)
-        user_creddd.fid,
-        "Group".id AS "groupId",
-        "Group"."typeId",
-        "Group"."displayName"
-      FROM
-        user_creddd
-      LEFT JOIN "MerkleTree" ON user_creddd. "treeId" = "MerkleTree".id
-      LEFT JOIN "Group" ON "MerkleTree"."groupId" = "Group".id
-    WHERE
-      "Group".state = 'Recordable'::"GroupState"
-    )
-    SELECT
-      ARRAY_AGG(fid) AS "fids", "groupId" AS "id", "displayName"
+  }>(`  SELECT
+      id,
+      "displayName"
     FROM
-      distinct_user_creddd
-    GROUP BY
-      ("groupId",
-        "displayName")
+      "Group"
+    WHERE
+      state = 'Recordable'
       `);
 
-  return groupsWithFids.rows;
+  return groups.rows;
 };

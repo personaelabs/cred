@@ -9,16 +9,13 @@ const db = getFirestore(app);
 const upsertRoom = async ({
   groupId,
   name,
-  writerIds,
 }: {
   groupId: string;
   name: string;
-  writerIds: string[];
 }) => {
-  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds'> = {
+  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds' | 'writerIds'> = {
     id: groupId,
     name,
-    writerIds,
     imageUrl: null,
   };
 
@@ -35,6 +32,7 @@ const upsertRoom = async ({
   } else {
     const newRoomData: Room = {
       ...roomData,
+      writerIds: [],
       joinedUserIds: [],
       readerIds: [],
     };
@@ -56,7 +54,6 @@ const syncRooms = async () => {
         return upsertRoom({
           groupId: group.id,
           name: group.displayName,
-          writerIds: group.fids.map(fid => fid.toString()),
         });
       })
     );
