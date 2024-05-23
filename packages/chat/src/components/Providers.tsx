@@ -65,9 +65,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (isPwa === false && isMobile === true) {
       router.push('/install-pwa');
-    }
-
-    if (signedInUser && isPwa === true) {
+    } else if (signedInUser && isPwa === true) {
       if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
