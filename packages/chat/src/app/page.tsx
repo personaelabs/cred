@@ -127,6 +127,11 @@ export default function Home() {
                 </Link>
               </AlertTitle>
             </Alert>
+            {writableRooms.length > 0 || purchasedRooms.length > 0 ? (
+              <div className="px-5 text-center opacity-60">Eligible rooms</div>
+            ) : (
+              <></>
+            )}
             {writableRooms.map(room => (
               <RoomItem
                 id={room.id}
