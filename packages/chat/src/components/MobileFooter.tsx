@@ -47,7 +47,7 @@ const MobileFooter = (_props: MobileFooterProps) => {
   };
 
   return (
-    <div className="h-[70px] w-full bg-background fixed bottom-0 flex flex-col">
+    <div className="h-[70px] w-full md:w-[50%] bg-background fixed bottom-0 flex flex-col">
       <div className="w-full h-full border-t bg-background">
         <div className="w-full h-full px-2 justify-between items-center inline-flex">
           <MenuItem

@@ -13,8 +13,6 @@
   "dependencies": {
     "@cred/firebase": "workspace:*",
     "@cred/shared": "workspace:*",
-    "@farcaster/auth-client": "^0.1.0",
-    "@farcaster/auth-kit": "^0.2.2",
     "@privy-io/react-auth": "^1.65.0",
     "@privy-io/server-auth": "^1.7.3",
     "@privy-io/wagmi": "^0.2.6",
@@ -46,6 +44,7 @@
     "firebase": "^10.11.1",
     "firebase-admin": "^12.1.0",
     "framer-motion": "^11.2.4",
+    "isomorphic-dompurify": "^2.11.0",
     "lucide-react": "^0.378.0",
     "next": "^14.2.3",
     "next-themes": "^0.3.0",

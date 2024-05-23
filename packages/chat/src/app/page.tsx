@@ -54,7 +54,7 @@ const RoomItem = (props: RoomItemProps) => {
       console.log(error);
       alert('Failed to join the room');
     }
-  });
+  }, [error]);
 
   return (
     <div className="flex mt-4 flex-row items-center justify-between px-5">

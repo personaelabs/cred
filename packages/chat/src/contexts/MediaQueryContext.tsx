@@ -19,10 +19,10 @@ export function MediaQueryProvider({
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 1024);
+    setIsMobile(window.innerWidth < 480);
 
     function handleResize() {
-      setIsMobile(window.innerWidth < 1024);
+      setIsMobile(window.innerWidth < 480);
     }
 
     if (typeof window !== 'undefined') {

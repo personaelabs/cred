@@ -15,7 +15,7 @@ const MobileHeader = (props: MobileHeaderProps) => {
   const router = useRouter();
 
   return (
-    <div className="md:hidden px-4 flex flex-row justify-between items-center h-[60px] w-[100vw] bg-background border-b-2">
+    <div className="px-4 flex flex-row justify-between items-center h-[60px] w-full bg-background border-b-2">
       <div
         onClick={() => {
           if (backTo) {

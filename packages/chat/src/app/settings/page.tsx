@@ -1,12 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { ChevronRight } from 'lucide-react';
 import AvatarWithFallback from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useSignOut from '@/hooks/useSignOut';
-/* eslint-disable @next/next/no-img-element */
 import useSignedInUser from '@/hooks/useSignedInUser';
-import useUsers from '@/hooks/useUsers';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import Link from 'next/link';
@@ -14,6 +13,7 @@ import Scrollable from '@/components/Scrollable';
 import { icons } from 'lucide-react';
 import theme from '@/lib/theme';
 import ClickableBox from '@/components/ClickableBox';
+import useUser from '@/hooks/useUser';
 
 interface SettingsMenuItemProps {
   icon: keyof typeof icons;
@@ -43,8 +43,7 @@ const Settings = () => {
   const { mutateAsync: signOut } = useSignOut();
   const router = useRouter();
 
-  const { data: users } = useUsers(signedInUser?.id ? [signedInUser.id] : []);
-  const user = users.length > 0 ? users[0] : null;
+  const { data: user } = useUser(signedInUser?.id || null);
 
   const onSignOutClick = useCallback(async () => {
     const confirmed = await window.confirm('Sign out?');

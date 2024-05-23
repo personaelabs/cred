@@ -28,10 +28,11 @@ const useUser = (userId: string | null) => {
   return useQuery({
     queryKey: ['user', { userId }],
     queryFn: async () => {
+      if (!userId) return null;
+
       const user = await getUser(userId!);
       return user;
     },
-    enabled: !!userId,
     staleTime: Infinity,
   });
 };
