@@ -61,15 +61,21 @@ const RoomMembersList = (props: RoomMembersListProps) => {
 type RoomItemProps = {
   room: Room;
   canJoin: boolean;
+  scrollableRef: React.RefObject<HTMLDivElement> | null;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { canJoin } = props;
+  const { canJoin, scrollableRef } = props;
   const { name, id } = props.room;
   const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
 
-  const { mutateAsync: buyKey, isProcessingTx, isPending } = useBuyKey(id);
+  const {
+    mutateAsync: buyKey,
+    isProcessingTx,
+    isPending,
+    reset,
+  } = useBuyKey(id);
   const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
@@ -77,9 +83,13 @@ const RoomItem = (props: RoomItemProps) => {
     router.replace(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 
-  const onPurchaseClick = useCallback(() => {
-    buyKey();
-  }, [buyKey]);
+  const onPurchaseClick = useCallback(async () => {
+    await buyKey();
+    if (scrollableRef) {
+      scrollableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    reset();
+  }, [buyKey, reset, scrollableRef]);
 
   useEffect(() => {
     if (error) {
@@ -191,7 +201,12 @@ export default function Home() {
               <></>
             )}
             {joinableRooms.map(room => (
-              <RoomItem room={room} key={room.id} canJoin={true}></RoomItem>
+              <RoomItem
+                room={room}
+                key={room.id}
+                canJoin={true}
+                scrollableRef={scrollableRef}
+              ></RoomItem>
             ))}
             {buyableRooms.length > 0 ? (
               <div className="mt-[32px] px-5 text-center opacity-60">
@@ -203,7 +218,12 @@ export default function Home() {
             {buyableRooms
               .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
               .map(room => (
-                <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
+                <RoomItem
+                  room={room}
+                  key={room.id}
+                  canJoin={false}
+                  scrollableRef={scrollableRef}
+                ></RoomItem>
               ))}
           </InfiniteScroll>
         </div>
