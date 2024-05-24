@@ -61,7 +61,8 @@ const getFarcasterAddresses = async (fid: number) => {
   if (fcUser) {
     return [...fcUser.verified_addresses.eth_addresses, fcUser.custody_address];
   } else {
-    return null;
+    console.error(`Failed to get Farcaster user ${fid}`);
+    return [];
   }
 };
 
