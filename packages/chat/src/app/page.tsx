@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/ui/button';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import usePurchasableRooms from '@/hooks/usePurchasableRooms';
-import useWritableRooms from '@/hooks/useWritableRooms';
+import useAllRooms from '@/hooks/useAllRooms';
+import useEligibleRooms from '@/hooks/useEligibleRooms';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useCallback, useEffect } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
@@ -21,6 +21,7 @@ import ConnectAddressesSheet from '@/components/ConnectAddressesSheet';
 import { Room } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
 import AvatarWithFallback from '@/components/Avatar';
+import useJoinedRooms from '@/hooks/useJoinedRooms';
 
 interface RoomMembersListProps {
   room: Room;
@@ -137,12 +138,20 @@ export default function Home() {
     });
   }, [setOptions]);
 
-  const { data: purchasableRooms } = usePurchasableRooms(
-    signedInUser?.id || null
-  );
-  const { data: writableRooms } = useWritableRooms(signedInUser?.id || null);
+  const { data: allRooms } = useAllRooms();
+  const { data: joinedRooms } = useJoinedRooms(signedInUser?.id || null);
+  const { data: eligibleRooms } = useEligibleRooms(signedInUser?.id || null);
   const { data: purchasedRooms } = usePurchasedRooms(signedInUser?.id || null);
 
+  const joinableRooms = [...purchasedRooms, ...eligibleRooms].filter(
+    room => !joinedRooms.some(r => r.id === room.id)
+  );
+
+  const buyableRooms = allRooms.filter(
+    room =>
+      !eligibleRooms.some(r => r.id === room.id) &&
+      !purchasedRooms.some(r => r.id === room.id)
+  );
   if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
   }
@@ -158,11 +167,7 @@ export default function Home() {
           <InfiniteScroll
             loader={<></>}
             endMessage={<></>}
-            dataLength={
-              purchasableRooms.length +
-              writableRooms.length +
-              purchasedRooms.length
-            }
+            dataLength={buyableRooms.length + joinableRooms.length}
             hasMore={false}
             next={() => {}}
             scrollThreshold={0.5}
@@ -178,27 +183,24 @@ export default function Home() {
                 </Link>
               </AlertTitle>
             </Alert>
-            {writableRooms.length > 0 || purchasedRooms.length > 0 ? (
+            {joinableRooms.length > 0 ? (
               <div className="px-5 text-center opacity-60 mt-4">
                 Eligible rooms
               </div>
             ) : (
               <></>
             )}
-            {writableRooms.map(room => (
+            {joinableRooms.map(room => (
               <RoomItem room={room} key={room.id} canJoin={true}></RoomItem>
             ))}
-            {purchasedRooms.map(room => (
-              <RoomItem room={room} key={room.id} canJoin={true}></RoomItem>
-            ))}
-            {purchasableRooms.length > 0 ? (
+            {buyableRooms.length > 0 ? (
               <div className="mt-[32px] px-5 text-center opacity-60">
                 Buy access to rooms
               </div>
             ) : (
               <></>
             )}
-            {purchasableRooms
+            {buyableRooms
               .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
               .map(room => (
                 <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
