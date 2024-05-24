@@ -46,7 +46,7 @@ const ConnectedAddressesPage = () => {
 
   return (
     <Scrollable>
-      <div className="flex flex-col items-center mt-4">
+      <div className="flex flex-col items-center mt-4 pb-[64px]">
         <div className="flex flex-col w-full items-center">
           {user?.connectedAddresses.length === 0 ? (
             <div className="text-center opacity-60">No connected address</div>

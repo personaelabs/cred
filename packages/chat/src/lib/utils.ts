@@ -25,8 +25,12 @@ export const extractLinks = (text: string) => {
 export const formatEthBalance = (balance: bigint) => {
   const balanceInEth = formatEther(balance);
   const balanceNumber = parseFloat(balanceInEth);
-  if (balanceNumber < 0.0001) {
+  if (balanceNumber < 0.0001 && balanceNumber > 0) {
     return '< 0.0001';
+  }
+
+  if (balanceNumber === 0) {
+    return '0';
   }
 
   return balanceNumber.toPrecision(3);

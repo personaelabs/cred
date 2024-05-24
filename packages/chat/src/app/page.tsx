@@ -171,7 +171,7 @@ export default function Home() {
             <Alert>
               <AlertTitle className="flex flx-row justify-between items-center">
                 <div className="opacity-70">
-                  Connect addresses to find more eligible rooms
+                  Connect addresses to find eligible rooms
                 </div>
                 <Link href="/settings/connected-addresses">
                   <Button variant="secondary">Connect</Button>
@@ -198,9 +198,11 @@ export default function Home() {
             ) : (
               <></>
             )}
-            {purchasableRooms.map(room => (
-              <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
-            ))}
+            {purchasableRooms
+              .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
+              .map(room => (
+                <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
+              ))}
           </InfiniteScroll>
         </div>
       </div>
