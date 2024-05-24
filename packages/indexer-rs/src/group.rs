@@ -13,6 +13,7 @@ const PREVIEW_GROUP_IDS: [&str; 6] = [
     "3544a1d252e2cfffb5d977c9dd2e3766b13a72ea4206c5e29b69502de62a6023", // $Higher believer
 ];
 
+
 #[derive(Debug, Clone)]
 pub struct Group {
     pub id: GroupId,
@@ -90,7 +91,7 @@ pub async fn upsert_group(
 }
 
 /// Get all groups from the database
-pub async fn get_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
+pub async fn get_all_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
     // Get all groups from the storage
     let result = pg_client
         .query(

@@ -2,7 +2,7 @@ use futures::future::join_all;
 use futures::join;
 use indexer_rs::contract::ContractType;
 use indexer_rs::eth_rpc::EthRpcClient;
-use indexer_rs::group::get_groups;
+use indexer_rs::group::get_all_groups;
 use indexer_rs::intrinsic_creddd_sync_engine::IntrinsicCredddSyncEngine;
 use indexer_rs::log_sync_engine::LogSyncEngine;
 use indexer_rs::postgres::init_neynar_db;
@@ -44,7 +44,7 @@ async fn main() {
     let rocksdb_client = Arc::new(rocksdb_conn);
     let eth_client = Arc::new(EthRpcClient::new());
 
-    let groups = get_groups(&pg_client).await;
+    let groups = get_all_groups(&pg_client).await;
 
     // Set to store the contracts that the groups depend on
     let mut contracts = HashSet::new();
