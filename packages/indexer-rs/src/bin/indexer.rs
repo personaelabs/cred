@@ -35,7 +35,6 @@ async fn main() {
 
     let pg_client = init_postgres().await;
 
-    /* 
     // Open the RocksDB connection
     let mut rocksdb_options = Options::default();
     rocksdb_options.create_if_missing(true);
@@ -161,9 +160,7 @@ async fn main() {
     join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
-        intrinsic_creddd_sync_job
+        intrinsic_creddd_sync_job,
+        start_server()
     );
-    */
-
-    start_server().await;
 }
