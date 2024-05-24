@@ -26,7 +26,7 @@ const SettingsMenuItem = (props: SettingsMenuItemProps) => {
   const Icon = icons[props.icon];
   const { text, to, iconColor } = props;
   return (
-    <Link href={to} className="no-underline w-[50%]">
+    <Link href={to} className="no-underline w-[50%] md:w-[200px]">
       <ClickableBox className="w-full flex flex-row items-center justify-between border-2 border-opacity-50 py-1  border-gray-200 rounded-md">
         <div className="flex flex-row  items-center">
           <Icon className="w-5 h-5 ml-2" color={iconColor}></Icon>
