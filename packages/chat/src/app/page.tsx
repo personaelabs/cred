@@ -41,7 +41,7 @@ const RoomMembersList = (props: RoomMembersListProps) => {
             <AvatarWithFallback
               imageUrl={user?.pfpUrl || null}
               alt={user?.displayName || 'User'}
-              size={16}
+              size={22}
               name={user?.displayName || ''}
             ></AvatarWithFallback>
           </div>
@@ -99,15 +99,15 @@ const RoomItem = (props: RoomItemProps) => {
   }, [error]);
 
   return (
-    <div className="border-b-2 py-2">
+    <div className="border-b-2 py-4">
       <div className="flex flex-col px-5">
         <div className="flex flex-row items-center justify-between">
           <div
-            className={`text-md text-wrap w-[55%] ${canJoin ? 'font-bold' : 'font-normal'} ${canJoin ? 'text-primary' : ''}`}
+            className={`text-lg text-wrap w-[70%] ${canJoin ? 'font-bold' : 'font-normal'} ${canJoin ? 'text-primary' : ''}`}
           >
             {name}
           </div>
-          <div className="text-center w-[45%]">
+          <div className="text-center w-[30%]">
             {canJoin ? (
               <Button onClick={onJoinClick} disabled={isJoining} variant="link">
                 Join
@@ -124,9 +124,13 @@ const RoomItem = (props: RoomItemProps) => {
             )}
           </div>
         </div>
-        <div>
-          <RoomMembersList room={props.room}></RoomMembersList>
-        </div>
+        {!canJoin ? (
+          <div>
+            <RoomMembersList room={props.room}></RoomMembersList>
+          </div>
+        ) : (
+          <></>
+        )}
         {
           // TODO: Move this to a parent component
           <ProcessingTxModal isOpen={isProcessingTx} />

@@ -11,7 +11,7 @@ const getUser = async (userId: string) => {
   );
 
   const userDoc = await getDoc(userDocRef);
-  return userDoc.data();
+  return userDoc.data() || null;
 };
 
 const useUser = (userId: string | null) => {
