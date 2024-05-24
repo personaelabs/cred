@@ -2,13 +2,54 @@ import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
-import { app } from '@cred/firebase';
+import { User as PrivyUser } from '@privy-io/server-auth';
+import { addWriterToRoom, app } from '@cred/firebase';
 import privy, { isAuthenticated } from '@/lib/backend/privy';
 import * as neynar from '@/lib/backend/neynar';
 import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
+import credddRpcClient from '@/lib/credddRpc';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+/**
+ * Save the Privy user to Firestore.
+ * This will overwrite any existing user data.
+ */
+const initUser = async (user: PrivyUser) => {
+  if (!user.wallet) {
+    throw new Error('User has not linked a wallet');
+  }
+
+  const userData: User = {
+    id: user.id,
+    displayName: user.farcaster?.displayName || '',
+    username: user.farcaster?.username || '',
+    pfpUrl: user.farcaster?.pfp || '',
+    privyAddress: user.wallet.address.toLowerCase(),
+    config: {
+      notification: {
+        mutedRoomIds: [],
+      },
+    },
+    connectedAddresses: [],
+  };
+
+  await db.collection('users').doc(user.id).set(userData);
+};
+
+/**
+ * Get the custody address and verified addresses for an Farcaster user.
+ */
+const getFarcasterAddresses = async (fid: number) => {
+  const fcUser = await neynar.getUser(fid);
+
+  if (fcUser) {
+    return [...fcUser.verified_addresses.eth_addresses, fcUser.custody_address];
+  } else {
+    return null;
+  }
+};
 
 export async function POST(req: NextRequest) {
   const verifiedClaims = await isAuthenticated(req);
@@ -17,10 +58,6 @@ export async function POST(req: NextRequest) {
 
   const token = await auth.createCustomToken(user.id);
 
-  if (!user.farcaster) {
-    throw new Error('User has not linked a Farcaster account');
-  }
-
   if (!user.wallet) {
     throw new Error('User has not linked a wallet');
   }
@@ -28,41 +65,41 @@ export async function POST(req: NextRequest) {
   const userExists = await db.collection('users').doc(user.id).get();
 
   if (!userExists.exists) {
-    const userData: User = {
-      id: user.id,
-      displayName: user.farcaster?.displayName || '',
-      username: user.farcaster?.username || '',
-      pfpUrl: user.farcaster?.pfp || '',
-      privyAddress: user.wallet.address.toLowerCase(),
-      config: {
-        notification: {
-          mutedRoomIds: [],
-        },
-      },
-      connectedAddresses: [],
-    };
-
-    await db.collection('users').doc(user.id).set(userData);
+    await initUser(user);
   }
 
+  // If the user logged in with Farcaster, pull their connected addresses
+  // and save them in Firestore
   if (user.farcaster?.fid) {
-    const fcUser = await neynar.getUser(user.farcaster.fid);
+    const addresses = await getFarcasterAddresses(user.farcaster.fid);
 
-    if (fcUser) {
-      // Add the custody address and all verified addresses to the user's connected addresses
+    if (addresses) {
       await Promise.all(
-        [
-          ...fcUser.verified_addresses.eth_addresses,
-          fcUser.custody_address,
-        ].map(address =>
-          addUserConnectedAddress({
+        addresses.map(async address => {
+          await addUserConnectedAddress({
             userId: user.id,
             address,
-          })
-        )
+          });
+        })
       );
-    } else {
-      // TODO: Report error to Sentry
+
+      // Add the user to the room for each connected address
+      await Promise.all(
+        addresses.map(async address => {
+          // Get the groups the address belongs to
+          const groups = await credddRpcClient.getAddressGroups(address);
+
+          // Add the user to the eligible groups
+          await Promise.all(
+            groups.map(async group => {
+              await addWriterToRoom({
+                roomId: group.id,
+                userId: user.id,
+              });
+            })
+          );
+        })
+      );
     }
   }
 

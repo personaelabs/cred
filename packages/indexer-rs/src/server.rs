@@ -95,7 +95,7 @@ pub async fn start_server() {
 
     let server = ServerBuilder::new(io)
         .cors(DomainsValidation::AllowOnly(vec![
-            AccessControlAllowOrigin::Null,
+            AccessControlAllowOrigin::Any,
         ]))
         .start_http(&addr.parse().unwrap())
         .expect("Unable to start RPC server");
