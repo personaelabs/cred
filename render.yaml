@@ -21,6 +21,9 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+        previewValue: /etc/secrets/firebase-service-account-staging.json
   - type: web
     name: credchat
     plan: pro
