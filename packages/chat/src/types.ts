@@ -97,3 +97,10 @@ export interface NeynarUserResponse {
   };
   custody_address: Hex;
 }
+
+export enum BottomSheetType {
+  // eslint-disable-next-line no-unused-vars
+  FUND_WALLET = 'FUND_WALLET',
+  // eslint-disable-next-line no-unused-vars
+  PROCESSING_TX = 'PROCESSING_TX',
+}

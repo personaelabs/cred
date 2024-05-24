@@ -35,13 +35,19 @@ const FundWalletSheet = (props: FundWalletSheetProps) => {
               Base
             </div>
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-center">
             You don`t have enough ETH to purchase the key.
           </SheetDescription>
         </SheetHeader>
         <div className="w-full mt-8 flex flex-col items-center justify-center">
           <Link href="/settings/wallet">
-            <Button>Deposit</Button>
+            <Button
+              onClick={() => {
+                onClose();
+              }}
+            >
+              Deposit
+            </Button>
           </Link>
         </div>
       </SheetContent>

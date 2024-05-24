@@ -3,7 +3,7 @@ import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 import { Hex, encodeFunctionData } from 'viem';
 import axios from '@/lib/axios';
-import { SyncRoomRequestBody } from '@/types';
+import { BottomSheetType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import { useBalance } from 'wagmi';
+import { useBottomSheet } from '@/contexts/BottomSheetContext';
 
 const sendTransactionId = async ({
   roomId,
@@ -41,6 +42,8 @@ const useBuyKey = (roomId: string) => {
   const { data: balance } = useBalance({
     address: privyAccount ? (privyAccount.address as Hex) : undefined,
   });
+
+  const { setOpenedSheet } = useBottomSheet();
 
   const result = useMutation({
     mutationFn: async () => {
@@ -74,7 +77,7 @@ const useBuyKey = (roomId: string) => {
       if (balance && balance.value < totalCost) {
         // Show Fund Wallet modal
         // await privyAccount.fund();
-        toast.info('Please fund your wallet');
+        setOpenedSheet(BottomSheetType.FUND_WALLET);
       } else {
         const data = encodeFunctionData({
           abi: CredAbi,
