@@ -44,7 +44,6 @@ async fn main() {
     let rocksdb_client = Arc::new(rocksdb_conn);
     let eth_client = Arc::new(EthRpcClient::new());
 
-    /*
     let groups = get_all_groups(&pg_client).await;
 
     // Set to store the contracts that the groups depend on
@@ -164,7 +163,6 @@ async fn main() {
         intrinsic_creddd_sync_job,
         start_server()
     );
-     */
 
-     start_server().await;
+    start_server().await;
 }
