@@ -1,5 +1,6 @@
 use num_bigint::BigUint;
 
+pub mod server;
 pub mod block_timestamp_iterator;
 pub mod block_timestamp_sync_engine;
 pub mod coingecko;
@@ -18,6 +19,7 @@ pub mod seeder;
 pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
+pub mod address_groups;
 pub mod utils;
 
 #[cfg(test)]

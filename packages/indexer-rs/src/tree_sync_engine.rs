@@ -1,4 +1,5 @@
 use crate::{
+    address_groups::AddressGroups,
     eth_rpc::EthRpcClient,
     group::{update_group_state, Group},
     processors::GroupIndexer,
@@ -8,7 +9,7 @@ use crate::{
 };
 use log::{error, info};
 use rand::{rngs::OsRng, seq::SliceRandom};
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 use tokio::sync::Semaphore;
 
 const INDEXING_INTERVAL_SECS: u64 = 300; // 5 minutes
@@ -43,6 +44,34 @@ impl TreeSyncEngine {
 }
 
 impl TreeSyncEngine {
+    fn save_address_groups(&self, addresses: &[Address]) {
+        let group_id_bytes = hex::decode(&self.group.id).unwrap();
+
+        if group_id_bytes.len() != 32 {
+            panic!("Invalid group id length");
+        }
+
+        let group_id_bytes: [u8; 32] = group_id_bytes.try_into().unwrap();
+
+        // Update the address -> group ids mapping
+        for address in addresses {
+            let address_groups = AddressGroups::get(*address, self.rocksdb_client.clone());
+
+            if let Some(mut address_groups) = address_groups {
+                // Record already exists
+                // Add the group id and save
+                address_groups.add_group(group_id_bytes);
+                address_groups.save();
+            } else {
+                // Record does not exist, create a new one
+                let mut group_ids = HashSet::<[u8; 32]>::new();
+                group_ids.insert(group_id_bytes);
+
+                AddressGroups::create(*address, group_ids, self.rocksdb_client.clone());
+            }
+        }
+    }
+
     /// Sync the tree to a specific block number
     async fn sync_to_block(&self, block_number: BlockNum) -> Result<(), Error> {
         // Get the members of the group at the given block number
@@ -76,6 +105,10 @@ impl TreeSyncEngine {
 
                 // Update the block number of the tree
                 update_tree_block_num(tree_id, block_number, &self.pg_client).await?;
+
+                // Update the address -> group ids mapping
+                self.save_address_groups(&members);
+
                 return Ok(());
             }
         }
@@ -106,6 +139,9 @@ impl TreeSyncEngine {
                 block_number as i64,
             )
             .await?;
+
+            // Update the address -> group ids mapping
+            self.save_address_groups(&members);
         }
 
         Ok(())

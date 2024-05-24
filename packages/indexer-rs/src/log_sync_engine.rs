@@ -59,7 +59,7 @@ impl LogSyncEngine {
             _ => panic!("Invalid event_id"),
         };
 
-        let block_timestamp_sync_engine = BlockTimestampSyncEngine::new(
+        let block_timestamp_sync_engine: BlockTimestampSyncEngine = BlockTimestampSyncEngine::new(
             eth_client.clone(),
             rocksdb_client.clone(),
             contract.chain,
@@ -77,7 +77,7 @@ impl LogSyncEngine {
         }
     }
 
-    /// Search for chunks that aren't synched yet
+    /// Search for chunks (i.e. block ranges) that aren't synched yet
     fn search_missing_chunks(&self, to_chunk: ChunkNum) -> Vec<ChunkNum> {
         let missing_chunks = search_missing_chunks(
             &self.rocksdb_client,
@@ -91,8 +91,10 @@ impl LogSyncEngine {
 
     /// Save batch of logs to RocksDB
     fn save_logs_batch(&self, logs_batch: Vec<Vec<Value>>) {
+        // Initialize the batch writer
         let mut batch = WriteBatch::default();
 
+        // Convert the logs to RocksDB records of the form (key, value)
         let parsed_logs: Vec<(Vec<u8>, Vec<u8>)> = logs_batch
             .par_iter()
             .flat_map(|logs_batch| {
@@ -124,15 +126,16 @@ impl LogSyncEngine {
             batch.put(&key, &value);
         }
 
+        // Write the batch to RocksDB
         self.rocksdb_client.write(batch).unwrap();
     }
 
-    /// Get the latest synched chunk
+    /// Get the latest saved chunk
     pub fn get_latest_synched_chunk(&self) -> Option<ChunkNum> {
         get_latest_synched_chunk(&self.rocksdb_client, self.event_id, self.contract.id)
     }
 
-    /// Sync logs in the given chunks (i.e. block ranges)
+    /// Fetch and save logs in the given chunks (i.e. block ranges)
     async fn sync_chunks(&self, chunks: Vec<ChunkNum>, latest_block: BlockNum) {
         // Block ranges to fetch logs.
         // We use batch requests to fetch logs in parallel.
