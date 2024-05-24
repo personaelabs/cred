@@ -40,7 +40,7 @@ services:
         value: "sepolia"
         previewValue: "sepolia"
       - fromGroup: cred
-  - type: worker
+  - type: web
     name: cred-indexer
     plan: pro plus
     previewPlan: starter
