@@ -43,12 +43,13 @@ pub async fn get_groups(group_ids: &Vec<String>, pg_client: &tokio_postgres::Cli
 
 pub async fn start_server() {
     let db_options = Options::default();
-    let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
+//    let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
 
     let pg_client = init_postgres().await;
 
     let mut io = IoHandler::default();
 
+    /*
     io.add_method("getAddressGroups", move |params: Params| {
         let rocksdb_conn = rocksdb_conn.clone();
         let pg_client = pg_client.clone();
@@ -87,6 +88,7 @@ pub async fn start_server() {
             Ok(json!(group_ids))
         }
     });
+     */
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "3030".to_string());
 
