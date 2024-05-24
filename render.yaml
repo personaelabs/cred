@@ -49,6 +49,9 @@ services:
       - key: NEXT_PUBLIC_PROJECT_ID
         value: "cred-279bb"
         previewValue: "staging-423405"
+      - key: NEXT_PUBLIC_VAPID_KEY
+        value: BHaVlakB8SbeMEprNB2e6FQtlPMFjyWEhMnBH8dKn-q2epYPi--NNCWM2EZmsjaXUQ0FbKpPuppmC-Od6xL0M88
+        previewValue: BKF9U_p1O5RChiFe30w4bq-IcVTh-i0LcXHSpBUsELHuzfxsQlqhlqL9QfzjuavM_k1aWksZRbEuWQHkTid6J70
   - type: web
     name: cred-indexer
     plan: pro plus
