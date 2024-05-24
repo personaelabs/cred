@@ -4,6 +4,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { User } from '@cred/shared';
 import { app } from '@cred/firebase';
 import privy, { isAuthenticated } from '@/lib/backend/privy';
+import * as neynar from '@/lib/backend/neynar';
+import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -41,6 +43,27 @@ export async function POST(req: NextRequest) {
     };
 
     await db.collection('users').doc(user.id).set(userData);
+  }
+
+  if (user.farcaster?.fid) {
+    const fcUser = await neynar.getUser(user.farcaster.fid);
+
+    if (fcUser) {
+      // Add the custody address and all verified addresses to the user's connected addresses
+      await Promise.all(
+        [
+          ...fcUser.verified_addresses.eth_addresses,
+          fcUser.custody_address,
+        ].map(address =>
+          addUserConnectedAddress({
+            userId: user.id,
+            address,
+          })
+        )
+      );
+    } else {
+      // TODO: Report error to Sentry
+    }
   }
 
   return Response.json({ token }, { status: 200 });

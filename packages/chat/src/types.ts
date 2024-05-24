@@ -85,3 +85,15 @@ export interface ConnectAddressRequestBody {
   signature: Hex;
   groupIds: string[]; // Temporary
 }
+
+export interface NeynarUserResponse {
+  fid: number;
+  username: string;
+  display_name: string;
+  active_status: string;
+  pfp_url: string;
+  verified_addresses: {
+    eth_addresses: Hex[];
+  };
+  custody_address: Hex;
+}
