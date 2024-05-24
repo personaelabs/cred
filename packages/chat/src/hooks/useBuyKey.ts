@@ -104,6 +104,7 @@ const useBuyKey = (roomId: string) => {
         });
 
         setIsProcessingTx(false);
+        toast.success('Purchase complete');
       }
     },
     onSuccess: async () => {
@@ -111,8 +112,6 @@ const useBuyKey = (roomId: string) => {
       queryClient.invalidateQueries({ queryKey: ['sell-price', roomId] });
       await queryClient.invalidateQueries({ queryKey: ['purchased-rooms'] });
       await queryClient.invalidateQueries({ queryKey: ['purchasable-rooms'] });
-
-      toast.success('Purchase complete');
     },
   });
 
