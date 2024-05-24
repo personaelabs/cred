@@ -54,6 +54,7 @@ services:
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
     preDeployCommand: populate
+    pullRequestPreviewsEnabled: false
     rootDir: ./
     buildFilter:
       paths:
