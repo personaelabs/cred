@@ -21,6 +21,9 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+        previewValue: /etc/secrets/firebase-service-account-staging.json
   - type: web
     name: credchat
     plan: pro
@@ -40,6 +43,9 @@ services:
         value: "sepolia"
         previewValue: "sepolia"
       - fromGroup: cred
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+        previewValue: /etc/secrets/firebase-service-account-staging.json
   - type: web
     name: cred-indexer
     plan: pro plus
@@ -93,6 +99,9 @@ services:
       - key: CHAIN
         value: "sepolia"
         previewValue: "sepolia"
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+        previewValue: /etc/secrets/firebase-service-account-staging.json
   - type: worker
     name: credchat-notifier
     plan: standard
@@ -113,11 +122,6 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - fromGroup: cred
-
-databases:
-  - name: cred
-    databaseName: cred
-    region: oregon
-    plan: pro
-    previewPlan: starter
-    postgresMajorVersion: 15
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account.json
+        previewValue: /etc/secrets/firebase-service-account-staging.json

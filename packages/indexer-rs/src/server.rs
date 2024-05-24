@@ -17,7 +17,10 @@ pub struct GroupData {
 
 pub type GetGroupsReturnType = Vec<GroupData>;
 
-pub async fn get_groups(group_ids: &Vec<String>, pg_client: &tokio_postgres::Client) -> Vec<GroupData> {
+pub async fn get_groups(
+    group_ids: &Vec<String>,
+    pg_client: &tokio_postgres::Client,
+) -> Vec<GroupData> {
     let rows = pg_client
         .query(
             r#"SELECT "id", "displayName", "typeId" FROM "Group" where "state" = 'Recordable' AND "id" = ANY($1)"#,
