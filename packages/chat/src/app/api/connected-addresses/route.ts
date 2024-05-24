@@ -5,16 +5,14 @@ import { ConnectAddressRequestBody } from '@/types';
 import { addWriterToRoom } from '@cred/firebase';
 import { NextRequest } from 'next/server';
 import { Hex, verifyMessage } from 'viem';
-import { createRpcClient } from '@cred/shared';
-
-const rpcClient = createRpcClient('https://cred-indexer-41hd.onrender.com');
+import credddRpcClient from '@/lib/credddRpc';
 
 /**
  * Returns `true` if the address is a member of the group
  */
 const isAddressMemberOfGroup = async (address: Hex, groupId: string) => {
-  const addressGroups = await rpcClient.getAddressGroups(address);
-  return addressGroups.includes(groupId);
+  const addressGroups = await credddRpcClient.getAddressGroups(address);
+  return addressGroups.some(group => group.id === groupId);
 };
 
 export async function POST(req: NextRequest) {

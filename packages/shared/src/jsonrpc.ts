@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { Group } from './types';
 
 export const createRpcClient = (rpcUrl: string) => new JsonRpcClient(rpcUrl);
 
@@ -12,12 +13,20 @@ class JsonRpcClient {
   }
 
   private async call<T>(method: string, params: any[] = []): Promise<T> {
-    const response = await this.axiosInstance.post<{ result: T }>('', {
-      jsonrpc: '2.0',
-      method,
-      params,
-      id: 1,
-    });
+    const response = await this.axiosInstance.post<{ result: T }>(
+      '',
+      {
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: 1,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     return response.data.result;
   }
@@ -25,7 +34,7 @@ class JsonRpcClient {
   /**
    * Returns the ids of group the address belongs to
    */
-  public async getAddressGroups(address: `0x${string}`): Promise<string[]> {
-    return await this.call<string[]>('getAddressGroups', [address]);
+  public async getAddressGroups(address: `0x${string}`): Promise<Group[]> {
+    return await this.call<Group[]>('getAddressGroups', [address]);
   }
 }

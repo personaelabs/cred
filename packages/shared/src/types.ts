@@ -24,9 +24,8 @@ export interface UserNotificationTokens {
 
 export interface Group {
   id: string;
-  displayName: string;
-  fids: number[];
-  updatedAt: Date | FirestoreTimestamp;
+  display_name: string;
+  type_id: string;
 }
 
 export interface FirestoreTimestamp {
