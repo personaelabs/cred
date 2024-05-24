@@ -46,6 +46,9 @@ services:
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json
         previewValue: /etc/secrets/firebase-service-account-staging.json
+      - key: NEXT_PUBLIC_PROJECT_ID
+        value: "cred-279bb"
+        previewValue: "staging-423405"
   - type: web
     name: cred-indexer
     plan: pro plus
