@@ -23,9 +23,9 @@ const initUser = async (user: PrivyUser) => {
 
   const userData: User = {
     id: user.id,
-    displayName: user.farcaster?.displayName || '',
-    username: user.farcaster?.username || '',
-    pfpUrl: user.farcaster?.pfp || '',
+    displayName: '',
+    username: '',
+    pfpUrl: '',
     privyAddress: user.wallet.address.toLowerCase(),
     config: {
       notification: {
@@ -34,6 +34,20 @@ const initUser = async (user: PrivyUser) => {
     },
     connectedAddresses: [],
   };
+
+  if (user.farcaster) {
+    userData.displayName = user.farcaster.displayName || '';
+    userData.username = user.farcaster.username || '';
+    userData.pfpUrl = user.farcaster.pfp || '';
+  } else if (user.google) {
+    userData.displayName = user.google.name || '';
+  } else if (user.twitter) {
+    userData.displayName = user.twitter.name || '';
+    userData.username = user.twitter.username || '';
+    userData.pfpUrl = user.twitter.profilePictureUrl || '';
+  } else {
+    throw new Error('User has no linked account');
+  }
 
   await db.collection('users').doc(user.id).set(userData);
 };

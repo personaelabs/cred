@@ -10,11 +10,7 @@ const getUser = async (userId: string) => {
   );
   const user = (await getDoc(userDoc)).data();
 
-  if (!user) {
-    throw new Error(`User with id ${userId} not found`);
-  }
-
-  return user;
+  return user || null;
 };
 
 const useUsers = (userIds: string[]) => {
@@ -27,7 +23,7 @@ const useUsers = (userIds: string[]) => {
     })),
     combine: results => {
       return {
-        data: results.map(result => result.data),
+        data: results.map(result => result.data).filter(u => u),
         pending: results.some(result => result.isPending),
       };
     },
