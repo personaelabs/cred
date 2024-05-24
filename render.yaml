@@ -125,3 +125,29 @@ services:
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json
         previewValue: /etc/secrets/firebase-service-account-staging.json
+  - type: worker
+    name: credchat-monkey
+    plan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i
+    startCommand: pnpm -F monkey start
+    rootDir: ./
+    buildFilter:
+      paths:
+        - packages/monkey/**
+        - packages/shared/**
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - fromGroup: cred
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account-staging.json
+
+databases:
+  - name: cred
+    databaseName: cred
+    region: oregon
+    plan: pro
+    previewPlan: starter
+    postgresMajorVersion: 15
