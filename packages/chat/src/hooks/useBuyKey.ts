@@ -34,6 +34,7 @@ const useBuyKey = (roomId: string) => {
   const [isProcessingTx, setIsProcessingTx] = useState(false);
   const { sendTransaction } = useSendTransaction();
   const { data: room } = useRoom(roomId);
+  const { setOpenedSheet, closeSheet } = useBottomSheet();
 
   const privyAccount = wallets?.find(
     wallet => wallet.walletClientType === 'privy'
@@ -42,8 +43,6 @@ const useBuyKey = (roomId: string) => {
   const { data: balance } = useBalance({
     address: privyAccount ? (privyAccount.address as Hex) : undefined,
   });
-
-  const { setOpenedSheet } = useBottomSheet();
 
   const result = useMutation({
     mutationFn: async () => {
@@ -100,6 +99,7 @@ const useBuyKey = (roomId: string) => {
         );
 
         setIsProcessingTx(true);
+        setOpenedSheet(BottomSheetType.PROCESSING_TX);
 
         await sendTransactionId({
           roomId,
@@ -108,6 +108,7 @@ const useBuyKey = (roomId: string) => {
 
         setIsProcessingTx(false);
         toast.success('Purchase complete');
+        closeSheet();
       }
     },
     onSuccess: async () => {

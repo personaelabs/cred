@@ -1,7 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import db from '@/lib/firestore';
-import { userConverter } from '@cred/shared';
+import { userConverter, User } from '@cred/shared';
 
 const getUser = async (userId: string) => {
   const userDoc = doc(
@@ -23,7 +23,7 @@ const useUsers = (userIds: string[]) => {
     })),
     combine: results => {
       return {
-        data: results.map(result => result.data).filter(u => u),
+        data: results.map(result => result.data).filter(u => u) as User[],
         pending: results.some(result => result.isPending),
       };
     },
