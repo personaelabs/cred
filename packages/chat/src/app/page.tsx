@@ -3,8 +3,7 @@
 import { Button } from '@/components/ui/button';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useAllRooms from '@/hooks/useAllRooms';
-import useEligibleRooms from '@/hooks/useEligibleRooms';
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
@@ -14,12 +13,10 @@ import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
 import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
-import usePurchasedRooms from '@/hooks/usePurchasedRooms';
 import ConnectAddressesSheet from '@/components/ConnectAddressesSheet';
 import { Room, User } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
 import AvatarWithFallback from '@/components/Avatar';
-import useJoinedRooms from '@/hooks/useJoinedRooms';
 import Scrollable from '@/components/Scrollable';
 
 interface RoomMemberListItemProps {
@@ -148,6 +145,8 @@ export default function Home() {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
+  const [joinableRooms, setJoinableRooms] = useState<Room[]>([]);
+  const [buyableRooms, setBuyableRooms] = useState<Room[]>([]);
 
   useEffect(() => {
     setOptions({
@@ -157,19 +156,27 @@ export default function Home() {
   }, [setOptions]);
 
   const { data: allRooms } = useAllRooms();
-  const { data: joinedRooms } = useJoinedRooms(signedInUser?.id || null);
-  const { data: eligibleRooms } = useEligibleRooms(signedInUser?.id || null);
-  const { data: purchasedRooms } = usePurchasedRooms(signedInUser?.id || null);
 
-  const joinableRooms = [...purchasedRooms, ...eligibleRooms].filter(
-    room => !joinedRooms.some(r => r.id === room.id)
-  );
+  useEffect(() => {
+    if (allRooms && signedInUser) {
+      const _joinableRooms = allRooms.filter(
+        room =>
+          room.writerIds.includes(signedInUser.id) ||
+          room.readerIds.includes(signedInUser.id)
+      );
 
-  const buyableRooms = allRooms.filter(
-    room =>
-      !eligibleRooms.some(r => r.id === room.id) &&
-      !purchasedRooms.some(r => r.id === room.id)
-  );
+      setJoinableRooms(_joinableRooms);
+
+      const _buyableRooms = allRooms.filter(
+        room =>
+          !room.joinedUserIds.includes(signedInUser.id) &&
+          !room.writerIds.includes(signedInUser.id) &&
+          !room.readerIds.includes(signedInUser.id)
+      );
+
+      setBuyableRooms(_buyableRooms);
+    }
+  }, [allRooms, signedInUser]);
 
   if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
@@ -195,8 +202,8 @@ export default function Home() {
         )}
         {joinableRooms.map(room => (
           <RoomItem
-            room={room}
             key={room.id}
+            room={room}
             canJoin={true}
             scrollableRef={scrollableRef}
           ></RoomItem>
