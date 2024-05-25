@@ -33,7 +33,6 @@ const useJoinedRooms = (userId: string | null) => {
       return rooms;
     },
     enabled: !!userId,
-    initialData: [],
     staleTime: Infinity,
   });
 };

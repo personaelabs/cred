@@ -1,16 +1,16 @@
 import { CredAbi } from '@cred/shared';
 import { Hex, encodeFunctionData, formatEther } from 'viem';
 import axios from '@/lib/axios';
-import { SyncRoomRequestBody } from '@/types';
+import { BottomSheetType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import wagmiConfig from '../lib/wagmiConfig';
 import { readContract } from '@wagmi/core';
+import { useBottomSheet } from '@/contexts/BottomSheetContext';
 
 const sendTransactionId = async ({
   roomId,
@@ -37,10 +37,10 @@ const getCurrentSellPrice = async (roomIdBigInt: bigint) => {
 
 const useSellKey = (roomId: string) => {
   const queryClient = useQueryClient();
-  const [isProcessingTx, setIsProcessingTx] = useState(false);
   const { sendTransaction } = useSendTransaction();
   const { data: room } = useRoom(roomId);
   const { wallets } = useWallets();
+  const { setOpenedSheet, closeSheet } = useBottomSheet();
 
   const result = useMutation({
     mutationFn: async () => {
@@ -77,14 +77,13 @@ const useSellKey = (roomId: string) => {
         }
       );
 
-      setIsProcessingTx(true);
-
+      setOpenedSheet(BottomSheetType.PROCESSING_TX);
       await sendTransactionId({
         roomId,
         txId: txReceipt.transactionHash as Hex,
       });
 
-      setIsProcessingTx(false);
+      closeSheet();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
@@ -95,7 +94,7 @@ const useSellKey = (roomId: string) => {
     },
   });
 
-  return { ...result, isProcessingTx };
+  return { ...result };
 };
 
 export default useSellKey;

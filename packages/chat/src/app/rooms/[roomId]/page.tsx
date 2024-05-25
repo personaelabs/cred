@@ -49,15 +49,24 @@ const Room = () => {
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   useEffect(() => {
-    const latestMessage =
-      (messages && messages.length > 0 && messages[messages.length - 1]) ||
-      null;
-    if (
-      latestMessage &&
-      latestMessage.createdAt !== latestReadMessageCreatedAt &&
-      signedInUser
-    ) {
-      updateReadTicket(latestMessage.createdAt);
+    if (signedInUser) {
+      const receivedMessages = messages.filter(
+        message => message.user.id !== signedInUser.id
+      );
+
+      const latestMessage =
+        (receivedMessages &&
+          receivedMessages.length > 0 &&
+          receivedMessages[receivedMessages.length - 1]) ||
+        null;
+
+      if (
+        latestMessage &&
+        latestMessage.createdAt !== latestReadMessageCreatedAt &&
+        signedInUser
+      ) {
+        updateReadTicket(latestMessage.createdAt);
+      }
     }
   }, [messages, latestReadMessageCreatedAt, updateReadTicket, signedInUser]);
 

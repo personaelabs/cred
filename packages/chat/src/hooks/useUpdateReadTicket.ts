@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
 import { useState } from 'react';
+import { getReadTicket } from './useReadTicket';
 
 const updateReadTicket = async ({
   roomId,
@@ -52,7 +53,19 @@ const useUpdateReadTicket = (roomId: string) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['read-ticket', { roomId }] });
+      if (!signedInUser) {
+        throw new Error('User not signed in');
+      }
+
+      queryClient.prefetchQuery({
+        queryKey: ['read-ticket', { roomId }],
+        queryFn: async () => {
+          return await getReadTicket({
+            roomId,
+            userId: signedInUser?.id,
+          });
+        },
+      });
     },
   });
 

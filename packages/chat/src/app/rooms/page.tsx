@@ -10,7 +10,6 @@ import {
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useJoinedRooms from '@/hooks/useJoinedRooms';
-import useMessages from '@/hooks/useMessages';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useEffect, useState } from 'react';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
@@ -27,9 +26,9 @@ import useUser from '@/hooks/useUser';
 import useToggleMute from '@/hooks/useToggleMute';
 import useReadTicket from '@/hooks/useReadTicket';
 import useSellKey from '@/hooks/useSellKey';
-import ProcessingTxModal from '@/components/ProcessingTxModal';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import useRoomLatestMessage from '@/hooks/useRoomLatestMessage';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
@@ -96,29 +95,30 @@ const RoomItem = (props: RoomItemProps) => {
   const { id, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const { data: singedInUser } = useSignedInUser();
+  const [unreadMessageExists, setUnreadMessageExists] = useState(false);
 
   const { mutateAsync: leaveRoom } = useLeaveRoom();
-  const { mutateAsync: sellKey, isProcessingTx } = useSellKey(id);
+  const { mutateAsync: sellKey } = useSellKey(id);
   const { mutateAsync: toggleMute } = useToggleMute();
 
   const { data: readTicket } = useReadTicket(id);
+  const { data: roomLatestMessage } = useRoomLatestMessage(id);
 
-  const { data: messages } = useMessages({
-    roomId: id,
-    initMessage: null,
-  });
+  useEffect(() => {
+    const isLatestMessageFromSignedInUser =
+      roomLatestMessage?.userId === singedInUser?.id;
 
-  const firstMessage = messages?.pages?.[0]?.[0];
+    const latestReadTicket =
+      (readTicket?.latestReadMessageCreatedAt as Date) || new Date(0);
 
-  let unreadMessageExists = false;
-  if (readTicket && firstMessage) {
-    unreadMessageExists =
-      firstMessage.createdAt > readTicket.latestReadMessageCreatedAt;
-  }
+    const _unreadMessageExists = roomLatestMessage
+      ? (roomLatestMessage.createdAt as Date) > latestReadTicket &&
+        !isLatestMessageFromSignedInUser
+      : false;
 
-  if (!readTicket && firstMessage) {
-    unreadMessageExists = true;
-  }
+    setUnreadMessageExists(_unreadMessageExists);
+  }, [roomLatestMessage, readTicket, singedInUser]);
 
   return (
     <>
@@ -137,7 +137,9 @@ const RoomItem = (props: RoomItemProps) => {
               {name}
             </div>
             <div className="opacity-60 mt-1">
-              {firstMessage ? `${cutoffMessage(firstMessage.text, 75)}` : ''}
+              {roomLatestMessage
+                ? `${cutoffMessage(roomLatestMessage.body, 75)}`
+                : ''}
             </div>
           </div>
           <div className="flex justify-center items-center">
@@ -183,7 +185,6 @@ const RoomItem = (props: RoomItemProps) => {
           </div>
         </div>
       </Link>
-      <ProcessingTxModal isOpen={isProcessingTx}></ProcessingTxModal>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import {
   addDoc,
@@ -11,6 +11,7 @@ import db from '@/lib/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { getRoomLatestMessage } from './useRoomLatestMessage';
 
 const sendMessage = async ({
   roomId,
@@ -74,6 +75,7 @@ const sendMessage = async ({
 
 const useSendMessage = (roomId: string) => {
   const { data: signedInUser } = useSignedInUser();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ['sendMessage', { roomId }],
@@ -99,6 +101,14 @@ const useSendMessage = (roomId: string) => {
         replyTo,
         senderId: signedInUser.id,
         imageUris,
+      });
+    },
+    onSuccess: () => {
+      queryClient.prefetchQuery({
+        queryKey: ['latest-message', { roomId }],
+        queryFn: async () => {
+          return await getRoomLatestMessage(roomId);
+        },
       });
     },
   });
