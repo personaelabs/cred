@@ -40,11 +40,17 @@ const Room = () => {
   const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
   const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
 
-  const { messages, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useMessages({
-      roomId: params.roomId,
-      initMessage: fromMessage,
-    });
+  const {
+    messages,
+    error,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useMessages({
+    roomId: params.roomId,
+    initMessage: fromMessage,
+  });
 
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
@@ -134,7 +140,7 @@ const Room = () => {
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
-          {messages.length === 0 ? (
+          {!isFetching && messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <div className="text-gray-500">No messages</div>
             </div>

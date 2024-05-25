@@ -44,7 +44,6 @@ const useRoomLatestMessage = (roomId: string) => {
       const doc = snapshot.docs[0];
       if (doc) {
         const message = doc.data();
-        console.log('Setting latest message', message);
         queryClient.setQueryData(['latest-message', { roomId }], message);
       }
     });
