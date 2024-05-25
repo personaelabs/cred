@@ -11,7 +11,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
 
-const ADMIN_FIDS = ['1', '12783'];
+const ADMIN_FIDS = ['1', 'did:privy:clw1w6dar0fdfmhd5ae1rfna6'];
 
 const registerFid1 = async () => {
   const USER_ID = '1';
@@ -27,6 +27,7 @@ const registerFid1 = async () => {
         mutedRoomIds: [],
       },
     },
+    connectedAddresses: [],
   };
 
   await userRef.set(userData);
@@ -68,6 +69,7 @@ const sendMessage = async ({
     readBy: [],
     replyTo: null,
     mentions: [],
+    images: [],
   };
 
   await db
