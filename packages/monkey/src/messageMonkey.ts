@@ -80,7 +80,7 @@ export const startMessageMonkey = async () => {
 
     const numRoomsToMessage = faker.number.int({
       min: 1,
-      max: rooms.size / 2,
+      max: rooms.size / 10,
     });
 
     const allRoomIds = rooms.docs.map(doc => doc.id);
@@ -91,8 +91,8 @@ export const startMessageMonkey = async () => {
     }
 
     await sleepForRandom({
-      minMs: 1000,
-      maxMs: 60 * 1000,
+      minMs: 60 * 15 * 1000, // 15 minutes
+      maxMs: 60 * 60 * 1000, // 1 hour
     });
   }
 };

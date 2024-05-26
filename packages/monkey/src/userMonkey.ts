@@ -76,8 +76,8 @@ export const startUserMonkey = async () => {
     }
 
     await sleepForRandom({
-      minMs: 1000,
-      maxMs: 60 * 1000,
+      minMs: 60 * 15 * 1000, // 15 minutes
+      maxMs: 60 * 60 * 1000, // 1 hour
     });
   }
 };
