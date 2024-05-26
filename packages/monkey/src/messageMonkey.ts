@@ -6,6 +6,8 @@ import { messageConverter, roomConverter, userConverter } from '@cred/shared';
 
 const db = getFirestore(app);
 
+const ADMIN_USER_IDS = ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'];
+
 const sendMessage = async ({
   roomId,
   userId,
@@ -29,6 +31,11 @@ const sendMessage = async ({
     .get();
 
   const mentions = mentionUsers.docs.map(doc => doc.data().id);
+
+  // Mention admins in 20% of messages
+  if (Math.random() < 20 / 100) {
+    mentions.push(...ADMIN_USER_IDS);
+  }
 
   console.log(`Sending message to ${roomId} from ${userId}`);
   await db
