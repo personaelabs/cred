@@ -83,9 +83,11 @@ const sendMessage = async ({
 const sendTestMessage = async () => {
   await registerFid1();
   await createNotificationTestRoom();
+
+  const nonce = Math.floor(Math.random() * 1000000);
   await sendMessage({
     roomId: 'test-notification',
-    message: 'Hello, world!',
+    message: `Hello, world! ${nonce}`,
     sender: '1',
   });
 };
