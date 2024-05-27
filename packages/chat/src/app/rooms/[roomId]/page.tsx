@@ -11,12 +11,15 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { MessageInput, MessageWithUserData } from '@/types';
+import { MessageInput, MessageWithUserData, ModalType } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
 import useDeleteMessage from '@/hooks/useDeleteMessage';
+import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
+import MessageAsAdminModal from '@/components/MessageAsAdminModal';
+import MessageAsBuyerModal from '@/components/MessageAsBuyerModal';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -29,6 +32,10 @@ const Room = () => {
     error: sendError,
   } = useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
+    useState(false);
+  const [isMessageAsBuyerModalOpen, setIsMessageAsBuyerModalOpen] =
+    useState(false);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -55,6 +62,25 @@ const Room = () => {
   });
 
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
+
+  useEffect(() => {
+    if (signedInUser && room) {
+      const isSignedInUserAdmin = isUserAdminInRoom({
+        room,
+        userId: signedInUser.id,
+      });
+
+      if (isSignedInUserAdmin) {
+        if (canShowModal(ModalType.REPLY_AS_ADMIN)) {
+          setIsMessageAsAdminModalOpen(true);
+        }
+      } else {
+        if (canShowModal(ModalType.MESSAGE_AS_BUYER)) {
+          setIsMessageAsBuyerModalOpen(true);
+        }
+      }
+    }
+  }, [signedInUser, room]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -116,7 +142,7 @@ const Room = () => {
   }, [isSuccess, reset]);
 
   const onSendClick = useCallback(
-    (input: MessageInput) => {
+    (input: Omit<MessageInput, 'replyTo'>) => {
       sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
     },
@@ -202,6 +228,18 @@ const Room = () => {
           }}
         ></ChatMessageInput>
       </div>
+      <MessageAsAdminModal
+        isOpen={isMessageAsAdminModalOpen}
+        onClose={() => {
+          setIsMessageAsAdminModalOpen(false);
+        }}
+      ></MessageAsAdminModal>
+      <MessageAsBuyerModal
+        isOpen={isMessageAsBuyerModalOpen}
+        onClose={() => {
+          setIsMessageAsBuyerModalOpen(false);
+        }}
+      ></MessageAsBuyerModal>
     </div>
   );
 };

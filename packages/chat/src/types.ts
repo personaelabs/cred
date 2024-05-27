@@ -106,3 +106,10 @@ export enum BottomSheetType {
   // eslint-disable-next-line no-unused-vars
   PROCESSING_TX = 'PROCESSING_TX',
 }
+
+export enum ModalType {
+  // eslint-disable-next-line no-unused-vars
+  MESSAGE_AS_BUYER = 'MESSAGE_AS_BUYER',
+  // eslint-disable-next-line no-unused-vars
+  REPLY_AS_ADMIN = 'REPLY_AS_ADMIN',
+}

@@ -14,9 +14,29 @@ import {
   where,
 } from 'firebase/firestore';
 import db from './firestore';
-import { MessageVisibility, messageConverter } from '@cred/shared';
+import { MessageVisibility, Room, messageConverter } from '@cred/shared';
+import { BottomSheetType, ModalType } from '@/types';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
+
+export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {
+  localStorage.setItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`, 'true');
+};
+
+export const canShowModal = (dialog: ModalType) => {
+  return !localStorage.getItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`);
+};
+
+export const isUserAdminInRoom = ({
+  userId,
+  room,
+}: {
+  userId: string;
+  room: Room;
+}) => {
+  return room.writerIds.includes(userId);
+};
 
 /**
  * Builds a Firestore query to fetch messages for a room.

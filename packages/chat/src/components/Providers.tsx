@@ -24,6 +24,7 @@ import {
   BottomSheetContextProvider,
   useBottomSheet,
 } from '@/contexts/BottomSheetContext';
+import { ModalContextProvider } from '@/contexts/ModalContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
@@ -166,7 +167,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               <HeaderContextProvider>
                 <FooterContextProvider>
                   <BottomSheetContextProvider>
-                    <Main>{children}</Main>
+                    <ModalContextProvider>
+                      <Main>{children}</Main>
+                    </ModalContextProvider>
                   </BottomSheetContextProvider>
                 </FooterContextProvider>
               </HeaderContextProvider>
