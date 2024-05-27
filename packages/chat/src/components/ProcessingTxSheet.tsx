@@ -2,11 +2,11 @@ import { Loader2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import theme from '@/lib/theme';
 
-interface ProcessingTxModalProps {
+interface ProcessingTxSheetProps {
   isOpen: boolean;
 }
 
-const ProcessingTxModal = (props: ProcessingTxModalProps) => {
+const ProcessingTxSheet = (props: ProcessingTxSheetProps) => {
   const { isOpen } = props;
 
   return (
@@ -27,4 +27,4 @@ const ProcessingTxModal = (props: ProcessingTxModalProps) => {
   );
 };
 
-export default ProcessingTxModal;
+export default ProcessingTxSheet;

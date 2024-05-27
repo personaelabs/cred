@@ -31,7 +31,7 @@ import {
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
-import ProcessingTxModal from './ProcessingTxModal';
+import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 
@@ -128,9 +128,9 @@ const Main = ({ children }: { children: React.ReactNode }) => {
           {hideFooter ? <></> : <MobileFooter></MobileFooter>}
         </div>
       </div>
-      <ProcessingTxModal
+      <ProcessingTxSheet
         isOpen={openedSheet === BottomSheetType.PROCESSING_TX}
-      ></ProcessingTxModal>
+      ></ProcessingTxSheet>
       <FundWalletSheet
         isOpen={openedSheet === BottomSheetType.FUND_WALLET}
         onClose={() => {
