@@ -87,7 +87,6 @@ const useSellKey = (roomId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
-      queryClient.invalidateQueries({ queryKey: ['purchased-rooms'] });
       queryClient.invalidateQueries({ queryKey: ['joined-rooms'] });
 
       toast.success('Sold key');

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   Message,
+  MessageVisibility,
   Room,
   User,
   messageConverter,
@@ -70,6 +71,7 @@ const sendMessage = async ({
     replyTo: null,
     mentions: [],
     images: [],
+    visibility: MessageVisibility.PUBLIC,
   };
 
   await db

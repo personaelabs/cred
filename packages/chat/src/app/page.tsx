@@ -161,8 +161,9 @@ export default function Home() {
     if (allRooms && signedInUser) {
       const _joinableRooms = allRooms.filter(
         room =>
-          room.writerIds.includes(signedInUser.id) ||
-          room.readerIds.includes(signedInUser.id)
+          !room.joinedUserIds.includes(signedInUser.id) &&
+          (room.writerIds.includes(signedInUser.id) ||
+            room.readerIds.includes(signedInUser.id))
       );
 
       setJoinableRooms(_joinableRooms);

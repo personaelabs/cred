@@ -41,8 +41,14 @@ export interface Message {
   createdAt: FirestoreTimestamp | FieldValue | Date | null;
   readBy: number[];
   replyTo: string | null;
+  visibility: MessageVisibility;
   mentions: string[];
   images: string[];
+}
+
+export enum MessageVisibility {
+  ONLY_ADMINS = 0,
+  PUBLIC = 1,
 }
 
 export interface Room {

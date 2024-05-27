@@ -1,21 +1,16 @@
-import {
-  collection,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  startAfter,
-} from 'firebase/firestore';
+import { getDocs, onSnapshot } from 'firebase/firestore';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { Message, messageConverter } from '@cred/shared';
-import db from '@/lib/firestore';
+import { Message } from '@cred/shared';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
-import { ChatMessage } from '@/types';
+import { MessageWithUserData } from '@/types';
 import useUsers from './useUsers';
+import useRoom from './useRoom';
+import { buildMessageQuery } from '@/lib/utils';
 
-export const toMessageType = (message: Message): ChatMessage => {
+export const toMessageWithUserData = (
+  message: Message
+): MessageWithUserData => {
   return {
     user: {
       id: message.userId.toString(),
@@ -27,57 +22,71 @@ export const toMessageType = (message: Message): ChatMessage => {
     createdAt: (message.createdAt || new Date()) as Date,
     replyToId: message.replyTo,
     images: message.images,
+    visibility: message.visibility,
   };
 };
 
 const PAGE_SIZE = 20;
-const getMessages = async (roomId: string, lastMessage: ChatMessage | null) => {
-  const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
-    messageConverter
-  );
-
-  const q = lastMessage
-    ? query(
-        messagesRef,
-        orderBy('createdAt', 'desc'),
-        startAfter(lastMessage.createdAt),
-        limit(PAGE_SIZE)
-      )
-    : query(messagesRef, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+const getMessages = async ({
+  isSingedInUserAdmin,
+  signedInUserId,
+  roomId,
+  lastMessage,
+}: {
+  isSingedInUserAdmin: boolean;
+  signedInUserId: string;
+  roomId: string;
+  lastMessage: MessageWithUserData | null;
+}) => {
+  const q = buildMessageQuery({
+    isAdminView: isSingedInUserAdmin,
+    viewerId: signedInUserId,
+    roomId,
+    pageSize: PAGE_SIZE,
+    from: lastMessage?.createdAt || new Date(0),
+  });
 
   const docs = (await getDocs(q)).docs;
-  const messages = docs.map(doc => toMessageType(doc.data()));
+  const messages = docs.map(doc => toMessageWithUserData(doc.data()));
 
   return messages;
 };
 
-const useListenToMessages = ({ roomId }: { roomId: string }) => {
+const useListenToMessages = ({
+  roomId,
+  isSingedInUserAdmin,
+  signedInUserId,
+}: {
+  roomId: string;
+  isSingedInUserAdmin: boolean;
+  signedInUserId: string | null;
+}) => {
   const queryClient = useQueryClient();
-  const { data: signedInUser } = useSignedInUser();
-  const [newMessages, setNewMessages] = useState<ChatMessage[]>([]);
+  const [newMessages, setNewMessages] = useState<MessageWithUserData[]>([]);
   const [removedMessages, setRemovedMessages] = useState<string[]>([]);
-  const [updatedMessages, setUpdatedMessages] = useState<ChatMessage[]>([]);
+  const [updatedMessages, setUpdatedMessages] = useState<MessageWithUserData[]>(
+    []
+  );
 
   useEffect(() => {
-    if (signedInUser) {
-      const messagesRef = query(
-        collection(db, 'rooms', roomId, 'messages').withConverter(
-          messageConverter
-        ),
-        orderBy('createdAt', 'desc'),
-        limit(10)
-      );
+    if (signedInUserId) {
+      const q = buildMessageQuery({
+        isAdminView: isSingedInUserAdmin,
+        viewerId: signedInUserId,
+        roomId,
+        pageSize: PAGE_SIZE,
+      });
 
-      const unsubscribe = onSnapshot(messagesRef, async snapshot => {
+      const unsubscribe = onSnapshot(q, async snapshot => {
         for (const change of snapshot.docChanges()) {
           const docData = change.doc.data();
           if (change.type === 'added') {
-            const message = toMessageType(docData);
+            const message = toMessageWithUserData(docData);
             setNewMessages(prev => [...prev, message]);
           } else if (change.type === 'removed') {
             setRemovedMessages(prev => [...prev, docData.id]);
           } else if (change.type === 'modified') {
-            const message = toMessageType(docData);
+            const message = toMessageWithUserData(docData);
             setUpdatedMessages(prev => [
               ...prev.filter(m => m.id !== message.id),
               message,
@@ -90,7 +99,7 @@ const useListenToMessages = ({ roomId }: { roomId: string }) => {
         unsubscribe();
       };
     }
-  }, [roomId, signedInUser, queryClient]);
+  }, [roomId, queryClient, isSingedInUserAdmin, signedInUserId]);
 
   return { newMessages, removedMessages, updatedMessages };
 };
@@ -100,24 +109,42 @@ const useMessages = ({
   initMessage,
 }: {
   roomId: string;
-  initMessage: ChatMessage | null;
+  initMessage: MessageWithUserData | null;
 }) => {
+  const { data: signedInUser } = useSignedInUser();
+  const { data: room } = useRoom(roomId);
   // Start listening for new messages after the first fetch
-  const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
+  const [allMessages, setAllMessages] = useState<MessageWithUserData[]>([]);
+
+  const isSingedInUserAdmin =
+    signedInUser && room ? room.writerIds.includes(signedInUser.id) : false;
 
   const { newMessages, removedMessages, updatedMessages } = useListenToMessages(
     {
       roomId,
+      isSingedInUserAdmin,
+      signedInUserId: signedInUser?.id || null,
     }
   );
 
   const result = useInfiniteQuery({
     queryKey: ['messages', { roomId }],
-    queryFn: async ({ pageParam }: { pageParam: ChatMessage | null }) => {
-      const messages = await getMessages(roomId, pageParam);
+    queryFn: async ({
+      pageParam,
+    }: {
+      pageParam: MessageWithUserData | null;
+    }) => {
+      const messages = await getMessages({
+        signedInUserId: signedInUser!.id,
+        roomId,
+        lastMessage: pageParam,
+        isSingedInUserAdmin,
+      });
+
       return messages;
     },
     initialPageParam: initMessage,
+    enabled: !!signedInUser && !!room,
     getNextPageParam: (lastPage, _) => lastPage[lastPage.length - 1],
     // staleTime: Infinity,
   });
@@ -138,7 +165,10 @@ const useMessages = ({
         )
         // Remove deleted messages
         .filter(msg => !removedMessages.includes(msg.id))
+        // Update edited messages
         .map(msg => updatedMessages.find(m => m.id === msg.id) || msg)
+        // Sort by createdAt
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     );
   }, [result.data, newMessages, removedMessages, updatedMessages]);
 

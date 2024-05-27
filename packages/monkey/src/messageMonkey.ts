@@ -2,7 +2,12 @@ import { faker } from '@faker-js/faker';
 import { getRandomElements, sleepForRandom } from './utils';
 import { app } from '@cred/firebase';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { messageConverter, roomConverter, userConverter } from '@cred/shared';
+import {
+  MessageVisibility,
+  messageConverter,
+  roomConverter,
+  userConverter,
+} from '@cred/shared';
 
 const db = getFirestore(app);
 
@@ -53,6 +58,10 @@ const sendMessage = async ({
       createdAt: FieldValue.serverTimestamp(),
       mentions,
       images: [],
+      visibility:
+        Math.random() < 0.2
+          ? MessageVisibility.ONLY_ADMINS
+          : MessageVisibility.PUBLIC,
     });
 };
 

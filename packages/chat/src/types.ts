@@ -1,6 +1,7 @@
 import { GetLogsReturnType, Hex } from 'viem';
 import { User } from '@privy-io/react-auth';
 import { TRANSFER_SINGLE_EVENT } from './lib/contract';
+import { MessageVisibility } from '@cred/shared';
 
 export type SignedInUser = User;
 
@@ -10,13 +11,14 @@ export interface ChatUser {
   avatarUrl: string;
 }
 
-export interface ChatMessage {
+export interface MessageWithUserData {
   id: string;
   replyToId: string | null;
   text: string;
   images: string[];
   user: ChatUser;
   createdAt: Date;
+  visibility: MessageVisibility;
 }
 
 export interface MerkleTree {

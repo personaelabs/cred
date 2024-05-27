@@ -4,8 +4,76 @@ import { twMerge } from 'tailwind-merge';
 import { Hex, formatEther } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
+import {
+  collection,
+  limit,
+  or,
+  orderBy,
+  query,
+  startAfter,
+  where,
+} from 'firebase/firestore';
+import db from './firestore';
+import { MessageVisibility, messageConverter } from '@cred/shared';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+
+/**
+ * Builds a Firestore query to fetch messages for a room.
+ * If the user is an admin, all messages are fetched.
+ * If the user is not an admin, only public messages and messages from the user are fetched.
+ */
+export const buildMessageQuery = ({
+  isAdminView,
+  viewerId,
+  roomId,
+  pageSize,
+  from,
+}: {
+  isAdminView: boolean;
+  viewerId: string;
+  roomId: string;
+  pageSize: number;
+  from?: Date;
+}) => {
+  const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
+    messageConverter
+  );
+
+  if (isAdminView) {
+    // Get all messages in the room for admins
+    return from
+      ? query(
+          messagesRef,
+          orderBy('createdAt', 'desc'),
+          startAfter(from),
+          limit(pageSize)
+        )
+      : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
+  }
+
+  const onlyPublic = or(
+    where('visibility', '==', MessageVisibility.PUBLIC),
+    where('userId', '==', viewerId)
+  );
+
+  // Only get public messages and messages from the viewer
+  // if the user is not an admin
+  return from
+    ? query(
+        messagesRef,
+        onlyPublic,
+        orderBy('createdAt', 'desc'),
+        startAfter(from),
+        limit(pageSize)
+      )
+    : query(
+        messagesRef,
+        onlyPublic,
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
+      );
+};
 
 export const constructAttestationMessage = (address: string) => {
   return `\n${SIG_SALT}Personae attest:${address}`;

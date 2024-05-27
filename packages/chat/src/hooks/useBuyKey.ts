@@ -114,8 +114,7 @@ const useBuyKey = (roomId: string) => {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['buy-price', roomId] });
       queryClient.invalidateQueries({ queryKey: ['sell-price', roomId] });
-      await queryClient.invalidateQueries({ queryKey: ['purchased-rooms'] });
-      await queryClient.invalidateQueries({ queryKey: ['purchasable-rooms'] });
+      queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
     },
   });
 

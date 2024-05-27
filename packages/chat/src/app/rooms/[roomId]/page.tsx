@@ -11,7 +11,7 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { MessageInput, type ChatMessage as IChatMessage } from '@/types';
+import { MessageInput, MessageWithUserData } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,8 +37,10 @@ const Room = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const { data: room } = useRoom(params.roomId);
-  const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
-  const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
+  const [replyTo, setReplyTo] = useState<MessageWithUserData | null>(null);
+  const [fromMessage, _setFromMessage] = useState<MessageWithUserData | null>(
+    null
+  );
 
   const {
     messages,
@@ -177,7 +179,7 @@ const Room = () => {
                       inputRef.current?.focus();
                     }}
                     onViewReplyClick={_message => {
-                      // setFromMessage(toMessageType(_message));
+                      // setFromMessage(toMessageWithUserData(_message));
                       // const snapshot =  QueryDocumentSnapshot()
                       // setFromMessage(message.id);
                     }}

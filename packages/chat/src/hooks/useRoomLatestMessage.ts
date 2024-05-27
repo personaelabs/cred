@@ -1,24 +1,28 @@
-import db from '@/lib/firestore';
-import { messageConverter } from '@cred/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  collection,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-} from 'firebase/firestore';
+import { getDocs, onSnapshot } from 'firebase/firestore';
 import { useEffect } from 'react';
+import useSignedInUser from './useSignedInUser';
+import useRoom from './useRoom';
+import { buildMessageQuery } from '@/lib/utils';
 
-export const getRoomLatestMessage = async (roomId: string) => {
-  const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
-    messageConverter
-  );
-
-  const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
+export const getRoomLatestMessage = async ({
+  isSingedInUserAdmin,
+  signedInUserId,
+  roomId,
+}: {
+  isSingedInUserAdmin: boolean;
+  signedInUserId: string;
+  roomId: string;
+}) => {
+  const q = buildMessageQuery({
+    isAdminView: isSingedInUserAdmin,
+    viewerId: signedInUserId,
+    roomId,
+    pageSize: 1,
+  });
 
   const docs = (await getDocs(q)).docs;
+  console.log({ q, isSingedInUserAdmin });
 
   if (docs.length === 0) {
     return null;
@@ -29,35 +33,50 @@ export const getRoomLatestMessage = async (roomId: string) => {
 };
 
 const useRoomLatestMessage = (roomId: string) => {
+  const { data: signedInUser } = useSignedInUser();
+
   const queryClient = useQueryClient();
+
+  const { data: room } = useRoom(roomId);
+
+  // Hook to listen for changes to the latest message
+  // once the component is mounted
   useEffect(() => {
-    const messagesRef = collection(
-      db,
-      'rooms',
-      roomId,
-      'messages'
-    ).withConverter(messageConverter);
+    if (room && signedInUser) {
+      const q = buildMessageQuery({
+        isAdminView: room.writerIds.includes(signedInUser.id),
+        viewerId: signedInUser.id,
+        roomId,
+        pageSize: 1,
+      });
 
-    const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
+      const unsubscribe = onSnapshot(q, async snapshot => {
+        const doc = snapshot.docs[0];
+        if (doc) {
+          const message = doc.data();
+          // Update the cache with the latest message
+          queryClient.setQueryData(['latest-message', { roomId }], message);
+        }
+      });
 
-    const unsubscribe = onSnapshot(q, async snapshot => {
-      const doc = snapshot.docs[0];
-      if (doc) {
-        const message = doc.data();
-        queryClient.setQueryData(['latest-message', { roomId }], message);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [queryClient, roomId]);
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [queryClient, room, roomId, signedInUser]);
 
   return useQuery({
     queryKey: ['latest-message', { roomId }],
     queryFn: async () => {
-      return await getRoomLatestMessage(roomId);
+      const isSingedInUserAdmin = room!.writerIds.includes(signedInUser!.id);
+
+      return await getRoomLatestMessage({
+        isSingedInUserAdmin,
+        signedInUserId: signedInUser!.id,
+        roomId,
+      });
     },
+    enabled: !!signedInUser && !!room,
   });
 };
 
