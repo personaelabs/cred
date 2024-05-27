@@ -85,7 +85,7 @@ const RoomItem = memo(function RoomItem(props: RoomItemProps) {
 
   const onJoinClick = useCallback(async () => {
     await joinRoom(id);
-    router.replace(`/rooms/${id}`);
+    router.push(`/rooms/${id}`);
   }, [id, joinRoom, router]);
 
   const onPurchaseClick = useCallback(async () => {
