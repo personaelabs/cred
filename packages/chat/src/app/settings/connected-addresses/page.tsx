@@ -62,11 +62,22 @@ const ConnectedAddressesPage = () => {
             ))}
           </div>
         </div>
-        <Link href="/settings/add-address">
-          <Button className="mt-4">
-            <Plus className="w-4 h-4 mr-2"></Plus> Add address
-          </Button>
-        </Link>
+        <div className="flex flex-col gap-y-4 items-center">
+          <Link href="/settings/add-address">
+            <Button className="mt-4">
+              <Plus className="w-4 h-4 mr-2"></Plus> Add address
+            </Button>
+          </Link>
+          <div className="flex flex-col items-center">
+            <div className="opacity-60">Coming soon</div>
+            <Button
+              disabled
+              className="bg-gradient-to-l from-purple-300 to-purple-500"
+            >
+              <Plus className="w-4 h-4 mr-2"></Plus> Add private address
+            </Button>
+          </div>
+        </div>
       </div>
     </Scrollable>
   );
