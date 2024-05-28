@@ -10,12 +10,13 @@ import theme from '@/lib/theme';
 import { trimAddress } from '@/lib/utils';
 import { EligibleCreddd } from '@/types';
 import { Check, Loader2 } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Hex } from 'viem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
+import CredddVerifiedSheet from '@/components/CredddVerifiedSheet';
 
 const ConnectButton = () => {
   const { connectWallet } = usePrivy();
@@ -60,11 +61,12 @@ const AddCredddPage = () => {
   const { data: signedInUser } = useSignedInUser();
   const { data: user } = useUser(signedInUser?.id || null);
 
-  const {
-    data: eligibleCreddd,
-    isFetching: isSearchingCreddd,
-    refetch,
-  } = useEligibleCreddd(address);
+  const { data: eligibleCreddd, isFetching: isSearchingCreddd } =
+    useEligibleCreddd(address);
+  const [showJoinableRoom, setShowJoinableRoom] = useState<{
+    id: string;
+    displayName: string;
+  } | null>(null);
 
   const { setOptions } = useHeaderOptions();
   const {
@@ -72,6 +74,7 @@ const AddCredddPage = () => {
     isPending: isAddingCreddd,
     isSuccess,
     hasSignedMessage,
+    reset,
   } = useAddCreddd();
 
   useEffect(() => {
@@ -93,9 +96,13 @@ const AddCredddPage = () => {
   const onAddClick = useCallback(
     async (creddd: EligibleCreddd) => {
       await addCreddd(creddd);
-      await refetch();
+      setShowJoinableRoom({
+        id: creddd.id,
+        displayName: creddd.displayName,
+      });
+      reset();
     },
-    [addCreddd, refetch]
+    [addCreddd, reset]
   );
 
   return (
@@ -172,6 +179,13 @@ const AddCredddPage = () => {
         isOpen={isAddingCreddd}
         hasSignedMessage={hasSignedMessage}
       ></AddingCredddModal>
+      <CredddVerifiedSheet
+        isOpen={showJoinableRoom ? true : false}
+        joinableRoom={showJoinableRoom}
+        onClose={() => {
+          setShowJoinableRoom(null);
+        }}
+      ></CredddVerifiedSheet>
     </>
   );
 };
