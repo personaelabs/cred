@@ -32,6 +32,7 @@ const initUser = async (user: PrivyUser) => {
         mutedRoomIds: [],
       },
     },
+    addedCreddd: [],
     connectedAddresses: [],
   };
 
