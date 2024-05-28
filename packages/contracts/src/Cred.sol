@@ -12,11 +12,26 @@ contract Cred is ERC1155, Ownable {
 
   address public feeRecipient;
 
+  bool public isPaused = false;
+
   constructor()
     ERC1155('https://creddd.xyz/api/cred/{id}.json')
     Ownable(msg.sender)
   {
     feeRecipient = msg.sender;
+  }
+
+  modifier whenNotPaused() {
+    require(!isPaused, 'Contract is paused');
+    _;
+  }
+
+  function pause() public onlyOwner {
+    isPaused = true;
+  }
+
+  function resume() public onlyOwner {
+    isPaused = false;
   }
 
   function setFeeRecipient(address _feeRecipient) public onlyOwner {
@@ -96,7 +111,7 @@ contract Cred is ERC1155, Ownable {
     uint256 tokenId,
     uint256 amount,
     bytes calldata data
-  ) public payable {
+  ) public payable whenNotPaused {
     require(amount > 0, 'Invalid amount');
 
     uint256 price = getBuyPrice(tokenId, amount);
@@ -113,7 +128,7 @@ contract Cred is ERC1155, Ownable {
   /**
    * @dev Sell the given amount of keys
    */
-  function sellKeys(uint256 tokenId, uint256 amount) public {
+  function sellKeys(uint256 tokenId, uint256 amount) public whenNotPaused {
     require(amount > 0, 'Invalid amount');
     require(balanceOf(msg.sender, tokenId) >= amount, 'Insufficient balance');
 

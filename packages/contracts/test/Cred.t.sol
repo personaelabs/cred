@@ -73,16 +73,28 @@ contract ContractBTest is Test, IERC1155Receiver {
   function testFuzz_setFeePercentage(uint8 percentage) public {
     cred.setFeePercentage(percentage % 100);
     assertEq(cred.feePercentage(), percentage % 100);
+
+    vm.prank(address(makeAddr("alice")));
+    vm.expectRevert();
+    cred.setFeePercentage(percentage % 100);
   }
 
   function testFuzz_setFeeRecipient(address recipient) public {
     cred.setFeeRecipient(recipient);
     assertEq(cred.feeRecipient(), recipient);
+
+    vm.prank(address(makeAddr("alice")));
+    vm.expectRevert();
+    cred.setFeeRecipient(recipient);
   }
 
   function testFuzz_setUnitPrice(uint256 price) public {
     cred.setUnitPrice(price);
     assertEq(cred.unitPrice(), price);
+
+    vm.prank(address(makeAddr("alice")));
+    vm.expectRevert();
+    cred.setUnitPrice(price);
   }
 
   function test_ProtocolFeeCollection() public {
@@ -183,5 +195,17 @@ contract ContractBTest is Test, IERC1155Receiver {
     cred.sellKeys(tokenId, amount / 2);
 
     assertEq(cred.balanceOf(address(this), tokenId), amount - (amount / 2));
+  }
+
+  function test_WhenPaused() public {
+    cred.pause();
+    uint256 tokenId = 1;
+    uint256 amount = 10;
+
+    vm.expectRevert("Contract is paused");
+    cred.buyKeys(address(this), tokenId, amount, "");
+
+    vm.expectRevert("Contract is paused");
+    cred.sellKeys(tokenId, amount);
   }
 }
