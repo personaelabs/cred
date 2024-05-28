@@ -140,24 +140,32 @@ export const sendMessageNotifications = async () => {
                   logger.info(`Sending notification to ${userId}`);
 
                   if (IS_PROD) {
-                    const messageId = await messaging.send({
-                      notification: {
-                        title: 'New message',
-                        body: message.body,
-                      },
-                      data: {
-                        fid: message.userId.toString(),
-                        path: `/rooms/${roomId}`,
-                      },
-                      token: token.token,
-                      webpush: {
-                        fcmOptions: {
-                          link: `/rooms/${roomId}`,
+                    try {
+                      const messageId = await messaging.send({
+                        notification: {
+                          title: 'New message',
+                          body: message.body,
                         },
-                      },
-                    });
+                        data: {
+                          fid: message.userId.toString(),
+                          path: `/rooms/${roomId}`,
+                        },
+                        token: token.token,
+                        webpush: {
+                          fcmOptions: {
+                            link: `/rooms/${roomId}`,
+                          },
+                        },
+                      });
 
-                    logger.info(`Message sent with ID: ${messageId}`);
+                      logger.info(`Message sent with ID: ${messageId}`);
+                    } catch (err) {
+                      logger.error(
+                        `Error sending notification to ${userId}`,
+                        err
+                      );
+                    }
+
                     await saveIdempotencyKey({
                       key: idempotencyKey,
                       messageCreatedAt: message.createdAt as Date,

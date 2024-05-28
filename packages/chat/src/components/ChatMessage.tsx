@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
-import { type ChatMessage } from '@/types';
+import { MessageWithUserData } from '@/types';
 import Avatar from './Avatar';
 import { Copy, Reply, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -22,6 +22,7 @@ import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
 import { useLongPress } from 'use-long-press';
 import LinkPreview from './LinkPreview';
+import { MessageVisibility } from '@cred/shared';
 
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
@@ -92,10 +93,10 @@ const ReplyPreview = (props: ReplyPreviewProps) => {
   );
 };
 
-type ChatMessageProps = ChatMessage & {
+type ChatMessageProps = MessageWithUserData & {
   isSender: boolean;
   renderAvatar: boolean;
-  onReplySelect: (_message: ChatMessage) => void;
+  onReplySelect: (_message: MessageWithUserData) => void;
   onViewReplyClick: (_replyId: string) => void;
   onDeleteClick: (_messageId: string) => void;
   roomId: string;
@@ -157,7 +158,7 @@ const ChatMessage = (props: ChatMessageProps) => {
             className={`flex flex-col gap-y-2 mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
           >
             <div
-              className={`${props.text ? '' : 'hidden'} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+              className={`${props.text ? '' : 'hidden'} text-md px-4 py-2 ${props.visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
               dangerouslySetInnerHTML={{
                 __html: highlightText(props.text),
               }}

@@ -46,6 +46,12 @@ services:
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json
         previewValue: /etc/secrets/firebase-service-account-staging.json
+      - key: NEXT_PUBLIC_PROJECT_ID
+        value: "cred-279bb"
+        previewValue: "staging-423405"
+      - key: NEXT_PUBLIC_VAPID_KEY
+        value: BHaVlakB8SbeMEprNB2e6FQtlPMFjyWEhMnBH8dKn-q2epYPi--NNCWM2EZmsjaXUQ0FbKpPuppmC-Od6xL0M88
+        previewValue: BKF9U_p1O5RChiFe30w4bq-IcVTh-i0LcXHSpBUsELHuzfxsQlqhlqL9QfzjuavM_k1aWksZRbEuWQHkTid6J70
   - type: web
     name: cred-indexer
     plan: pro plus
@@ -54,6 +60,7 @@ services:
     region: oregon
     dockerfilePath: ./Dockerfile.indexer
     preDeployCommand: populate
+    pullRequestPreviewsEnabled: false
     rootDir: ./
     buildFilter:
       paths:
@@ -125,3 +132,29 @@ services:
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json
         previewValue: /etc/secrets/firebase-service-account-staging.json
+  - type: worker
+    name: credchat-monkey
+    plan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i
+    startCommand: pnpm -F monkey start
+    rootDir: ./
+    buildFilter:
+      paths:
+        - packages/monkey/**
+        - packages/shared/**
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - fromGroup: cred
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/secrets/firebase-service-account-staging.json
+
+databases:
+  - name: cred
+    databaseName: cred
+    region: oregon
+    plan: pro
+    previewPlan: starter
+    postgresMajorVersion: 15

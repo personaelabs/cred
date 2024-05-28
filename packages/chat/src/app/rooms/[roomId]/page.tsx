@@ -11,12 +11,15 @@ import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { MessageInput, type ChatMessage as IChatMessage } from '@/types';
+import { MessageInput, MessageWithUserData, ModalType } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
 import useDeleteMessage from '@/hooks/useDeleteMessage';
+import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
+import MessageAsAdminModal from '@/components/MessageAsAdminModal';
+import MessageAsBuyerModal from '@/components/MessageAsBuyerModal';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -29,6 +32,10 @@ const Room = () => {
     error: sendError,
   } = useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
+    useState(false);
+  const [isMessageAsBuyerModalOpen, setIsMessageAsBuyerModalOpen] =
+    useState(false);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -37,27 +44,63 @@ const Room = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const { data: room } = useRoom(params.roomId);
-  const [replyTo, setReplyTo] = useState<IChatMessage | null>(null);
-  const [fromMessage, _setFromMessage] = useState<IChatMessage | null>(null);
+  const [replyTo, setReplyTo] = useState<MessageWithUserData | null>(null);
+  const [fromMessage, _setFromMessage] = useState<MessageWithUserData | null>(
+    null
+  );
 
-  const { messages, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useMessages({
-      roomId: params.roomId,
-      initMessage: fromMessage,
-    });
+  const {
+    messages,
+    error,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useMessages({
+    roomId: params.roomId,
+    initMessage: fromMessage,
+  });
 
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   useEffect(() => {
-    const latestMessage =
-      (messages && messages.length > 0 && messages[messages.length - 1]) ||
-      null;
-    if (
-      latestMessage &&
-      latestMessage.createdAt !== latestReadMessageCreatedAt &&
-      signedInUser
-    ) {
-      updateReadTicket(latestMessage.createdAt);
+    if (signedInUser && room) {
+      const isSignedInUserAdmin = isUserAdminInRoom({
+        room,
+        userId: signedInUser.id,
+      });
+
+      if (isSignedInUserAdmin) {
+        if (canShowModal(ModalType.REPLY_AS_ADMIN)) {
+          setIsMessageAsAdminModalOpen(true);
+        }
+      } else {
+        if (canShowModal(ModalType.MESSAGE_AS_BUYER)) {
+          setIsMessageAsBuyerModalOpen(true);
+        }
+      }
+    }
+  }, [signedInUser, room]);
+
+  useEffect(() => {
+    if (signedInUser) {
+      const receivedMessages = messages.filter(
+        message => message.user.id !== signedInUser.id
+      );
+
+      const latestMessage =
+        (receivedMessages &&
+          receivedMessages.length > 0 &&
+          receivedMessages[receivedMessages.length - 1]) ||
+        null;
+
+      if (
+        latestMessage &&
+        latestMessage.createdAt !== latestReadMessageCreatedAt &&
+        signedInUser
+      ) {
+        updateReadTicket(latestMessage.createdAt);
+      }
     }
   }, [messages, latestReadMessageCreatedAt, updateReadTicket, signedInUser]);
 
@@ -99,7 +142,7 @@ const Room = () => {
   }, [isSuccess, reset]);
 
   const onSendClick = useCallback(
-    (input: MessageInput) => {
+    (input: Omit<MessageInput, 'replyTo'>) => {
       sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
     },
@@ -125,7 +168,7 @@ const Room = () => {
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
         >
-          {messages.length === 0 ? (
+          {!isFetching && messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <div className="text-gray-500">No messages</div>
             </div>
@@ -162,7 +205,7 @@ const Room = () => {
                       inputRef.current?.focus();
                     }}
                     onViewReplyClick={_message => {
-                      // setFromMessage(toMessageType(_message));
+                      // setFromMessage(toMessageWithUserData(_message));
                       // const snapshot =  QueryDocumentSnapshot()
                       // setFromMessage(message.id);
                     }}
@@ -185,6 +228,18 @@ const Room = () => {
           }}
         ></ChatMessageInput>
       </div>
+      <MessageAsAdminModal
+        isOpen={isMessageAsAdminModalOpen}
+        onClose={() => {
+          setIsMessageAsAdminModalOpen(false);
+        }}
+      ></MessageAsAdminModal>
+      <MessageAsBuyerModal
+        isOpen={isMessageAsBuyerModalOpen}
+        onClose={() => {
+          setIsMessageAsBuyerModalOpen(false);
+        }}
+      ></MessageAsBuyerModal>
     </div>
   );
 };

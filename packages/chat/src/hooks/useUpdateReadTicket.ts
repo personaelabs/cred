@@ -29,6 +29,7 @@ const updateReadTicket = async ({
   };
 
   await setDoc(readTicketRef, data);
+  return data;
 };
 
 const useUpdateReadTicket = (roomId: string) => {
@@ -45,14 +46,18 @@ const useUpdateReadTicket = (roomId: string) => {
 
       setLatestReadMessageCreatedAt(latestReadMessageCreatedAt);
 
-      await updateReadTicket({
+      const updatedData = await updateReadTicket({
         roomId,
         userId: signedInUser.id,
         latestReadMessageCreatedAt,
       });
+
+      await queryClient.setQueryData(['read-ticket', { roomId }], updatedData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['read-ticket', { roomId }] });
+      if (!signedInUser) {
+        throw new Error('User not signed in');
+      }
     },
   });
 

@@ -11,7 +11,7 @@ const getRoom = async (roomId: string) => {
   );
 
   const roomDoc = await getDoc(roomDocRef);
-  return roomDoc.data();
+  return roomDoc.data() || null;
 };
 
 const useRoom = (roomId: string) => {

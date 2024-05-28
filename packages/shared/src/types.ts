@@ -24,9 +24,8 @@ export interface UserNotificationTokens {
 
 export interface Group {
   id: string;
-  displayName: string;
-  fids: number[];
-  updatedAt: Date | FirestoreTimestamp;
+  display_name: string;
+  type_id: string;
 }
 
 export interface FirestoreTimestamp {
@@ -42,8 +41,14 @@ export interface Message {
   createdAt: FirestoreTimestamp | FieldValue | Date | null;
   readBy: number[];
   replyTo: string | null;
+  visibility: MessageVisibility;
   mentions: string[];
   images: string[];
+}
+
+export enum MessageVisibility {
+  ONLY_ADMINS = 0,
+  PUBLIC = 1,
 }
 
 export interface Room {

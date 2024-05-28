@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
 
-const getReadTicket = async ({
+export const getReadTicket = async ({
   roomId,
   userId,
 }: {

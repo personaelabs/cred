@@ -38,6 +38,10 @@ const useJoinRoom = () => {
       queryClient.invalidateQueries({
         queryKey: ['joined-rooms'],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ['all-rooms'],
+      });
     },
   });
 };

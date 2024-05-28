@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth.uid != null && request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.joinedUserIds;
     }
 
+    function isRoomAdmin(roomId) {
+      return request.auth.uid != null && request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.writerIds;
+    }
+
     function isAddingValueToArray(field, value) {
       // Check if the field exists in the request and resource
       return request.resource.data[field] is list &&
@@ -44,7 +48,15 @@ service cloud.firestore {
       return request.resource.data.body is string &&
       (request.resource.data.replyTo is string || request.resource.data.replyTo == null) &&
       request.resource.data.mentions is list &&
-      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions", "images"]);
+      request.resource.data.images is list &&
+      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions", "images", "visibility"]) &&
+      (
+        // If the user is a room admin, the visibility can be 0 or 1
+        isRoomAdmin(request.resource.data.roomId) && request.resource.data.visibility == 1
+        ||
+        // If the user is not a room admin, the visibility must be 0
+        request.resource.data.visibility == 0
+      )
     }
 
     match /rooms/{roomId} {
@@ -89,10 +101,21 @@ service cloud.firestore {
       resource.data.roomId == roomId;
 
       allow update: if
-      isInRoom(roomId) &&
-      isValidMessage() &&
-      isUserAuthorized() &&
-      request.resource.data.roomId == roomId;
+      (
+        // Allow updating if the user is the message sender
+        (
+        isInRoom(roomId) 
+        && isUserAuthorized()
+        && isValidMessage()
+        && request.resource.data.roomId == roomId
+        )
+      || 
+        // Allow changing the visibility to 1 if the user is a room admin 
+        (isRoomAdmin(roomId) 
+        && request.resource.data.visibility == 1
+        && isOnlyUpdatingFields(["visibility"])
+        )
+      )
     }
 
     match /notificationTokens/{userId} {

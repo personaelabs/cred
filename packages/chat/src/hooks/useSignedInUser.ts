@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { isAuthenticated } from '@/lib/auth';
 import { usePrivy } from '@privy-io/react-auth';
 import { getAuth } from 'firebase/auth';
+import useIsPwa from './useIsPwa';
+import { useMediaQuery } from '@/contexts/MediaQueryContext';
 
 export const getSignedInUser = (): SignedInUser | null => {
   const result = localStorage.getItem('user');
@@ -20,6 +22,8 @@ const useSignedInUser = () => {
   const router = useRouter();
   const { user, ready: privyReady } = usePrivy();
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const isPwa = useIsPwa();
+  const { isMobile } = useMediaQuery();
 
   useEffect(() => {
     (async () => {
@@ -30,7 +34,12 @@ const useSignedInUser = () => {
 
   useEffect(() => {
     (async () => {
-      if (privyReady) {
+      // Only redirect to signin
+      // - if the view is a PWA
+      // - or if the device is desktop
+      const canRedirectToSignIn = isPwa === true || isMobile === false;
+
+      if (privyReady && canRedirectToSignIn) {
         if (!user) {
           console.log('Not logged in, redirecting to signin');
           router.push('/signin');
@@ -44,7 +53,7 @@ const useSignedInUser = () => {
         }
       }
     })();
-  }, [router, user, privyReady]);
+  }, [router, user, privyReady, isPwa, isMobile]);
 
   const ready = isAuthReady && privyReady;
   return { data: ready ? user : null, ready };

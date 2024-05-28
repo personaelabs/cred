@@ -1,6 +1,6 @@
 import { SnapshotOptions, DocumentData } from 'firebase/firestore';
 
-import { FirestoreTimestamp, Message } from '../types';
+import { FirestoreTimestamp, Message, MessageVisibility } from '../types';
 
 export const messageConverter = {
   toFirestore: (message: Message) => {
@@ -12,6 +12,7 @@ export const messageConverter = {
       replyTo: message.replyTo || null,
       mentions: message.mentions,
       images: message.images,
+      visibility: message.visibility,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -31,6 +32,7 @@ export const messageConverter = {
       replyTo: data.replyTo || null,
       mentions: data.mentions || [],
       images: data.images || [],
+      visibility: data.visibility || MessageVisibility.ONLY_ADMINS,
     };
 
     return message;

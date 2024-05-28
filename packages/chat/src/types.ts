@@ -1,6 +1,7 @@
 import { GetLogsReturnType, Hex } from 'viem';
 import { User } from '@privy-io/react-auth';
 import { TRANSFER_SINGLE_EVENT } from './lib/contract';
+import { MessageVisibility } from '@cred/shared';
 
 export type SignedInUser = User;
 
@@ -10,13 +11,14 @@ export interface ChatUser {
   avatarUrl: string;
 }
 
-export interface ChatMessage {
+export interface MessageWithUserData {
   id: string;
   replyToId: string | null;
   text: string;
   images: string[];
   user: ChatUser;
   createdAt: Date;
+  visibility: MessageVisibility;
 }
 
 export interface MerkleTree {
@@ -84,4 +86,30 @@ export interface ConnectAddressRequestBody {
   address: Hex;
   signature: Hex;
   groupIds: string[]; // Temporary
+}
+
+export interface NeynarUserResponse {
+  fid: number;
+  username: string;
+  display_name: string;
+  active_status: string;
+  pfp_url: string;
+  verified_addresses: {
+    eth_addresses: Hex[];
+  };
+  custody_address: Hex;
+}
+
+export enum BottomSheetType {
+  // eslint-disable-next-line no-unused-vars
+  FUND_WALLET = 'FUND_WALLET',
+  // eslint-disable-next-line no-unused-vars
+  PROCESSING_TX = 'PROCESSING_TX',
+}
+
+export enum ModalType {
+  // eslint-disable-next-line no-unused-vars
+  MESSAGE_AS_BUYER = 'MESSAGE_AS_BUYER',
+  // eslint-disable-next-line no-unused-vars
+  REPLY_AS_ADMIN = 'REPLY_AS_ADMIN',
 }

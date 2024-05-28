@@ -1,0 +1,17 @@
+{
+  "name": "@cred/monkey",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@cred/firebase": "workspace:*",
+    "@cred/shared": "workspace:*",
+    "@faker-js/faker": "^8.4.1",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1"
+  }
+}

@@ -136,9 +136,14 @@ const WalletPage = () => {
                 Export wallet
               </Button>
             </div>
-            <div className="mt-[32px] opacity-60 text-sm text-center w-full px-4">
-              Activity
-            </div>
+            {tradeHistory?.length ? (
+              <div className="mt-[32px] opacity-60 text-sm text-center w-full px-4">
+                Activity
+              </div>
+            ) : (
+              <></>
+            )}
+
             <div className="flex flex-col mt-[16px]">
               {tradeHistory?.map((log, index) => (
                 <TradeHistoryListItem

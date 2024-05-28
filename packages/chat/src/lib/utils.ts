@@ -4,8 +4,96 @@ import { twMerge } from 'tailwind-merge';
 import { Hex, formatEther } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
+import {
+  collection,
+  limit,
+  or,
+  orderBy,
+  query,
+  startAfter,
+  where,
+} from 'firebase/firestore';
+import db from './firestore';
+import { MessageVisibility, Room, messageConverter } from '@cred/shared';
+import { BottomSheetType, ModalType } from '@/types';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
+
+export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {
+  localStorage.setItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`, 'true');
+};
+
+export const canShowModal = (dialog: ModalType) => {
+  return !localStorage.getItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`);
+};
+
+export const isUserAdminInRoom = ({
+  userId,
+  room,
+}: {
+  userId: string;
+  room: Room;
+}) => {
+  return room.writerIds.includes(userId);
+};
+
+/**
+ * Builds a Firestore query to fetch messages for a room.
+ * If the user is an admin, all messages are fetched.
+ * If the user is not an admin, only public messages and messages from the user are fetched.
+ */
+export const buildMessageQuery = ({
+  isAdminView,
+  viewerId,
+  roomId,
+  pageSize,
+  from,
+}: {
+  isAdminView: boolean;
+  viewerId: string;
+  roomId: string;
+  pageSize: number;
+  from?: Date;
+}) => {
+  const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
+    messageConverter
+  );
+
+  if (isAdminView) {
+    // Get all messages in the room for admins
+    return from
+      ? query(
+          messagesRef,
+          orderBy('createdAt', 'desc'),
+          startAfter(from),
+          limit(pageSize)
+        )
+      : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
+  }
+
+  const onlyPublic = or(
+    where('visibility', '==', MessageVisibility.PUBLIC),
+    where('userId', '==', viewerId)
+  );
+
+  // Only get public messages and messages from the viewer
+  // if the user is not an admin
+  return from
+    ? query(
+        messagesRef,
+        onlyPublic,
+        orderBy('createdAt', 'desc'),
+        startAfter(from),
+        limit(pageSize)
+      )
+    : query(
+        messagesRef,
+        onlyPublic,
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
+      );
+};
 
 export const constructAttestationMessage = (address: string) => {
   return `\n${SIG_SALT}Personae attest:${address}`;
@@ -25,8 +113,12 @@ export const extractLinks = (text: string) => {
 export const formatEthBalance = (balance: bigint) => {
   const balanceInEth = formatEther(balance);
   const balanceNumber = parseFloat(balanceInEth);
-  if (balanceNumber < 0.0001) {
+  if (balanceNumber < 0.0001 && balanceNumber > 0) {
     return '< 0.0001';
+  }
+
+  if (balanceNumber === 0) {
+    return '0';
   }
 
   return balanceNumber.toPrecision(3);

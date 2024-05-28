@@ -21,12 +21,20 @@ import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { FooterContextProvider } from '@/contexts/FooterContext';
 import {
+  BottomSheetContextProvider,
+  useBottomSheet,
+} from '@/contexts/BottomSheetContext';
+import { ModalContextProvider } from '@/contexts/ModalContext';
+import {
   MediaQueryProvider,
   useMediaQuery,
 } from '@/contexts/MediaQueryContext';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
+import ProcessingTxSheet from './ProcessingTxSheet';
+import { BottomSheetType } from '@/types';
+import FundWalletSheet from './FundWalletSheet';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -53,6 +61,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
+  const { openedSheet, closeSheet } = useBottomSheet();
 
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
@@ -100,25 +109,36 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const footerHeight = hideFooter ? 0 : 70;
 
   return (
-    <div className="h-full w-full flex flex-col items-center">
-      <div className="h-full w-full md:w-[50%]">
-        <MobileHeader
-          title={options.title}
-          description={options.description}
-          showBackButton={options.showBackButton}
-          headerRight={options.headerRight}
-          backTo={options.backTo}
-        ></MobileHeader>
-        <div
-          style={{
-            height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
-          }}
-        >
-          {children}
+    <>
+      <div className="h-full w-full flex flex-col items-center">
+        <div className="h-full w-full md:w-[50%]">
+          <MobileHeader
+            title={options.title}
+            description={options.description}
+            showBackButton={options.showBackButton}
+            headerRight={options.headerRight}
+            backTo={options.backTo}
+          ></MobileHeader>
+          <div
+            style={{
+              height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
+            }}
+          >
+            {children}
+          </div>
+          {hideFooter ? <></> : <MobileFooter></MobileFooter>}
         </div>
-        {hideFooter ? <></> : <MobileFooter></MobileFooter>}
       </div>
-    </div>
+      <ProcessingTxSheet
+        isOpen={openedSheet === BottomSheetType.PROCESSING_TX}
+      ></ProcessingTxSheet>
+      <FundWalletSheet
+        isOpen={openedSheet === BottomSheetType.FUND_WALLET}
+        onClose={() => {
+          closeSheet();
+        }}
+      ></FundWalletSheet>
+    </>
   );
 };
 
@@ -146,7 +166,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <MediaQueryProvider>
               <HeaderContextProvider>
                 <FooterContextProvider>
-                  <Main>{children}</Main>
+                  <BottomSheetContextProvider>
+                    <ModalContextProvider>
+                      <Main>{children}</Main>
+                    </ModalContextProvider>
+                  </BottomSheetContextProvider>
                 </FooterContextProvider>
               </HeaderContextProvider>
             </MediaQueryProvider>

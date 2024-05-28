@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   Message,
+  MessageVisibility,
   Room,
   User,
   messageConverter,
@@ -11,7 +12,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
 
-const ADMIN_FIDS = ['1', '12783'];
+const ADMIN_FIDS = ['1', 'did:privy:clw1w6dar0fdfmhd5ae1rfna6'];
 
 const registerFid1 = async () => {
   const USER_ID = '1';
@@ -27,6 +28,7 @@ const registerFid1 = async () => {
         mutedRoomIds: [],
       },
     },
+    connectedAddresses: [],
   };
 
   await userRef.set(userData);
@@ -68,6 +70,8 @@ const sendMessage = async ({
     readBy: [],
     replyTo: null,
     mentions: [],
+    images: [],
+    visibility: MessageVisibility.PUBLIC,
   };
 
   await db
@@ -81,9 +85,11 @@ const sendMessage = async ({
 const sendTestMessage = async () => {
   await registerFid1();
   await createNotificationTestRoom();
+
+  const nonce = Math.floor(Math.random() * 1000000);
   await sendMessage({
     roomId: 'test-notification',
-    message: 'Hello, world!',
+    message: `Hello, world! ${nonce}`,
     sender: '1',
   });
 };
