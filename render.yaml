@@ -9,6 +9,7 @@ services:
     buildCommand: pnpm i && pnpm -F frontend build
     startCommand: NODE_ENV=production pnpm -F frontend start
     preDeployCommand: pnpm -F db migrate:prod
+    pullRequestPreviewsEnabled: false
     buildFilter:
       paths:
         - packages/frontend/**
@@ -140,6 +141,7 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F monkey start
     rootDir: ./
+    pullRequestPreviewsEnabled: false
     buildFilter:
       paths:
         - packages/monkey/**
