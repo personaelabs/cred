@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { Group } from './types';
+import { GetGroupMerkleTreeReturnType, Group } from './types';
 
 export const createRpcClient = (rpcUrl: string) => new JsonRpcClient(rpcUrl);
 
@@ -36,5 +36,22 @@ class JsonRpcClient {
    */
   public async getAddressGroups(address: `0x${string}`): Promise<Group[]> {
     return await this.call<Group[]>('getAddressGroups', [address]);
+  }
+
+  public async getGroupByMerkleRoot(merkleRoot: `0x${string}`): Promise<Group> {
+    return await this.call<Group>('getGroupByMerkleRoot', [merkleRoot]);
+  }
+
+  public async getGroupMerkleTree({
+    groupId,
+    merkleRoot,
+  }: {
+    groupId: string;
+    merkleRoot: string;
+  }): Promise<GetGroupMerkleTreeReturnType> {
+    return await this.call<GetGroupMerkleTreeReturnType>('getGroupMerkleTree', [
+      merkleRoot,
+      groupId,
+    ]);
   }
 }

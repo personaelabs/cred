@@ -7,11 +7,21 @@ export interface User {
   pfpUrl: string;
   privyAddress: string;
   connectedAddresses: string[];
+  addedCreddd: string[];
   config: {
     notification: {
       mutedRoomIds: string[];
     };
   };
+}
+
+export interface UserCreddd {
+  userId: string;
+  creddd: {
+    proof: string;
+    privySignature: string;
+    groupId: string;
+  }[];
 }
 
 export interface UserNotificationTokens {
@@ -73,4 +83,8 @@ export interface IdempotencyKey {
 export interface NewRoomNotifyIdempotencyKey {
   key: string;
   createdAt: Date | FirestoreTimestamp;
+}
+
+export interface GetGroupMerkleTreeReturnType {
+  blockNumber: number;
 }

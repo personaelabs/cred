@@ -1,11 +1,10 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
 import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
 import { getAllMerkleTrees, getGroupLatestMerkleTree } from '@/lib/credddApi';
 import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
-import { useEffect } from 'react';
 import { fromHexString } from '@/lib/utils';
 
 /**
@@ -147,17 +146,8 @@ const useAllMerkleTrees = () => {
 };
 
 const useEligibleCreddd = (address: Hex | null) => {
-  const queryClient = useQueryClient();
   const { data: signedInUser } = useSignedInUser();
   const { data: merkleTrees } = useAllMerkleTrees();
-
-  useEffect(() => {
-    if (merkleTrees && address) {
-      queryClient.invalidateQueries({
-        queryKey: ['eligible-creddd', { address }],
-      });
-    }
-  }, [merkleTrees, address, queryClient]);
 
   return useQuery({
     queryKey: ['eligible-creddd', { address }],
@@ -170,7 +160,6 @@ const useEligibleCreddd = (address: Hex | null) => {
       return eligibleCreddd;
     },
     enabled: !!signedInUser && !!address && !!merkleTrees,
-    staleTime: Infinity,
   });
 };
 

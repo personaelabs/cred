@@ -28,6 +28,7 @@ const registerFid1 = async () => {
         mutedRoomIds: [],
       },
     },
+    addedCreddd: [],
     connectedAddresses: [],
   };
 

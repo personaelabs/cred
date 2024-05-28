@@ -1,7 +1,7 @@
 import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex, formatEther } from 'viem';
+import { Hex, formatEther, keccak256 } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 import {
@@ -17,7 +17,7 @@ import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { BottomSheetType, ModalType } from '@/types';
 
-const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+const SIG_SALT = '0xdd01e93b61b644c842a5ce8dbf07437f';
 const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
 export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {
@@ -97,6 +97,10 @@ export const buildMessageQuery = ({
 
 export const constructAttestationMessage = (address: string) => {
   return `\n${SIG_SALT}Personae attest:${address}`;
+};
+
+export const constructProofAttestationMessage = (proofHash: Hex) => {
+  return `\n${SIG_SALT}Personae attest:${proofHash}`;
 };
 
 export function cn(...inputs: ClassValue[]) {
@@ -271,4 +275,8 @@ export const fromHexString = (hexString: Hex, size?: number): Buffer => {
     : hexString.slice(2);
 
   return Buffer.from(padded, 'hex');
+};
+
+export const getProofHash = (proof: Hex) => {
+  return keccak256(proof);
 };
