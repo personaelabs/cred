@@ -4,6 +4,7 @@ import client from './lib/viemClient';
 import {
   CRED_CONTRACT_ADDRESS as _CRED_CONTRACT_ADDRESS,
   CRED_SEPOLIA_CONTRACT_ADDRESS,
+  CredAbi,
   tokenIdToRoomId,
 } from '@cred/shared';
 import { Hex, parseAbiItem, zeroAddress } from 'viem';
@@ -26,6 +27,23 @@ const TRANSFER_SINGLE_EVENT = parseAbiItem(
 
 const CRED_CONTRACT_DEPLOYED_BLOCK = BigInt(0);
 const CRED_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10167164);
+
+const getBalance = async ({
+  address,
+  tokenId,
+}: {
+  address: Hex;
+  tokenId: bigint;
+}) => {
+  const balance = await client.readContract({
+    abi: CredAbi,
+    address: CRED_CONTRACT_ADDRESS,
+    functionName: 'balanceOf',
+    args: [address, tokenId],
+  });
+
+  return balance;
+};
 
 const syncTrades = async () => {
   const chunkSize = BigInt(1000);
@@ -86,17 +104,24 @@ const syncTrades = async () => {
         }
 
         if (from !== zeroAddress) {
-          const fromUser = await getUserByAddress(from.toLowerCase() as Hex);
-
-          if (!fromUser) {
-            console.warn('fromUser not found:', from);
-            continue;
-          }
-
-          await removeUserFromRoom({
-            roomId,
-            userId: fromUser.id,
+          const balance = await getBalance({
+            address: from,
+            tokenId: id,
           });
+
+          if (balance === BigInt(0)) {
+            const fromUser = await getUserByAddress(from.toLowerCase() as Hex);
+
+            if (!fromUser) {
+              console.warn('fromUser not found:', from);
+              continue;
+            }
+
+            await removeUserFromRoom({
+              roomId,
+              userId: fromUser.id,
+            });
+          }
         }
       }
 
