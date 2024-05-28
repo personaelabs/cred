@@ -26,9 +26,16 @@ export const addUserCreddd = async ({
   const userCredddDoc = await userCredddRef.get();
 
   if (userCredddDoc.exists) {
-    await userCredddRef.update({
-      creddd: FieldValue.arrayUnion(creddd),
-    });
+    const existingGroupIds =
+      userCredddDoc.data()?.creddd.map(c => c.groupId) || [];
+
+    if (existingGroupIds.includes(creddd.groupId)) {
+      console.warn(`User already has creddd ${creddd.groupId}`);
+    } else {
+      await userCredddRef.update({
+        creddd: FieldValue.arrayUnion(creddd),
+      });
+    }
   } else {
     await userCredddRef.set({
       userId,

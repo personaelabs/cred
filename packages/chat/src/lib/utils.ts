@@ -17,7 +17,7 @@ import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { BottomSheetType, ModalType } from '@/types';
 
-const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+const SIG_SALT = '0xdd01e93b61b644c842a5ce8dbf07437f';
 const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
 export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {

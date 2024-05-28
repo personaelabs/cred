@@ -84,3 +84,7 @@ export interface NewRoomNotifyIdempotencyKey {
   key: string;
   createdAt: Date | FirestoreTimestamp;
 }
+
+export interface GetGroupMerkleTreeReturnType {
+  blockNumber: number;
+}

@@ -11,6 +11,8 @@ import { bytesToHex, hashMessage, hexToBytes, verifyMessage } from 'viem';
 import * as circuit from 'circuit-node/circuits_embedded';
 import { addUserCreddd } from '@/lib/backend/userCreddd';
 import privy from '@/lib/backend/privy';
+import credddRpcClient from '@/lib/credddRpc';
+import { addWriterToRoom } from '@cred/firebase';
 
 let circuitInitialized = false;
 
@@ -51,11 +53,18 @@ export async function POST(req: NextRequest) {
 
   const merkleRootBytes = await circuit.get_merkle_root(proofBytes);
 
-  const _merkleRoot = bytesToHex(merkleRootBytes, {
+  const merkleRoot = bytesToHex(merkleRootBytes, {
     size: 32,
   });
 
-  // TODO: Get group from Merkle root
+  const group = await credddRpcClient.getGroupByMerkleRoot(merkleRoot);
+
+  if (!group) {
+    return Response.json(
+      { error: 'Group not found for the Merkle root' },
+      { status: 400 }
+    );
+  }
 
   // 5. Verify the signed message in the proof
 
@@ -68,8 +77,6 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid message' }, { status: 400 });
   }
 
-  // TODO: Add user as writer to Room
-
   // TODO: Add user creddd
 
   const user = await privy.getUserByWalletAddress(body.privyAddress);
@@ -78,12 +85,18 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'User not found' }, { status: 400 });
   }
 
+  // TODO: Add user as writer to Room
+  await addWriterToRoom({
+    roomId: group.id,
+    userId: user.id,
+  });
+
   await addUserCreddd({
     userId: user.id,
     creddd: {
       proof: body.proof as string,
       privySignature: body.privyAddressSignature,
-      groupId: '',
+      groupId: group.id,
     },
   });
 
