@@ -19,7 +19,7 @@ use indexer_rs::rocksdb_key::{
     ERC1155_TRANSFER_BATCH_EVENT_ID, ERC1155_TRANSFER_SINGLE_EVENT_ID, ERC20_TRANSFER_EVENT_ID,
     ERC721_TRANSFER_EVENT_ID,
 };
-use indexer_rs::server::start_server;
+use indexer_rs::server::server::start_server;
 use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
