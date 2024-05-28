@@ -119,10 +119,10 @@ contract Cred is ERC1155, Ownable {
 
     require(msg.value >= price + fee, 'Insufficient payment');
 
+    tokenIdToSupply[tokenId] = tokenIdToSupply[tokenId] + amount;
+
     collectFee(fee);
     _mint(to, tokenId, amount, data);
-
-    tokenIdToSupply[tokenId] = tokenIdToSupply[tokenId] + amount;
   }
 
   /**
