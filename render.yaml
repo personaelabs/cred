@@ -10,6 +10,7 @@ services:
     startCommand: NODE_ENV=production pnpm -F frontend start
     preDeployCommand: pnpm -F db migrate:prod
     pullRequestPreviewsEnabled: false
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/frontend/**
@@ -33,6 +34,7 @@ services:
     region: oregon
     buildCommand: pnpm i && pnpm -F chat build
     startCommand: NODE_ENV=production pnpm -F chat start
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/chat/**/*
@@ -63,6 +65,7 @@ services:
     preDeployCommand: populate
     pullRequestPreviewsEnabled: false
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/indexer-rs/**/*
@@ -85,6 +88,7 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F sync start
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/sync/**/*
@@ -112,6 +116,7 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F notification start
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/notification/**/*
@@ -132,6 +137,7 @@ services:
     startCommand: pnpm -F monkey start
     rootDir: ./
     pullRequestPreviewsEnabled: false
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/monkey/**/*
