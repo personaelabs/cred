@@ -1,12 +1,5 @@
 'use client';
-import {
-  Bell,
-  BellOff,
-  Circle,
-  Ellipsis,
-  KeyRound,
-  SquareArrowLeft,
-} from 'lucide-react';
+import { Bell, BellOff, Circle, Ellipsis, SquareArrowLeft } from 'lucide-react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 /* eslint-disable @next/next/no-img-element */
 import useJoinedRooms from '@/hooks/useJoinedRooms';
@@ -25,7 +18,6 @@ import {
 import useUser from '@/hooks/useUser';
 import useToggleMute from '@/hooks/useToggleMute';
 import useReadTicket from '@/hooks/useReadTicket';
-import useSellKey from '@/hooks/useSellKey';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import useRoomLatestMessage from '@/hooks/useRoomLatestMessage';
@@ -33,30 +25,14 @@ import useRoomLatestMessage from '@/hooks/useRoomLatestMessage';
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
   showMuteToggle: boolean;
-  showSellKey: boolean;
   isMuted: boolean;
   onToggleMuteClick: () => void;
-  onSellKeyClick: () => void;
 }
 
 const RoomItemDropdownContent = (props: RoomItemDropdownContentProps) => {
-  const {
-    onLeaveClick,
-    isMuted,
-    onToggleMuteClick,
-    showMuteToggle,
-    showSellKey,
-  } = props;
+  const { onLeaveClick, isMuted, onToggleMuteClick, showMuteToggle } = props;
   return (
     <DropdownMenuContent side="left" className="bg-background">
-      {showSellKey ? (
-        <DropdownMenuItem onClick={props.onSellKeyClick}>
-          <KeyRound className="mr-2 w-4 h-4 text-blue-500"></KeyRound>
-          <div>Sell Key</div>
-        </DropdownMenuItem>
-      ) : (
-        <></>
-      )}
       {showMuteToggle ? (
         <DropdownMenuItem onClick={onToggleMuteClick}>
           {isMuted ? (
@@ -99,7 +75,6 @@ const RoomItem = (props: RoomItemProps) => {
   const [unreadMessageExists, setUnreadMessageExists] = useState(false);
 
   const { mutateAsync: leaveRoom } = useLeaveRoom();
-  const { mutateAsync: sellKey } = useSellKey(id);
   const { mutateAsync: toggleMute } = useToggleMute();
 
   const { data: readTicket } = useReadTicket(id);
@@ -165,7 +140,6 @@ const RoomItem = (props: RoomItemProps) => {
                 <Ellipsis className="mr-4 opacity-60" />
               </DropdownMenuTrigger>
               <RoomItemDropdownContent
-                showSellKey={isPurchasedRoom}
                 showMuteToggle={showMuteToggle}
                 onLeaveClick={async () => {
                   await leaveRoom(id);
@@ -174,10 +148,6 @@ const RoomItem = (props: RoomItemProps) => {
                 isMuted={isMuted}
                 onToggleMuteClick={async () => {
                   await toggleMute({ roomId: id, mute: !isMuted });
-                  setIsMenuOpen(false);
-                }}
-                onSellKeyClick={async () => {
-                  await sellKey();
                   setIsMenuOpen(false);
                 }}
               ></RoomItemDropdownContent>
