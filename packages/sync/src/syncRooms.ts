@@ -1,4 +1,4 @@
-import { Room, roomConverter } from '@cred/shared';
+import { Room, roomConverter, logger } from '@cred/shared';
 import { getGroups } from './lib/creddd';
 import { sleep } from './lib/utils';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -13,7 +13,10 @@ const upsertRoom = async ({
   groupId: string;
   name: string;
 }) => {
-  const roomData: Omit<Room, 'joinedUserIds' | 'readerIds' | 'writerIds'> = {
+  const roomData: Omit<
+    Room,
+    'joinedUserIds' | 'readerIds' | 'writerIds' | 'isFeatured'
+  > = {
     id: groupId,
     name,
     imageUrl: null,
@@ -27,7 +30,7 @@ const upsertRoom = async ({
   const group = await groupDoc.get();
 
   if (group.exists) {
-    console.log('upsertRoom', groupId, name);
+    logger.info('upsertRoom', { groupId, name });
     await groupDoc.update(roomData);
   } else {
     const newRoomData: Room = {
@@ -35,8 +38,8 @@ const upsertRoom = async ({
       writerIds: [],
       joinedUserIds: [],
       readerIds: [],
+      isFeatured: false,
     };
-    console.log('createRoom', groupId, name);
     await groupDoc.set(newRoomData);
   }
 };

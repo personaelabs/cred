@@ -4,13 +4,13 @@ import {
   messageConverter,
   roomConverter,
   userConverter,
+  logger,
 } from '@cred/shared';
 import { getMessaging } from 'firebase-admin/messaging';
-import logger from './logger';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { app } from '@cred/firebase';
 import { notificationTokens } from './notificationTokens';
-import { IS_PROD } from './utils';
+import { DRY_RUN } from './utils';
 
 const messaging = getMessaging(app);
 const db = getFirestore(app);
@@ -73,7 +73,7 @@ export const sendMessageNotifications = async () => {
   const startTimestamp = Timestamp.fromDate(
     (latestIdempotencyKey?.messageCreatedAt as Date) || new Date(0)
   );
-  logger.info(`Starting at ${startTimestamp.toDate()}`);
+  logger.info(`Messages: Starting at ${startTimestamp.toDate()}`);
 
   const unsubscribe = db
     .collectionGroup('messages')
@@ -81,18 +81,17 @@ export const sendMessageNotifications = async () => {
     .where('createdAt', '>=', startTimestamp)
     .onSnapshot(async snapshot => {
       for (const change of snapshot.docChanges()) {
-        logger.info(`Change type: ${change.type}`);
         if (change.type === 'added') {
           const doc = change.doc;
           const message = change.doc.data();
           const roomId = message.roomId;
 
           if (roomId === 'test') {
-            logger.info(`Skipping message ${doc.id} with roomId ${roomId}`);
+            logger.debug(`Skipping message ${doc.id} with roomId ${roomId}`);
             continue;
           }
 
-          logger.info(`New message from ${message.userId}`);
+          logger.debug(`New message from ${message.userId}`);
 
           const room = await getRoom(roomId);
 
@@ -113,14 +112,13 @@ export const sendMessageNotifications = async () => {
             }
 
             if (user.config.notification.mutedRoomIds.includes(roomId)) {
-              logger.info(`User ${userId} muted room ${roomId}`);
+              logger.debug(`User ${userId} muted room ${roomId}`);
               continue;
             }
 
             const tokens = notificationTokens.get(userId);
 
             if (tokens) {
-              logger.info(`Found ${tokens.length} tokens for ${userId}`);
               for (const token of tokens) {
                 const idempotencyKey = `${token.token}:${doc.id}`;
 
@@ -130,16 +128,14 @@ export const sendMessageNotifications = async () => {
                 }
 
                 if (message.createdAt < token.createdAt) {
-                  logger.info(
+                  logger.debug(
                     `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
                   );
                   continue;
                 }
 
                 if (!(await idempotencyKeyExsits(idempotencyKey))) {
-                  logger.info(`Sending notification to ${userId}`);
-
-                  if (IS_PROD) {
+                  if (!DRY_RUN) {
                     try {
                       const messageId = await messaging.send({
                         notification: {
@@ -158,7 +154,11 @@ export const sendMessageNotifications = async () => {
                         },
                       });
 
-                      logger.info(`Message sent with ID: ${messageId}`);
+                      logger.info(`New message notification sent`, {
+                        messageId,
+                        userId,
+                        roomId,
+                      });
                     } catch (err) {
                       logger.error(
                         `Error sending notification to ${userId}`,
@@ -171,12 +171,12 @@ export const sendMessageNotifications = async () => {
                       messageCreatedAt: message.createdAt as Date,
                     });
                   } else {
-                    logger.info(
+                    logger.debug(
                       `Skipping notification for ${userId} in dev mode`
                     );
                   }
                 } else {
-                  logger.info(`Idempotency key exists for ${idempotencyKey}`);
+                  logger.debug(`Idempotency key exists for ${idempotencyKey}`);
                 }
               }
             }

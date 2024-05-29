@@ -1,6 +1,10 @@
 import winston, { createLogger } from 'winston';
 
-const winstonTransports: any[] = [new winston.transports.Console()];
+const winstonTransports: any[] = [
+  new winston.transports.Console({
+    level: 'debug',
+  }),
+];
 
 const { DATADOG_API_KEY } = process.env;
 
@@ -9,11 +13,19 @@ if (DATADOG_API_KEY) {
   console.log('RENDER_EXTERNAL_HOSTNAME', RENDER_EXTERNAL_HOSTNAME);
   console.log('RENDER_GIT_BRANCH', RENDER_GIT_BRANCH);
 
+  const hostname = RENDER_EXTERNAL_HOSTNAME || 'localhost';
+  const env = RENDER_GIT_BRANCH || 'local';
+
+  console.log(
+    `Sending logs to Datadog with hostname: ${hostname} and env: ${env}`
+  );
+
   winstonTransports.push(
     new winston.transports.Http({
       host: 'http-intake.logs.datadoghq.com',
-      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${RENDER_EXTERNAL_HOSTNAME || 'localhost'}&ddtags=env:${RENDER_GIT_BRANCH || 'local'}`,
+      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${hostname}&ddtags=env:${env}`,
       ssl: true,
+      level: 'warn',
     })
   );
 }
