@@ -2,6 +2,7 @@
 import Scrollable from '@/components/Scrollable';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
+import useCreddd from '@/hooks/useCreddd';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
 import { Plus } from 'lucide-react';
@@ -15,9 +16,11 @@ interface CredddListItemProps {
 const CredddListItem = (props: CredddListItemProps) => {
   const { groupId } = props;
 
+  const { data: creddd } = useCreddd(groupId);
+
   return (
     <div className="flex flex-col items-start py-4 px-4 text-lg border-b-2">
-      <div>{groupId}</div>
+      <div>{creddd?.display_name}</div>
     </div>
   );
 };
@@ -25,7 +28,6 @@ const CredddListItem = (props: CredddListItemProps) => {
 const CredddPage = () => {
   const { data: signedInUser } = useSignedInUser();
   const { data: user } = useUser(signedInUser?.id || null);
-  console.log(user);
 
   const { setOptions } = useHeaderOptions();
 

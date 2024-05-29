@@ -1,5 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
-import { GetGroupMerkleTreeReturnType, Group } from './types';
+import {
+  GetCredddReturnType,
+  GetGroupMerkleTreeReturnType,
+  Group,
+} from './types';
 
 export const createRpcClient = (rpcUrl: string) => new JsonRpcClient(rpcUrl);
 
@@ -53,5 +57,13 @@ class JsonRpcClient {
       merkleRoot,
       groupId,
     ]);
+  }
+
+  public async getCreddd({
+    credddId,
+  }: {
+    credddId: string;
+  }): Promise<GetCredddReturnType> {
+    return await this.call<GetCredddReturnType>('getCreddd', [credddId]);
   }
 }
