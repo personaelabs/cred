@@ -86,11 +86,6 @@ export const sendMessageNotifications = async () => {
           const message = change.doc.data();
           const roomId = message.roomId;
 
-          if (roomId === 'test') {
-            logger.debug(`Skipping message ${doc.id} with roomId ${roomId}`);
-            continue;
-          }
-
           logger.debug(`New message from ${message.userId}`);
 
           const room = await getRoom(roomId);
