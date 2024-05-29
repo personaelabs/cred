@@ -39,7 +39,7 @@ const JoinButton = (props: JoinButtonProps) => {
   );
 };
 
-interface CredddVerifiedSheetSheetProps {
+interface CredddVerifiedSheetProps {
   isOpen: boolean;
   joinableRoom: {
     id: string;
@@ -48,7 +48,7 @@ interface CredddVerifiedSheetSheetProps {
   onClose: () => void;
 }
 
-const CredddVerifiedSheetSheet = (props: CredddVerifiedSheetSheetProps) => {
+const CredddVerifiedSheet = (props: CredddVerifiedSheetProps) => {
   const { isOpen, joinableRoom, onClose } = props;
   const { data: signedInUser } = useSignedInUser();
   const { data: joinedRooms } = useJoinedRooms(signedInUser?.id || null);
@@ -81,7 +81,7 @@ const CredddVerifiedSheetSheet = (props: CredddVerifiedSheetSheetProps) => {
             <CheckCheck className="ml-2 w-5 h-5 text-purple-600"></CheckCheck>
             Creddd verified
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-center">
             You can start chatting in the following room
           </SheetDescription>
         </SheetHeader>
@@ -111,4 +111,4 @@ const CredddVerifiedSheetSheet = (props: CredddVerifiedSheetSheetProps) => {
   );
 };
 
-export default CredddVerifiedSheetSheet;
+export default CredddVerifiedSheet;
