@@ -104,6 +104,9 @@ const Settings = () => {
           Sign out
         </Button>
       </div>
+      <div className="w-full text-center opacity-40 select-text mb-1">
+        user: {user.id}
+      </div>
     </Scrollable>
   );
 };
