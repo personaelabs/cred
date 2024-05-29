@@ -1,12 +1,19 @@
+import { getProofHash } from '@/lib/utils';
 import {
-  constructAttestationMessage,
-  constructProofAttestationMessage,
-  getProofHash,
-} from '@/lib/utils';
+  EIP721_CREDDD_PROOF_HASH_SIG_DOMAIN,
+  EIP721_CREDDD_PROOF_HASH_SIG_TYPES,
+  constructProofHashSigMessage,
+  constructProofSigMessage,
+} from '@/lib/eip712';
 import { AddCredddRequestBody } from '@/types';
-// import { addWriterToRoom } from '@cred/firebase';
 import { NextRequest } from 'next/server';
-import { bytesToHex, hashMessage, hexToBytes, verifyMessage } from 'viem';
+import {
+  bytesToHex,
+  getAddress,
+  hashTypedData,
+  hexToBytes,
+  verifyTypedData,
+} from 'viem';
 // @ts-ignore
 import * as circuit from 'circuit-node/circuits_embedded';
 import { addUserCreddd } from '@/lib/backend/userCreddd';
@@ -37,12 +44,15 @@ export async function POST(req: NextRequest) {
   // 2. Verify the signature from the Privy address
   // The Privy address should have signed the proof hash
   const proofHash = getProofHash(body.proof);
-  const proofAttestationMessage = constructProofAttestationMessage(proofHash);
+  const proofAttestationMessage = constructProofHashSigMessage(proofHash);
 
-  const isPrivySigValid = verifyMessage({
+  const isPrivySigValid = verifyTypedData({
     address: body.privyAddress,
     signature: body.privyAddressSignature,
     message: proofAttestationMessage,
+    primaryType: 'ProofHash',
+    domain: EIP721_CREDDD_PROOF_HASH_SIG_DOMAIN,
+    types: EIP721_CREDDD_PROOF_HASH_SIG_TYPES,
   });
 
   if (!isPrivySigValid) {
@@ -57,10 +67,19 @@ export async function POST(req: NextRequest) {
     size: 32,
   });
 
-  /*
   const attestedAddressBytes = await circuit.get_sign_in_sig(proofBytes);
-  const attestedAddress = bytesToHex(attestedAddressBytes, {
-    */
+  const attestedAddress = getAddress(
+    bytesToHex(attestedAddressBytes.slice(0, 20), {
+      size: 20,
+    })
+  );
+
+  if (attestedAddress !== body.privyAddress) {
+    return Response.json(
+      { error: 'The attested address does not match the Privy address' },
+      { status: 400 }
+    );
+  }
 
   const group = await credddRpcClient.getGroupByMerkleRoot(merkleRoot);
 
@@ -73,8 +92,9 @@ export async function POST(req: NextRequest) {
 
   // 5. Verify the signed message in the proof
 
-  const message = constructAttestationMessage(body.privyAddress);
-  const expectedMsgHash = await hashMessage(message);
+  const message = constructProofSigMessage(body.privyAddress);
+  const expectedMsgHash = await hashTypedData(message);
+
   // Get the message hash from the proof
   const msgHash = bytesToHex(await circuit.get_msg_hash(proofBytes));
 

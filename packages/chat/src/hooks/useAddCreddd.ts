@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 
 import * as Comlink from 'comlink';
+import wagmiConfig from '@/lib/wagmiConfig';
 import {
   AddCredddRequestBody,
   EligibleCreddd,
@@ -9,10 +10,10 @@ import {
   WitnessInput,
 } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCall, useSignMessage } from 'wagmi';
+import { useCall, useSignMessage, useSignTypedData } from 'wagmi';
 import {
   Hex,
-  hashMessage,
+  hashTypedData,
   hexToBytes,
   hexToCompactSignature,
   hexToSignature,
@@ -21,8 +22,6 @@ import {
 import {
   calculateSigRecovery,
   concatUint8Arrays,
-  constructAttestationMessage,
-  constructProofAttestationMessage,
   getProofHash,
 } from '@/lib/utils';
 import useSignedInUser from './useSignedInUser';
@@ -31,6 +30,14 @@ import credddApi from '@/lib/credddApi';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useCallback, useState } from 'react';
 import axios from '@/lib/axios';
+import {
+  EIP712_CREDDD_PROOF_SIG_DOMAIN,
+  EIP712_CREDDD_PROOF_SIG_TYPES,
+  EIP721_CREDDD_PROOF_HASH_SIG_DOMAIN,
+  constructProofSigMessage,
+} from '@/lib/eip712';
+import { useSetActiveWallet } from '@privy-io/wagmi';
+import { getConnectors } from '@wagmi/core';
 
 const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 
@@ -51,6 +58,9 @@ const useAddCreddd = (proverAddress: Hex | null) => {
   const [isPrivySignatureReady, setIsPrivySignatureReady] = useState(false);
   const [isSubmittingProof, setIsSubmittingProof] = useState(false);
   const [isProofReady, setIsProofReady] = useState(false);
+  const { signTypedData: privySignedTypedData } = usePrivy();
+  const { signTypedDataAsync } = useSignTypedData();
+  const { setActiveWallet } = useSetActiveWallet();
 
   const privyAddress = wallets?.find(
     wallet => wallet.walletClientType === 'privy'
@@ -62,12 +72,12 @@ const useAddCreddd = (proverAddress: Hex | null) => {
         throw new Error("User doesn't have a wallet");
       }
 
-      const proofHashMessage = constructProofAttestationMessage(proofHash);
+      const proofHashMessage = constructProofSigMessage(proofHash);
 
-      const signature = await privyAddress.sign(proofHashMessage);
+      const signature = await privySignedTypedData(proofHashMessage);
       return signature as Hex;
     },
-    [privyAddress]
+    [privyAddress, privySignedTypedData]
   );
 
   const result = useMutation({
@@ -85,7 +95,7 @@ const useAddCreddd = (proverAddress: Hex | null) => {
       }
 
       const { merkleProof } = creddd;
-      const message = constructAttestationMessage(privyAddress.address as Hex);
+      const message = constructProofSigMessage(privyAddress.address as Hex);
 
       const prover = Comlink.wrap<Prover>(
         new Worker(new URL('../lib/prover.ts', import.meta.url))
@@ -101,8 +111,17 @@ const useAddCreddd = (proverAddress: Hex | null) => {
 
       await prover.prepare();
 
+      const provider = await proverWallet.getEthersProvider();
+      const signer = provider.getSigner();
+      console.log('signer', await signer.getChainId());
+
       // Sign message with the source key
-      const sig = await proverWallet.sign(message);
+      const sig = await signer._signTypedData(
+        message.domain,
+        message.types,
+        message.message
+      );
+
       setIsProofSignatureReady(true);
 
       const { s, r, v } = hexToSignature(sig as Hex);
@@ -112,7 +131,7 @@ const useAddCreddd = (proverAddress: Hex | null) => {
       }
 
       const isYOdd = calculateSigRecovery(v);
-      const msgHash = hashMessage(message);
+      const msgHash = hashTypedData(message);
 
       // Construct the witness
       const witness: WitnessInput = {

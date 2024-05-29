@@ -35,7 +35,6 @@ import { getChain } from '@/lib/utils';
 import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
-import { mainnet } from 'viem/chains';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -150,7 +149,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         appId="clw1tqoyj02yh110vokuu7yc5"
         config={{
           defaultChain: getChain(),
-          supportedChains: [getChain(), mainnet],
+          supportedChains: [getChain()],
           appearance: {
             theme: 'dark',
             accentColor: theme.orange as `#${string}`,
