@@ -20,11 +20,6 @@ export const requestNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
 
   try {
-    if ('serviceWorker' in navigator) {
-      // Wait for the service worker to become ready
-      await navigator.serviceWorker.ready;
-    }
-
     const token = await getToken(messaging, {
       vapidKey: NEXT_PUBLIC_VAPID_KEY,
     });
