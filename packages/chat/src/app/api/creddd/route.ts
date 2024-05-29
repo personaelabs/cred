@@ -57,6 +57,11 @@ export async function POST(req: NextRequest) {
     size: 32,
   });
 
+  /*
+  const attestedAddressBytes = await circuit.get_sign_in_sig(proofBytes);
+  const attestedAddress = bytesToHex(attestedAddressBytes, {
+    */
+
   const group = await credddRpcClient.getGroupByMerkleRoot(merkleRoot);
 
   if (!group) {

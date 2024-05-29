@@ -73,9 +73,11 @@ const AddCredddPage = () => {
     mutateAsync: addCreddd,
     isPending: isAddingCreddd,
     isSuccess,
-    hasSignedMessage,
+    isPrivySignatureReady,
+    isProofSignatureReady,
+    isProofReady,
     reset,
-  } = useAddCreddd();
+  } = useAddCreddd(address);
 
   useEffect(() => {
     setOptions({
@@ -177,7 +179,9 @@ const AddCredddPage = () => {
       </Scrollable>
       <AddingCredddModal
         isOpen={isAddingCreddd}
-        hasSignedMessage={hasSignedMessage}
+        isProofSignatureReady={isProofSignatureReady}
+        isPrivySignatureReady={isPrivySignatureReady}
+        isProofReady={isProofReady}
       ></AddingCredddModal>
       <CredddVerifiedSheet
         isOpen={showJoinableRoom ? true : false}

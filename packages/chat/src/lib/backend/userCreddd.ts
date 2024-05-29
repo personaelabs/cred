@@ -19,11 +19,11 @@ export const addUserCreddd = async ({
   });
 
   // Save the proof
-  const usersCredddRef = db
-    .collection('usersCreddd')
-    .withConverter(userCredddConverter);
+  const userCredddRef = db
+    .collection('userCreddd')
+    .withConverter(userCredddConverter)
+    .doc(userId);
 
-  const userCredddRef = usersCredddRef.doc(userId);
   const userCredddDoc = await userCredddRef.get();
 
   if (userCredddDoc.exists) {

@@ -9,7 +9,7 @@ import {
   WitnessInput,
 } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSignMessage } from 'wagmi';
+import { useCall, useSignMessage } from 'wagmi';
 import {
   Hex,
   hashMessage,
@@ -43,11 +43,14 @@ interface Prover {
   prove(_witness: WitnessInput): Promise<Uint8Array>;
 }
 
-const useAddCreddd = () => {
+const useAddCreddd = (proverAddress: Hex | null) => {
   const { data: signedInUser } = useSignedInUser();
   const queryClient = useQueryClient();
   const { wallets } = useWallets();
-  const [hasSignedMessage, setHasSignedMessage] = useState(false);
+  const [isProofSignatureReady, setIsProofSignatureReady] = useState(false);
+  const [isPrivySignatureReady, setIsPrivySignatureReady] = useState(false);
+  const [isSubmittingProof, setIsSubmittingProof] = useState(false);
+  const [isProofReady, setIsProofReady] = useState(false);
 
   const privyAddress = wallets?.find(
     wallet => wallet.walletClientType === 'privy'
@@ -77,6 +80,10 @@ const useAddCreddd = () => {
         throw new Error("User doesn't have a wallet");
       }
 
+      if (!proverAddress) {
+        throw new Error('Prover address not found');
+      }
+
       const { merkleProof } = creddd;
       const message = constructAttestationMessage(privyAddress.address as Hex);
 
@@ -84,19 +91,19 @@ const useAddCreddd = () => {
         new Worker(new URL('../lib/prover.ts', import.meta.url))
       );
 
-      await prover.prepare();
-
-      const proverAddress = wallets.find(
-        wallet => wallet.address === creddd.address
+      const proverWallet = wallets.find(
+        wallet => wallet.address === proverAddress
       );
 
-      if (!proverAddress) {
-        throw new Error('Prover address not found');
+      if (!proverWallet) {
+        throw new Error('Prover wallet not found');
       }
 
+      await prover.prepare();
+
       // Sign message with the source key
-      const sig = await proverAddress.sign(message);
-      setHasSignedMessage(true);
+      const sig = await proverWallet.sign(message);
+      setIsProofSignatureReady(true);
 
       const { s, r, v } = hexToSignature(sig as Hex);
 
@@ -132,24 +139,49 @@ const useAddCreddd = () => {
       };
 
       const proof = await prover.prove(witness);
+      setIsProofReady(true);
+
       const proofHex = toHex(proof);
       const proofHashSig = await signProofHash(getProofHash(proofHex));
+      setIsPrivySignatureReady(true);
 
+      setIsSubmittingProof(true);
       await submitProof({
         proof: proofHex,
         privyAddress: privyAddress.address as Hex,
         privyAddressSignature: proofHashSig,
       });
-
-      setHasSignedMessage(false);
+      setIsSubmittingProof(false);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['user-creddd'] });
-      await queryClient.invalidateQueries({ queryKey: ['eligible-creddd'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['user-creddd'],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['eligible-creddd', { address: proverAddress }],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['user', { userId: signedInUser?.id }],
+      });
     },
   });
 
-  return { ...result, hasSignedMessage };
+  const reset = useCallback(() => {
+    result.reset();
+    setIsProofSignatureReady(false);
+    setIsPrivySignatureReady(false);
+    setIsSubmittingProof(false);
+    setIsProofReady(false);
+  }, [result]);
+
+  return {
+    ...result,
+    reset,
+    isSubmittingProof,
+    isProofSignatureReady,
+    isPrivySignatureReady,
+    isProofReady,
+  };
 };
 
 export default useAddCreddd;
