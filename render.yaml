@@ -35,8 +35,8 @@ services:
     startCommand: NODE_ENV=production pnpm -F chat start
     buildFilter:
       paths:
-        - packages/chat/**
-        - packages/shared/**
+        - packages/chat/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -65,12 +65,8 @@ services:
     rootDir: ./
     buildFilter:
       paths:
-        - packages/indexer-rs/**
-        - packages/db/**
-      ignoredPaths:
-        - packages/notification/**
-        - packages/circuit/**
-        - packages/frontend/**
+        - packages/indexer-rs/**/*
+        - packages/db/**/**/*
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -91,11 +87,8 @@ services:
     rootDir: ./
     buildFilter:
       paths:
-        - packages/sync/**
-        - packages/shared/**
-      ignoredPaths:
-        - packages/app/**
-        - packages/api/**
+        - packages/sync/**/*
+        - packages/shared/**/*  
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -121,11 +114,8 @@ services:
     rootDir: ./
     buildFilter:
       paths:
-        - packages/notification/**
-        - packages/shared/**
-      ignoredPaths:
-        - packages/chat/**
-        - packages/app/**
+        - packages/notification/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -144,8 +134,8 @@ services:
     pullRequestPreviewsEnabled: false
     buildFilter:
       paths:
-        - packages/monkey/**
-        - packages/shared/**
+        - packages/monkey/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
