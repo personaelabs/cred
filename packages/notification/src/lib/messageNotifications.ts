@@ -5,12 +5,15 @@ import {
   roomConverter,
   userConverter,
   logger,
+  Room,
+  Message,
 } from '@cred/shared';
 import { getMessaging } from 'firebase-admin/messaging';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { app } from '@cred/firebase';
 import { notificationTokens } from './notificationTokens';
 import { DRY_RUN } from './utils';
+import { MessageNotificationType } from '../types';
 
 const messaging = getMessaging(app);
 const db = getFirestore(app);
@@ -22,6 +25,24 @@ const getRoom = async (roomId: string) => {
     .doc(roomId)
     .get();
   return roomDoc.data();
+};
+
+const getMessage = async ({
+  roomId,
+  messageId,
+}: {
+  roomId: string;
+  messageId: string;
+}) => {
+  const messageDoc = await db
+    .collection('rooms')
+    .doc(roomId)
+    .collection('messages')
+    .withConverter(messageConverter)
+    .doc(messageId)
+    .get();
+
+  return messageDoc.data();
 };
 
 const getUser = async (userId: string) => {
@@ -67,6 +88,160 @@ const getLatestIdempotencyKey = async () => {
   return keyDoc.docs[0].data();
 };
 
+const sendMentionNotification = async ({
+  body,
+  token,
+  room,
+  userId,
+}: {
+  body: string;
+  token: string;
+  room: Room;
+  userId: string;
+}) => {
+  try {
+    const messageId = await messaging.send({
+      notification: {
+        title: `Mentioned in ${room.name}`,
+        body,
+      },
+      token: token,
+      webpush: {
+        fcmOptions: {
+          link: `/rooms/${room.id}`,
+        },
+      },
+    });
+
+    logger.info(`Mention notification sent`, {
+      messageId,
+      roomId: room.id,
+      userId,
+    });
+  } catch (err) {
+    logger.error(`Error sending notification to ${userId}`, err);
+  }
+};
+
+const sendReplyNotification = async ({
+  body,
+  token,
+  room,
+}: {
+  body: string;
+  token: string;
+  room: Room;
+}) => {
+  const messageId = await messaging.send({
+    notification: {
+      title: `Reply in ${room.name}`,
+      body,
+    },
+    token: token,
+    webpush: {
+      fcmOptions: {
+        link: `/rooms/${room.id}`,
+      },
+    },
+  });
+
+  logger.info(`Reply notification sent`, {
+    messageId,
+    roomId: room.id,
+  });
+};
+
+/**
+ * Notify a user about a message
+ * @param userId The user to notify
+ * @param messageType The type of message
+ * @param room The room the message was sent in
+ * @param message The message to notify about
+ */
+const notifyUserAboutMessage = async ({
+  userId,
+  messageType,
+  room,
+  message,
+}: {
+  userId: string;
+  messageType: MessageNotificationType;
+  room: Room;
+  message: Message;
+}) => {
+  const roomId = message.roomId;
+
+  const user = await getUser(userId);
+  if (!user) {
+    logger.error(`User ${userId} not found`);
+    return;
+  }
+
+  if (user.config.notification.mutedRoomIds.includes(roomId)) {
+    logger.debug(`User ${userId} muted room ${roomId}`);
+    return;
+  }
+
+  // Get the notification tokens for the user
+  const tokens = notificationTokens.get(userId) || [];
+
+  if (tokens.length === 0) {
+    logger.debug(`No notification tokens for ${userId}`);
+    return;
+  }
+
+  for (const token of tokens) {
+    const idempotencyKey = `${token.token}:${message.id}`;
+
+    if (message.createdAt === null) {
+      logger.error(`message.createdAt is null`);
+      continue;
+    }
+
+    if (message.createdAt < token.createdAt) {
+      logger.debug(
+        `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
+      );
+      continue;
+    }
+
+    if (await idempotencyKeyExsits(idempotencyKey)) {
+      logger.warn(`Idempotency key exists for ${idempotencyKey}`);
+      continue;
+    }
+
+    if (!DRY_RUN) {
+      try {
+        if (messageType === MessageNotificationType.MENTION) {
+          await sendMentionNotification({
+            body: message.body,
+            token: token.token,
+            room,
+            userId,
+          });
+        } else if (messageType === MessageNotificationType.REPLY) {
+          await sendReplyNotification({
+            body: message.body,
+            token: token.token,
+            room,
+          });
+        } else {
+          logger.error(`Unknown message type ${messageType}`);
+        }
+      } catch (err) {
+        logger.error(`Error sending notification to ${userId}`, err);
+      }
+
+      await saveIdempotencyKey({
+        key: idempotencyKey,
+        messageCreatedAt: message.createdAt as Date,
+      });
+    } else {
+      logger.debug(`Skipping notification for ${userId} in dev mode`);
+    }
+  }
+};
+
 export const sendMessageNotifications = async () => {
   const latestIdempotencyKey = await getLatestIdempotencyKey();
 
@@ -82,11 +257,10 @@ export const sendMessageNotifications = async () => {
     .onSnapshot(async snapshot => {
       for (const change of snapshot.docChanges()) {
         if (change.type === 'added') {
-          const doc = change.doc;
           const message = change.doc.data();
           const roomId = message.roomId;
 
-          logger.debug(`New message from ${message.userId}`);
+          logger.debug(`New message from ${message.userId} ${message.replyTo}`);
 
           const room = await getRoom(roomId);
 
@@ -95,85 +269,37 @@ export const sendMessageNotifications = async () => {
             continue;
           }
 
-          const userIdsToNotify = room.joinedUserIds.filter(
-            fid => message.userId !== fid
-          );
-
-          for (const userId of userIdsToNotify) {
-            const user = await getUser(userId);
-            if (!user) {
-              logger.error(`User ${userId} not found`);
+          // Notify users who were mentioned in the message
+          for (const userId of message.mentions) {
+            if (userId === message.userId) {
+              logger.debug(`Skipping self mention for ${userId}`);
               continue;
             }
 
-            if (user.config.notification.mutedRoomIds.includes(roomId)) {
-              logger.debug(`User ${userId} muted room ${roomId}`);
-              continue;
-            }
+            await notifyUserAboutMessage({
+              userId,
+              messageType: MessageNotificationType.MENTION,
+              room,
+              message,
+            });
+          }
 
-            const tokens = notificationTokens.get(userId);
+          // If the message is a reply, notify the user who was replied to
+          if (message.replyTo) {
+            const repliedMessage = await getMessage({
+              roomId,
+              messageId: message.replyTo,
+            });
 
-            if (tokens) {
-              for (const token of tokens) {
-                const idempotencyKey = `${token.token}:${doc.id}`;
-
-                if (message.createdAt === null) {
-                  logger.error(`message.createdAt is null`);
-                  continue;
-                }
-
-                if (message.createdAt < token.createdAt) {
-                  logger.debug(
-                    `Notification token for ${userId} newer than message ${message.createdAt} < ${token.createdAt}`
-                  );
-                  continue;
-                }
-
-                if (!(await idempotencyKeyExsits(idempotencyKey))) {
-                  if (!DRY_RUN) {
-                    try {
-                      const messageId = await messaging.send({
-                        notification: {
-                          title: 'New message',
-                          body: message.body,
-                        },
-                        data: {
-                          fid: message.userId.toString(),
-                          path: `/rooms/${roomId}`,
-                        },
-                        token: token.token,
-                        webpush: {
-                          fcmOptions: {
-                            link: `/rooms/${roomId}`,
-                          },
-                        },
-                      });
-
-                      logger.info(`New message notification sent`, {
-                        messageId,
-                        userId,
-                        roomId,
-                      });
-                    } catch (err) {
-                      logger.error(
-                        `Error sending notification to ${userId}`,
-                        err
-                      );
-                    }
-
-                    await saveIdempotencyKey({
-                      key: idempotencyKey,
-                      messageCreatedAt: message.createdAt as Date,
-                    });
-                  } else {
-                    logger.debug(
-                      `Skipping notification for ${userId} in dev mode`
-                    );
-                  }
-                } else {
-                  logger.warn(`Idempotency key exists for ${idempotencyKey}`);
-                }
-              }
+            if (!repliedMessage) {
+              logger.error(`Replied message ${message.replyTo} not found`);
+            } else {
+              await notifyUserAboutMessage({
+                userId: repliedMessage.userId,
+                messageType: MessageNotificationType.REPLY,
+                room,
+                message,
+              });
             }
           }
         }

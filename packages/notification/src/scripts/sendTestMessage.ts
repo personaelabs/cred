@@ -43,6 +43,7 @@ const createNotificationTestRoom = async () => {
     readerIds: [],
     joinedUserIds: ADMIN_FIDS,
     imageUrl: '',
+    isFeatured: false,
   };
 
   await db
@@ -70,7 +71,7 @@ const sendMessage = async ({
     createdAt: new Date(),
     readBy: [],
     replyTo: null,
-    mentions: [],
+    mentions: ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'],
     images: [],
     visibility: MessageVisibility.PUBLIC,
   };
