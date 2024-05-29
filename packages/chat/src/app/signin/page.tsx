@@ -7,11 +7,7 @@ import theme from '@/lib/theme';
 import { Button } from '@/components/ui/button';
 
 const SignIn = () => {
-  const {
-    mutateAsync: signIn,
-    isPending: isSigningIn,
-    isSuccess: signInComplete,
-  } = useSignIn();
+  const { mutateAsync: signIn, isSigningIn } = useSignIn();
   const { setOptions } = useHeaderOptions();
 
   useEffect(() => {
@@ -23,7 +19,7 @@ const SignIn = () => {
   }, [setOptions]);
   return (
     <div className="flex flex-col items-center justify-center h-full bg-background">
-      {isSigningIn || signInComplete ? (
+      {isSigningIn ? (
         <div className="flex flex-row items-center">
           <Loader2
             className="mr-2 animate-spin"
