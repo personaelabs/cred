@@ -52,6 +52,12 @@ const syncTrades = async () => {
         toBlock,
       });
 
+      logger.info(`Found logs`, {
+        fromBlock,
+        toBlock,
+        logs: logs.length,
+      });
+
       for (const log of logs) {
         const { from, to, id } = log.args;
 
