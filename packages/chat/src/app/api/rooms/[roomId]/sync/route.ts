@@ -28,9 +28,6 @@ export async function POST(
     hash: body.buyTransactionHash,
   });
 
-  // TODO: Wait for transaction confirmation and add user to room
-
-  // result.logs.forEach((log) => log.topics);i
   if (result.logs.length === 0) {
     return Response.json(
       {
@@ -64,8 +61,6 @@ export async function POST(
   const from = eventLog.args.from;
   const to = eventLog.args.to;
   const tokenId = eventLog.args.id;
-
-  console.log('TransferSingle', { from, to, tokenId });
 
   if (!tokenId) {
     return Response.json(

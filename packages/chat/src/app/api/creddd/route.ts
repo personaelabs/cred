@@ -77,15 +77,12 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Invalid message' }, { status: 400 });
   }
 
-  // TODO: Add user creddd
-
   const user = await privy.getUserByWalletAddress(body.privyAddress);
 
   if (!user) {
     return Response.json({ error: 'User not found' }, { status: 400 });
   }
 
-  // TODO: Add user as writer to Room
   await addWriterToRoom({
     roomId: group.id,
     userId: user.id,
