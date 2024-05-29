@@ -171,7 +171,7 @@ export const sendMessageNotifications = async () => {
                     );
                   }
                 } else {
-                  logger.debug(`Idempotency key exists for ${idempotencyKey}`);
+                  logger.warn(`Idempotency key exists for ${idempotencyKey}`);
                 }
               }
             }
