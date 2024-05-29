@@ -10,7 +10,6 @@ const leaveRoom = async ({
   roomId: string;
   userId: string;
 }) => {
-  console.log(`Leaving room ${roomId}`);
   await updateDoc(doc(db, 'rooms', roomId), {
     joinedUserIds: arrayRemove(userId),
   });

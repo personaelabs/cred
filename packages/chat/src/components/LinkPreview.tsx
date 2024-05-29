@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { cutoffMessage } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
+import * as Sentry from '@sentry/nextjs';
 
 interface LinkPreviewProps {
   url: string;
@@ -35,6 +36,7 @@ const getLinkPreview = async (url: string): Promise<PreviewData | null> => {
 
     return { title, description, image };
   } catch (error) {
+    Sentry.captureException(error);
     console.error(error);
     return null;
   }

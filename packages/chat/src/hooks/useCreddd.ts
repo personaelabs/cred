@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 
 const getCreddd = async (credddId: string) => {
   const creddd = await credddRpc.getCreddd({ credddId });
-  console.log({ credddId, creddd });
   return creddd;
 };
 

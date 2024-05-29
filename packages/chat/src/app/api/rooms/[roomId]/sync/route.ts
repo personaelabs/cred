@@ -8,6 +8,7 @@ import {
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
 import { tokenIdToRoomId } from '@cred/shared';
+import { logger } from '@cred/shared';
 
 const TRANSFER_SINGLE_EVENT_SIG =
   '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
@@ -29,6 +30,9 @@ export async function POST(
   });
 
   if (result.logs.length === 0) {
+    logger.error('No logs found', {
+      txHash: body.buyTransactionHash,
+    });
     return Response.json(
       {
         error: 'No logs found',
@@ -42,6 +46,9 @@ export async function POST(
   const eventSig = log.topics[0];
 
   if (eventSig !== TRANSFER_SINGLE_EVENT_SIG) {
+    logger.error(`Unexpected event signature ${eventSig}`, {
+      txHash: log.transactionHash,
+    });
     return Response.json(
       {
         error: 'Unexpected event signature',
@@ -63,6 +70,9 @@ export async function POST(
   const tokenId = eventLog.args.id;
 
   if (!tokenId) {
+    logger.error('No tokenId found in log', {
+      txHash: log.transactionHash,
+    });
     return Response.json(
       {
         error: 'No tokenId found in log',
@@ -74,7 +84,7 @@ export async function POST(
   const roomId = tokenIdToRoomId(BigInt(tokenId));
 
   if (params.roomId !== roomId) {
-    console.error(`Room ID does not match: ${params.roomId} !== ${roomId}`);
+    logger.error(`Room ID does not match: ${params.roomId} !== ${roomId}`);
     return Response.json(
       {
         error: 'Room ID does not match',
@@ -87,6 +97,9 @@ export async function POST(
     const transferToUser = await getUserByAddress(to.toLowerCase() as Hex);
 
     if (!transferToUser) {
+      logger.error(`"to" User not found: ${from}`, {
+        txHash: log.transactionHash,
+      });
       return Response.json(
         {
           error: '"to" User not found',
@@ -105,6 +118,9 @@ export async function POST(
     const transferFromUser = await getUserByAddress(from.toLowerCase() as Hex);
 
     if (!transferFromUser) {
+      logger.error(`"from" User not found: ${from}`, {
+        txHash: log.transactionHash,
+      });
       return Response.json(
         {
           error: '"from" User not found',

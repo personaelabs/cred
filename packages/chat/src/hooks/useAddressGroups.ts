@@ -7,7 +7,6 @@ const useAddressGroups = (address: Hex | null) => {
     queryKey: ['address-groups', { address }],
     queryFn: async () => {
       const groups = await credddRpcClient.getAddressGroups(address!);
-      console.log(groups);
       return groups;
     },
     enabled: !!address,

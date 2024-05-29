@@ -1,6 +1,7 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { app } from '@cred/firebase';
 import { UserCreddd, userCredddConverter } from '@cred/shared';
+import * as Sentry from '@sentry/nextjs';
 
 const db = getFirestore(app);
 
@@ -30,6 +31,9 @@ export const addUserCreddd = async ({
       userCredddDoc.data()?.creddd.map(c => c.groupId) || [];
 
     if (existingGroupIds.includes(creddd.groupId)) {
+      Sentry.captureException(
+        new Error(`User already has creddd ${creddd.groupId}`)
+      );
       console.warn(`User already has creddd ${creddd.groupId}`);
     } else {
       await userCredddRef.update({

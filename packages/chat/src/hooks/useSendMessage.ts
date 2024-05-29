@@ -49,7 +49,6 @@ const sendMessage = async ({
   visibility: MessageVisibility;
 }) => {
   const storage = getStorage();
-  console.log(`Sending message ${message} to ${roomId} as ${visibility}`);
   // Create the room if it doens't exit
 
   const messagesRef = collection(db, 'rooms', roomId, 'messages').withConverter(
@@ -90,8 +89,6 @@ const sendMessage = async ({
   await updateDoc(messageDoc, {
     images: await uploadImagesPromise,
   });
-
-  console.log(`Message sent to ${roomId}`);
 };
 
 const useSendMessage = (roomId: string) => {
