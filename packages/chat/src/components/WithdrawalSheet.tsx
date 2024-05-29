@@ -94,21 +94,21 @@ const WithdrawalSheet = (props: WithdrawalProps) => {
                   width: 'calc(80% - 27px)',
                 }}
                 type="text"
+                tabIndex={-1}
                 onChange={e => {
                   setToAddress(e.target.value);
                 }}
                 placeholder="withdrawal to address"
-                autoFocus={false}
               ></Input>
               <div className="flex flex-row items-center justify-center gap-x-2 w-[80%]">
                 <Input
                   className="w-full"
                   type="number"
+                  tabIndex={-1}
                   placeholder="amount"
                   onChange={e => {
                     setAmount(parseEther(e.target.value));
                   }}
-                  autoFocus={false}
                 ></Input>
                 <div className="text-sm opacity-60">ETH</div>
               </div>
