@@ -13,7 +13,9 @@ const ProcessingTxSheet = (props: ProcessingTxSheetProps) => {
     <Sheet open={isOpen}>
       <SheetContent side="bottom" className="h-[300px]">
         <SheetHeader>
-          <SheetTitle>Processing transaction</SheetTitle>
+          <SheetTitle className="text-center">
+            Processing transaction
+          </SheetTitle>
         </SheetHeader>
         <div className="flex flex-col items-center justify-center h-[80%]">
           <Loader2

@@ -27,11 +27,12 @@ const sendTransactionId = async ({
 };
 
 const getCurrentSellPrice = async (roomIdBigInt: bigint) => {
+  const amount = BigInt(1);
   return await readContract(wagmiConfig, {
     abi: CredAbi,
     address: CRED_CONTRACT_ADDRESS,
     functionName: 'getSellPrice',
-    args: [roomIdBigInt],
+    args: [roomIdBigInt, amount],
   });
 };
 
@@ -54,10 +55,11 @@ const useSellKey = (roomId: string) => {
         throw new Error('No embedded wallet found.');
       }
 
+      const amount = BigInt(1);
       const data = encodeFunctionData({
         abi: CredAbi,
-        functionName: 'sellToken',
-        args: [roomIdBigInt],
+        functionName: 'sellKeys',
+        args: [roomIdBigInt, amount],
       });
 
       const sellPrice = await getCurrentSellPrice(roomIdBigInt);
