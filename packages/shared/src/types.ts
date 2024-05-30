@@ -28,6 +28,7 @@ export interface UserNotificationTokens {
   userId: string;
   tokens: {
     token: string;
+    enabled: boolean;
     createdAt: Date | FirestoreTimestamp;
   }[];
 }

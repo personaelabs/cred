@@ -1,15 +1,12 @@
-use std::sync::Arc;
 use super::GroupData;
 use crate::{address_groups::AddressGroups, GroupType};
 use jsonrpc_http_server::jsonrpc_core::*;
 use serde_json::json;
+use std::sync::Arc;
 
 pub type GetGroupsReturnType = Vec<GroupData>;
 
-pub async fn get_groups(
-    group_ids: &Vec<String>,
-    pg_client: &tokio_postgres::Client,
-) -> Vec<GroupData> {
+async fn get_groups(group_ids: &Vec<String>, pg_client: &tokio_postgres::Client) -> Vec<GroupData> {
     let rows = pg_client
         .query(
             r#"SELECT "id", "displayName", "typeId" FROM "Group" where "state" = 'Recordable' AND "id" = ANY($1)"#,

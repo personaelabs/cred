@@ -16,7 +16,7 @@ export const setNotificationConfigured = () => {
   localStorage.setItem('notificationConfigured', 'true');
 };
 
-export const requestNotificationToken = async (): Promise<string | null> => {
+export const getDeviceNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
 
   try {

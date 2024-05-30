@@ -13,11 +13,9 @@ import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
 import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
-import ConnectAddressesSheet from '@/components/ConnectAddressesSheet';
 import { Room, User } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
 import AvatarWithFallback from '@/components/Avatar';
-import Scrollable from '@/components/Scrollable';
 
 interface RoomMemberListItemProps {
   user: User;
@@ -70,14 +68,14 @@ const RoomMembersList = (props: RoomMembersListProps) => {
 type RoomItemProps = {
   room: Room;
   canJoin: boolean;
-  scrollableRef: React.RefObject<HTMLDivElement> | null;
 };
 
 const RoomItem = memo(function RoomItem(props: RoomItemProps) {
-  const { canJoin, scrollableRef } = props;
+  const { canJoin } = props;
   const { name, id } = props.room;
   const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
+  const { scrollableRef } = useScrollableRef();
 
   const { mutateAsync: buyKey, isPending, reset } = useBuyKey(id);
 
@@ -121,7 +119,7 @@ const RoomItem = memo(function RoomItem(props: RoomItemProps) {
               <Button
                 onClick={onPurchaseClick}
                 disabled={isPending}
-                variant="link"
+                variant="outline"
                 className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
               >
                 {keyPrice ? formatEther(keyPrice) : ''}ETH
@@ -184,50 +182,40 @@ export default function Home() {
   }
 
   return (
-    <>
-      <Scrollable>
-        <Alert>
-          <AlertTitle className="flex flx-row justify-between items-center">
-            <div className="opacity-70">
-              Connect addresses to find eligible rooms
-            </div>
-            <Link href="/settings/connected-addresses">
-              <Button variant="secondary">Connect</Button>
-            </Link>
-          </AlertTitle>
-        </Alert>
-        {joinableRooms.length > 0 ? (
-          <div className="px-5 text-center opacity-60 mt-4">Eligible rooms</div>
-        ) : (
-          <></>
-        )}
-        {joinableRooms.map(room => (
-          <RoomItem
-            key={room.id}
-            room={room}
-            canJoin={true}
-            scrollableRef={scrollableRef}
-          ></RoomItem>
-        ))}
-        {buyableRooms.length > 0 ? (
-          <div className="mt-[32px] px-5 text-center opacity-60">
-            Buy access to rooms
+    <div
+      className="flex flex-col w-full h-full overflow-scroll"
+      ref={scrollableRef}
+    >
+      <Alert>
+        <AlertTitle className="flex flx-row justify-between items-center">
+          <div className="opacity-70">
+            Connect addresses to find eligible rooms
           </div>
-        ) : (
-          <></>
-        )}
-        {buyableRooms
-          .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
-          .map(room => (
-            <RoomItem
-              room={room}
-              key={room.id}
-              canJoin={false}
-              scrollableRef={scrollableRef}
-            ></RoomItem>
-          ))}
-      </Scrollable>
-      <ConnectAddressesSheet />
-    </>
+          <Link href="/settings/connected-addresses">
+            <Button variant="secondary">Connect</Button>
+          </Link>
+        </AlertTitle>
+      </Alert>
+      {joinableRooms.length > 0 ? (
+        <div className="px-5 text-center opacity-60 mt-4">Eligible rooms</div>
+      ) : (
+        <></>
+      )}
+      {joinableRooms.map(room => (
+        <RoomItem key={room.id} room={room} canJoin={true}></RoomItem>
+      ))}
+      {buyableRooms.length > 0 ? (
+        <div className="mt-[32px] px-5 text-center opacity-60">
+          Buy access to rooms
+        </div>
+      ) : (
+        <></>
+      )}
+      {buyableRooms
+        .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
+        .map(room => (
+          <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
+        ))}
+    </div>
   );
 }

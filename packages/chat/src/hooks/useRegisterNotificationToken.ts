@@ -1,4 +1,7 @@
-import { UserNotificationTokens } from '@cred/shared';
+import {
+  UserNotificationTokens,
+  notificationTokensConvert,
+} from '@cred/shared';
 import { useMutation } from '@tanstack/react-query';
 import {
   collection,
@@ -10,15 +13,17 @@ import {
 } from 'firebase/firestore';
 import db from '@/lib/firestore';
 import {
-  requestNotificationToken,
+  getDeviceNotificationToken,
   setNotificationConfigured,
 } from '@/lib/notification';
 
 const registerNotificationToken = async (userId: string) => {
-  const token = await requestNotificationToken();
+  const token = await getDeviceNotificationToken();
   if (token) {
     const notificationTokenDoc = doc(
-      collection(db, 'notificationTokens'),
+      collection(db, 'notificationTokens').withConverter(
+        notificationTokensConvert
+      ),
       userId.toString()
     );
     const userTokens = await getDoc(notificationTokenDoc);
@@ -29,7 +34,17 @@ const registerNotificationToken = async (userId: string) => {
       ).tokens.some(_token => _token.token === token);
 
       if (tokenExists) {
-        // Notification token already exists
+        // Notification token already exists,
+        // just need to update the enabled status
+        await updateDoc(notificationTokenDoc, {
+          tokens: userTokens
+            .data()
+            .tokens.map(t =>
+              t.token === token
+                ? { ...t, createdAt: new Date(), enabled: true }
+                : t
+            ),
+        });
         return;
       }
     } else {
@@ -44,6 +59,7 @@ const registerNotificationToken = async (userId: string) => {
       tokens: arrayUnion({
         token,
         createdAt: new Date(),
+        enabled: true,
       }),
     });
   }
