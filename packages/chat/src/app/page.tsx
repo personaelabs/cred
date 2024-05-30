@@ -119,7 +119,7 @@ const RoomItem = memo(function RoomItem(props: RoomItemProps) {
               <Button
                 onClick={onPurchaseClick}
                 disabled={isPending}
-                variant="link"
+                variant="outline"
                 className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
               >
                 {keyPrice ? formatEther(keyPrice) : ''}ETH
