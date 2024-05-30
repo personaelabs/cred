@@ -152,6 +152,18 @@ const ChatMessageInput = (props: ChatMessageInputProps) => {
     }
   }, [input, onSend, roomUsers, selectedImages]);
 
+  // Hook to listen to enter key press to send message
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.onkeydown = e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          onSendClick();
+        }
+      };
+    }
+  }, [inputRef, onSendClick]);
+
   return (
     <div className="flex flex-col">
       <div className="px-2 flex flex-row gap-4">
