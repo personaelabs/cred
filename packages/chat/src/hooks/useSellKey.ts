@@ -11,6 +11,7 @@ import useRoom from './useRoom';
 import wagmiConfig from '../lib/wagmiConfig';
 import { readContract } from '@wagmi/core';
 import { useBottomSheet } from '@/contexts/BottomSheetContext';
+import useSignedInUser from './useSignedInUser';
 
 const sendTransactionId = async ({
   roomId,
@@ -42,6 +43,7 @@ const useSellKey = (roomId: string) => {
   const { data: room } = useRoom(roomId);
   const { wallets } = useWallets();
   const { setOpenedSheet, closeSheet } = useBottomSheet();
+  const { data: signedInUser } = useSignedInUser();
 
   const result = useMutation({
     mutationFn: async () => {
@@ -89,6 +91,9 @@ const useSellKey = (roomId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
+      queryClient.invalidateQueries({
+        queryKey: ['key-balance', { address: signedInUser?.wallet?.address }],
+      });
       queryClient.invalidateQueries({ queryKey: ['joined-rooms'] });
       queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
 
