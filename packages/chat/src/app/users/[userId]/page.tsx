@@ -2,8 +2,6 @@
 import AvatarWithFallback from '@/components/Avatar';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useUser from '@/hooks/useUser';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -41,18 +39,6 @@ const UserPage = () => {
         size={100}
       ></AvatarWithFallback>
       <div className="text-2xl mt-4">{user.displayName}</div>
-      <Link
-        href={`https://warpcast.com/${user.username}`}
-        className="mt-10"
-        target="_blank"
-      >
-        <Image
-          src="/warpcast.svg"
-          width={38}
-          height={38}
-          alt="warpcast logo"
-        ></Image>
-      </Link>
     </div>
   );
 };
