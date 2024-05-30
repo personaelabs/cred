@@ -1,4 +1,5 @@
 # Cred
+*staging
 
 ## Development
 
