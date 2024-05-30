@@ -64,7 +64,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isModalOpen } = usePrivy();
   const { openedSheet, closeSheet } = useBottomSheet();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
-  console.log({ mixpanelInitialized });
 
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
