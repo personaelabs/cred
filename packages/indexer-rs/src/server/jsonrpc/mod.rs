@@ -2,6 +2,7 @@ pub mod get_address_groups;
 pub mod get_group_by_merkle_root;
 pub mod get_group_merkle_tree;
 pub mod get_creddd;
+pub mod get_groups;
 use serde::{Deserialize, Serialize};
 
 use crate::GroupType;

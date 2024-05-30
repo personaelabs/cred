@@ -3,7 +3,7 @@ use crate::{
     server::jsonrpc::{
         get_address_groups::get_address_groups, get_creddd::get_creddd,
         get_group_by_merkle_root::get_group_by_merkle_root,
-        get_group_merkle_tree::get_group_merkle_tree,
+        get_group_merkle_tree::get_group_merkle_tree, get_groups::get_groups,
     },
     ROCKSDB_PATH,
 };
@@ -47,6 +47,13 @@ pub async fn start_server() {
         let pg_client_moved = pg_client_moved.clone();
 
         async move { get_creddd(params, &pg_client_moved).await }
+    });
+
+    let pg_client_moved = pg_client.clone();
+    io.add_method("getGroups", move |params: Params| {
+        let pg_client_moved = pg_client_moved.clone();
+
+        async move { get_groups(params, &pg_client_moved).await }
     });
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "3030".to_string());
