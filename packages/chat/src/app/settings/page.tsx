@@ -76,7 +76,10 @@ const Settings = () => {
             alt="profile image"
             name={user.displayName}
           ></AvatarWithFallback>
-          <div className="text-2xl font-bold">{user.displayName}</div>
+          <div className="flex flex-col items-center w-full">
+            <div className="text-2xl font-bold">{user.displayName}</div>
+            <div className="text-md opacity-60">@{user.username}</div>
+          </div>
         </div>
         <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem

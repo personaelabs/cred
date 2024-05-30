@@ -23,7 +23,7 @@ const AvatarWithFallback = (props: AvatarProps) => {
           alt={alt}
           className={`rounded-full object-cover`}
         />
-        <AvatarFallback delayMs={1200} className="text-xs">
+        <AvatarFallback delayMs={500} className="text-xs">
           {name.slice(0, 1)}
         </AvatarFallback>
       </Avatar>
