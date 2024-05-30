@@ -190,7 +190,7 @@ const notifyUserAboutMessage = async ({
     return;
   }
 
-  for (const token of tokens) {
+  for (const token of tokens.filter(token => token.enabled)) {
     const idempotencyKey = `${token.token}:${message.id}`;
 
     if (message.createdAt === null) {
