@@ -156,6 +156,10 @@ const ChatMessage = (props: ChatMessageProps) => {
           <div
             {...bind()}
             className={`flex flex-col gap-y-2 mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
+            onContextMenu={e => {
+              e.preventDefault();
+              setIsMenuOpen(true);
+            }}
           >
             <div
               className={`${props.text ? '' : 'hidden'} text-md px-4 py-2 ${props.visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
