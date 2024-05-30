@@ -19,14 +19,15 @@ import AvatarWithFallback from '@/components/Avatar';
 
 interface RoomMemberListItemProps {
   user: User;
+  isFirst: boolean;
 }
 
 const RoomMemberListItem = memo(function RoomMemberListItem(
   props: RoomMemberListItemProps
 ) {
-  const { user } = props;
+  const { user, isFirst } = props;
   return (
-    <div className="ml-[-6px]">
+    <div className={`${isFirst ? '' : 'ml-[-6px]'}`}>
       <AvatarWithFallback
         imageUrl={user?.pfpUrl || null}
         alt={user?.displayName || 'User'}
@@ -48,20 +49,22 @@ const RoomMembersList = (props: RoomMembersListProps) => {
   const { data: users } = useUsers(joinedUserIds.slice(0, NUM_USERS_TO_SHOW));
 
   return (
-    <Link href={`/rooms/${props.room.id}/roomInfo`} className="no-underline">
-      <div className="flex flex-row items-center">
-        {users?.map((user, i) => (
-          <RoomMemberListItem key={i} user={user}></RoomMemberListItem>
-        ))}
-        {joinedUserIds.length > NUM_USERS_TO_SHOW ? (
-          <div className="text-sm opacity-80">
-            +{joinedUserIds.length - NUM_USERS_TO_SHOW}
-          </div>
-        ) : (
-          <></>
-        )}
-      </div>
-    </Link>
+    <div className="flex flex-row items-center">
+      {users?.map((user, i) => (
+        <RoomMemberListItem
+          key={i}
+          user={user}
+          isFirst={i === 0}
+        ></RoomMemberListItem>
+      ))}
+      {joinedUserIds.length > NUM_USERS_TO_SHOW ? (
+        <div className="text-sm opacity-80">
+          +{joinedUserIds.length - NUM_USERS_TO_SHOW}
+        </div>
+      ) : (
+        <></>
+      )}
+    </div>
   );
 };
 
@@ -137,8 +140,18 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
   return (
     <div className="border-b-2 py-4">
       <div className="flex flex-col px-5">
-        <div className="flex flex-row items-center justify-between">
-          <div className="text-lg text-wrap w-[70%]">{name}</div>
+        <div className="flex flex-row items-center h-full justify-between">
+          <Link
+            href={`/rooms/${props.room.id}/roomInfo`}
+            className="no-underline w-full"
+          >
+            <div className="flex flex-col justify-start w-[70%]">
+              <div className="text-lg text-wrap w-full">{name}</div>
+              <div className="mt-3 w-full">
+                <RoomMembersList room={props.room}></RoomMembersList>
+              </div>
+            </div>
+          </Link>
           <div className="text-center w-[30%]">
             <Button
               onClick={onPurchaseClick}
@@ -149,9 +162,6 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
               {keyPrice ? formatEther(keyPrice) : ''}ETH
             </Button>
           </div>
-        </div>
-        <div>
-          <RoomMembersList room={props.room}></RoomMembersList>
         </div>
       </div>
     </div>

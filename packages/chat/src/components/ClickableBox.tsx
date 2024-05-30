@@ -1,4 +1,5 @@
 'use client';
+import { cn } from '@/lib/utils';
 import { MotionProps, motion } from 'framer-motion';
 
 const ClickableBox = (
@@ -14,6 +15,7 @@ const ClickableBox = (
       style={{
         cursor: 'pointer',
       }}
+      className={cn(props.className, 'focus:outline-none')}
     >
       {children}
     </motion.div>
