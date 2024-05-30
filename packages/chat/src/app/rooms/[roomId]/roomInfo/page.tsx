@@ -12,6 +12,9 @@ import { useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import useSellKey from '@/hooks/useSellKey';
 import { KeyRound } from 'lucide-react';
+import useKeyBalance from '@/hooks/useKeyBalance';
+import { getRoomTokenId } from '@cred/shared';
+import { Hex } from 'viem';
 
 const RoomInfo = () => {
   const params = useParams<{ roomId: string }>();
@@ -22,6 +25,10 @@ const RoomInfo = () => {
   const { data: signedInUser } = useSignedInUser();
   const { data: keySellPrice } = useSellPrice(params.roomId);
   const { mutateAsync: sellKey } = useSellKey(params.roomId);
+  const { data: keyBalance } = useKeyBalance({
+    address: (signedInUser?.wallet?.address as Hex) || null,
+    tokenId: getRoomTokenId(params.roomId),
+  });
 
   useEffect(() => {
     if (room) {
@@ -86,23 +93,29 @@ const RoomInfo = () => {
       </InfiniteScroll>
       <div className="flex flex-col items-center mt-8">
         <div>
-          <span className="text-blue-500">Key price</span>
+          <span className="text-blue-500">Key sell price</span>
           <span className="ml-2 opacity-60">
-            {keySellPrice ? formatEthBalance(keySellPrice) : ''} ETH
+            {keySellPrice !== undefined ? formatEthBalance(keySellPrice) : ''}{' '}
+            ETH
           </span>
         </div>
-        <div className="mt-1"></div>
-        <Button
-          className="mt-4 text-blue-500"
-          variant="secondary"
-          onClick={async () => {
-            await sellKey();
-            router.replace(`/rooms`);
-          }}
-        >
-          <KeyRound className="mr-2 w-3 h-3"></KeyRound>
-          Sell key
-        </Button>
+        {keyBalance && keyBalance > BigInt(0) ? (
+          <div className="mt-1">
+            <Button
+              className="mt-4 text-blue-500"
+              variant="secondary"
+              onClick={async () => {
+                await sellKey();
+                router.replace(`/rooms`);
+              }}
+            >
+              <KeyRound className="mr-2 w-3 h-3"></KeyRound>
+              Sell key
+            </Button>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

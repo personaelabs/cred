@@ -11,11 +11,12 @@ const useBuyPrice = (roomId: string) => {
   return useQuery({
     queryKey: ['buy-price', roomId],
     queryFn: async () => {
+      const amount = BigInt(1);
       const result = readContract(wagmiConfig, {
         abi: CredAbi,
         address: CRED_CONTRACT_ADDRESS,
         functionName: 'getBuyPrice',
-        args: [roomIdBigInt],
+        args: [roomIdBigInt, amount],
       });
 
       return result;

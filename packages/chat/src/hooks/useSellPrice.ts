@@ -11,11 +11,24 @@ const useSellPrice = (roomId: string) => {
   return useQuery({
     queryKey: ['sell-price', roomId],
     queryFn: async () => {
+      const amount = BigInt(1);
+
+      const tokenSupply = await readContract(wagmiConfig, {
+        abi: CredAbi,
+        address: CRED_CONTRACT_ADDRESS,
+        functionName: 'tokenIdToSupply',
+        args: [roomIdBigInt],
+      });
+
+      if (tokenSupply === BigInt(0)) {
+        return BigInt(0);
+      }
+
       return await readContract(wagmiConfig, {
         abi: CredAbi,
         address: CRED_CONTRACT_ADDRESS,
         functionName: 'getSellPrice',
-        args: [roomIdBigInt],
+        args: [roomIdBigInt, amount],
       });
     },
   });
