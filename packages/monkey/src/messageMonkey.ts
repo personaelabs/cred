@@ -136,8 +136,8 @@ export const startMessageMonkey = async () => {
     }
 
     await sleepForRandom({
-      minMs: 60 * 15 * 1000, // 15 minutes
-      maxMs: 60 * 60 * 1000, // 1 hour
+      minMs: 60 * 5 * 1000, // 5 minutes
+      maxMs: 60 * 15 * 1000, // 15 minutes
     });
   }
 };
