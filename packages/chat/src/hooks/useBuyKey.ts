@@ -53,11 +53,12 @@ const useBuyKey = (roomId: string) => {
       const privyAddress = privyAccount.address as Hex;
       const roomTokenId = getRoomTokenId(roomId);
 
+      const amount = BigInt(1);
       const value = await readContract(wagmiConfig, {
         abi: CredAbi,
         address: CRED_CONTRACT_ADDRESS,
         functionName: 'getBuyPrice',
-        args: [roomTokenId],
+        args: [roomTokenId, amount],
       });
 
       const fee = await readContract(wagmiConfig, {
@@ -80,8 +81,8 @@ const useBuyKey = (roomId: string) => {
       } else {
         const data = encodeFunctionData({
           abi: CredAbi,
-          functionName: 'buyToken',
-          args: [privyAddress as Hex, roomTokenId, '0x'],
+          functionName: 'buyKeys',
+          args: [privyAddress as Hex, roomTokenId, amount, '0x'],
         });
 
         const txReceipt = await sendTransaction(
