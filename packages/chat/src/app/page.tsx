@@ -13,7 +13,6 @@ import { useScrollableRef } from '@/contexts/FooterContext';
 import useBuyKey from '@/hooks/useBuyKey';
 import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
-import ConnectAddressesSheet from '@/components/ConnectAddressesSheet';
 import { Room, User } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
 import AvatarWithFallback from '@/components/Avatar';
@@ -227,7 +226,6 @@ export default function Home() {
             ></RoomItem>
           ))}
       </Scrollable>
-      <ConnectAddressesSheet />
     </>
   );
 }
