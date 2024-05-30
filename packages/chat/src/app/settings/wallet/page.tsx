@@ -30,12 +30,12 @@ interface TradeHistoryListItemProps {
 const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
   const { log, userAddress } = props;
 
-  const { value, from, to, id } = log.args;
+  const { from, to, id } = log.args;
   const isPurchase = to === userAddress;
 
   const { data: room } = useRoom(id ? tokenIdToRoomId(id) : '');
 
-  if (!value || !from || !to) {
+  if (!from || !to) {
     // TODO: Report error
     return null;
   }
@@ -50,7 +50,6 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
         </div>
         <div>{room?.name}</div>
       </div>
-      <div>{formatEthBalance(value)} ETH</div>
     </div>
   );
 };

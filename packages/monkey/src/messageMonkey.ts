@@ -8,9 +8,19 @@ import {
   logger,
   messageConverter,
   roomConverter,
+  userConverter,
 } from '@cred/shared';
 
 const db = getFirestore(app);
+
+const getUser = async (userId: string) => {
+  const userRef = db
+    .collection('users')
+    .withConverter(userConverter)
+    .doc(userId);
+  const userDoc = await userRef.get();
+  return userDoc.data();
+};
 
 const sendMessage = async ({
   room,
@@ -26,6 +36,8 @@ const sendMessage = async ({
   // Get a random subset of users to mention in the message.
   const mentions = getRandomElements(room.joinedUserIds, 3);
 
+  const mentionedUsers = await Promise.all(mentions.map(getUser));
+
   logger.info(`Sending message`, {
     userId,
     room: room.name,
@@ -40,7 +52,7 @@ const sendMessage = async ({
     .add({
       id: '',
       userId,
-      body: message,
+      body: `${message} ${mentionedUsers.map(user => `@${user?.username}`).join(' ')}`,
       roomId: room.id,
       readBy: [],
       replyTo: null,
@@ -136,8 +148,8 @@ export const startMessageMonkey = async () => {
     }
 
     await sleepForRandom({
-      minMs: 60 * 15 * 1000, // 15 minutes
-      maxMs: 60 * 60 * 1000, // 1 hour
+      minMs: 60 * 5 * 1000, // 5 minutes
+      maxMs: 60 * 15 * 1000, // 15 minutes
     });
   }
 };

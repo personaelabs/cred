@@ -65,34 +65,23 @@ const RoomMembersList = (props: RoomMembersListProps) => {
   );
 };
 
-type RoomItemProps = {
+type EligibleRoomItemProps = {
   room: Room;
-  canJoin: boolean;
+  isPurchased: boolean;
 };
 
-const RoomItem = memo(function RoomItem(props: RoomItemProps) {
-  const { canJoin } = props;
+const EligibleRoomItem = memo(function EligibleRoom(
+  props: EligibleRoomItemProps
+) {
   const { name, id } = props.room;
+  const { isPurchased } = props;
   const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
-  const { scrollableRef } = useScrollableRef();
-
-  const { mutateAsync: buyKey, isPending, reset } = useBuyKey(id);
-
-  const { data: keyPrice } = useBuyPrice(id);
 
   const onJoinClick = useCallback(async () => {
     await joinRoom(id);
     router.push(`/rooms/${id}`);
   }, [id, joinRoom, router]);
-
-  const onPurchaseClick = useCallback(async () => {
-    await buyKey();
-    if (scrollableRef) {
-      scrollableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    reset();
-  }, [buyKey, reset, scrollableRef]);
 
   useEffect(() => {
     if (error) {
@@ -105,35 +94,65 @@ const RoomItem = memo(function RoomItem(props: RoomItemProps) {
     <div className="border-b-2 py-4">
       <div className="flex flex-col px-5">
         <div className="flex flex-row items-center justify-between">
-          <div
-            className={`text-lg text-wrap w-[70%] ${canJoin ? 'font-bold' : 'font-normal'} ${canJoin ? 'text-primary' : ''}`}
-          >
-            {name}
+          <div className="w-[70%]">
+            <div
+              className={`text-lg text-wrap w-full ${isPurchased ? '' : 'text-primary font-bold'}`}
+            >
+              {name}
+            </div>
           </div>
           <div className="text-center w-[30%]">
-            {canJoin ? (
-              <Button onClick={onJoinClick} disabled={isJoining} variant="link">
-                Join
-              </Button>
-            ) : (
-              <Button
-                onClick={onPurchaseClick}
-                disabled={isPending}
-                variant="outline"
-                className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
-              >
-                {keyPrice ? formatEther(keyPrice) : ''}ETH
-              </Button>
-            )}
+            <Button onClick={onJoinClick} disabled={isJoining} variant="link">
+              Join
+            </Button>
           </div>
         </div>
-        {!canJoin ? (
-          <div>
-            <RoomMembersList room={props.room}></RoomMembersList>
+      </div>
+    </div>
+  );
+});
+
+type PurchasableRoomItemProps = {
+  room: Room;
+};
+
+const PurchasableRoomItem = memo(function PurchasableRoomItem(
+  props: PurchasableRoomItemProps
+) {
+  const { name, id } = props.room;
+  const { scrollableRef } = useScrollableRef();
+
+  const { mutateAsync: buyKey, isPending, reset } = useBuyKey(id);
+
+  const { data: keyPrice } = useBuyPrice(id);
+
+  const onPurchaseClick = useCallback(async () => {
+    await buyKey();
+    if (scrollableRef) {
+      scrollableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    reset();
+  }, [buyKey, reset, scrollableRef]);
+
+  return (
+    <div className="border-b-2 py-4">
+      <div className="flex flex-col px-5">
+        <div className="flex flex-row items-center justify-between">
+          <div className="text-lg text-wrap w-[70%]">{name}</div>
+          <div className="text-center w-[30%]">
+            <Button
+              onClick={onPurchaseClick}
+              disabled={isPending}
+              variant="outline"
+              className="bg-clip-text text-transparent bg-gradient-to-l from-primary to-[#fdb38f]"
+            >
+              {keyPrice ? formatEther(keyPrice) : ''}ETH
+            </Button>
           </div>
-        ) : (
-          <></>
-        )}
+        </div>
+        <div>
+          <RoomMembersList room={props.room}></RoomMembersList>
+        </div>
       </div>
     </div>
   );
@@ -202,7 +221,14 @@ export default function Home() {
         <></>
       )}
       {joinableRooms.map(room => (
-        <RoomItem key={room.id} room={room} canJoin={true}></RoomItem>
+        <EligibleRoomItem
+          key={room.id}
+          room={room}
+          isPurchased={
+            room.readerIds.includes(signedInUser.id) &&
+            !room.writerIds.includes(signedInUser.id)
+          }
+        ></EligibleRoomItem>
       ))}
       {buyableRooms.length > 0 ? (
         <div className="mt-[32px] px-5 text-center opacity-60">
@@ -214,7 +240,7 @@ export default function Home() {
       {buyableRooms
         .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
         .map(room => (
-          <RoomItem room={room} key={room.id} canJoin={false}></RoomItem>
+          <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
         ))}
     </div>
   );

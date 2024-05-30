@@ -7,11 +7,30 @@ import {
 } from '@cred/firebase';
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
-import { tokenIdToRoomId } from '@cred/shared';
+import { CredAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';
 import { logger } from '@cred/shared';
+import client from '@/lib/backend/viemClient';
+import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
 
 const TRANSFER_SINGLE_EVENT_SIG =
   '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
+
+const getBalance = async ({
+  address,
+  tokenId,
+}: {
+  address: Hex;
+  tokenId: bigint;
+}) => {
+  const balance = await client.readContract({
+    abi: CredAbi,
+    address: CRED_CONTRACT_ADDRESS,
+    functionName: 'balanceOf',
+    args: [address, tokenId],
+  });
+
+  return balance;
+};
 
 export async function POST(
   req: NextRequest,
@@ -129,10 +148,20 @@ export async function POST(
       );
     }
 
-    await removeUserFromRoom({
-      roomId,
-      userId: transferFromUser.id,
+    const balance = await getBalance({
+      address: from,
+      tokenId: getRoomTokenId(roomId),
     });
+
+    // Remove the user from the room if their balance is 0
+    if (balance === BigInt(0)) {
+      await removeUserFromRoom({
+        roomId,
+        userId: transferFromUser.id,
+      });
+    } else {
+      logger.info(`User ${transferFromUser.id} still has balance`);
+    }
   }
 
   return Response.json({}, { status: 200 });
