@@ -1,5 +1,4 @@
-import { Room, roomConverter, logger } from '@cred/shared';
-import { getGroups } from './lib/creddd';
+import { Room, roomConverter, logger, createRpcClient } from '@cred/shared';
 import { sleep } from './lib/utils';
 import { getFirestore } from 'firebase-admin/firestore';
 import { app } from '@cred/firebase';
@@ -44,8 +43,12 @@ const upsertRoom = async ({
   }
 };
 
+const credddRpcClient = createRpcClient(
+  'https://cred-indexer-41hd.onrender.com'
+);
+
 const syncRooms = async () => {
-  const groups = await getGroups();
+  const groups = await credddRpcClient.getGroups();
 
   const chunkSize = 1000;
 
@@ -56,7 +59,7 @@ const syncRooms = async () => {
       chunk.map(async group => {
         return upsertRoom({
           groupId: group.id,
-          name: group.displayName,
+          name: group.display_name,
         });
       })
     );

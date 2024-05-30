@@ -66,4 +66,8 @@ class JsonRpcClient {
   }): Promise<GetCredddReturnType> {
     return await this.call<GetCredddReturnType>('getCreddd', [credddId]);
   }
+
+  public async getGroups(): Promise<Group[]> {
+    return await this.call<Group[]>('getGroups', []);
+  }
 }

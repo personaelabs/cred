@@ -1,21 +1,17 @@
 {
   "name": "@cred/sync",
   "scripts": {
-    "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
-    "populateMessages": "tsx src/scripts/populateMessages.ts"
+    "start": "NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts"
   },
   "dependencies": {
     "@cred/firebase": "workspace:*",
     "@cred/shared": "workspace:*",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.0",
-    "pg": "^8.11.5",
     "viem": "^2.10.9"
   },
   "devDependencies": {
-    "@faker-js/faker": "^8.4.1",
     "@types/node": "^20.11.17",
-    "@types/pg": "^8.11.5",
     "tsx": "^4.7.1"
   }
 }
