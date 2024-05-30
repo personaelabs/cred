@@ -7,10 +7,11 @@ import {
   roomConverter,
 } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
-import { Hex, createWalletClient, http } from 'viem';
+import { Hex, createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
-import { getRandomElements, sleepForRandom } from './utils';
+import { getRandomElements, sleep, sleepForRandom } from './utils';
+import { faker } from '@faker-js/faker';
 
 const db = getFirestore(app);
 
@@ -34,23 +35,50 @@ const client = createWalletClient({
   ),
 });
 
+const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(
+    `https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_BASE_SEPOLIA_API_KEY}`
+  ),
+});
+
 const buyKeys = async ({
   roomId,
   numKeys,
 }: {
   roomId: string;
-  numKeys: number;
+  numKeys: bigint;
 }) => {
   const tokenId = getRoomTokenId(roomId);
+
+  const buyPrice = await publicClient.readContract({
+    abi: CredAbi,
+    address: CRED_SEPOLIA_CONTRACT_ADDRESS,
+    functionName: 'getBuyPrice',
+    args: [tokenId, numKeys],
+  });
+
+  const fee = await publicClient.readContract({
+    abi: CredAbi,
+    address: CRED_SEPOLIA_CONTRACT_ADDRESS,
+    functionName: 'getProtocolFee',
+    args: [buyPrice],
+  });
+
+  const totalCost = buyPrice + fee;
+
   const txHash = await client.writeContract({
     abi: CredAbi,
     address: CRED_SEPOLIA_CONTRACT_ADDRESS,
-    functionName: 'buyToken',
-    args: [monkeyAccount.address, tokenId, '0x0'],
+    functionName: 'buyKeys',
+    args: [monkeyAccount.address, tokenId, numKeys, '0x0'],
+    value: totalCost,
   });
 
-  logger.info(`Bought ${numKeys} keys for room ${roomId}`, {
+  logger.info(`Bought ${numKeys} keys for ${totalCost}`, {
     txHash,
+    totalCost,
+    roomId,
   });
 };
 
@@ -68,10 +96,17 @@ export const startTradeMonkey = async () => {
 
     logger.debug(`Buying keys for ${buyKeyOfRooms.length} rooms`);
 
+    const numKeys = faker.number.bigInt({ min: 1, max: 5 });
+
     // Buy keys for rooms
-    await Promise.all(
-      buyKeyOfRooms.map(roomId => buyKeys({ roomId, numKeys: 1 }))
-    );
+    for (const roomId of buyKeyOfRooms) {
+      try {
+        await buyKeys({ roomId, numKeys });
+        await sleep(5000);
+      } catch (error) {
+        logger.error('Failed to buy keys', { roomId, error });
+      }
+    }
 
     await sleepForRandom({
       minMs: 60 * 15 * 1000, // 15 minutes

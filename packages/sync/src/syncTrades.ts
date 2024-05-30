@@ -27,7 +27,7 @@ const TRANSFER_SINGLE_EVENT = parseAbiItem(
 );
 
 const CRED_CONTRACT_DEPLOYED_BLOCK = BigInt(0);
-const CRED_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10167164);
+const CRED_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10638162);
 
 const getBalance = async ({
   address,
