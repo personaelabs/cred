@@ -1,5 +1,9 @@
 import { faker } from '@faker-js/faker';
 
+export const excludePrivyUsers = (userIds: string[]): string[] => {
+  return userIds.filter(userId => !userId.startsWith('did:privy'));
+};
+
 export const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

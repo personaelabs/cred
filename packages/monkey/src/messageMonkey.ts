@@ -1,87 +1,102 @@
 import { faker } from '@faker-js/faker';
-import { getRandomElements, sleepForRandom } from './utils';
+import { excludePrivyUsers, getRandomElements, sleepForRandom } from './utils';
 import { app } from '@cred/firebase';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import {
   MessageVisibility,
+  Room,
+  logger,
   messageConverter,
   roomConverter,
-  userConverter,
 } from '@cred/shared';
 
 const db = getFirestore(app);
 
-const ADMIN_USER_IDS = ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'];
-
 const sendMessage = async ({
-  roomId,
+  room,
   userId,
+  visibility,
 }: {
-  roomId: string;
-  userId: string;
+  room: Room; // Room to send message to
+  userId: string; // User to send message from
+  visibility: MessageVisibility;
 }) => {
-  const usersRef = db.collection('users').withConverter(userConverter);
-
   const message = faker.lorem.sentence();
-  const { count: numUsers } = (await usersRef.count().get()).data();
 
-  const mentionUsers = await usersRef
-    .offset(
-      faker.number.int({
-        min: 0,
-        max: numUsers,
-      })
-    )
-    .limit(5)
-    .get();
+  // Get a random subset of users to mention in the message.
+  const mentions = getRandomElements(room.joinedUserIds, 3);
 
-  const mentions = mentionUsers.docs.map(doc => doc.data().id);
+  logger.info(`Sending message`, {
+    userId,
+    room: room.name,
+    visibility,
+  });
 
-  // Mention admins in 20% of messages
-  if (Math.random() < 20 / 100) {
-    mentions.push(...ADMIN_USER_IDS);
-  }
-
-  console.log(`Sending message to ${roomId} from ${userId}`);
   await db
     .collection('rooms')
-    .doc(roomId)
+    .doc(room.id)
     .collection('messages')
     .withConverter(messageConverter)
     .add({
       id: '',
       userId,
       body: message,
-      roomId,
+      roomId: room.id,
       readBy: [],
       replyTo: null,
       createdAt: FieldValue.serverTimestamp(),
       mentions,
       images: [],
-      visibility:
-        Math.random() < 0.2
-          ? MessageVisibility.ONLY_ADMINS
-          : MessageVisibility.PUBLIC,
+      visibility,
     });
 };
 
 const sendMessagesInRoom = async ({ roomId }: { roomId: string }) => {
+  logger.info(`Sending messages in room ${roomId}`);
   const roomRef = await db
     .collection('rooms')
     .withConverter(roomConverter)
     .doc(roomId)
     .get();
 
-  const roomData = roomRef.data();
+  const room = roomRef.data();
 
-  if (!roomData) {
+  if (!room) {
     throw new Error(`Room ${roomId} not found`);
   }
 
-  const sendMessagesFrom = getRandomElements(roomData.joinedUserIds, 5);
+  // Get a random subset of readers to send messages from.
+  const sendMessagesFromReaders = getRandomElements(
+    excludePrivyUsers(room.readerIds),
+    3
+  );
 
+  logger.debug(
+    `Sending messages from ${sendMessagesFromReaders.length} readers`
+  );
+
+  // Send messages from readers
   await Promise.all(
-    sendMessagesFrom.map(userId => sendMessage({ roomId, userId }))
+    sendMessagesFromReaders.map(userId =>
+      sendMessage({ room, userId, visibility: MessageVisibility.ONLY_ADMINS })
+    )
+  );
+
+  // Get a random subset of writers to send messages from.
+  const sendMessagesFromWriters = getRandomElements(
+    excludePrivyUsers(room.writerIds),
+    3
+  );
+
+  logger.debug(
+    `Sending messages from ${sendMessagesFromWriters.length} writers`
+  );
+
+  // Send messages from writers
+  await Promise.all(
+    sendMessagesFromWriters.map(userId =>
+      sendMessage({ room, userId, visibility: MessageVisibility.PUBLIC })
+    )
   );
 };
 
@@ -92,18 +107,32 @@ export const startMessageMonkey = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const roomsRef = db.collection('rooms').withConverter(roomConverter);
-    const rooms = await roomsRef.get();
+    const rooms = (await roomsRef.get()).docs.map(doc => doc.data());
 
-    const numRoomsToMessage = faker.number.int({
-      min: 1,
-      max: rooms.size / 10,
-    });
+    const roomsWithUsers = rooms.filter(
+      room => excludePrivyUsers(room.joinedUserIds).length > 0
+    );
 
-    const allRoomIds = rooms.docs.map(doc => doc.id);
-    const roomsIdsToMessage = getRandomElements(allRoomIds, numRoomsToMessage);
+    if (roomsWithUsers.length !== 0) {
+      // Determine how many rooms to send messages in.
+      const numRoomsToMessage = faker.number.int({
+        min: 1,
+        max: Math.max(roomsWithUsers.length / 10, 2),
+      });
 
-    for (const roomId of roomsIdsToMessage) {
-      await sendMessagesInRoom({ roomId });
+      logger.info(`Sending messages in ${numRoomsToMessage} rooms`);
+
+      // Get a random subset of rooms to send messages in.
+      const roomsIdsToMessage = getRandomElements(
+        roomsWithUsers.map(room => room.id),
+        numRoomsToMessage
+      );
+
+      for (const roomId of roomsIdsToMessage) {
+        await sendMessagesInRoom({ roomId });
+      }
+    } else {
+      logger.info('No rooms with users to send messages in');
     }
 
     await sleepForRandom({

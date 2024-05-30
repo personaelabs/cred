@@ -1,11 +1,14 @@
-import { app } from '@cred/firebase';
+import { addWriterToRoom, app } from '@cred/firebase';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { faker } from '@faker-js/faker';
-import { User, roomConverter } from '@cred/shared';
+import { User, logger, roomConverter } from '@cred/shared';
 import { getRandomElements, sleepForRandom } from './utils';
 
 const db = getFirestore(app);
 
+/**
+ * Create a user with random name, pfp, and privy address
+ */
 const createUser = async () => {
   const userId = faker.string.uuid();
 
@@ -25,21 +28,29 @@ const createUser = async () => {
       },
     },
     connectedAddresses: [],
+    addedCreddd: [],
   };
 
-  console.log(`Creating user ${userId}`);
+  logger.info(`Creating user ${userId}`);
   await db.collection('users').doc(userId).set(userData);
   return userId;
 };
 
-const addUserToRoom = async ({
+/**
+ * Add a user to a room's `joinedUserIds` list
+ */
+const joinRoom = async ({
   userId,
   roomId,
 }: {
   userId: string;
   roomId: string;
 }) => {
-  console.log(`Adding user ${userId} to room ${roomId}`);
+  logger.info(`Adding user to room`, {
+    userId,
+    roomId,
+  });
+
   await db
     .collection('rooms')
     .doc(roomId)
@@ -61,17 +72,28 @@ export const startUserMonkey = async () => {
 
     const rooms = roomsRef.docs.map(doc => doc.data());
 
+    // Determine how many users to create.
+    // This is a random number between 1 and 5.
     const numUsersToCreate = faker.number.int({ min: 1, max: 5 });
 
     for (let i = 0; i < numUsersToCreate; i++) {
       const userId = await createUser();
 
+      // Determine how many rooms the created user should join.
       const numRoomsToJoin = faker.number.int({ min: 1, max: 3 });
 
+      // Get a random subset of rooms to join.
       const roomsToJoin = getRandomElements(rooms, numRoomsToJoin);
 
+      // Add the user to each room as a writer
       await Promise.all(
-        roomsToJoin.map(room => addUserToRoom({ userId, roomId: room.id }))
+        roomsToJoin.map(async room => {
+          // Add the user as a writer to the room
+          await addWriterToRoom({ userId, roomId: room.id });
+
+          // Now that the user is a writer in the room, add them to the room
+          await joinRoom({ userId, roomId: room.id });
+        })
       );
     }
 
