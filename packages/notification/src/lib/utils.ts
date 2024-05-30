@@ -5,8 +5,18 @@ import { logger } from '@cred/shared';
 const projectId = app.options.credential.projectId;
 
 // Dry run mode is enabled when running on a pull request or on a non-render environment
-export const DRY_RUN =
-  process.env.IS_PULL_REQUEST === 'true' || process.env.RENDER !== 'true';
+let DRY_RUN = false;
+
+if (
+  process.env.IS_PULL_REQUEST === 'true' &&
+  process.env.RENDER_GIT_BRANCH !== 'staging'
+) {
+  DRY_RUN = true;
+}
+
+if (process.env.RENDER !== 'true') {
+  DRY_RUN = true;
+}
 
 logger.info(`Google Cloud project ID: ${projectId}`);
 logger.info(`Running in ${DRY_RUN ? 'dry run' : 'production'} mode`);
