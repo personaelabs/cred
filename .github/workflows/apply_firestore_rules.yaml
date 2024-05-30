@@ -21,6 +21,6 @@ jobs:
         run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' > ./service-account.json
       - name: Apply security rules
         working-directory: ./packages/chat
-        run: firebase deploy --only firestore:default
+        run: firebase deploy --project cred-279bb
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./service-account.json

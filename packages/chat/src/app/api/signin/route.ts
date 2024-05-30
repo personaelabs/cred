@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
-import { User } from '@cred/shared';
+import { User, logger } from '@cred/shared';
 import { User as PrivyUser } from '@privy-io/server-auth';
 import { addWriterToRoom, app } from '@cred/firebase';
 import privy, { isAuthenticated } from '@/lib/backend/privy';
@@ -32,6 +32,7 @@ const initUser = async (user: PrivyUser) => {
         mutedRoomIds: [],
       },
     },
+    addedCreddd: [],
     connectedAddresses: [],
   };
 
@@ -61,7 +62,7 @@ const getFarcasterAddresses = async (fid: number) => {
   if (fcUser) {
     return [...fcUser.verified_addresses.eth_addresses, fcUser.custody_address];
   } else {
-    console.error(`Failed to get Farcaster user ${fid}`);
+    logger.error(`Failed to get Farcaster user ${fid}`);
     return [];
   }
 };

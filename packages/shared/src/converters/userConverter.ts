@@ -17,6 +17,7 @@ export const userConverter = {
       config: user.config,
       privyAddress: user.privyAddress,
       connectedAddresses: user.connectedAddresses,
+      addedCreddd: user.addedCreddd,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -30,6 +31,7 @@ export const userConverter = {
       config: data.config || defaultConfig,
       privyAddress: data.privyAddress || '',
       connectedAddresses: data.connectedAddresses || [],
+      addedCreddd: data.addedCreddd || [],
     };
 
     return user;

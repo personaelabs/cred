@@ -80,16 +80,16 @@ const Settings = () => {
         </div>
         <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem
+            icon="Link2"
+            text="My creddd"
+            to="/settings/creddd"
+            iconColor={theme.orange}
+          ></SettingsMenuItem>
+          <SettingsMenuItem
             icon="Wallet"
             text="Wallet"
             to="/settings/wallet"
             iconColor="#65a7f7"
-          ></SettingsMenuItem>
-          <SettingsMenuItem
-            icon="Link2"
-            text="Addresses"
-            to="/settings/connected-addresses"
-            iconColor={theme.orange}
           ></SettingsMenuItem>
           {/*
           <SettingsMenuItem
@@ -103,6 +103,9 @@ const Settings = () => {
         <Button variant="link" className="mt-10" onClick={onSignOutClick}>
           Sign out
         </Button>
+      </div>
+      <div className="w-full text-center opacity-40 select-text mb-1">
+        user: {user.id}
       </div>
     </Scrollable>
   );

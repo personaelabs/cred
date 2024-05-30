@@ -6,9 +6,11 @@ export * from './converters/roomConverter';
 export * from './converters/idempotencyKeyConverter';
 export * from './converters/newRoomNotifyIdempotencyKeyConverter';
 export * from './converters/roomReadTicketConverter';
+export * from './converters/userCredddConverter';
 export * from './utils';
 export { createRpcClient } from './jsonrpc';
 export { default as CredAbi } from './abi/Cred';
+export { default as logger } from './logger';
 
 export const CRED_CONTRACT_ADDRESS =
   '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';

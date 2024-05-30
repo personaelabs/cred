@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ChatMessage from '@/components/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
-import * as logger from '@/lib/logger';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -29,7 +28,6 @@ const Room = () => {
     mutate: sendMessage,
     isSuccess,
     reset,
-    error: sendError,
   } = useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
@@ -51,7 +49,6 @@ const Room = () => {
 
   const {
     messages,
-    error,
     isFetching,
     hasNextPage,
     fetchNextPage,
@@ -105,12 +102,6 @@ const Room = () => {
   }, [messages, latestReadMessageCreatedAt, updateReadTicket, signedInUser]);
 
   useEffect(() => {
-    if (sendError) {
-      console.error('Error sending message', sendError);
-    }
-  }, [sendError]);
-
-  useEffect(() => {
     if (room) {
       setOptions({
         title: room.name,
@@ -127,12 +118,6 @@ const Room = () => {
       });
     }
   }, [params.roomId, room, setOptions]);
-
-  useEffect(() => {
-    if (error) {
-      console.error('Error fetching messages', error);
-    }
-  }, [error]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -180,8 +165,6 @@ const Room = () => {
               hasMore={hasNextPage}
               inverse={true}
               next={() => {
-                console.log('next');
-                logger.log('next');
                 fetchNextPage();
               }}
               scrollableTarget="scrollableDiv"

@@ -10,6 +10,7 @@ export const roomConverter = {
       writerIds: room.writerIds,
       name: room.name,
       imageUrl: room.imageUrl,
+      isFeatured: room.isFeatured,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
@@ -22,6 +23,7 @@ export const roomConverter = {
       writerIds: data.writerIds,
       name: data.name,
       imageUrl: data.imageUrl,
+      isFeatured: data.isFeatured || false,
     };
 
     return room;

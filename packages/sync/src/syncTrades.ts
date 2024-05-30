@@ -6,6 +6,7 @@ import {
   CRED_SEPOLIA_CONTRACT_ADDRESS,
   CredAbi,
   tokenIdToRoomId,
+  logger,
 } from '@cred/shared';
 import { Hex, parseAbiItem, zeroAddress } from 'viem';
 import {
@@ -56,7 +57,7 @@ const syncTrades = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const latestBlock = await client.getBlockNumber();
-    console.log(`Synching from block ${synchedBlock} to ${latestBlock}`);
+    logger.info(`Synching from block ${synchedBlock} to ${latestBlock}`);
 
     for (let i = synchedBlock; i < latestBlock; ) {
       const fromBlock = i;
@@ -69,21 +70,27 @@ const syncTrades = async () => {
         toBlock,
       });
 
+      logger.info(`Found logs`, {
+        fromBlock,
+        toBlock,
+        logs: logs.length,
+      });
+
       for (const log of logs) {
         const { from, to, id } = log.args;
 
         if (!to) {
-          console.warn('No "to" to address found in log');
+          logger.error('No "to" to address found in log');
           continue;
         }
 
         if (!from) {
-          console.warn('No "from" address found in log');
+          logger.error('No "from" address found in log');
           continue;
         }
 
         if (!id) {
-          console.warn('No id found in log');
+          logger.error('No id found in log');
           continue;
         }
 
@@ -93,7 +100,7 @@ const syncTrades = async () => {
           const toUser = await getUserByAddress(to.toLowerCase() as Hex);
 
           if (!toUser) {
-            console.warn('toUser not found:', to);
+            logger.warn('toUser not found:', to);
             continue;
           }
 

@@ -30,7 +30,7 @@ const getCurrentSellPrice = async (roomIdBigInt: bigint) => {
   return await readContract(wagmiConfig, {
     abi: CredAbi,
     address: CRED_CONTRACT_ADDRESS,
-    functionName: 'getBuyPrice',
+    functionName: 'getSellPrice',
     args: [roomIdBigInt],
   });
 };
@@ -88,6 +88,7 @@ const useSellKey = (roomId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
       queryClient.invalidateQueries({ queryKey: ['joined-rooms'] });
+      queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
 
       toast.success('Sold key');
     },

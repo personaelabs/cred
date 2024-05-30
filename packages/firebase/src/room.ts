@@ -59,15 +59,6 @@ export const addReaderToRoom = async ({
       await roomDoc.update({
         readerIds: FieldValue.arrayUnion(userId),
       });
-      console.log('Added reader to room', {
-        roomId,
-        userId,
-      });
-    } else {
-      console.warn('Reader already in room:', {
-        roomId,
-        userId,
-      });
     }
   } else {
     console.error(`Room not found: ${roomId}`);
@@ -94,15 +85,6 @@ export const removeUserFromRoom = async ({
       await roomDoc.update({
         readerIds: FieldValue.arrayRemove(userId),
         joinedUserIds: FieldValue.arrayRemove(userId),
-      });
-      console.log('Removed reader from room', {
-        roomId,
-        userId,
-      });
-    } else {
-      console.warn('Reader not in room:', {
-        roomId,
-        userId,
       });
     }
   } else {

@@ -22,7 +22,6 @@ export const getRoomLatestMessage = async ({
   });
 
   const docs = (await getDocs(q)).docs;
-  console.log({ q, isSingedInUserAdmin });
 
   if (docs.length === 0) {
     return null;

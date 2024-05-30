@@ -1,7 +1,6 @@
-import axios from './axios';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex, formatEther } from 'viem';
+import { Hex, formatEther, keccak256 } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 import {
@@ -17,7 +16,6 @@ import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { BottomSheetType, ModalType } from '@/types';
 
-const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
 const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
 export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {
@@ -94,11 +92,6 @@ export const buildMessageQuery = ({
         limit(pageSize)
       );
 };
-
-export const constructAttestationMessage = (address: string) => {
-  return `\n${SIG_SALT}Personae attest:${address}`;
-};
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -254,14 +247,6 @@ export const postJSON = async <T>({
   return result;
 };
 
-export const log = async (message: string) => {
-  if (process.env.NODE_ENV !== 'production') {
-    await axios.post('api/log', {
-      message,
-    });
-  }
-};
-
 /**
  * Convert a `Hex` to a Buffer
  */
@@ -271,4 +256,8 @@ export const fromHexString = (hexString: Hex, size?: number): Buffer => {
     : hexString.slice(2);
 
   return Buffer.from(padded, 'hex');
+};
+
+export const getProofHash = (proof: Hex) => {
+  return keccak256(proof);
 };

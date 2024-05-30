@@ -1,10 +1,11 @@
+import { logger } from '@cred/shared';
 import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get('url');
-  console.log('proxy:', url);
 
   if (!url) {
+    logger.error('Missing URL parameter');
     return new Response('Missing URL parameter', {
       status: 400,
     });

@@ -9,7 +9,6 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import db from '@/lib/firestore';
-import { log } from '@/lib/logger';
 import {
   requestNotificationToken,
   setNotificationConfigured,
@@ -30,7 +29,7 @@ const registerNotificationToken = async (userId: string) => {
       ).tokens.some(_token => _token.token === token);
 
       if (tokenExists) {
-        console.log('Notification token already registered');
+        // Notification token already exists
         return;
       }
     } else {
@@ -40,8 +39,6 @@ const registerNotificationToken = async (userId: string) => {
       });
     }
 
-    log('Registring notification token');
-    console.log('Registring notification token');
     await updateDoc(notificationTokenDoc, {
       userId,
       tokens: arrayUnion({

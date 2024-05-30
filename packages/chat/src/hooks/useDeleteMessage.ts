@@ -3,6 +3,7 @@ import db from '@/lib/firestore';
 import { useMutation } from '@tanstack/react-query';
 import { deleteObject, getStorage, ref } from 'firebase/storage';
 import { messageConverter } from '@cred/shared';
+import * as Sentry from '@sentry/nextjs';
 
 const deleteMessage = async ({
   roomId,
@@ -30,7 +31,7 @@ const deleteMessage = async ({
         await deleteObject(storageRef);
       } catch (err) {
         console.error(err);
-        // TODO Report error to Sentry
+        Sentry.captureException(err);
       }
     }) || []
   );

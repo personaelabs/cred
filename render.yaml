@@ -10,6 +10,7 @@ services:
     startCommand: NODE_ENV=production pnpm -F frontend start
     preDeployCommand: pnpm -F db migrate:prod
     pullRequestPreviewsEnabled: false
+    autoDeploy: false
     buildFilter:
       paths:
         - packages/frontend/**
@@ -33,10 +34,11 @@ services:
     region: oregon
     buildCommand: pnpm i && pnpm -F chat build
     startCommand: NODE_ENV=production pnpm -F chat start
+    autoDeploy: false
     buildFilter:
       paths:
-        - packages/chat/**
-        - packages/shared/**
+        - packages/chat/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -63,14 +65,11 @@ services:
     preDeployCommand: populate
     pullRequestPreviewsEnabled: false
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
-        - packages/indexer-rs/**
-        - packages/db/**
-      ignoredPaths:
-        - packages/notification/**
-        - packages/circuit/**
-        - packages/frontend/**
+        - packages/indexer-rs/**/*
+        - packages/db/**/**/*
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -89,13 +88,11 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F sync start
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
-        - packages/sync/**
-        - packages/shared/**
-      ignoredPaths:
-        - packages/app/**
-        - packages/api/**
+        - packages/sync/**/*
+        - packages/shared/**/*  
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -119,13 +116,11 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F notification start
     rootDir: ./
+    autoDeploy: false
     buildFilter:
       paths:
-        - packages/notification/**
-        - packages/shared/**
-      ignoredPaths:
-        - packages/chat/**
-        - packages/app/**
+        - packages/notification/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -142,10 +137,11 @@ services:
     startCommand: pnpm -F monkey start
     rootDir: ./
     pullRequestPreviewsEnabled: false
+    autoDeploy: false
     buildFilter:
       paths:
-        - packages/monkey/**
-        - packages/shared/**
+        - packages/monkey/**/*
+        - packages/shared/**/*
     envVars:
       - key: NODE_VERSION
         value: 18.17.0

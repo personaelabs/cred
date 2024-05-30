@@ -2,11 +2,11 @@ import { app } from '@cred/firebase';
 import {
   newRoomNotifyIdempotencyKeyConverter,
   roomConverter,
+  logger,
 } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { notificationTokens } from './notificationTokens';
-import logger from './logger';
 import { IS_PROD } from './utils';
 
 const messaging = getMessaging(app);
@@ -64,7 +64,6 @@ export const sendNewRoomNotifications = async () => {
         for (const writerId of addedWriterIds) {
           const tokens = notificationTokens.get(writerId);
           if (!tokens) {
-            console.log(`No notification tokens found for ${writerId}`);
             continue;
           }
 

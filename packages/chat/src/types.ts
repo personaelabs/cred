@@ -88,6 +88,12 @@ export interface ConnectAddressRequestBody {
   groupIds: string[]; // Temporary
 }
 
+export interface AddCredddRequestBody {
+  proof: Hex;
+  privyAddress: Hex;
+  privyAddressSignature: Hex;
+}
+
 export interface NeynarUserResponse {
   fid: number;
   username: string;
