@@ -1,4 +1,4 @@
-import { roomConverter } from '@cred/shared';
+import { roomConverter, logger } from '@cred/shared';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import app from './app';
 
@@ -24,18 +24,9 @@ export const addWriterToRoom = async ({
       await roomDoc.update({
         writerIds: FieldValue.arrayUnion(userId),
       });
-      console.info('Added writer to room', {
-        roomId,
-        userId,
-      });
-    } else {
-      console.warn('Writer already in room:', {
-        roomId,
-        userId,
-      });
     }
   } else {
-    console.error(`Room not found: ${roomId}`);
+    logger.error(`Room not found: ${roomId}`);
   }
 };
 
@@ -61,7 +52,7 @@ export const addReaderToRoom = async ({
       });
     }
   } else {
-    console.error(`Room not found: ${roomId}`);
+    logger.error(`Room not found: ${roomId}`);
   }
 };
 
@@ -88,6 +79,6 @@ export const removeUserFromRoom = async ({
       });
     }
   } else {
-    console.error(`Room not found: ${roomId}`);
+    logger.error(`Room not found: ${roomId}`);
   }
 };

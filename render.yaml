@@ -136,7 +136,6 @@ services:
     buildCommand: pnpm i
     startCommand: pnpm -F monkey start
     rootDir: ./
-    pullRequestPreviewsEnabled: false
     autoDeploy: false
     buildFilter:
       paths:

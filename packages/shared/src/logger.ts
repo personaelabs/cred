@@ -1,8 +1,20 @@
 import winston, { createLogger } from 'winston';
 
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 const winstonTransports: any[] = [
   new winston.transports.Console({
     level: 'debug',
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.printf(({ level, message, ...meta }) => {
+        delete meta.component;
+        return `${level}: ${message} ${JSON.stringify(meta, null, 2)}`;
+      })
+    ),
   }),
 ];
 
