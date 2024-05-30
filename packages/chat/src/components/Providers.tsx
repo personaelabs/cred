@@ -12,7 +12,7 @@ import {
 } from '@/contexts/HeaderContext';
 import MobileHeader from '@/components/MobileHeader';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -35,6 +35,7 @@ import { getChain } from '@/lib/utils';
 import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
+import mixpanel from 'mixpanel-browser';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -62,6 +63,8 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
   const { openedSheet, closeSheet } = useBottomSheet();
+  const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
+  console.log({ mixpanelInitialized });
 
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
@@ -69,6 +72,27 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
+
+  useEffect(() => {
+    if (signedInUser) {
+      mixpanel.init('4f57a2e1c29d0e91fe07d1292e325520', {
+        debug: process.env.NODE_ENV === 'development',
+        track_pageview: false,
+        persistence: 'localStorage',
+      });
+
+      mixpanel.identify(signedInUser.id);
+      setMixpanelInitialized(true);
+    }
+  }, [signedInUser]);
+
+  useEffect(() => {
+    if (mixpanelInitialized) {
+      mixpanel.track('page_view', {
+        pathname,
+      });
+    }
+  }, [mixpanelInitialized, pathname]);
 
   useEffect(() => {
     if (isPwa === false && isMobile === true) {
