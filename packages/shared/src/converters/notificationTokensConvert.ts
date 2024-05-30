@@ -14,14 +14,6 @@ export const notificationTokensConvert = {
 
     const tokens = (data.tokens as UserNotificationTokens['tokens']).map(
       token => {
-        /*
-        const createdAt = token.createdAt
-              ? new Date(
-                  (token.createdAt as FirestoreTimestamp).seconds * 1000
-                )
-              : new Date();
-            */
-
         const createdAt = new Date(
           (token.createdAt as FirestoreTimestamp).seconds * 1000
         );
@@ -29,6 +21,7 @@ export const notificationTokensConvert = {
         return {
           token: token.token,
           createdAt,
+          enabled: token.enabled !== false ? true : false,
         };
       }
     );
