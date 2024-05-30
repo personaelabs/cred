@@ -35,7 +35,7 @@ if (DATADOG_API_KEY) {
   winstonTransports.push(
     new winston.transports.Http({
       host: 'http-intake.logs.datadoghq.com',
-      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${hostname}&ddtags=env:${env}`,
+      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${hostname}&ddtags="env:${env}"`,
       ssl: true,
       level: 'warn',
     })
