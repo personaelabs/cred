@@ -67,12 +67,14 @@ const RoomMembersList = (props: RoomMembersListProps) => {
 
 type EligibleRoomItemProps = {
   room: Room;
+  isPurchased: boolean;
 };
 
 const EligibleRoomItem = memo(function EligibleRoom(
   props: EligibleRoomItemProps
 ) {
   const { name, id } = props.room;
+  const { isPurchased } = props;
   const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
 
@@ -92,8 +94,12 @@ const EligibleRoomItem = memo(function EligibleRoom(
     <div className="border-b-2 py-4">
       <div className="flex flex-col px-5">
         <div className="flex flex-row items-center justify-between">
-          <div className="text-lg text-wrap w-[70%] font-bold text-primary">
-            {name}
+          <div className="w-[70%]">
+            <div
+              className={`text-lg text-wrap w-full ${isPurchased ? '' : 'text-primary font-bold'}`}
+            >
+              {name}
+            </div>
           </div>
           <div className="text-center w-[30%]">
             <Button onClick={onJoinClick} disabled={isJoining} variant="link">
@@ -215,7 +221,14 @@ export default function Home() {
         <></>
       )}
       {joinableRooms.map(room => (
-        <EligibleRoomItem key={room.id} room={room}></EligibleRoomItem>
+        <EligibleRoomItem
+          key={room.id}
+          room={room}
+          isPurchased={
+            room.readerIds.includes(signedInUser.id) &&
+            !room.writerIds.includes(signedInUser.id)
+          }
+        ></EligibleRoomItem>
       ))}
       {buyableRooms.length > 0 ? (
         <div className="mt-[32px] px-5 text-center opacity-60">
