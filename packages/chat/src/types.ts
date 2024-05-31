@@ -119,3 +119,7 @@ export enum ModalType {
   // eslint-disable-next-line no-unused-vars
   REPLY_AS_ADMIN = 'REPLY_AS_ADMIN',
 }
+
+export interface SetUsernameRequestBody {
+  username: string;
+}

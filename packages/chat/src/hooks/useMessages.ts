@@ -4,9 +4,9 @@ import { Message } from '@cred/shared';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
 import { MessageWithUserData } from '@/types';
-import useUsers from './useUsers';
 import useRoom from './useRoom';
 import { buildMessageQuery } from '@/lib/utils';
+import useUsers from './useUsers';
 
 export const toMessageWithUserData = (
   message: Message
@@ -19,7 +19,7 @@ export const toMessageWithUserData = (
     },
     id: message.id,
     text: message.body,
-    createdAt: (message.createdAt || new Date()) as Date,
+    createdAt: new Date((message.createdAt || new Date()) as Date),
     replyToId: message.replyTo,
     images: message.images,
     visibility: message.visibility,
@@ -43,7 +43,7 @@ const getMessages = async ({
     viewerId: signedInUserId,
     roomId,
     pageSize: PAGE_SIZE,
-    from: lastMessage?.createdAt || new Date(0),
+    from: lastMessage?.createdAt ? new Date(lastMessage.createdAt) : undefined,
   });
 
   const docs = (await getDocs(q)).docs;
@@ -56,10 +56,12 @@ const useListenToMessages = ({
   roomId,
   isSingedInUserAdmin,
   signedInUserId,
+  enabled,
 }: {
   roomId: string;
   isSingedInUserAdmin: boolean;
   signedInUserId: string | null;
+  enabled: boolean;
 }) => {
   const queryClient = useQueryClient();
   const [newMessages, setNewMessages] = useState<MessageWithUserData[]>([]);
@@ -69,63 +71,52 @@ const useListenToMessages = ({
   );
 
   useEffect(() => {
-    if (signedInUserId) {
+    if (signedInUserId && enabled) {
       const q = buildMessageQuery({
         isAdminView: isSingedInUserAdmin,
         viewerId: signedInUserId,
         roomId,
-        pageSize: PAGE_SIZE,
+        pageSize: 10,
       });
 
-      const unsubscribe = onSnapshot(q, async snapshot => {
-        for (const change of snapshot.docChanges()) {
-          const docData = change.doc.data();
-          if (change.type === 'added') {
-            const message = toMessageWithUserData(docData);
-            setNewMessages(prev => [...prev, message]);
-          } else if (change.type === 'removed') {
-            setRemovedMessages(prev => [...prev, docData.id]);
-          } else if (change.type === 'modified') {
-            const message = toMessageWithUserData(docData);
-            setUpdatedMessages(prev => [
-              ...prev.filter(m => m.id !== message.id),
-              message,
-            ]);
+      const unsubscribe = onSnapshot(
+        q,
+        async snapshot => {
+          for (const change of snapshot.docChanges()) {
+            const docData = change.doc.data();
+            if (change.type === 'added') {
+              const message = toMessageWithUserData(docData);
+              setNewMessages(prev => [...prev, message]);
+            } else if (change.type === 'removed') {
+              setRemovedMessages(prev => [...prev, docData.id]);
+            } else if (change.type === 'modified') {
+              const message = toMessageWithUserData(docData);
+              setUpdatedMessages(prev => [
+                ...prev.filter(m => m.id !== message.id),
+                message,
+              ]);
+            }
           }
+        },
+        err => {
+          console.error(err);
         }
-      });
-
+      );
       return () => {
         unsubscribe();
       };
     }
-  }, [roomId, queryClient, isSingedInUserAdmin, signedInUserId]);
+  }, [roomId, queryClient, isSingedInUserAdmin, signedInUserId, enabled]);
 
   return { newMessages, removedMessages, updatedMessages };
 };
 
-const useMessages = ({
-  roomId,
-  initMessage,
-}: {
-  roomId: string;
-  initMessage: MessageWithUserData | null;
-}) => {
+const useMessages = ({ roomId }: { roomId: string }) => {
   const { data: signedInUser } = useSignedInUser();
   const { data: room } = useRoom(roomId);
-  // Start listening for new messages after the first fetch
-  const [allMessages, setAllMessages] = useState<MessageWithUserData[]>([]);
 
   const isSingedInUserAdmin =
     signedInUser && room ? room.writerIds.includes(signedInUser.id) : false;
-
-  const { newMessages, removedMessages, updatedMessages } = useListenToMessages(
-    {
-      roomId,
-      isSingedInUserAdmin,
-      signedInUserId: signedInUser?.id || null,
-    }
-  );
 
   const result = useInfiniteQuery({
     queryKey: ['messages', { roomId }],
@@ -143,40 +134,46 @@ const useMessages = ({
 
       return messages;
     },
-    initialPageParam: initMessage,
+    initialPageParam: null,
     enabled: !!signedInUser && !!room,
     getNextPageParam: (lastPage, _) => lastPage[lastPage.length - 1],
-    // staleTime: Infinity,
   });
 
-  // Merge new messages with the existing messages
-  useEffect(() => {
-    const fetchedMessages = result.data?.pages.flat().reverse() || [];
+  const { newMessages, removedMessages, updatedMessages } = useListenToMessages(
+    {
+      roomId,
+      isSingedInUserAdmin,
+      signedInUserId: signedInUser?.id || null,
+      enabled: !!result.data,
+    }
+  );
 
-    const _allMessages = newMessages
-      ? [...fetchedMessages, ...newMessages]
-      : fetchedMessages;
+  // Merge the new messages to the existing messages
+  const fetchedMessages = result.data?.pages.flat() || [];
 
-    setAllMessages(
-      _allMessages
-        // Remove duplicates
-        .filter(
-          (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
-        )
-        // Remove deleted messages
-        .filter(msg => !removedMessages.includes(msg.id))
-        // Update edited messages
-        .map(msg => updatedMessages.find(m => m.id === msg.id) || msg)
-        // Sort by createdAt
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-    );
-  }, [result.data, newMessages, removedMessages, updatedMessages]);
+  const _allMessages = newMessages
+    ? [...fetchedMessages, ...newMessages]
+    : fetchedMessages;
+
+  const messages = _allMessages
+    // Remove duplicates
+    .filter(
+      (msg, index, self) => index === self.findIndex(t => t.id === msg.id)
+    )
+    // Remove deleted messages
+    .filter(msg => !removedMessages.includes(msg.id))
+    // Update edited messages
+    .map(msg => updatedMessages.find(m => m.id === msg.id) || msg)
+    // Sort by createdAt
+    .sort((a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
 
   // Get user images
-  const usersQueryResult = useUsers(allMessages.map(m => m.user.id));
+  const usersQueryResult = useUsers(messages.map(m => m.user.id));
 
   // Merge user data with messages
-  const messagesWithUserData = allMessages.map(msg => {
+  const messagesWithUserData = messages.map(msg => {
     const user = usersQueryResult.data?.find(
       u => u?.id?.toString() === msg.user.id
     );

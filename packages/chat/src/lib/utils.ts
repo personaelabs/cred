@@ -4,17 +4,27 @@ import { Hex, formatEther, keccak256 } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 import {
+  Timestamp,
   collection,
   limit,
   or,
   orderBy,
   query,
-  startAfter,
+  startAt,
   where,
 } from 'firebase/firestore';
 import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { BottomSheetType, ModalType } from '@/types';
+
+export const MIN_USERNAME_LENGTH = 3;
+export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
+
+export const isValidUsername = (username: string) => {
+  return (
+    username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
+  );
+};
 
 const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
@@ -64,7 +74,7 @@ export const buildMessageQuery = ({
       ? query(
           messagesRef,
           orderBy('createdAt', 'desc'),
-          startAfter(from),
+          startAt(Timestamp.fromDate(from)),
           limit(pageSize)
         )
       : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
@@ -82,7 +92,7 @@ export const buildMessageQuery = ({
         messagesRef,
         onlyPublic,
         orderBy('createdAt', 'desc'),
-        startAfter(from),
+        startAt(Timestamp.fromDate(from)),
         limit(pageSize)
       )
     : query(

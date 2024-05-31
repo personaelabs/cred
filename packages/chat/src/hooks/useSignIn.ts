@@ -17,8 +17,13 @@ const useSignIn = () => {
       if (!accessToken) {
         throw new Error('Failed to get access token');
       }
-      await authSignedInUser(accessToken);
-      router.push('/enable-notifications');
+      const usernameIsSet = await authSignedInUser(accessToken);
+
+      if (usernameIsSet) {
+        router.push('/enable-notifications');
+      } else {
+        router.push('/setup-username');
+      }
     },
   });
 
