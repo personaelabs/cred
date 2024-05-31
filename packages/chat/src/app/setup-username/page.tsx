@@ -3,21 +3,17 @@ import { Input } from '@/components/ui/input';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { isUsernameAvailable } from '@/lib/username';
+import {
+  isValidUsername,
+  USERNAME_REGEX,
+  MIN_USERNAME_LENGTH,
+} from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
 import useDebounce from '@/hooks/useDebounce';
 import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useSetUsername from '@/hooks/useSetUsername';
 import { useRouter } from 'next/navigation';
-
-const MIN_USERNAME_LENGTH = 3;
-const USERNAME_REGEX = /^[a-zA-Z0-9_.]+$/;
-
-const isValidUsername = (username: string) => {
-  return (
-    username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
-  );
-};
 
 interface UsernameAvailabilityProps {
   username: string;

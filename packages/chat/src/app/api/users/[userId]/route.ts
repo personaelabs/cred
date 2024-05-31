@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { SetUsernameRequestBody } from '@/types';
 import { setUsername, usernameExists } from '@/lib/backend/username';
+import { isValidUsername } from '@/lib/utils';
 
 /**
  * Set the username for a user.
@@ -17,6 +18,15 @@ export async function PATCH(
 ) {
   const body = (await req.json()) as SetUsernameRequestBody;
   const username = body.username;
+
+  if (!isValidUsername(username)) {
+    return Response.json(
+      {
+        error: 'Invalid username',
+      },
+      { status: 400 }
+    );
+  }
 
   // Check that the username is not already taken
   if (await usernameExists(username)) {
