@@ -1,7 +1,7 @@
 {
   "name": "@cred/monkey",
   "scripts": {
-    "start": "pnpm lint &&  && tsx src/index.ts",
+    "start": "pnpm lint && tsx src/index.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
