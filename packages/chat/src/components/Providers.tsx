@@ -41,7 +41,6 @@ import {
   getAuth,
   setPersistence,
 } from 'firebase/auth';
-import { isAuthenticated } from '@/lib/auth';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -110,11 +109,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       if (isPwa === false && isMobile === true) {
         router.push('/install-pwa');
       } else if (ready) {
-        if (
-          !authenticated ||
-          !signedInUser ||
-          !(await isAuthenticated(signedInUser.id))
-        ) {
+        if (!authenticated) {
           router.replace('/signin');
         }
       } else if (!isNotificationConfigured()) {
