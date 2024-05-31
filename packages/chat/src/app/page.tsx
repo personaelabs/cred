@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useAllRooms from '@/hooks/useAllRooms';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
@@ -168,12 +168,10 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
   );
 });
 
-export default function Home() {
+const Home = () => {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
-  const [joinableRooms, setJoinableRooms] = useState<Room[]>([]);
-  const [buyableRooms, setBuyableRooms] = useState<Room[]>([]);
 
   useEffect(() => {
     setOptions({
@@ -184,27 +182,23 @@ export default function Home() {
 
   const { data: allRooms } = useAllRooms();
 
-  useEffect(() => {
-    if (allRooms && signedInUser) {
-      const _joinableRooms = allRooms.filter(
-        room =>
-          !room.joinedUserIds.includes(signedInUser.id) &&
-          (room.writerIds.includes(signedInUser.id) ||
-            room.readerIds.includes(signedInUser.id))
-      );
-
-      setJoinableRooms(_joinableRooms);
-
-      const _buyableRooms = allRooms.filter(
+  const buyableRooms = signedInUser
+    ? allRooms.filter(
         room =>
           !room.joinedUserIds.includes(signedInUser.id) &&
           !room.writerIds.includes(signedInUser.id) &&
           !room.readerIds.includes(signedInUser.id)
-      );
+      )
+    : [];
 
-      setBuyableRooms(_buyableRooms);
-    }
-  }, [allRooms, signedInUser]);
+  const joinableRooms = signedInUser
+    ? allRooms.filter(
+        room =>
+          !room.joinedUserIds.includes(signedInUser.id) &&
+          (room.writerIds.includes(signedInUser.id) ||
+            room.readerIds.includes(signedInUser.id))
+      )
+    : [];
 
   if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
@@ -254,4 +248,6 @@ export default function Home() {
         ))}
     </div>
   );
-}
+};
+
+export default Home;

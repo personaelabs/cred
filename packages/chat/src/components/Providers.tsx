@@ -36,6 +36,11 @@ import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
+import {
+  browserSessionPersistence,
+  getAuth,
+  setPersistence,
+} from 'firebase/auth';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -73,6 +78,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
+    const auth = getAuth();
+    setPersistence(auth, browserSessionPersistence);
+  }, []);
+
+  useEffect(() => {
     if (signedInUser) {
       mixpanel.init('4f57a2e1c29d0e91fe07d1292e325520', {
         debug: process.env.NODE_ENV === 'development',
@@ -102,6 +112,19 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, [isPwa, router, signedInUser, isMobile]);
+
+  useEffect(() => {
+    (async () => {
+      const canRedirectToSignIn = isPwa === true || isMobile === false;
+
+      if (canRedirectToSignIn) {
+        await getAuth().authStateReady();
+        if (!getAuth().currentUser) {
+          router.replace('/signin');
+        }
+      }
+    })();
+  }, [isMobile, isPwa, router]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({
