@@ -250,7 +250,7 @@ impl LogSyncEngine {
 
     /// Sync contract logs up to the given block number
     pub async fn sync_to_block(&self, to_block: BlockNum) {
-        let batch_size = 10;
+        let batch_size = 1;
 
         // Calculate the total number of chunks to sync
         let num_total_chunks =
