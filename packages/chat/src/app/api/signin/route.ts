@@ -1,7 +1,8 @@
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
-import { User, logger } from '@cred/shared';
+import { User } from '@cred/shared';
+import logger from '@/lib/backend/logger';
 import { User as PrivyUser } from '@privy-io/server-auth';
 import { addWriterToRoom, app } from '@cred/firebase';
 import privy, { isAuthenticated } from '@/lib/backend/privy';

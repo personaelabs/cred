@@ -8,7 +8,7 @@ import {
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
 import { CredAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';
-import { logger } from '@cred/shared';
+import logger from '@/lib/backend/logger';
 import client from '@/lib/backend/viemClient';
 import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
 

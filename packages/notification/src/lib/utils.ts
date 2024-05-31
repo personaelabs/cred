@@ -1,5 +1,5 @@
 import { app } from '@cred/firebase';
-import { logger } from '@cred/shared';
+import logger from './logger';
 
 // @ts-ignore
 const projectId = app.options.credential.projectId;
@@ -17,6 +17,7 @@ if (
 if (process.env.RENDER !== 'true') {
   DRY_RUN = true;
 }
+export { DRY_RUN };
 
 logger.info(`Google Cloud project ID: ${projectId}`);
 logger.info(`Running in ${DRY_RUN ? 'dry run' : 'production'} mode`);

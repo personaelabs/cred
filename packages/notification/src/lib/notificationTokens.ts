@@ -2,9 +2,9 @@ import { app } from '@cred/firebase';
 import {
   UserNotificationTokens,
   notificationTokensConvert,
-  logger,
 } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
+import logger from './logger';
 
 const db = getFirestore(app);
 

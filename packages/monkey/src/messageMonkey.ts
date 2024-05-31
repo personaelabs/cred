@@ -5,11 +5,11 @@ import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import {
   MessageVisibility,
   Room,
-  logger,
   messageConverter,
   roomConverter,
   userConverter,
 } from '@cred/shared';
+import logger from './logger';
 
 const db = getFirestore(app);
 
