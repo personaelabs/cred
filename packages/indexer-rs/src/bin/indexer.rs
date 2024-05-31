@@ -156,11 +156,15 @@ async fn main() {
 
     let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
+    let sever_thread = tokio::spawn(async move {
+        start_server(rocksdb_client.clone(), pg_client.clone()).await;
+    });
+
     // Run the sync and indexing jobs concurrently
     join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
         intrinsic_creddd_sync_job,
-        start_server()
+        sever_thread
     );
 }
