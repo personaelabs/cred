@@ -5,12 +5,19 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import { isUsernameAvailable } from '@/lib/username';
 import { useCallback, useEffect, useState } from 'react';
 import useDebounce from '@/hooks/useDebounce';
-import { Loader2 } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useSetUsername from '@/hooks/useSetUsername';
 import { useRouter } from 'next/navigation';
 
 const MIN_USERNAME_LENGTH = 3;
+const USERNAME_REGEX = /^[a-zA-Z0-9_.]+$/;
+
+const isValidUsername = (username: string) => {
+  return (
+    username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
+  );
+};
 
 interface UsernameAvailabilityProps {
   username: string;
@@ -37,8 +44,17 @@ const UsernameAvailability = (props: UsernameAvailabilityProps) => {
     );
   }
 
+  if (USERNAME_REGEX.test(username) === false) {
+    return (
+      <div className="text-red-500 text-sm">
+        Username contains invalid characters
+      </div>
+    );
+  }
+
   return isAvailable ? (
-    <div className="text-green-500 text-sm text-left">
+    <div className="text-green-500 text-sm text-left flex h-full flex-row items-center">
+      <Check className="w-3 h-3 mr-1"></Check>
       Username is available
     </div>
   ) : (
@@ -109,7 +125,7 @@ const SetupUsernamePage = () => {
     return <></>;
   }
 
-  const canGoNext = username.length >= MIN_USERNAME_LENGTH && usernameAvailable;
+  const canGoNext = usernameAvailable && isValidUsername(username);
 
   return (
     <div className="w-full h-full flex-col">
