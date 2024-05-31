@@ -4,7 +4,6 @@ import {
   messageConverter,
   roomConverter,
   userConverter,
-  logger,
   Room,
   Message,
 } from '@cred/shared';
@@ -14,6 +13,7 @@ import { app } from '@cred/firebase';
 import { notificationTokens } from './notificationTokens';
 import { DRY_RUN } from './utils';
 import { MessageNotificationType } from '../types';
+import logger from './logger';
 
 const messaging = getMessaging(app);
 const db = getFirestore(app);

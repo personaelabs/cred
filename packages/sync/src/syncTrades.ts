@@ -6,7 +6,6 @@ import {
   CRED_SEPOLIA_CONTRACT_ADDRESS,
   CredAbi,
   tokenIdToRoomId,
-  logger,
 } from '@cred/shared';
 import { Hex, parseAbiItem, zeroAddress } from 'viem';
 import {
@@ -14,6 +13,7 @@ import {
   getUserByAddress,
   removeUserFromRoom,
 } from '@cred/firebase';
+import logger from './lib/logger';
 
 const chain = getChain();
 

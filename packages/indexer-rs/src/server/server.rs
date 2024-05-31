@@ -1,23 +1,15 @@
-use crate::{
-    postgres::init_postgres,
-    server::jsonrpc::{
-        get_address_groups::get_address_groups, get_creddd::get_creddd,
-        get_group_by_merkle_root::get_group_by_merkle_root,
-        get_group_merkle_tree::get_group_merkle_tree, get_groups::get_groups,
-    },
-    ROCKSDB_PATH,
+use crate::server::jsonrpc::{
+    get_address_groups::get_address_groups, get_creddd::get_creddd,
+    get_group_by_merkle_root::get_group_by_merkle_root,
+    get_group_merkle_tree::get_group_merkle_tree, get_groups::get_groups,
 };
 use jsonrpc_http_server::jsonrpc_core::*;
 use jsonrpc_http_server::*;
 use log::info;
-use rocksdb::{Options, DB};
+use rocksdb::DB;
 use std::sync::Arc;
 
-pub async fn start_server() {
-    let db_options = Options::default();
-    let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
-    let pg_client = init_postgres().await;
-
+pub async fn start_server(rocksdb_conn: Arc<DB>, pg_client: Arc<tokio_postgres::Client>) {
     let mut io = IoHandler::default();
 
     let pg_client_moved = pg_client.clone();

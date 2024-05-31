@@ -1,8 +1,9 @@
 {
   "name": "@cred/notification",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "sendTestMessage": "tsx src/scripts/sendTestMessage.ts"
+    "start": "pnpm lint && tsx src/index.ts",
+    "sendTestMessage": "pnpm lint && tsx src/scripts/sendTestMessage.ts",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@cred/shared": "workspace:*",

@@ -1,8 +1,9 @@
 import { addWriterToRoom, app } from '@cred/firebase';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { faker } from '@faker-js/faker';
-import { User, logger, roomConverter } from '@cred/shared';
+import { User, roomConverter } from '@cred/shared';
 import { getRandomElements, sleepForRandom } from './utils';
+import logger from './logger';
 
 const db = getFirestore(app);
 

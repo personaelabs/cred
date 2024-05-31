@@ -1,6 +1,5 @@
 import { app } from '@cred/firebase';
 import {
-  logger,
   CredAbi,
   CRED_SEPOLIA_CONTRACT_ADDRESS,
   getRoomTokenId,
@@ -12,6 +11,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
 import { getRandomElements, sleep, sleepForRandom } from './utils';
 import { faker } from '@faker-js/faker';
+import logger from './logger';
 
 const db = getFirestore(app);
 

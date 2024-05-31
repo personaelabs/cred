@@ -38,6 +38,7 @@ impl CoingeckoClient {
             Chain::Optimism => "optimism",
             Chain::Base => "base",
             Chain::Arbitrum => "arbitrum",
+            Chain::Blast => "blast",
         };
 
         let url = format!(

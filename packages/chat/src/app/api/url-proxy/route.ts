@@ -1,4 +1,4 @@
-import { logger } from '@cred/shared';
+import logger from '@/lib/backend/logger';
 import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {

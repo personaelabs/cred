@@ -1,7 +1,8 @@
 {
   "name": "@cred/monkey",
   "scripts": {
-    "start": "tsx src/index.ts"
+    "start": "pnpm lint &&  && tsx src/index.ts",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@cred/firebase": "workspace:*",

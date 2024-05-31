@@ -2,12 +2,12 @@ import { app } from '@cred/firebase';
 import {
   newRoomNotifyIdempotencyKeyConverter,
   roomConverter,
-  logger,
 } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { notificationTokens } from './notificationTokens';
-import { IS_PROD } from './utils';
+import { DRY_RUN } from './utils';
+import logger from './logger';
 
 const messaging = getMessaging(app);
 const db = getFirestore(app);
@@ -73,7 +73,7 @@ export const sendNewRoomNotifications = async () => {
             if (!(await idempotencyKeyExsits(idempotencyKey))) {
               logger.info(`Notifying ${writerId} about room ${room.name}`);
 
-              if (IS_PROD) {
+              if (!DRY_RUN) {
                 const message = {
                   notification: {
                     title: `New room`,
