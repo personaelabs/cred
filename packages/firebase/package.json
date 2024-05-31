@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -d",
     "build:watch": "tsc -d --watch",
+    "lint": "tsc --noEmit",
     "postinstall": "pnpm build"
   },
   "keywords": [],

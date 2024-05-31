@@ -1,4 +1,4 @@
-import { roomConverter, logger } from '@cred/shared';
+import { roomConverter } from '@cred/shared';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import app from './app';
 
@@ -26,7 +26,7 @@ export const addWriterToRoom = async ({
       });
     }
   } else {
-    logger.error(`Room not found: ${roomId}`);
+    throw new Error(`Room not found: ${roomId}`);
   }
 };
 
@@ -52,7 +52,7 @@ export const addReaderToRoom = async ({
       });
     }
   } else {
-    logger.error(`Room not found: ${roomId}`);
+    throw new Error(`Room not found: ${roomId}`);
   }
 };
 
@@ -79,6 +79,6 @@ export const removeUserFromRoom = async ({
       });
     }
   } else {
-    logger.error(`Room not found: ${roomId}`);
+    throw new Error(`Room not found: ${roomId}`);
   }
 };
