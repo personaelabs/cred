@@ -5,18 +5,7 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const winstonTransports: any[] = [
-  new winston.transports.Console({
-    level: 'debug',
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.printf(({ level, message, ...meta }) => {
-        delete meta.component;
-        return `${level}: ${message} ${JSON.stringify(meta, null, 2)}`;
-      })
-    ),
-  }),
-];
+const winstonTransports: any[] = [];
 
 const { DATADOG_API_KEY } = process.env;
 
@@ -35,9 +24,22 @@ if (DATADOG_API_KEY) {
   winstonTransports.push(
     new winston.transports.Http({
       host: 'http-intake.logs.datadoghq.com',
-      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${hostname}&ddtags="env:${env}"`,
+      path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&hostname=${hostname}&ddtags=env:${env}`,
       ssl: true,
-      level: 'warn',
+      level: 'info',
+    })
+  );
+} else {
+  winstonTransports.push(
+    new winston.transports.Console({
+      level: 'debug',
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.printf(({ level, message, ...meta }) => {
+          delete meta.component;
+          return `${level}: ${message} ${JSON.stringify(meta, null, 2)}`;
+        })
+      ),
     })
   );
 }
