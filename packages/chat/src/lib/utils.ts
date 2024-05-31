@@ -4,12 +4,13 @@ import { Hex, formatEther, keccak256 } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 import {
+  Timestamp,
   collection,
   limit,
   or,
   orderBy,
   query,
-  startAfter,
+  startAt,
   where,
 } from 'firebase/firestore';
 import db from './firestore';
@@ -64,7 +65,7 @@ export const buildMessageQuery = ({
       ? query(
           messagesRef,
           orderBy('createdAt', 'desc'),
-          startAfter(from),
+          startAt(Timestamp.fromDate(from)),
           limit(pageSize)
         )
       : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
@@ -82,7 +83,7 @@ export const buildMessageQuery = ({
         messagesRef,
         onlyPublic,
         orderBy('createdAt', 'desc'),
-        startAfter(from),
+        startAt(Timestamp.fromDate(from)),
         limit(pageSize)
       )
     : query(

@@ -43,9 +43,6 @@ const Room = () => {
 
   const { data: room } = useRoom(params.roomId);
   const [replyTo, setReplyTo] = useState<MessageWithUserData | null>(null);
-  const [fromMessage, _setFromMessage] = useState<MessageWithUserData | null>(
-    null
-  );
 
   const {
     messages,
@@ -55,7 +52,6 @@ const Room = () => {
     isFetchingNextPage,
   } = useMessages({
     roomId: params.roomId,
-    initMessage: fromMessage,
   });
 
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);

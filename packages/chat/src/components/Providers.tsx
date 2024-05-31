@@ -119,7 +119,9 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
       if (canRedirectToSignIn) {
         await getAuth().authStateReady();
-        if (!getAuth().currentUser) {
+        const user = getAuth().currentUser;
+        console.log({ user });
+        if (!user) {
           router.replace('/signin');
         }
       }

@@ -8,7 +8,7 @@ import {
   roomConverter,
 } from '@cred/shared';
 import { app } from '@cred/firebase';
-import { getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
 
@@ -68,7 +68,7 @@ const sendMessage = async ({
     roomId,
     body: message,
     userId: sender,
-    createdAt: new Date(),
+    createdAt: FieldValue.serverTimestamp(),
     readBy: [],
     replyTo: null,
     mentions: ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'],
@@ -94,6 +94,16 @@ const sendTestMessage = async () => {
     message: `Hello, world! ${nonce}`,
     sender: '1',
   });
+
+  const numMessages = (
+    await db
+      .collection('rooms')
+      .doc('test-notification')
+      .collection('messages')
+      .get()
+  ).docs.length;
+
+  console.log(` ${numMessages} messages`);
 };
 
 sendTestMessage();
