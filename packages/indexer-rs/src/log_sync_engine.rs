@@ -182,16 +182,9 @@ impl LogSyncEngine {
 
                             if error == "null" {
                                 false
-                            } else if error.contains("larger than 150MB limit")
-                                || error.contains(
-                                    "Your app has exceeded its compute units per second capacity",
-                                )
-                                || error.contains("Query timeout exceeded")
-                            {
+                            } else {
                                 error_msg = Some(error);
                                 true
-                            } else {
-                                panic!("Error: {}", error);
                             }
                         });
 
@@ -257,7 +250,7 @@ impl LogSyncEngine {
 
     /// Sync contract logs up to the given block number
     pub async fn sync_to_block(&self, to_block: BlockNum) {
-        let batch_size = 50;
+        let batch_size = 10;
 
         // Calculate the total number of chunks to sync
         let num_total_chunks =
@@ -267,15 +260,21 @@ impl LogSyncEngine {
         // Get the latest synched chunk. We start from the next chunk.
         let chunks_from = self.get_latest_synched_chunk().unwrap_or(0);
 
-        // A chunk is 2000 blocks. We sync in batches of 50 chunks (100,000 blocks)
+        // A chunk is 2000 blocks. We get logs in batches of 50 chunks (100,000 blocks)
 
         let chunk_batches = (chunks_from..num_total_chunks).collect::<Vec<ChunkNum>>();
 
+        for batch in chunk_batches.chunks(batch_size as usize) {
+            self.sync_chunks(batch.to_vec(), to_block).await;
+        }
+
+        /*
         let jobs = chunk_batches
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         join_all(jobs).await;
+         */
 
         // Get missing chunks
         let missing_chunks = self.search_missing_chunks(num_total_chunks);

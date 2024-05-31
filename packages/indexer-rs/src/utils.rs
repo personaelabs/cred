@@ -294,6 +294,7 @@ pub fn get_chain_id(chain: Chain) -> ChainId {
         Chain::Base => 8453,
         Chain::Arbitrum => 42161,
         Chain::Optimism => 10,
+        Chain::Blast => 8145, // The actual chain id is 81457, but we use 8145 so it can fit in a u16
     }
 }
 

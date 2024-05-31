@@ -1384,5 +1384,101 @@
       "EarlyHolder",
       "Whale"
     ]
+  },
+  {
+    "id": 109,
+    "contract_type": "ERC20",
+    "address": "0x5ffd9EbD27f2fcAB044c0f0a26A45Cb62fa29c06",
+    "name": "PacMoon",
+    "deployed_block": 809421,
+    "chain": "Blast",
+    "symbol": "PAC",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  }
+  ,
+  {
+    "id": 110,
+    "contract_type": "ERC20",
+    "address": "0xc4f2c66af3735e9b6CbB61b2117DE579D8910018",
+    "name": "Kabosu",
+    "deployed_block": 
+    3877069 ,
+    "chain": "Blast",
+    "symbol": "Kabosu",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 111,
+    "contract_type": "ERC20",
+    "address": "0x0EE485dfD0f4ef8C4faBC1Ab93dbcC03FCC05c57",
+    "name": "PEW",
+    "deployed_block": 3534681,
+    "chain": "Blast",
+    "symbol": "PEW",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 112,
+    "contract_type": "ERC20",
+    "address": "0xd43D8aDAC6A4C7d9Aeece7c3151FcA8f23752cf8",
+    "name": "Andy",
+    "deployed_block": 
+    271583,
+    "chain": "Blast",
+    "symbol": "ANDY",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 113,
+    "contract_type": "ERC20",
+    "address": "0x67fa2887914fA3729e9EED7630294Fe124f417A0",
+    "name": " Yield Token",
+    "deployed_block": 
+    687587,
+    "chain": "Blast",
+    "symbol": "YIELD",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 114,
+    "contract_type": "ERC20",
+    "address": "0xA4C7aA67189EC5623121c6C94Ec757DfeD932D4B",
+    "name": "Mia",
+    "deployed_block": 221159,
+    "chain": "Blast",
+    "symbol": "MIA",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
+  },
+  {
+    "id": 115,
+    "contract_type": "ERC20",
+    "address": "0x5FE8534a6F96cb01261Bd96e98c17C2c1Cab3204",
+    "name": "Baja",
+    "deployed_block": 
+    218568 ,
+    "chain": "Blast",
+    "symbol": "BAJA",
+    "derive_groups": [
+      "EarlyHolder",
+      "Whale"
+    ]
   }
 ]

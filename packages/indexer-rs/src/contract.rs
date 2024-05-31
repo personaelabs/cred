@@ -49,6 +49,7 @@ pub async fn upsert_contract(
         Chain::Optimism => "OP Mainnet",
         Chain::Base => "Base",
         Chain::Arbitrum => "Arbitrum One",
+        Chain::Blast => "Blast",
     };
 
     /*
@@ -132,6 +133,7 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
                 "OP Mainnet" => Chain::Optimism,
                 "Base" => Chain::Base,
                 "Arbitrum One" => Chain::Arbitrum,
+                "Blast" => Chain::Blast,
                 _ => panic!("Invalid chain"),
             };
 

@@ -15,6 +15,7 @@ use tokio::sync::Semaphore;
 
 const NUM_MAINNET_NODES: u32 = 10;
 
+/// Permits for throttling the requests to the Ethereum JSON-RPC API  
 pub static PERMITS: Semaphore = Semaphore::const_new(100);
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
@@ -23,6 +24,7 @@ pub enum Chain {
     Optimism,
     Base,
     Arbitrum,
+    Blast,
 }
 
 impl FromStr for Chain {
@@ -34,12 +36,13 @@ impl FromStr for Chain {
             "optimism" => Ok(Chain::Optimism),
             "base" => Ok(Chain::Base),
             "arbitrum" => Ok(Chain::Arbitrum),
+            "blast" => Ok(Chain::Blast),
             _ => Err(format!("Invalid chain: {}", s)),
         }
     }
 }
 
-/// A load balances to distribute requests across multiple Alchemy nodes
+/// A load balancer to distribute requests across multiple RPC endpoints
 struct LoadBalancer {
     next_client_index: u32,
 }
@@ -52,11 +55,16 @@ impl LoadBalancer {
     }
 
     pub fn get_endpoint(&mut self, chain: Chain) -> Result<String, VarError> {
+        if chain == Chain::Blast {
+            return env::var("BLAST_RPC_URL");
+        }
+
         let api_key = match chain {
             Chain::Mainnet => env::var(format!("ALCHEMY_API_KEY_{}", self.next_client_index))?,
             Chain::Optimism => env::var("ALCHEMY_OPT_API_KEY")?,
             Chain::Base => env::var("ALCHEMY_BASE_API_KEY")?,
             Chain::Arbitrum => env::var("ALCHEMY_ARB_API_KEY")?,
+            Chain::Blast => "".to_string()
         };
 
         let subdomain = match chain {
@@ -64,6 +72,7 @@ impl LoadBalancer {
             Chain::Optimism => "opt-mainnet",
             Chain::Base => "base-mainnet",
             Chain::Arbitrum => "arb-mainnet",
+            Chain::Blast => ""
         };
 
         let url = format!("https://{}.g.alchemy.com/v2/{}", subdomain, api_key);
