@@ -36,6 +36,12 @@ import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
+import {
+  browserSessionPersistence,
+  getAuth,
+  setPersistence,
+} from 'firebase/auth';
+import { isAuthenticated } from '@/lib/auth';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -59,6 +65,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { options } = useHeaderOptions();
   const pathname = usePathname();
   const router = useRouter();
+  const { authenticated, ready } = usePrivy();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
@@ -71,6 +78,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
+
+  useEffect(() => {
+    const auth = getAuth();
+    setPersistence(auth, browserSessionPersistence);
+  }, []);
 
   useEffect(() => {
     if (signedInUser) {
@@ -94,14 +106,22 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   }, [mixpanelInitialized, pathname]);
 
   useEffect(() => {
-    if (isPwa === false && isMobile === true) {
-      router.push('/install-pwa');
-    } else if (signedInUser && isPwa === true) {
-      if (!isNotificationConfigured()) {
+    (async () => {
+      if (isPwa === false && isMobile === true) {
+        router.push('/install-pwa');
+      } else if (ready) {
+        if (
+          !authenticated ||
+          !signedInUser ||
+          !(await isAuthenticated(signedInUser.id))
+        ) {
+          router.replace('/signin');
+        }
+      } else if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
-    }
-  }, [isPwa, router, signedInUser, isMobile]);
+    })();
+  }, [isPwa, router, ready, authenticated, isMobile, signedInUser]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({

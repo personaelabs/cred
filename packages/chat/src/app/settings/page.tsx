@@ -48,8 +48,9 @@ const Settings = () => {
   const onSignOutClick = useCallback(async () => {
     const confirmed = await window.confirm('Sign out?');
     if (confirmed) {
+      router.prefetch('/signin');
       await signOut();
-      router.push('/signin');
+      router.replace('/signin');
     }
   }, [signOut, router]);
 
