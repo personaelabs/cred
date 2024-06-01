@@ -8,9 +8,6 @@ import { useEffect, useState } from 'react';
 export const isAuthenticatedToFirestore = async (userId: string) => {
   const auth = getAuth();
   await auth.authStateReady();
-  auth.onAuthStateChanged(user => {
-    console.log('User', user);
-  });
   const user = auth.currentUser;
 
   if (!user) {

@@ -13,7 +13,6 @@ import {
 import MobileHeader from '@/components/MobileHeader';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
@@ -36,11 +35,6 @@ import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
-import {
-  browserSessionPersistence,
-  getAuth,
-  setPersistence,
-} from 'firebase/auth';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 
 const NODE_ENV = process.env.NODE_ENV;
@@ -80,11 +74,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useMediaQuery();
 
   useEffect(() => {
-    const auth = getAuth();
-    setPersistence(auth, browserSessionPersistence);
-  }, []);
-
-  useEffect(() => {
     if (signedInUser) {
       mixpanel.init('4f57a2e1c29d0e91fe07d1292e325520', {
         debug: process.env.NODE_ENV === 'development',
@@ -115,8 +104,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         } else {
           // Already on the sign in page
         }
-      } else if (!isNotificationConfigured()) {
-        router.replace('/enable-notifications');
       }
     })();
   }, [isPwa, router, isMobile, isAuthenticated, pathname]);

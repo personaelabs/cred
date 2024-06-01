@@ -182,7 +182,9 @@ const Home = () => {
   }, [setOptions]);
 
   const { data: allRooms } = useAllRooms();
-  const renderRooms = allRooms.slice(0, renderPages);
+  const renderRooms = allRooms
+    .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
+    .slice(0, renderPages);
 
   const buyableRooms = signedInUser
     ? renderRooms.filter(
@@ -252,11 +254,9 @@ const Home = () => {
       ) : (
         <></>
       )}
-      {buyableRooms
-        .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
-        .map(room => (
-          <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
-        ))}
+      {buyableRooms.map(room => (
+        <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
+      ))}
     </div>
   );
 };
