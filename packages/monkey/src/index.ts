@@ -6,7 +6,7 @@ import { startTradeMonkey } from './tradeMonkey';
 const startMonkey = async () => {
   if (
     process.env.NODE_ENV === 'development' ||
-    process.env.IS_PULL_REQUEST === 'true'
+    process.env.RENDER_GIT_BRANCH === 'staging'
   ) {
     await Promise.all([
       startMessageMonkey(),
