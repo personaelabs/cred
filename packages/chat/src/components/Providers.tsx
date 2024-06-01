@@ -69,7 +69,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
   const { openedSheet, closeSheet } = useBottomSheet();
-  const { data: isAuthenticated } = useIsAuthenticated();
+  const isAuthenticated = useIsAuthenticated();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
 
   const hideFooter =
@@ -109,8 +109,12 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       if (isPwa === false && isMobile === true) {
         router.push('/install-pwa');
-      } else if (pathname !== '/signin' && isAuthenticated === false) {
-        router.replace('/signin');
+      } else if (isAuthenticated === false) {
+        if (pathname !== '/signin') {
+          router.replace('/signin');
+        } else {
+          // Already on the sign in page
+        }
       } else if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
