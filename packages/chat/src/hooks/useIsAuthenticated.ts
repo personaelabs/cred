@@ -6,13 +6,19 @@ import { getAuth } from 'firebase/auth';
  * Returns true if the user is authenticated to the given user ID on Firebase
  */
 export const isAuthenticatedToFirestore = async (userId: string) => {
-  await getAuth().authStateReady();
-  const user = getAuth().currentUser;
+  const auth = getAuth();
+  await auth.authStateReady();
+  auth.onAuthStateChanged(user => {
+    console.log('User', user);
+  });
+  const user = auth.currentUser;
 
   if (!user) {
+    console.log('No user');
     return false;
   }
 
+  console.log('User', user);
   return user.uid === userId;
 };
 
@@ -22,15 +28,18 @@ const useIsAuthenticated = () => {
   return useQuery({
     queryKey: ['is-authenticated'],
     queryFn: async () => {
-      if (isPrivyReady && !authenticated) {
+      if (!isPrivyReady) {
+        console.log('Privy not ready');
+        return null;
+      }
+
+      if (!authenticated) {
+        console.log('Not authenticated');
         return false;
       }
 
       if (!user) {
-        return false;
-      }
-
-      if (!(await isAuthenticatedToFirestore(user.id))) {
+        console.log('No user');
         return false;
       }
 
