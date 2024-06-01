@@ -2,13 +2,15 @@
   "name": "@cred/sync",
   "scripts": {
     "start": "pnpm lint && NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "fillInviteCodes": "tsx ./scripts/fillInviteCodes.ts"
   },
   "dependencies": {
     "@cred/firebase": "workspace:*",
     "@cred/shared": "workspace:*",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.0",
+    "nanoid": "^5.0.7",
     "viem": "^2.10.9"
   },
   "devDependencies": {

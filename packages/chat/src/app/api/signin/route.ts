@@ -9,6 +9,8 @@ import privy, { isAuthenticated } from '@/lib/backend/privy';
 import * as neynar from '@/lib/backend/neynar';
 import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
 import credddRpcClient from '@/lib/credddRpc';
+import { isValidInviteCode } from '@/lib/backend/inviteCode';
+import { SignInRequestBody } from '@/types';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -66,8 +68,21 @@ const getFarcasterAddresses = async (fid: number) => {
   }
 };
 
+/**
+ * If the invite code is valid, does the following:
+ * - Creates a new user in Firestore if the user does not exist
+ * - Adds the user to the rooms for each connected address
+ * - Returns a jwt token
+ */
 export async function POST(req: NextRequest) {
   const verifiedClaims = await isAuthenticated(req);
+  const body = (await req.json()) as SignInRequestBody;
+
+  const isCodeValid = await isValidInviteCode(body.inviteCode);
+
+  if (!isCodeValid) {
+    return Response.json({ error: 'Invalid code' }, { status: 400 });
+  }
 
   const user = await privy.getUser(verifiedClaims.userId);
 
