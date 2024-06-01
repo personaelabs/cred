@@ -30,17 +30,3 @@ export const authSignedInUser = async ({
 
   return data.usernameSet;
 };
-
-/**
- * Returns true if the user is authenticated to the given user ID on Firebase
- */
-export const isAuthenticated = async (userId: string) => {
-  await getAuth().authStateReady();
-  const user = getAuth().currentUser;
-
-  if (!user) {
-    return false;
-  }
-
-  return user.uid === userId;
-};

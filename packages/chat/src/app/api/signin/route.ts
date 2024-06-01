@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
   }
 
   return Response.json(
-    { token, usernameSet: userExists.exists },
+    { token, usernameSet: userExists.data()?.username !== '' },
     { status: 200 }
   );
 }

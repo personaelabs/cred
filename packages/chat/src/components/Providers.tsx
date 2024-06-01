@@ -41,6 +41,7 @@ import {
   getAuth,
   setPersistence,
 } from 'firebase/auth';
+import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -64,11 +65,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { options } = useHeaderOptions();
   const pathname = usePathname();
   const router = useRouter();
-  const { authenticated, ready } = usePrivy();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
   const { openedSheet, closeSheet } = useBottomSheet();
+  const { data: isAuthenticated } = useIsAuthenticated();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
 
   const hideFooter =
@@ -108,15 +109,13 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       if (isPwa === false && isMobile === true) {
         router.push('/install-pwa');
-      } else if (ready) {
-        if (!authenticated) {
-          router.replace('/signin');
-        }
+      } else if (pathname !== '/signin' && isAuthenticated === false) {
+        router.replace('/signin');
       } else if (!isNotificationConfigured()) {
         router.replace('/enable-notifications');
       }
     })();
-  }, [isPwa, router, ready, authenticated, isMobile, signedInUser]);
+  }, [isPwa, router, isMobile, isAuthenticated, pathname]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({

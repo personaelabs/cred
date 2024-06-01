@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import useSignIn from '@/hooks/useSignIn';
+import useSignIn, { saveInviteCode } from '@/hooks/useSignIn';
 import useIsInviteCodeValid from '@/hooks/useIsInviteCodeValid';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { Check, Loader2 } from 'lucide-react';
@@ -76,7 +76,7 @@ const CodeValidityIndicator = (props: CodeValidityIndicatorProps) => {
 
 const SignIn = () => {
   const [inviteCode, setInviteCode] = useState<string>('');
-  const { mutateAsync: signIn, isSigningIn, error } = useSignIn(inviteCode);
+  const { mutateAsync: signIn, isSigningIn, error } = useSignIn();
   const { setOptions } = useHeaderOptions();
   const {
     mutate: checkInviteCode,
@@ -105,6 +105,13 @@ const SignIn = () => {
       headerRight: null,
     });
   }, [setOptions]);
+
+  // Save the invite code to local storage if it is valid
+  useEffect(() => {
+    if (isInviteCodeValid === true) {
+      saveInviteCode(inviteCode);
+    }
+  }, [isInviteCodeValid, inviteCode]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-background">
