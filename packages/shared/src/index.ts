@@ -7,6 +7,7 @@ export * from './converters/idempotencyKeyConverter';
 export * from './converters/newRoomNotifyIdempotencyKeyConverter';
 export * from './converters/roomReadTicketConverter';
 export * from './converters/userCredddConverter';
+export * from './converters/inviteCodeConverter';
 export * from './utils';
 export { createRpcClient } from './jsonrpc';
 export { default as CredAbi } from './abi/Cred';
