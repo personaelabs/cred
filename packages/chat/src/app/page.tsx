@@ -225,10 +225,10 @@ const Home = () => {
       <Alert>
         <AlertTitle className="flex flx-row justify-between items-center">
           <div className="opacity-70">
-            Connect addresses to find eligible rooms
+            Prove onchain reputation to join rooms
           </div>
-          <Link href="/settings/connected-addresses">
-            <Button variant="secondary">Connect</Button>
+          <Link href="/settings/creddd">
+            <Button variant="secondary">Prove reputation</Button>
           </Link>
         </AlertTitle>
       </Alert>
