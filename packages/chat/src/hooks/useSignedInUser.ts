@@ -1,5 +1,6 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useQuery } from '@tanstack/react-query';
+import { isAuthenticatedToFirestore } from './useIsAuthenticated';
 
 const useSignedInUser = () => {
   const { user } = usePrivy();
@@ -7,9 +8,11 @@ const useSignedInUser = () => {
   return useQuery({
     queryKey: ['signed-in-user'],
     queryFn: async () => {
+      await isAuthenticatedToFirestore(user!.id);
       return user;
     },
     enabled: !!user,
+    refetchOnMount: true,
   });
 };
 

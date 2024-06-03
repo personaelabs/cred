@@ -123,3 +123,7 @@ export enum ModalType {
 export interface SetUsernameRequestBody {
   username: string;
 }
+
+export interface SignInRequestBody {
+  inviteCode: string;
+}

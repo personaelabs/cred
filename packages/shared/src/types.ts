@@ -24,6 +24,11 @@ export interface UserCreddd {
   }[];
 }
 
+export interface InviteCode {
+  code: string;
+  isUsed: boolean;
+}
+
 export interface UserNotificationTokens {
   userId: string;
   tokens: {

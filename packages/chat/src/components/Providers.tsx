@@ -13,7 +13,6 @@ import {
 import MobileHeader from '@/components/MobileHeader';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { isNotificationConfigured } from '@/lib/notification';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
@@ -36,11 +35,7 @@ import ProcessingTxSheet from './ProcessingTxSheet';
 import { BottomSheetType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
-import {
-  browserSessionPersistence,
-  getAuth,
-  setPersistence,
-} from 'firebase/auth';
+import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -64,11 +59,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { options } = useHeaderOptions();
   const pathname = usePathname();
   const router = useRouter();
-  const { authenticated, ready } = usePrivy();
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
   const { openedSheet, closeSheet } = useBottomSheet();
+  const isAuthenticated = useIsAuthenticated();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
 
   const hideFooter =
@@ -77,11 +72,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
-
-  useEffect(() => {
-    const auth = getAuth();
-    setPersistence(auth, browserSessionPersistence);
-  }, []);
 
   useEffect(() => {
     if (signedInUser) {
@@ -108,15 +98,15 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       if (isPwa === false && isMobile === true) {
         router.push('/install-pwa');
-      } else if (ready) {
-        if (!authenticated) {
+      } else if (isAuthenticated === false) {
+        if (pathname !== '/signin') {
           router.replace('/signin');
+        } else {
+          // Already on the sign in page
         }
-      } else if (!isNotificationConfigured()) {
-        router.replace('/enable-notifications');
       }
     })();
-  }, [isPwa, router, ready, authenticated, isMobile, signedInUser]);
+  }, [isPwa, router, isMobile, isAuthenticated, pathname]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({

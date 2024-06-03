@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useAllRooms from '@/hooks/useAllRooms';
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useJoinRoom from '@/hooks/useJoinRoom';
 import { useRouter } from 'next/navigation';
@@ -172,6 +172,7 @@ const Home = () => {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
   const { setOptions } = useHeaderOptions();
+  const [renderPages, setRenderPages] = useState(10);
 
   useEffect(() => {
     setOptions({
@@ -181,9 +182,12 @@ const Home = () => {
   }, [setOptions]);
 
   const { data: allRooms } = useAllRooms();
+  const renderRooms = allRooms
+    .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
+    .slice(0, renderPages);
 
   const buyableRooms = signedInUser
-    ? allRooms.filter(
+    ? renderRooms.filter(
         room =>
           !room.joinedUserIds.includes(signedInUser.id) &&
           !room.writerIds.includes(signedInUser.id) &&
@@ -208,6 +212,15 @@ const Home = () => {
     <div
       className="flex flex-col w-full h-full overflow-scroll"
       ref={scrollableRef}
+      id="scrollableDiv"
+      onScroll={e => {
+        const element = e.currentTarget;
+        if (element.scrollHeight > element.clientHeight * 0.3) {
+          if (allRooms.length > renderPages) {
+            setRenderPages(prev => prev + 10);
+          }
+        }
+      }}
     >
       <Alert>
         <AlertTitle className="flex flx-row justify-between items-center">
@@ -241,11 +254,9 @@ const Home = () => {
       ) : (
         <></>
       )}
-      {buyableRooms
-        .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
-        .map(room => (
-          <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
-        ))}
+      {buyableRooms.map(room => (
+        <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
+      ))}
     </div>
   );
 };
