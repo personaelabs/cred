@@ -1,6 +1,6 @@
-import { CredAbi } from '@cred/shared';
+import { PortalAbi } from '@cred/shared';
 import { getRoomTokenId } from '@/lib/utils';
-import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
+import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useQuery } from '@tanstack/react-query';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
@@ -13,8 +13,8 @@ const useBuyPrice = (roomId: string) => {
     queryFn: async () => {
       const amount = BigInt(1);
       const result = readContract(wagmiConfig, {
-        abi: CredAbi,
-        address: CRED_CONTRACT_ADDRESS,
+        abi: PortalAbi,
+        address: PORTAL_CONTRACT_ADDRESS,
         functionName: 'getBuyPrice',
         args: [roomIdBigInt, amount],
       });

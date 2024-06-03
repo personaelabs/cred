@@ -1,10 +1,10 @@
-import { CredAbi } from '@cred/shared';
+import { PortalAbi } from '@cred/shared';
 import { Hex, encodeFunctionData, formatEther } from 'viem';
 import axios from '@/lib/axios';
 import { BottomSheetType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
-import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
+import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
@@ -30,8 +30,8 @@ const sendTransactionId = async ({
 const getCurrentSellPrice = async (roomIdBigInt: bigint) => {
   const amount = BigInt(1);
   return await readContract(wagmiConfig, {
-    abi: CredAbi,
-    address: CRED_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_CONTRACT_ADDRESS,
     functionName: 'getSellPrice',
     args: [roomIdBigInt, amount],
   });
@@ -59,7 +59,7 @@ const useSellKey = (roomId: string) => {
 
       const amount = BigInt(1);
       const data = encodeFunctionData({
-        abi: CredAbi,
+        abi: PortalAbi,
         functionName: 'sellKeys',
         args: [roomIdBigInt, amount],
       });
@@ -71,7 +71,7 @@ const useSellKey = (roomId: string) => {
       const txReceipt = await sendTransaction(
         {
           from: embeddedWallet.address,
-          to: CRED_CONTRACT_ADDRESS,
+          to: PORTAL_CONTRACT_ADDRESS,
           data,
         },
         {

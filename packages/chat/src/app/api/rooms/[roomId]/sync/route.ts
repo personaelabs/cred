@@ -7,10 +7,10 @@ import {
 } from '@cred/firebase';
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
-import { CredAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';
+import { PortalAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';
 import logger from '@/lib/backend/logger';
 import client from '@/lib/backend/viemClient';
-import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
+import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 
 const TRANSFER_SINGLE_EVENT_SIG =
   '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
@@ -23,8 +23,8 @@ const getBalance = async ({
   tokenId: bigint;
 }) => {
   const balance = await client.readContract({
-    abi: CredAbi,
-    address: CRED_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_CONTRACT_ADDRESS,
     functionName: 'balanceOf',
     args: [address, tokenId],
   });

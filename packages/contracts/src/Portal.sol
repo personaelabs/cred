@@ -4,7 +4,7 @@ import { ERC1155 } from '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import 'forge-std/console.sol';
 
-contract Cred is ERC1155, Ownable {
+contract Portal is ERC1155, Ownable {
   mapping(uint256 => uint256) public tokenIdToSupply;
 
   uint256 public feePercentage = 1; // 1%

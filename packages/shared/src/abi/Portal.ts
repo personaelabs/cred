@@ -1,4 +1,4 @@
-const CredAbi = [
+const PortalAbi = [
   { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
     type: 'function',
@@ -379,4 +379,4 @@ const CredAbi = [
   },
 ] as const;
 
-export default CredAbi;
+export default PortalAbi;

@@ -1,4 +1,4 @@
-import { CredAbi } from '@cred/shared';
+import { PortalAbi } from '@cred/shared';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 import { Hex, encodeFunctionData } from 'viem';
@@ -6,7 +6,7 @@ import axios from '@/lib/axios';
 import { BottomSheetType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
-import { CRED_CONTRACT_ADDRESS } from '@/lib/contract';
+import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
@@ -55,15 +55,15 @@ const useBuyKey = (roomId: string) => {
 
       const amount = BigInt(1);
       const value = await readContract(wagmiConfig, {
-        abi: CredAbi,
-        address: CRED_CONTRACT_ADDRESS,
+        abi: PortalAbi,
+        address: PORTAL_CONTRACT_ADDRESS,
         functionName: 'getBuyPrice',
         args: [roomTokenId, amount],
       });
 
       const fee = await readContract(wagmiConfig, {
-        abi: CredAbi,
-        address: CRED_CONTRACT_ADDRESS,
+        abi: PortalAbi,
+        address: PORTAL_CONTRACT_ADDRESS,
         functionName: 'getProtocolFee',
         args: [value],
       });
@@ -80,7 +80,7 @@ const useBuyKey = (roomId: string) => {
         setOpenedSheet(BottomSheetType.FUND_WALLET);
       } else {
         const data = encodeFunctionData({
-          abi: CredAbi,
+          abi: PortalAbi,
           functionName: 'buyKeys',
           args: [privyAddress as Hex, roomTokenId, amount, '0x'],
         });
@@ -88,7 +88,7 @@ const useBuyKey = (roomId: string) => {
         const txReceipt = await sendTransaction(
           {
             from: privyAddress,
-            to: CRED_CONTRACT_ADDRESS,
+            to: PORTAL_CONTRACT_ADDRESS,
             data,
             value: value + fee,
           },
