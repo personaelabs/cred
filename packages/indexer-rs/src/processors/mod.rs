@@ -23,7 +23,7 @@ pub trait GroupIndexer: Send + Sync {
     /// Returns the chain the logs the indexer depends on are on
     fn chain(&self) -> Chain;
     /// Returns true if the logs which the indexer depends on are ready
-    async fn is_ready(&self) -> Result<bool, surf::Error>;
+    async fn is_ready(&self) -> Result<bool, Error>;
     /// Return all members
     async fn get_members(&self, block_number: BlockNum) -> Result<HashSet<Address>, Error>;
     /// Sanity check that the given members are eligible to be in the group

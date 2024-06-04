@@ -13,9 +13,8 @@ const PREVIEW_GROUP_IDS: [&str; 9] = [
     "3544a1d252e2cfffb5d977c9dd2e3766b13a72ea4206c5e29b69502de62a6023", // $Higher believer
     "0958ac3e686d2f77fbee11e9dfcfa35cc83e98249f84cbedf08e2ed82eb2519e", // Early $PAC holder
     "155a295bcc839b97ac181384b1b99af4e1eefac12f173200c4e03a6dbb43eb74", // $PAC whale
-    "9aa0652a76f710a10e17ff49c09ba8b04260898a956f4f9d7ee84f6a164d2f8a"
+    "9aa0652a76f710a10e17ff49c09ba8b04260898a956f4f9d7ee84f6a164d2f8a",
 ];
-
 
 #[derive(Debug, Clone)]
 pub struct Group {

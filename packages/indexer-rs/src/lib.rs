@@ -1,6 +1,6 @@
 use num_bigint::BigUint;
 
-pub mod server;
+pub mod address_groups;
 pub mod block_timestamp_iterator;
 pub mod block_timestamp_sync_engine;
 pub mod coingecko;
@@ -16,11 +16,12 @@ pub mod postgres;
 pub mod processors;
 pub mod rocksdb_key;
 pub mod seeder;
+pub mod server;
 pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
-pub mod address_groups;
 pub mod utils;
+pub mod status_logger;
 
 #[cfg(test)]
 pub mod test_utils;
@@ -70,11 +71,17 @@ pub enum IndexerError {
 }
 
 #[derive(Debug)]
+pub struct EthRpcError {
+    pub message: String,
+}
+
+#[derive(Debug)]
 pub enum Error {
     RocksDB(rocksdb::Error),
     Postgres(tokio_postgres::Error),
     Surf(surf::Error),
     Indexer(IndexerError),
+    EthRpc(EthRpcError),
 }
 
 impl From<rocksdb::Error> for Error {

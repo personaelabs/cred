@@ -24,7 +24,7 @@ impl GroupIndexer for CredddTeamIndexer {
         Chain::Mainnet
     }
 
-    async fn is_ready(&self) -> Result<bool, surf::Error> {
+    async fn is_ready(&self) -> Result<bool, Error> {
         Ok(true)
     }
 

@@ -2,9 +2,9 @@ import { baseSepolia } from 'viem/chains';
 import { getChain, sleep } from './lib/utils';
 import client from './lib/viemClient';
 import {
-  CRED_CONTRACT_ADDRESS as _CRED_CONTRACT_ADDRESS,
-  CRED_SEPOLIA_CONTRACT_ADDRESS,
-  CredAbi,
+  PORTAL_CONTRACT_ADDRESS as _PORTAL_CONTRACT_ADDRESS,
+  PORTAL_SEPOLIA_CONTRACT_ADDRESS,
+  PortalAbi,
   tokenIdToRoomId,
 } from '@cred/shared';
 import { Hex, parseAbiItem, zeroAddress } from 'viem';
@@ -17,17 +17,17 @@ import logger from './lib/logger';
 
 const chain = getChain();
 
-const CRED_CONTRACT_ADDRESS =
+const PORTAL_CONTRACT_ADDRESS =
   chain.id === baseSepolia.id
-    ? CRED_SEPOLIA_CONTRACT_ADDRESS
-    : _CRED_CONTRACT_ADDRESS;
+    ? PORTAL_SEPOLIA_CONTRACT_ADDRESS
+    : _PORTAL_CONTRACT_ADDRESS;
 
 const TRANSFER_SINGLE_EVENT = parseAbiItem(
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)'
 );
 
-const CRED_CONTRACT_DEPLOYED_BLOCK = BigInt(0);
-const CRED_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10638162);
+const PORTAL_CONTRACT_DEPLOYED_BLOCK = BigInt(0);
+const PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10638162);
 
 const getBalance = async ({
   address,
@@ -37,8 +37,8 @@ const getBalance = async ({
   tokenId: bigint;
 }) => {
   const balance = await client.readContract({
-    abi: CredAbi,
-    address: CRED_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_CONTRACT_ADDRESS,
     functionName: 'balanceOf',
     args: [address, tokenId],
   });
@@ -51,8 +51,8 @@ const syncTrades = async () => {
 
   let synchedBlock =
     chain.id === baseSepolia.id
-      ? CRED_SEPOLIA_CONTRACT_DEPLOY_BLOCK
-      : CRED_CONTRACT_DEPLOYED_BLOCK;
+      ? PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK
+      : PORTAL_CONTRACT_DEPLOYED_BLOCK;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -64,7 +64,7 @@ const syncTrades = async () => {
       const toBlock = i + chunkSize > latestBlock ? latestBlock : i + chunkSize;
 
       const logs = await client.getLogs({
-        address: CRED_CONTRACT_ADDRESS,
+        address: PORTAL_CONTRACT_ADDRESS,
         event: TRANSFER_SINGLE_EVENT,
         fromBlock,
         toBlock,

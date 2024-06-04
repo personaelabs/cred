@@ -145,7 +145,7 @@ impl GroupIndexer for AllHoldersIndexer {
         Ok(true)
     }
 
-    async fn is_ready(&self) -> Result<bool, surf::Error> {
+    async fn is_ready(&self) -> Result<bool, Error> {
         if self.contract().contract_type == ContractType::ERC721
             || self.contract().contract_type == ContractType::Punk
         {

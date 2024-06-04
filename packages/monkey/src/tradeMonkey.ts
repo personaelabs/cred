@@ -1,7 +1,7 @@
 import { app } from '@cred/firebase';
 import {
-  CredAbi,
-  CRED_SEPOLIA_CONTRACT_ADDRESS,
+  PortalAbi,
+  PORTAL_SEPOLIA_CONTRACT_ADDRESS,
   getRoomTokenId,
   roomConverter,
 } from '@cred/shared';
@@ -52,15 +52,15 @@ const buyKeys = async ({
   const tokenId = getRoomTokenId(roomId);
 
   const buyPrice = await publicClient.readContract({
-    abi: CredAbi,
-    address: CRED_SEPOLIA_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_SEPOLIA_CONTRACT_ADDRESS,
     functionName: 'getBuyPrice',
     args: [tokenId, numKeys],
   });
 
   const fee = await publicClient.readContract({
-    abi: CredAbi,
-    address: CRED_SEPOLIA_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_SEPOLIA_CONTRACT_ADDRESS,
     functionName: 'getProtocolFee',
     args: [buyPrice],
   });
@@ -68,8 +68,8 @@ const buyKeys = async ({
   const totalCost = buyPrice + fee;
 
   const txHash = await client.writeContract({
-    abi: CredAbi,
-    address: CRED_SEPOLIA_CONTRACT_ADDRESS,
+    abi: PortalAbi,
+    address: PORTAL_SEPOLIA_CONTRACT_ADDRESS,
     functionName: 'buyKeys',
     args: [monkeyAccount.address, tokenId, numKeys, '0x0'],
     value: totalCost,

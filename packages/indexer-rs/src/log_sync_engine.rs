@@ -12,7 +12,6 @@ use crate::rocksdb_key::{
 };
 use crate::utils::{get_latest_synched_chunk, search_missing_chunks};
 use crate::{BlockNum, ChunkNum, EventId};
-use colored::*;
 use core::panic;
 use futures::future::join_all;
 use log::{error, info};
@@ -21,6 +20,7 @@ use rocksdb::WriteBatch;
 use serde_json::Value;
 use std::cmp::min;
 use std::sync::Arc;
+use std::time::Duration;
 
 pub const CHUNK_SIZE: u64 = 2000;
 
@@ -158,7 +158,7 @@ impl LogSyncEngine {
         let mut batch_size = block_ranges.len();
         while !block_ranges.is_empty() {
             batch_size = min(batch_size, block_ranges.len());
-            let batch = block_ranges[..batch_size].to_vec();
+            let batch: Vec<[u64; 2]> = block_ranges[..batch_size].to_vec();
 
             let result = self
                 .eth_client
@@ -172,9 +172,9 @@ impl LogSyncEngine {
 
             match result {
                 Ok(result) => {
-                    let result = result.as_array();
+                    let result_array = result.as_array();
 
-                    if let Some(result) = result {
+                    if let Some(result) = result_array {
                         // Check if any of the batches failed
                         let mut error_msg = None;
                         let needs_retry = result.iter().any(|batch| {
@@ -190,17 +190,19 @@ impl LogSyncEngine {
 
                         if needs_retry {
                             error!(
-                                "${} ({}) {} {:?}",
+                                "{} (batch size {}) {:?}",
                                 self.contract.name,
                                 batch.len(),
-                                "Error:".red(),
                                 error_msg
                             );
                             // We reduce the number of chunks and retry
                             batch_size /= 4;
+
+                            let retry_in = rand::random::<u64>() % 10000;
+                            tokio::time::sleep(Duration::from_millis(retry_in)).await;
                         } else {
                             // Parse the inner results
-                            let batches = result
+                            let batches: Vec<Vec<Value>> = result
                                 .iter()
                                 .map(|batch| batch["result"].as_array().unwrap().to_vec())
                                 .collect();
@@ -210,6 +212,9 @@ impl LogSyncEngine {
                             // Remove the processed block ranges
                             block_ranges = block_ranges[batch_size..].to_vec();
                         }
+                    } else {
+                        // Empty batch
+                        block_ranges = block_ranges[batch_size..].to_vec();
                     }
                 }
                 Err(e) => {
@@ -240,7 +245,7 @@ impl LogSyncEngine {
         self.rocksdb_client.write(batch).unwrap();
         if !chunks.is_empty() {
             info!(
-                "${} Synched chunk: {}-{}",
+                "{} Synched chunk: {}-{}",
                 self.contract.name,
                 chunks[0],
                 chunks[chunks.len() - 1]
@@ -250,7 +255,7 @@ impl LogSyncEngine {
 
     /// Sync contract logs up to the given block number
     pub async fn sync_to_block(&self, to_block: BlockNum) {
-        let batch_size = 1;
+        let batch_size = 50;
 
         // Calculate the total number of chunks to sync
         let num_total_chunks =
@@ -264,17 +269,11 @@ impl LogSyncEngine {
 
         let chunk_batches = (chunks_from..num_total_chunks).collect::<Vec<ChunkNum>>();
 
-        for batch in chunk_batches.chunks(batch_size as usize) {
-            self.sync_chunks(batch.to_vec(), to_block).await;
-        }
-
-        /*
         let jobs = chunk_batches
             .chunks(batch_size as usize)
             .map(|batch| self.sync_chunks(batch.to_vec(), to_block));
 
         join_all(jobs).await;
-         */
 
         // Get missing chunks
         let missing_chunks = self.search_missing_chunks(num_total_chunks);
@@ -314,7 +313,7 @@ impl LogSyncEngine {
                 self.block_timestamp_sync_engine.sync().await;
             }
 
-            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
         }
     }
 }

@@ -51,7 +51,7 @@ impl GroupIndexer for TickerIndexer {
         &self.group
     }
 
-    async fn is_ready(&self) -> Result<bool, surf::Error> {
+    async fn is_ready(&self) -> Result<bool, Error> {
         is_event_logs_ready(
             &self.resources.rocksdb_client,
             &self.resources.eth_client,

@@ -20,10 +20,12 @@ use indexer_rs::rocksdb_key::{
     ERC721_TRANSFER_EVENT_ID,
 };
 use indexer_rs::server::server::start_server;
+use indexer_rs::status_logger::start_status_logger;
 use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
+use log::error;
 use rocksdb::{Options, DB};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -44,7 +46,6 @@ async fn main() {
     let rocksdb_client = Arc::new(rocksdb_conn);
     let eth_client = Arc::new(EthRpcClient::new());
 
-    /* 
     let groups = get_all_groups(&pg_client).await;
 
     // Set to store the contracts that the groups depend on
@@ -157,18 +158,39 @@ async fn main() {
 
     let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
+    let _pg_client = pg_client.clone();
     let sever_thread = tokio::spawn(async move {
-        start_server(rocksdb_client.clone(), pg_client.clone()).await;
+        start_server(rocksdb_client.clone(), pg_client).await;
     });
 
+    let pg_client = _pg_client;
+
+    let status_logger_thread =
+        tokio::spawn(async move { start_status_logger(pg_client.clone()).await });
+
     // Run the sync and indexing jobs concurrently
-    join!(
+    let (sync_results, indexing_results, _intrinsic_result, server_result, _status_logger_result) = join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
         intrinsic_creddd_sync_job,
-        sever_thread
+        sever_thread,
+        status_logger_thread
     );
-    */
 
-    start_server(rocksdb_client.clone(), pg_client.clone()).await;
+    for sync_result in sync_results {
+        if let Err(e) = sync_result {
+            error!("Sync thread failed: {:?}", e);
+        }
+    }
+
+    for indexing_result in indexing_results {
+        if let Err(e) = indexing_result {
+            error!("Indexing thread failed: {:?}", e);
+        }
+    }
+
+    // Handle the results
+    if let Err(e) = server_result {
+        error!("Server thread failed: {:?}", e);
+    }
 }

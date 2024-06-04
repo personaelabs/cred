@@ -27,10 +27,10 @@ async fn main() -> Result<(), tokio_postgres::Error> {
     let rocksdb_conn = Arc::new(DB::open_for_read_only(&db_options, ROCKSDB_PATH, true).unwrap());
 
     let num_synched_logs = count_synched_logs(&rocksdb_conn, event_id, contract_id, to_block);
-    let num_synched_timestamps = count_synched_timestamps(&rocksdb_conn, chain, to_block);
+  //  let num_synched_timestamps = count_synched_timestamps(&rocksdb_conn, chain, to_block);
 
     println!("num_synched_logs: {}", num_synched_logs);
-    println!("num_synched_timestamps: {}", num_synched_timestamps);
+//    println!("num_synched_timestamps: {}", num_synched_timestamps);
 
     Ok(())
 }
