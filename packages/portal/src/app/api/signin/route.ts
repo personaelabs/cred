@@ -133,8 +133,10 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const userData = userExists.data();
+
   return Response.json(
-    { token, usernameSet: userExists.data()?.username !== '' },
+    { token, usernameSet: userData ? userData.username !== '' : false },
     { status: 200 }
   );
 }
