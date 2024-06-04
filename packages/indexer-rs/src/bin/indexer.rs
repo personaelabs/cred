@@ -20,6 +20,7 @@ use indexer_rs::rocksdb_key::{
     ERC721_TRANSFER_EVENT_ID,
 };
 use indexer_rs::server::server::start_server;
+use indexer_rs::status_logger::start_status_logger;
 use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
@@ -157,16 +158,23 @@ async fn main() {
 
     let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
+    let _pg_client = pg_client.clone();
     let sever_thread = tokio::spawn(async move {
-        start_server(rocksdb_client.clone(), pg_client.clone()).await;
+        start_server(rocksdb_client.clone(), pg_client).await;
     });
 
+    let pg_client = _pg_client;
+
+    let status_logger_thread =
+        tokio::spawn(async move { start_status_logger(pg_client.clone()).await });
+
     // Run the sync and indexing jobs concurrently
-    let (sync_results, indexing_results, intrinsic_result, server_result) = join!(
+    let (sync_results, indexing_results, _intrinsic_result, server_result, _status_logger_result) = join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
         intrinsic_creddd_sync_job,
-        sever_thread
+        sever_thread,
+        status_logger_thread
     );
 
     for sync_result in sync_results {

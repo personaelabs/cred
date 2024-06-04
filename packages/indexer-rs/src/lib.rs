@@ -21,6 +21,7 @@ pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
 pub mod utils;
+pub mod status_logger;
 
 #[cfg(test)]
 pub mod test_utils;
