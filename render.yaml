@@ -57,7 +57,7 @@ services:
         previewValue: BKF9U_p1O5RChiFe30w4bq-IcVTh-i0LcXHSpBUsELHuzfxsQlqhlqL9QfzjuavM_k1aWksZRbEuWQHkTid6J70
   - type: web
     name: cred-indexer
-    plan: pro plus
+    plan: pro max
     previewPlan: starter
     runtime: docker
     region: oregon
