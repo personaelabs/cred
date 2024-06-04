@@ -14,11 +14,13 @@ import {
 import db from '@/lib/firestore';
 import {
   getDeviceNotificationToken,
+  saveNotificationEnabled,
   setNotificationConfigured,
 } from '@/lib/notification';
 
 const registerNotificationToken = async (userId: string) => {
   const token = await getDeviceNotificationToken();
+  console.log('registerNotificationToken', token);
   if (token) {
     const notificationTokenDoc = doc(
       collection(db, 'notificationTokens').withConverter(
@@ -40,9 +42,7 @@ const registerNotificationToken = async (userId: string) => {
           tokens: userTokens
             .data()
             .tokens.map(t =>
-              t.token === token
-                ? { ...t, createdAt: new Date(), enabled: true }
-                : t
+              t.token === token ? { ...t, createdAt: new Date() } : t
             ),
         });
         return;
@@ -59,7 +59,6 @@ const registerNotificationToken = async (userId: string) => {
       tokens: arrayUnion({
         token,
         createdAt: new Date(),
-        enabled: true,
       }),
     });
   }
@@ -69,6 +68,7 @@ const useRegisterNotificationToken = () => {
   return useMutation({
     mutationFn: async ({ userId }: { userId: string }) => {
       await registerNotificationToken(userId);
+      saveNotificationEnabled(true);
     },
     onSuccess: () => {
       setNotificationConfigured();

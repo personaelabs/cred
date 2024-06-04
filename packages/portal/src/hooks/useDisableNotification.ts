@@ -3,9 +3,14 @@ import { notificationTokensConvert } from '@cred/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
-import { getDeviceNotificationToken } from '@/lib/notification';
+import {
+  getDeviceNotificationToken,
+  saveNotificationEnabled,
+} from '@/lib/notification';
+import * as messaging from 'firebase/messaging';
+import app from '@/lib/firebase';
 
-const disableNotificationToken = async ({
+const deleteNotificationToken = async ({
   userId,
   token,
 }: {
@@ -26,9 +31,8 @@ const disableNotificationToken = async ({
   }
 
   await updateDoc(notificationTokenDoc, {
-    tokens: notificationTokens.tokens.map(t =>
-      t.token === token ? { ...t, enabled: false } : t
-    ),
+    // Remove the deleted token from the list of users tokens
+    tokens: notificationTokens.tokens.filter(t => t.token !== token),
   });
 };
 
@@ -37,6 +41,8 @@ const useDisableNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
+      saveNotificationEnabled(false);
+
       if (!signedInUser) {
         throw new Error('User not signed in');
       }
@@ -45,13 +51,14 @@ const useDisableNotification = () => {
         throw new Error('Notification permission not granted');
       }
 
+      await messaging.deleteToken(messaging.getMessaging(app));
       const token = await getDeviceNotificationToken();
 
       if (!token) {
         throw new Error('Notification token not found');
       }
 
-      await disableNotificationToken({
+      await deleteNotificationToken({
         userId: signedInUser!.id,
         token,
       });

@@ -21,7 +21,6 @@ export const notificationTokensConvert = {
         return {
           token: token.token,
           createdAt,
-          enabled: token.enabled !== false ? true : false,
         };
       }
     );

@@ -17,6 +17,19 @@ export const setNotificationConfigured = () => {
   localStorage.setItem('notificationConfigured', 'true');
 };
 
+const NOTIFICATION_ENABLED_KEY = 'portal.notificationsEnabled';
+
+export const isNotificationsEnabled = () => {
+  return window.localStorage.getItem(NOTIFICATION_ENABLED_KEY) === 'true';
+};
+
+export const saveNotificationEnabled = (enabled: boolean) => {
+  window.localStorage.setItem(
+    NOTIFICATION_ENABLED_KEY,
+    enabled ? 'true' : 'false'
+  );
+};
+
 export const getDeviceNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
 
