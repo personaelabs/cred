@@ -2,7 +2,7 @@
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, CirclePlus } from 'lucide-react';
+import { ArrowDownToLine, CircleFadingPlus } from 'lucide-react';
 import theme from '@/lib/theme';
 import {
   copyTextToClipboard,
@@ -37,7 +37,7 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
 
   if (!from || !to) {
     // TODO: Report error
-    return null;
+    return <></>;
   }
 
   return (
@@ -48,7 +48,7 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
         >
           {isPurchase ? 'Purchased' : 'Sold'}
         </div>
-        <div>{room?.name}</div>
+        <div>{room?.name || ''}</div>
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ const DepositButton = (props: { address: Hex | undefined }) => {
         toast.info(`Copied address ${trimAddress(address as Hex)}`);
       }}
     >
-      <CirclePlus className="w-4 h-4" color={theme.orange}></CirclePlus>
+      <CircleFadingPlus className="w-4 h-4 text-primary"></CircleFadingPlus>
       <div className="text-md flex flex-row items-center">
         Deposit on{' '}
         <img src="/base.png" alt="base" className="w-4 h-4 mx-1"></img>
@@ -142,7 +142,6 @@ const WalletPage = () => {
             ) : (
               <></>
             )}
-
             <div className="flex flex-col mt-[16px]">
               {tradeHistory?.map((log, index) => (
                 <TradeHistoryListItem
