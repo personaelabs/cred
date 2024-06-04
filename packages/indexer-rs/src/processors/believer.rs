@@ -91,7 +91,7 @@ impl GroupIndexer for BelieverIndexer {
         self.contract().chain
     }
 
-    async fn is_ready(&self) -> Result<bool, surf::Error> {
+    async fn is_ready(&self) -> Result<bool, Error> {
         let event_logs_ready = is_event_logs_ready(
             &self.resources.rocksdb_client,
             &self.resources.eth_client,

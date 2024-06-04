@@ -1,4 +1,6 @@
 use crate::BlockNum;
+use crate::Error;
+use crate::EthRpcError;
 use cached::proc_macro::cached;
 use cached::TimedSizedCache;
 use serde::Deserialize;
@@ -64,7 +66,7 @@ impl LoadBalancer {
             Chain::Optimism => env::var("ALCHEMY_OPT_API_KEY")?,
             Chain::Base => env::var("ALCHEMY_BASE_API_KEY")?,
             Chain::Arbitrum => env::var("ALCHEMY_ARB_API_KEY")?,
-            Chain::Blast => "".to_string()
+            Chain::Blast => "".to_string(),
         };
 
         let subdomain = match chain {
@@ -72,7 +74,7 @@ impl LoadBalancer {
             Chain::Optimism => "opt-mainnet",
             Chain::Base => "base-mainnet",
             Chain::Arbitrum => "arb-mainnet",
-            Chain::Blast => ""
+            Chain::Blast => "",
         };
 
         let url = format!("https://{}.g.alchemy.com/v2/{}", subdomain, api_key);
@@ -90,7 +92,7 @@ impl LoadBalancer {
 )]
 /// Get the latest block number for a chain
 /// Caches the result for 12 seconds
-async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, surf::Error> {
+async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, Error> {
     let permit = PERMITS.acquire().await.unwrap();
 
     let delay = rand::random::<u64>() % 500;
@@ -111,6 +113,24 @@ async fn get_block_number(client: &surf::Client, url: &str) -> Result<BlockNum, 
     let body_str = res.body_string().await?;
 
     let body: Value = serde_json::from_str(&body_str).unwrap();
+
+    let error = body["error"].as_object();
+
+    if error.is_some() {
+        let err = EthRpcError {
+            message: error.unwrap()["message"].as_str().unwrap().to_string(),
+        };
+
+        return Err(Error::EthRpc(err));
+    }
+
+    let finalized_block_number = body["result"]["number"].as_str();
+
+    if finalized_block_number.is_none() {
+        return Err(Error::EthRpc(EthRpcError {
+            message: "Failed to get finalized block number".to_string(),
+        }));
+    }
 
     let finalized_block = u64::from_str_radix(
         body["result"]["number"]
@@ -150,7 +170,7 @@ impl EthRpcClient {
     }
 
     /// Get the latest block number for a chain
-    pub async fn get_block_number(&self, chain: Chain) -> Result<BlockNum, surf::Error> {
+    pub async fn get_block_number(&self, chain: Chain) -> Result<BlockNum, Error> {
         let mut load_balancer = self.load_balancer.lock().await;
         let url = load_balancer.get_endpoint(chain).unwrap();
         drop(load_balancer);

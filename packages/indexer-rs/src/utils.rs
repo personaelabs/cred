@@ -8,7 +8,7 @@ use crate::{
     rocksdb_key::{KeyType, RocksDbKey},
     synched_chunks_iterator::SynchedChunksIterator,
     BlockNum, ChainId, ChunkNum, ERC1155TransferBatchEvent, ERC1155TransferSingleEvent,
-    ERC20TransferEvent, ERC721TransferEvent, GroupType,
+    ERC20TransferEvent, ERC721TransferEvent, Error, GroupType,
 };
 use crate::{Address, ContractId, EventId};
 use alloy_json_abi::Function;
@@ -120,7 +120,7 @@ pub async fn is_event_logs_ready(
     eth_client: &EthRpcClient,
     event_id: EventId,
     contract: &Contract,
-) -> Result<bool, surf::Error> {
+) -> Result<bool, Error> {
     let block_num = eth_client.get_block_number(contract.chain).await?;
 
     let total_chunks = get_contract_total_chunks(block_num, contract);

@@ -24,6 +24,7 @@ use indexer_rs::tree_sync_engine::TreeSyncEngine;
 use indexer_rs::utils::dotenv_config;
 use indexer_rs::GroupType;
 use indexer_rs::ROCKSDB_PATH;
+use log::error;
 use rocksdb::{Options, DB};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -44,7 +45,6 @@ async fn main() {
     let rocksdb_client = Arc::new(rocksdb_conn);
     let eth_client = Arc::new(EthRpcClient::new());
 
-    /* 
     let groups = get_all_groups(&pg_client).await;
 
     // Set to store the contracts that the groups depend on
@@ -162,13 +162,27 @@ async fn main() {
     });
 
     // Run the sync and indexing jobs concurrently
-    join!(
+    let (sync_results, indexing_results, intrinsic_result, server_result) = join!(
         join_all(sync_jobs),
         join_all(indexing_jobs),
         intrinsic_creddd_sync_job,
         sever_thread
     );
-    */
 
-    start_server(rocksdb_client.clone(), pg_client.clone()).await;
+    for sync_result in sync_results {
+        if let Err(e) = sync_result {
+            error!("Sync thread failed: {:?}", e);
+        }
+    }
+
+    for indexing_result in indexing_results {
+        if let Err(e) = indexing_result {
+            error!("Indexing thread failed: {:?}", e);
+        }
+    }
+
+    // Handle the results
+    if let Err(e) = server_result {
+        error!("Server thread failed: {:?}", e);
+    }
 }
