@@ -17,10 +17,10 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Create service account key
-        working-directory: ./packages/chat
+        working-directory: ./packages/portal
         run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' > ./service-account.json
       - name: Apply security rules
-        working-directory: ./packages/chat
+        working-directory: ./packages/portal
         run: firebase deploy --project cred-279bb
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./service-account.json
