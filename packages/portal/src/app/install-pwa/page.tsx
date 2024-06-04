@@ -4,7 +4,7 @@ import useIsPwa from '@/hooks/useIsPwa';
 import { getMobileOperatingSystem } from '@/lib/utils';
 import { MobileOS } from '@/types';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const IOSInstallation = () => {
   return (
@@ -28,6 +28,7 @@ const InstallPwaPage = () => {
   const { setOptions } = useHeaderOptions();
   const isPwa = useIsPwa();
   const router = useRouter();
+  const [mobileOS, setMobileOS] = useState<MobileOS | null>(null);
 
   useEffect(() => {
     setOptions({
@@ -39,11 +40,13 @@ const InstallPwaPage = () => {
 
   useEffect(() => {
     if (isPwa) {
-      //      router.replace('/');
+      router.replace('/');
     }
   }, [isPwa, router]);
 
-  const mobileOS = getMobileOperatingSystem();
+  useEffect(() => {
+    setMobileOS(getMobileOperatingSystem());
+  }, []);
 
   return (
     <div className="bg-background h-full flex flex-col items-center justify-center px-4">
