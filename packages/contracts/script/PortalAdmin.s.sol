@@ -4,10 +4,23 @@ pragma solidity ^0.8.13;
 import { Script, console } from 'forge-std/Script.sol';
 import '../src/Portal.sol';
 
-contract SetupUnitPrice is Script {
+contract PortalAdmin is Script {
     Portal portal = Portal(0xb8B0c71AA4e96F002BCd4dE6582B61c80e373E24);
 
   function setUp() public {}
+
+  function transferOwnership() public {
+    address ownerBefore = portal.owner();
+
+    vm.startBroadcast();
+    portal.transferOwnership(0x46dFcA07Df4e82b5cCCd4944FB728a926890a2f8);
+    vm.stopBroadcast();
+
+    address ownerAfter = portal.owner();
+
+    console.log('Owner before:', ownerBefore);
+    console.log('Owner after:', ownerAfter);
+  }
 
   function setUnitPrice() public {
     uint256 unitPriceBefore = portal.unitPrice();
@@ -39,7 +52,7 @@ contract SetupUnitPrice is Script {
     address feeRecipientBefore = portal.feeRecipient();
 
     vm.startBroadcast();
-    portal.setFeeRecipient(0x1234567890123456789012345678901234567890);
+    portal.setFeeRecipient(0x46dFcA07Df4e82b5cCCd4944FB728a926890a2f8);
     vm.stopBroadcast();
 
     address feeRecipientAfter = portal.feeRecipient();
