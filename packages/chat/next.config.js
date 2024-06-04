@@ -47,7 +47,7 @@ module.exports =
           // Suppresses source map uploading logs during build
           silent: true,
           org: 'personae-labs',
-          project: 'credchat',
+          project: 'portal',
         },
         {
           // For all available options, see:
