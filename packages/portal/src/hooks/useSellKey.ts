@@ -27,6 +27,15 @@ const sendTransactionId = async ({
   await axios.post(`/api/rooms/${roomId}/sync`, body);
 };
 
+const getProtocolFee = async (price: bigint): Promise<bigint> => {
+  return await readContract(wagmiConfig, {
+    abi: PortalAbi,
+    address: PORTAL_CONTRACT_ADDRESS,
+    functionName: 'getProtocolFee',
+    args: [price],
+  });
+};
+
 const getCurrentSellPrice = async (roomIdBigInt: bigint) => {
   const amount = BigInt(1);
   return await readContract(wagmiConfig, {
@@ -65,8 +74,9 @@ const useSellKey = (roomId: string) => {
       });
 
       const sellPrice = await getCurrentSellPrice(roomIdBigInt);
+      const protocolFee = await getProtocolFee(sellPrice);
 
-      const formattedKeyPrice = formatEther(sellPrice);
+      const formattedSalesValue = formatEther(sellPrice - protocolFee);
 
       const txReceipt = await sendTransaction(
         {
@@ -76,7 +86,7 @@ const useSellKey = (roomId: string) => {
         },
         {
           header: `Sell ${room?.name} key`,
-          description: `You will receive ${formattedKeyPrice} ETH (estimated)`,
+          description: `You will receive ${formattedSalesValue} ETH (estimated)  (1% protocol fee)`,
           buttonText: 'Sell key',
         }
       );
