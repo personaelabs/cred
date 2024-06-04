@@ -1,8 +1,28 @@
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useIsPwa from '@/hooks/useIsPwa';
+import { getMobileOperatingSystem } from '@/lib/utils';
+import { MobileOS } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+
+const IOSInstallation = () => {
+  return (
+    <div>
+      <div className="text-lg mt-4">1. Tap the share button </div>
+      <div className="text-lg">2. Tap &quot;Add to Home Screen&quot;</div>
+    </div>
+  );
+};
+
+const AndroidInstallation = () => {
+  return (
+    <div>
+      <div className="text-lg mt-4">1. Tap the ... icon </div>
+      <div className="text-lg">2. Tap &quot;Install app&quot;</div>
+    </div>
+  );
+};
 
 const InstallPwaPage = () => {
   const { setOptions } = useHeaderOptions();
@@ -19,17 +39,25 @@ const InstallPwaPage = () => {
 
   useEffect(() => {
     if (isPwa) {
-      router.replace('/');
+      //      router.replace('/');
     }
   }, [isPwa, router]);
+
+  const mobileOS = getMobileOperatingSystem();
 
   return (
     <div className="bg-background h-full flex flex-col items-center justify-center px-4">
       <div className="text-2xl text-primary">
         Please add this app <br></br> to your home screen
       </div>
-      <div className="text-lg mt-4">1. Tap the share button </div>
-      <div className="text-lg">2. Tap &quot;Add to Home Screen&quot;</div>
+      {mobileOS === MobileOS.IOS ? (
+        <IOSInstallation />
+      ) : mobileOS === MobileOS.ANDROID ? (
+        <AndroidInstallation />
+      ) : (
+        // Show IOS installation instructions for other OS
+        <IOSInstallation />
+      )}
     </div>
   );
 };

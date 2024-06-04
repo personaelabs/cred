@@ -127,3 +127,12 @@ export interface SetUsernameRequestBody {
 export interface SignInRequestBody {
   inviteCode: string;
 }
+
+export enum MobileOS {
+  // eslint-disable-next-line no-unused-vars
+  IOS = 'IOS',
+  // eslint-disable-next-line no-unused-vars
+  ANDROID = 'ANDROID',
+  // eslint-disable-next-line no-unused-vars
+  WINDOWS = 'WINDOWS',
+}

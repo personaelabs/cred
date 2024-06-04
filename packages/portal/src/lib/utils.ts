@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
-import { BottomSheetType, ModalType } from '@/types';
+import { BottomSheetType, MobileOS, ModalType } from '@/types';
 
 export const MIN_USERNAME_LENGTH = 3;
 export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
@@ -270,4 +270,32 @@ export const fromHexString = (hexString: Hex, size?: number): Buffer => {
 
 export const getProofHash = (proof: Hex) => {
   return keccak256(proof);
+};
+
+/**
+ * Determine the mobile operating system.
+ * This function returns one of 'iOS', 'Android', 'Windows Phone', or 'unknown'.
+ *
+ * Copied from https://stackoverflow.com/questions/21741841
+ */
+export const getMobileOperatingSystem = () => {
+  // @ts-ignore
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+  // Windows Phone must come first because its UA also contains "Android"
+  if (/windows phone/i.test(userAgent)) {
+    return MobileOS.WINDOWS;
+  }
+
+  if (/android/i.test(userAgent)) {
+    return MobileOS.ANDROID;
+  }
+
+  // iOS detection from: http://stackoverflow.com/a/9039885/177710
+  // @ts-ignore
+  if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+    return MobileOS.IOS;
+  }
+
+  return null;
 };
