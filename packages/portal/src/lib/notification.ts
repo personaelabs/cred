@@ -1,6 +1,7 @@
 import { getMessaging, getToken } from 'firebase/messaging';
 import app from './firebase';
 import * as Sentry from '@sentry/nextjs';
+import { sleep } from './utils';
 
 const NEXT_PUBLIC_VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_KEY;
 
@@ -20,11 +21,25 @@ export const getDeviceNotificationToken = async (): Promise<string | null> => {
   const messaging = getMessaging(app);
 
   try {
-    const token = await getToken(messaging, {
-      vapidKey: NEXT_PUBLIC_VAPID_KEY,
-    });
+    const maxRetries = 5;
+    let retries = 0;
 
-    return token;
+    while (maxRetries > retries) {
+      try {
+        const token = await getToken(messaging, {
+          vapidKey: NEXT_PUBLIC_VAPID_KEY,
+        });
+
+        await sleep(100);
+
+        return token;
+      } catch (err: any) {
+        console.log(err);
+        retries++;
+      }
+    }
+
+    throw new Error('Failed to get device notification token');
   } catch (err: any) {
     Sentry.captureException(err);
     alert(`Error: ${err.message}`);

@@ -17,6 +17,10 @@ import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { BottomSheetType, MobileOS, ModalType } from '@/types';
 
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const MIN_USERNAME_LENGTH = 3;
 export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
 
