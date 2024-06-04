@@ -53,6 +53,7 @@ const NotificationSettingsPage = () => {
             loading: 'Enabling notifications...',
             success: 'Notifications enabled',
             error: 'Failed to enable notifications',
+            position: 'top-right',
           });
         } else {
           const disablePromise = disableNotification();
@@ -61,6 +62,7 @@ const NotificationSettingsPage = () => {
             loading: 'Disabling notifications...',
             success: 'Notifications disabled',
             error: 'Failed to disable notifications',
+            position: 'top-right',
           });
         }
       }
