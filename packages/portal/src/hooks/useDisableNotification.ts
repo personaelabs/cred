@@ -51,7 +51,6 @@ const useDisableNotification = () => {
         throw new Error('Notification permission not granted');
       }
 
-      await messaging.deleteToken(messaging.getMessaging(app));
       const token = await getDeviceNotificationToken();
 
       if (!token) {
@@ -62,6 +61,8 @@ const useDisableNotification = () => {
         userId: signedInUser!.id,
         token,
       });
+
+      await messaging.deleteToken(messaging.getMessaging(app));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
