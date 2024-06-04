@@ -5,7 +5,7 @@ import { Script, console } from 'forge-std/Script.sol';
 import '../src/Portal.sol';
 
 contract PortalAdmin is Script {
-    Portal portal = Portal(0xb8B0c71AA4e96F002BCd4dE6582B61c80e373E24);
+    Portal portal = Portal(0x4c62e19A56dd3F31350cEDB605D234fef7D12d18);
 
   function setUp() public {}
 
