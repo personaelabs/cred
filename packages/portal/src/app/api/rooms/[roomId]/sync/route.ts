@@ -60,13 +60,13 @@ export async function POST(
     );
   }
 
-  const log = result.logs[0];
+  const log = result.logs.find(
+    log => log.topics[0] === TRANSFER_SINGLE_EVENT_SIG
+  );
 
-  const eventSig = log.topics[0];
-
-  if (eventSig !== TRANSFER_SINGLE_EVENT_SIG) {
-    logger.error(`Unexpected event signature ${eventSig}`, {
-      txHash: log.transactionHash,
+  if (!log) {
+    logger.error(`No log with TransferSingle event sig`, {
+      txHash: result.transactionHash,
     });
     return Response.json(
       {
