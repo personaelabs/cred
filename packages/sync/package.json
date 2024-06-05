@@ -1,7 +1,7 @@
 {
   "name": "@cred/sync",
   "scripts": {
-    "start": "pnpm lint && NODE_TLS_REJECT_UNAUTHORIZED='0' tsx src/sync.ts",
+    "start": "pnpm lint && tsx src/sync.ts",
     "lint": "tsc --noEmit",
     "fillInviteCodes": "tsx ./scripts/fillInviteCodes.ts",
     "printInviteCodes": "tsx ./scripts/printInviteCodes.ts"

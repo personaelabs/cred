@@ -43,7 +43,7 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - key: NEXT_PUBLIC_CHAIN
-        value: "sepolia"
+        value: "mainnet"
         previewValue: "sepolia"
       - fromGroup: cred
       - key: GOOGLE_APPLICATION_CREDENTIALS
@@ -102,7 +102,7 @@ services:
           name: cred
           property: connectionString
       - key: CHAIN
-        value: "sepolia"
+        value: "mainnet"
         previewValue: "sepolia"
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json

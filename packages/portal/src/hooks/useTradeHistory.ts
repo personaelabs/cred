@@ -2,9 +2,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { PublicClient, Hex, parseAbiItem, GetLogsReturnType } from 'viem';
 import { useAccount, usePublicClient } from 'wagmi';
-import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
+import {
+  PORTAL_CONTRACT_ADDRESS,
+  PORTAL_CONTRACT_DEPLOYED_BLOCK,
+} from '@/lib/contract';
 
-const PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10167164);
 const TRANSFER_SINGLE_EVENT = parseAbiItem(
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)'
 );
@@ -18,7 +20,7 @@ const getTradeHistory = async (
   const purchaseLogs = await client.getLogs({
     address: PORTAL_CONTRACT_ADDRESS,
     event: TRANSFER_SINGLE_EVENT,
-    fromBlock: PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK,
+    fromBlock: PORTAL_CONTRACT_DEPLOYED_BLOCK,
     toBlock: 'latest',
     args: {
       from: address,
@@ -28,7 +30,7 @@ const getTradeHistory = async (
   const sellLogs = await client.getLogs({
     address: PORTAL_CONTRACT_ADDRESS,
     event: TRANSFER_SINGLE_EVENT,
-    fromBlock: PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK,
+    fromBlock: PORTAL_CONTRACT_DEPLOYED_BLOCK,
     toBlock: 'latest',
     args: {
       to: address,

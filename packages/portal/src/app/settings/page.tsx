@@ -95,14 +95,12 @@ const Settings = () => {
             to="/settings/wallet"
             iconColor="#65a7f7"
           ></SettingsMenuItem>
-          {/*
           <SettingsMenuItem
             icon="Bell"
             text="Notifications"
             to="/settings/notification"
             iconColor="#65f7b5"
           ></SettingsMenuItem>
-          */}
         </div>
         <Button variant="link" className="mt-10" onClick={onSignOutClick}>
           Sign out

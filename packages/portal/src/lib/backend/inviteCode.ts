@@ -8,6 +8,14 @@ const db = getFirestore(app);
  * @returns {boolean} Whether the invite code is valid.
  */
 export const isValidInviteCode = async (inviteCode: string) => {
+  // In development or pull requests, allow the invite code "test".
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.IS_PULL_REQUEST === 'true'
+  ) {
+    return inviteCode === 'test';
+  }
+
   const inviteCodeDoc = await db
     .collection('inviteCodes')
     .where('code', '==', inviteCode)

@@ -116,7 +116,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     persistQueryClient({
       queryClient,
       persister: localStoragePersister,
-      buster: '2',
+      buster: '3',
     });
   }, []);
 

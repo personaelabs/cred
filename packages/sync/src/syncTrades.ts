@@ -3,7 +3,9 @@ import { getChain, sleep } from './lib/utils';
 import client from './lib/viemClient';
 import {
   PORTAL_CONTRACT_ADDRESS as _PORTAL_CONTRACT_ADDRESS,
+  PORTAL_CONTRACT_DEPLOYED_BLOCK as _PORTAL_CONTRACT_DEPLOYED_BLOCK,
   PORTAL_SEPOLIA_CONTRACT_ADDRESS,
+  PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK,
   PortalAbi,
   tokenIdToRoomId,
 } from '@cred/shared';
@@ -22,12 +24,14 @@ const PORTAL_CONTRACT_ADDRESS =
     ? PORTAL_SEPOLIA_CONTRACT_ADDRESS
     : _PORTAL_CONTRACT_ADDRESS;
 
+const PORTAL_CONTRACT_DEPLOYED_BLOCK =
+  chain.id === baseSepolia.id
+    ? PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK
+    : _PORTAL_CONTRACT_DEPLOYED_BLOCK;
+
 const TRANSFER_SINGLE_EVENT = parseAbiItem(
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)'
 );
-
-const PORTAL_CONTRACT_DEPLOYED_BLOCK = BigInt(0);
-const PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK = BigInt(10638162);
 
 const getBalance = async ({
   address,
@@ -49,10 +53,7 @@ const getBalance = async ({
 const syncTrades = async () => {
   const chunkSize = BigInt(1000);
 
-  let synchedBlock =
-    chain.id === baseSepolia.id
-      ? PORTAL_SEPOLIA_CONTRACT_DEPLOY_BLOCK
-      : PORTAL_CONTRACT_DEPLOYED_BLOCK;
+  let synchedBlock = PORTAL_CONTRACT_DEPLOYED_BLOCK;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
