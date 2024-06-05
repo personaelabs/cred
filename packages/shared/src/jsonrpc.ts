@@ -17,7 +17,13 @@ class JsonRpcClient {
   }
 
   private async call<T>(method: string, params: any[] = []): Promise<T> {
-    const response = await this.axiosInstance.post<{ result: T }>(
+    const response = await this.axiosInstance.post<{
+      result: T;
+      error?: {
+        code: number;
+        message: string;
+      };
+    }>(
       '',
       {
         jsonrpc: '2.0',
@@ -31,6 +37,10 @@ class JsonRpcClient {
         },
       }
     );
+
+    if (response.data.error) {
+      throw new Error(response.data.error.message);
+    }
 
     return response.data.result;
   }
