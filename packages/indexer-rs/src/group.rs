@@ -1,7 +1,7 @@
 use crate::{
     contract::{get_contracts, Contract},
     utils::{get_group_id, is_prod},
-    GroupId, GroupState, GroupType,
+    Error, GroupId, GroupState, GroupType,
 };
 
 const PREVIEW_GROUP_IDS: [&str; 9] = [
@@ -93,18 +93,17 @@ pub async fn upsert_group(
 }
 
 /// Get all groups from the database
-pub async fn get_all_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
+pub async fn get_all_groups(pg_client: &tokio_postgres::Client) -> Result<Vec<Group>, Error> {
     // Get all groups from the storage
     let result = pg_client
         .query(
             r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" = 'Recordable' "#,
             &[],
         )
-        .await
-        .unwrap();
+        .await?;
 
     // Get all contracts from storage
-    let contracts = get_contracts(pg_client).await;
+    let contracts = get_contracts(pg_client).await?;
 
     let groups = result
         .iter()
@@ -144,13 +143,13 @@ pub async fn get_all_groups(pg_client: &tokio_postgres::Client) -> Vec<Group> {
         .collect::<Vec<Group>>();
 
     if is_prod() {
-        groups
+        Ok(groups)
     } else {
         // Only return a selected few
-        groups
+        Ok(groups
             .iter()
             .filter(|group| PREVIEW_GROUP_IDS.contains(&group.id.as_str()))
             .cloned()
-            .collect()
+            .collect())
     }
 }

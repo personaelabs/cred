@@ -32,7 +32,7 @@ async fn get_group_block_height(
 }
 
 async fn log_group_block_heights(pg_client: Arc<tokio_postgres::Client>) -> Result<(), Error> {
-    let groups = get_all_groups(&pg_client).await;
+    let groups = get_all_groups(&pg_client).await?;
 
     for group in groups {
         let block_num = get_group_block_height(group.id.clone(), &pg_client).await?;

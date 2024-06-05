@@ -1,5 +1,5 @@
 use crate::BlockNum;
-use jsonrpc_http_server::jsonrpc_core::*;
+use jsonrpc_http_server::jsonrpc_core::{Error as JsonRpcError, Params, Value};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -8,17 +8,20 @@ pub struct MerkleTreeData {
     pub block_number: BlockNum,
 }
 
-pub async fn get_group_merkle_tree(params: Params, pg_client: &tokio_postgres::Client) -> Result<Value> {
+pub async fn get_group_merkle_tree(
+    params: Params,
+    pg_client: &tokio_postgres::Client,
+) -> Result<Value, JsonRpcError> {
     let params: Vec<String> = params.parse().unwrap();
 
     if params.len() != 2 {
-        return Err(Error::invalid_params("Expected 2 parameter"));
+        return Err(JsonRpcError::invalid_params("Expected 2 parameter"));
     }
 
     let merkle_root = params[0].clone();
     let group_id = params[1].clone();
 
-    let rows = pg_client
+    let result = pg_client
         .query(
             r#"
             SELECT
@@ -31,11 +34,16 @@ pub async fn get_group_merkle_tree(params: Params, pg_client: &tokio_postgres::C
             "#,
             &[&merkle_root, &group_id],
         )
-        .await
-        .unwrap();
+        .await;
+
+    if result.is_err() {
+        return Err(JsonRpcError::internal_error());
+    }
+
+    let rows = result.unwrap();
 
     if rows.len() == 0 {
-        return Err(Error::invalid_params(
+        return Err(JsonRpcError::invalid_params(
             "No Merkle tree found for the given Merkle root and group id",
         ));
     }

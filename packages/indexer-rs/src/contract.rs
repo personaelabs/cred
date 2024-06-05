@@ -1,4 +1,4 @@
-use crate::{eth_rpc::Chain, seeder::seed_contracts::ContractData, BlockNum, ContractId};
+use crate::{eth_rpc::Chain, seeder::seed_contracts::ContractData, BlockNum, ContractId, Error};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 
@@ -52,38 +52,6 @@ pub async fn upsert_contract(
         Chain::Blast => "Blast",
     };
 
-    /*
-    // Check that we are not reassigning ids
-    let result = pg_client
-        .query(
-            r#"SELECT "address", "chain" FROM "Contract" WHERE "id" = $1"#,
-            &[&(contract.id as i32)],
-        )
-        .await?;
-
-    if result.len() > 0 {
-        let row = result.get(0).unwrap();
-        // Update the contract
-        let contract_address: String = row.get("address");
-        let chain: String = row.get("chain");
-
-        // Convert the chain string to Chain enum
-        let chain = match chain.as_str() {
-            "Ethereum" => Chain::Mainnet,
-            "OP Mainnet" => Chain::Optimism,
-            "Base" => Chain::Base,
-            "Arbitrum One" => Chain::Arbitrum,
-            _ => panic!("Invalid chain"),
-        };
-
-        if contract_address == contract.address || chain == contract.chain {
-            // Contract already exists
-        } else {
-            panic!("Cannot overwrite contract id");
-        }
-    }
-     */
-
     // The contract doesn't exist yet so we insert it
 
     pg_client
@@ -107,15 +75,14 @@ pub async fn upsert_contract(
 }
 
 /// Get all contracts from the postgres
-pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> {
+pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Result<Vec<Contract>, Error> {
     // Get all contracts from the storage
     let result = pg_clinet
         .query(
             r#"SELECT "id", "address", "type",  "name", "chain", "deployedBlock" FROM "Contract""#,
             &[],
         )
-        .await
-        .unwrap();
+        .await?;
 
     let contracts = result
         .iter()
@@ -148,5 +115,5 @@ pub async fn get_contracts(pg_clinet: &tokio_postgres::Client) -> Vec<Contract> 
         })
         .collect();
 
-    contracts
+    Ok(contracts)
 }

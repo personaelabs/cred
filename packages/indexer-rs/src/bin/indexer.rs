@@ -46,7 +46,8 @@ async fn main() {
     let rocksdb_client = Arc::new(rocksdb_conn);
     let eth_client = Arc::new(EthRpcClient::new());
 
-    let groups = get_all_groups(&pg_client).await;
+    // It's ok to unwrap here because this is a one-time operation
+    let groups = get_all_groups(&pg_client).await.unwrap();
 
     // Set to store the contracts that the groups depend on
     let mut contracts = HashSet::new();
