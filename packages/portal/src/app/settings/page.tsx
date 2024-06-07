@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { ChevronRight } from 'lucide-react';
-import AvatarWithFallback from '@/components/Avatar';
+import AvatarWithFallback from '@/components/AvatarWithFallback';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useSignOut from '@/hooks/useSignOut';

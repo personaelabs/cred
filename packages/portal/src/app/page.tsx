@@ -15,7 +15,7 @@ import useBuyPrice from '@/hooks/useBuyPrice';
 import { formatEther } from 'viem';
 import { Room, User } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
-import AvatarWithFallback from '@/components/Avatar';
+import AvatarWithFallback from '@/components/AvatarWithFallback';
 
 interface RoomMemberListItemProps {
   user: User;
