@@ -84,7 +84,6 @@ const useAddCreddd = (proverAddress: Hex | null) => {
 
       const provider = await proverWallet.getEthersProvider();
       const signer = provider.getSigner();
-      console.log('signer', await signer.getChainId());
 
       // Sign message with the source key
       const sig = await signer._signTypedData(

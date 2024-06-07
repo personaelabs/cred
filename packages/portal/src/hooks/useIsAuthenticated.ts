@@ -11,11 +11,9 @@ export const isAuthenticatedToFirestore = async (userId: string) => {
   const user = auth.currentUser;
 
   if (!user) {
-    console.log('No user');
     return false;
   }
 
-  console.log('User', user);
   return user.uid === userId;
 };
 

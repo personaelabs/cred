@@ -14,7 +14,7 @@ const PAGE_SIZE = 10;
 
 const getRooms = async (lastVisible: Room | null) => {
   const roomsRef = collection(db, 'rooms').withConverter(roomConverter);
-  console.log('lastVisible', lastVisible);
+
   const q = lastVisible
     ? query(
         roomsRef,
