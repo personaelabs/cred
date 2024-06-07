@@ -2,6 +2,7 @@
   "name": "@cred/scripts",
   "scripts": {
     "lint": "tsc --noEmit",
+    "addAdmins": "tsx ./src/addAdmins.ts",
     "fillInviteCodes": "tsx ./src/fillInviteCodes.ts",
     "printInviteCodes": "tsx ./src/printInviteCodes.ts"
   },
