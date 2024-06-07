@@ -2,11 +2,12 @@
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, CircleFadingPlus } from 'lucide-react';
+import { ArrowDownToLine, CircleFadingPlus, ExternalLink } from 'lucide-react';
 import theme from '@/lib/theme';
 import {
   copyTextToClipboard,
   formatEthBalance,
+  getChain,
   trimAddress,
 } from '@/lib/utils';
 import { Hex } from 'viem';
@@ -21,6 +22,8 @@ import { tokenIdToRoomId } from '@cred/shared';
 import Scrollable from '@/components/Scrollable';
 import WithdrawalSheet from '@/components/WithdrawalSheet';
 import ClickableBox from '@/components/ClickableBox';
+import Link from 'next/link';
+import { baseSepolia } from 'viem/chains';
 
 interface TradeHistoryListItemProps {
   log: TradeLog;
@@ -41,14 +44,25 @@ const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
   }
 
   return (
-    <div className="flex flex-row gap-x-2 py-2 items-end justify-between px-[32px] border-b-2">
-      <div>
-        <div
-          className={`text-xs ${isPurchase ? 'text-green-400' : 'text-blue-400'}`}
-        >
-          {isPurchase ? 'Purchased' : 'Sold'}
-        </div>
+    <div className="flex flex-col py-2 border-b-2">
+      <div
+        className={`text-xs ${isPurchase ? 'text-green-400' : 'text-blue-400'}`}
+      >
+        {isPurchase ? 'Purchased' : 'Sold'}
+      </div>
+      <div className="flex flex-row items-center justify-between">
         <div>{room?.name || ''}</div>
+        <Link
+          className="px-2 text-xs"
+          href={
+            getChain().id === baseSepolia.id
+              ? `https://sepolia.basescan.org/tx/${log.transactionHash}`
+              : `https://basescan.org/tx/${log.transactionHash}`
+          }
+          target="_blank"
+        >
+          <ExternalLink className="w-4 h-4"></ExternalLink>
+        </Link>
       </div>
     </div>
   );
