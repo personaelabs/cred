@@ -31,7 +31,7 @@ interface ChatMessageDropdownContentProps {
 }
 
 const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
-  const { onReplyClick, onCopyClick, onReactClick } = props;
+  const { onReplyClick, onCopyClick } = props;
 
   return (
     <DropdownMenuContent className="bg-background mt-[-20px] ml-[40px]">
@@ -42,19 +42,6 @@ const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
-      </DropdownMenuItem>
-      <DropdownMenuItem className="focus:bg-background">
-        <div className="flex flex-row gap-x-2">
-          {['👍', '❤️', '🔥', '🙏'].map((emoji, i) => (
-            <div
-              key={i}
-              className="p-2 hover:bg-accent"
-              onClick={() => onReactClick(emoji)}
-            >
-              {emoji}
-            </div>
-          ))}
-        </div>
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
