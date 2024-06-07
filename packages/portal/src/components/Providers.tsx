@@ -19,11 +19,7 @@ import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { FooterContextProvider } from '@/contexts/FooterContext';
-import {
-  BottomSheetContextProvider,
-  useBottomSheet,
-} from '@/contexts/BottomSheetContext';
-import { ModalContextProvider } from '@/contexts/ModalContext';
+import { DialogContextProvider, useDialog } from '@/contexts/DialogContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
@@ -32,7 +28,7 @@ import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
 import ProcessingTxSheet from './ProcessingTxSheet';
-import { BottomSheetType } from '@/types';
+import { DialogType } from '@/types';
 import FundWalletSheet from './FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
@@ -62,7 +58,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
-  const { openedSheet, closeSheet } = useBottomSheet();
+  const { openedDialog, closeDialog } = useDialog();
   const isAuthenticated = useIsAuthenticated();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
 
@@ -158,12 +154,12 @@ const Main = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       <ProcessingTxSheet
-        isOpen={openedSheet === BottomSheetType.PROCESSING_TX}
+        isOpen={openedDialog === DialogType.PROCESSING_TX}
       ></ProcessingTxSheet>
       <FundWalletSheet
-        isOpen={openedSheet === BottomSheetType.FUND_WALLET}
+        isOpen={openedDialog === DialogType.FUND_WALLET}
         onClose={() => {
-          closeSheet();
+          closeDialog();
         }}
       ></FundWalletSheet>
     </>
@@ -194,11 +190,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <MediaQueryProvider>
               <HeaderContextProvider>
                 <FooterContextProvider>
-                  <BottomSheetContextProvider>
-                    <ModalContextProvider>
-                      <Main>{children}</Main>
-                    </ModalContextProvider>
-                  </BottomSheetContextProvider>
+                  <DialogContextProvider>
+                    <Main>{children}</Main>
+                  </DialogContextProvider>
                 </FooterContextProvider>
               </HeaderContextProvider>
             </MediaQueryProvider>

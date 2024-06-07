@@ -3,7 +3,7 @@ import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 import { Hex, encodeFunctionData } from 'viem';
 import axios from '@/lib/axios';
-import { BottomSheetType, SyncRoomRequestBody } from '@/types';
+import { DialogType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import { useBalance } from 'wagmi';
-import { useBottomSheet } from '@/contexts/BottomSheetContext';
+import { useDialog } from '@/contexts/DialogContext';
 
 const sendTransactionId = async ({
   roomId,
@@ -34,7 +34,7 @@ const useBuyKey = (roomId: string) => {
   const [isProcessingTx, setIsProcessingTx] = useState(false);
   const { sendTransaction } = useSendTransaction();
   const { data: room } = useRoom(roomId);
-  const { setOpenedSheet, closeSheet } = useBottomSheet();
+  const { setOpenedSheet, closeDialog } = useDialog();
 
   const privyAccount = wallets?.find(
     wallet => wallet.walletClientType === 'privy'
@@ -77,7 +77,7 @@ const useBuyKey = (roomId: string) => {
       if (balance && balance.value < totalCost) {
         // Show Fund Wallet modal
         // await privyAccount.fund();
-        setOpenedSheet(BottomSheetType.FUND_WALLET);
+        setOpenedSheet(DialogType.FUND_WALLET);
       } else {
         const data = encodeFunctionData({
           abi: PortalAbi,
@@ -100,7 +100,7 @@ const useBuyKey = (roomId: string) => {
         );
 
         setIsProcessingTx(true);
-        setOpenedSheet(BottomSheetType.PROCESSING_TX);
+        setOpenedSheet(DialogType.PROCESSING_TX);
 
         await sendTransactionId({
           roomId,
@@ -109,7 +109,7 @@ const useBuyKey = (roomId: string) => {
 
         setIsProcessingTx(false);
         toast.success('Purchase complete');
-        closeSheet();
+        closeDialog();
       }
     },
     onSuccess: async () => {

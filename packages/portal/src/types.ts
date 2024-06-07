@@ -107,7 +107,7 @@ export interface NeynarUserResponse {
   custody_address: Hex;
 }
 
-export enum BottomSheetType {
+export enum DialogType {
   // eslint-disable-next-line no-unused-vars
   FUND_WALLET = 'FUND_WALLET',
   // eslint-disable-next-line no-unused-vars

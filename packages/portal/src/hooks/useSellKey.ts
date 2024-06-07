@@ -1,7 +1,7 @@
 import { PortalAbi } from '@cred/shared';
 import { Hex, encodeFunctionData, formatEther } from 'viem';
 import axios from '@/lib/axios';
-import { BottomSheetType, SyncRoomRequestBody } from '@/types';
+import { DialogType, SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
@@ -10,7 +10,7 @@ import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import wagmiConfig from '../lib/wagmiConfig';
 import { readContract } from '@wagmi/core';
-import { useBottomSheet } from '@/contexts/BottomSheetContext';
+import { useDialog } from '@/contexts/DialogContext';
 import useSignedInUser from './useSignedInUser';
 
 const sendTransactionId = async ({
@@ -51,7 +51,7 @@ const useSellKey = (roomId: string) => {
   const { sendTransaction } = useSendTransaction();
   const { data: room } = useRoom(roomId);
   const { wallets } = useWallets();
-  const { setOpenedSheet, closeSheet } = useBottomSheet();
+  const { setOpenedSheet, closeDialog } = useDialog();
   const { data: signedInUser } = useSignedInUser();
 
   const result = useMutation({
@@ -91,13 +91,13 @@ const useSellKey = (roomId: string) => {
         }
       );
 
-      setOpenedSheet(BottomSheetType.PROCESSING_TX);
+      setOpenedSheet(DialogType.PROCESSING_TX);
       await sendTransactionId({
         roomId,
         txId: txReceipt.transactionHash as Hex,
       });
 
-      closeSheet();
+      closeDialog();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });

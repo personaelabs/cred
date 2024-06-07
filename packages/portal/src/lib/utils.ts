@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
-import { BottomSheetType, MobileOS, ModalType } from '@/types';
+import { DialogType, MobileOS, ModalType } from '@/types';
 
 export const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -32,7 +32,7 @@ export const isValidUsername = (username: string) => {
 
 const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
-export const setDoNotShowAgain = (dialog: ModalType | BottomSheetType) => {
+export const setDoNotShowAgain = (dialog: ModalType | DialogType) => {
   localStorage.setItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`, 'true');
 };
 
