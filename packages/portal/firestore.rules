@@ -49,13 +49,14 @@ service cloud.firestore {
       (request.resource.data.replyTo is string || request.resource.data.replyTo == null) &&
       request.resource.data.mentions is list &&
       request.resource.data.images is list &&
-      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions", "images", "visibility"]) &&
+      request.resource.data.reactions is map &&
+      request.resource.data.keys().hasOnly(["body", "roomId", "userId", "createdAt", "replyTo", "mentions", "images", "visibility", "reactions"]) &&
       (
-        // If the user is a room admin, the visibility can be 0 or 1
-        isRoomAdmin(request.resource.data.roomId) && request.resource.data.visibility == 1
+      // If the user is a room admin, the visibility can be 0 or 1
+      isRoomAdmin(request.resource.data.roomId) && request.resource.data.visibility == 1
         ||
-        // If the user is not a room admin, the visibility must be 0
-        request.resource.data.visibility == 0
+      // If the user is not a room admin, the visibility must be 0
+      request.resource.data.visibility == 0
       )
     }
 
@@ -101,21 +102,23 @@ service cloud.firestore {
       resource.data.roomId == roomId;
 
       allow update: if
+      // Allow updating if the user is the message sender
       (
-        // Allow updating if the user is the message sender
-        (
-        isInRoom(roomId) 
+      isInRoom(roomId) 
         && isUserAuthorized()
         && isValidMessage()
         && request.resource.data.roomId == roomId
-        )
-      || 
-        // Allow changing the visibility to 1 if the user is a room admin 
-        (isRoomAdmin(roomId) 
+      )
+        || 
+      // Allow changing the visibility to 1 if the user is a room admin 
+      (isRoomAdmin(roomId) 
         && request.resource.data.visibility == 1
         && isOnlyUpdatingFields(["visibility"])
-        )
       )
+        ||
+      (isInRoom(roomId) 
+        && isOnlyUpdatingFieldsInData(request.resource.data["reactions"], resource.data["reactions"], [request.auth.uid])
+      );
     }
 
     match /notificationTokens/{userId} {

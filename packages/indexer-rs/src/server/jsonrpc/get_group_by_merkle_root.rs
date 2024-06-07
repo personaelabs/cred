@@ -1,6 +1,6 @@
 use super::GroupData;
 use crate::GroupType;
-use jsonrpc_http_server::jsonrpc_core::*;
+use jsonrpc_http_server::jsonrpc_core::{Error as JsonRpcError, Params, Value};
 use serde_json::json;
 
 pub type GetGroupByMerkleRootReturnType = GroupData;
@@ -8,16 +8,16 @@ pub type GetGroupByMerkleRootReturnType = GroupData;
 pub async fn get_group_by_merkle_root(
     params: Params,
     pg_client: &tokio_postgres::Client,
-) -> Result<Value> {
+) -> Result<Value, JsonRpcError> {
     let params: Vec<String> = params.parse().unwrap();
 
     if params.len() != 1 {
-        return Err(Error::invalid_params("Expected 1 parameter"));
+        return Err(JsonRpcError::invalid_params("Expected 1 parameter"));
     }
 
     let merkle_root = params[0].clone();
 
-    let rows = pg_client
+    let result = pg_client
         .query(
             r#"
             SELECT
@@ -32,11 +32,16 @@ pub async fn get_group_by_merkle_root(
             "#,
             &[&merkle_root],
         )
-        .await
-        .unwrap();
+        .await;
+
+    if result.is_err() {
+        return Err(JsonRpcError::internal_error());
+    }
+
+    let rows = result.unwrap();
 
     if rows.len() == 0 {
-        return Err(Error::invalid_params(
+        return Err(JsonRpcError::invalid_params(
             "No group found for the given Merkle root",
         ));
     }

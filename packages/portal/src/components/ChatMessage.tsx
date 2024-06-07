@@ -27,10 +27,11 @@ import { MessageVisibility } from '@cred/shared';
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
   onCopyClick: () => void;
+  onReactClick: (_reaction: string) => void;
 }
 
 const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
-  const { onReplyClick, onCopyClick } = props;
+  const { onReplyClick, onCopyClick, onReactClick } = props;
 
   return (
     <DropdownMenuContent className="bg-background mt-[-20px] ml-[40px]">
@@ -41,6 +42,19 @@ const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
+      </DropdownMenuItem>
+      <DropdownMenuItem className="focus:bg-background">
+        <div className="flex flex-row gap-x-2">
+          {['👍', '❤️', '🔥', '🙏'].map((emoji, i) => (
+            <div
+              key={i}
+              className="p-2 hover:bg-accent"
+              onClick={() => onReactClick(emoji)}
+            >
+              {emoji}
+            </div>
+          ))}
+        </div>
       </DropdownMenuItem>
     </DropdownMenuContent>
   );
@@ -93,12 +107,33 @@ const ReplyPreview = (props: ReplyPreviewProps) => {
   );
 };
 
+interface MessageReactionsProps {
+  reactions: {
+    [key: string]: string;
+  };
+}
+
+const MessageReactions = (props: MessageReactionsProps) => {
+  const { reactions } = props;
+
+  return (
+    <div className="flex flex-row gap-x-2">
+      {Object.entries(reactions).map(([_userId, reaction], i) => (
+        <div key={i} className="px-2">
+          {reaction}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 type ChatMessageProps = MessageWithUserData & {
   isSender: boolean;
   renderAvatar: boolean;
   onReplySelect: (_message: MessageWithUserData) => void;
   onViewReplyClick: (_replyId: string) => void;
   onDeleteClick: (_messageId: string) => void;
+  onReactionClick: (_reaction: string) => void;
   roomId: string;
 };
 
@@ -155,7 +190,7 @@ const ChatMessage = (props: ChatMessageProps) => {
           )}
           <div
             {...bind()}
-            className={`flex flex-col gap-y-2 mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
+            className={`flex flex-col mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
             onContextMenu={e => {
               e.preventDefault();
               setIsMenuOpen(true);
@@ -167,7 +202,7 @@ const ChatMessage = (props: ChatMessageProps) => {
                 __html: highlightText(props.text),
               }}
             ></div>
-            <div className="mt-1 flex flex-col items-center gap-y-1">
+            <div className="mt-4 flex flex-col items-center gap-y-1">
               {props.images.map((image, i) => (
                 <PhotoProvider key={i}>
                   <PhotoView src={image}>
@@ -182,6 +217,7 @@ const ChatMessage = (props: ChatMessageProps) => {
               ))}
             </div>
           </div>
+          <MessageReactions reactions={props.reactions}></MessageReactions>
         </div>
         {extractLinks(props.text).map((link, index) => (
           <div className="p-2" key={index}>
@@ -209,6 +245,9 @@ const ChatMessage = (props: ChatMessageProps) => {
                 props.onReplySelect(props);
               }}
               onCopyClick={onClickCopyToClipboard}
+              onReactClick={reaction => {
+                props.onReactionClick(reaction);
+              }}
             ></ChatMessageDropdownContent>
           )}
         </DropdownMenu>

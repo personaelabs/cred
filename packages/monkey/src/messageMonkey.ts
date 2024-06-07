@@ -60,6 +60,7 @@ const sendMessage = async ({
       mentions,
       images: [],
       visibility,
+      reactions: {},
     });
 };
 

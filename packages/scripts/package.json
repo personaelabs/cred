@@ -1,8 +1,11 @@
 {
-  "name": "@cred/sync",
+  "name": "@cred/scripts",
   "scripts": {
-    "start": "pnpm lint && tsx src/sync.ts",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "addAdmins": "tsx ./src/addAdmins.ts",
+    "fillEmptyReactions": "tsx ./src/fillEmptyReactions.ts",
+    "fillInviteCodes": "tsx ./src/fillInviteCodes.ts",
+    "printInviteCodes": "tsx ./src/printInviteCodes.ts"
   },
   "dependencies": {
     "@cred/firebase": "workspace:*",

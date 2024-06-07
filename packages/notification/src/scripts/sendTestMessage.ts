@@ -74,6 +74,7 @@ const sendMessage = async ({
     mentions: ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'],
     images: [],
     visibility: MessageVisibility.PUBLIC,
+    reactions: {},
   };
 
   await db

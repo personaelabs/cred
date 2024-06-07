@@ -1,24 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
-
 import * as Comlink from 'comlink';
-import wagmiConfig from '@/lib/wagmiConfig';
-import {
-  AddCredddRequestBody,
-  EligibleCreddd,
-  SignedInUser,
-  WitnessInput,
-} from '@/types';
+import { AddCredddRequestBody, EligibleCreddd, WitnessInput } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCall, useSignMessage, useSignTypedData } from 'wagmi';
-import {
-  Hex,
-  hashTypedData,
-  hexToBytes,
-  hexToCompactSignature,
-  hexToSignature,
-  toHex,
-} from 'viem';
+import { Hex, hashTypedData, hexToBytes, hexToSignature, toHex } from 'viem';
 import {
   calculateSigRecovery,
   concatUint8Arrays,
@@ -26,20 +9,10 @@ import {
 } from '@/lib/utils';
 import useSignedInUser from './useSignedInUser';
 import { fromHexString } from '@/lib/utils';
-import credddApi from '@/lib/credddApi';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useCallback, useState } from 'react';
 import axios from '@/lib/axios';
-import {
-  EIP712_CREDDD_PROOF_SIG_DOMAIN,
-  EIP712_CREDDD_PROOF_SIG_TYPES,
-  EIP721_CREDDD_PROOF_HASH_SIG_DOMAIN,
-  constructProofSigMessage,
-} from '@/lib/eip712';
-import { useSetActiveWallet } from '@privy-io/wagmi';
-import { getConnectors } from '@wagmi/core';
-
-const SIG_SALT = Buffer.from('0xdd01e93b61b644c842a5ce8dbf07437f', 'hex');
+import { constructProofSigMessage } from '@/lib/eip712';
 
 const submitProof = async (body: AddCredddRequestBody) => {
   await axios.post('/api/creddd', body);
@@ -59,8 +32,6 @@ const useAddCreddd = (proverAddress: Hex | null) => {
   const [isSubmittingProof, setIsSubmittingProof] = useState(false);
   const [isProofReady, setIsProofReady] = useState(false);
   const { signTypedData: privySignedTypedData } = usePrivy();
-  const { signTypedDataAsync } = useSignTypedData();
-  const { setActiveWallet } = useSetActiveWallet();
 
   const privyAddress = wallets?.find(
     wallet => wallet.walletClientType === 'privy'
@@ -113,7 +84,6 @@ const useAddCreddd = (proverAddress: Hex | null) => {
 
       const provider = await proverWallet.getEthersProvider();
       const signer = provider.getSigner();
-      console.log('signer', await signer.getChainId());
 
       // Sign message with the source key
       const sig = await signer._signTypedData(

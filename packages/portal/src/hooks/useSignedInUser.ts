@@ -11,6 +11,7 @@ const useSignedInUser = () => {
       await isAuthenticatedToFirestore(user!.id);
       return user;
     },
+    initialData: null,
     enabled: !!user,
     refetchOnMount: true,
   });

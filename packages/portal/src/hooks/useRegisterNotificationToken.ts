@@ -20,7 +20,7 @@ import {
 
 const registerNotificationToken = async (userId: string) => {
   const token = await getDeviceNotificationToken();
-  console.log('registerNotificationToken', token);
+
   if (token) {
     const notificationTokenDoc = doc(
       collection(db, 'notificationTokens').withConverter(

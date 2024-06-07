@@ -19,6 +19,7 @@ export interface MessageWithUserData {
   user: ChatUser;
   createdAt: Date;
   visibility: MessageVisibility;
+  reactions: Record<string, string>;
 }
 
 export interface MerkleTree {

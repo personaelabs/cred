@@ -13,6 +13,7 @@ export const messageConverter = {
       mentions: message.mentions,
       images: message.images,
       visibility: message.visibility,
+      reactions: message.reactions,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -33,6 +34,7 @@ export const messageConverter = {
       mentions: data.mentions || [],
       images: data.images || [],
       visibility: data.visibility || MessageVisibility.ONLY_ADMINS,
+      reactions: data.reactions || {},
     };
 
     return message;
