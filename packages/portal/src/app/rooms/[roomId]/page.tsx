@@ -19,6 +19,7 @@ import useDeleteMessage from '@/hooks/useDeleteMessage';
 import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
 import MessageAsAdminModal from '@/components/MessageAsAdminModal';
 import MessageAsBuyerModal from '@/components/MessageAsBuyerModal';
+import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -55,6 +56,8 @@ const Room = () => {
   });
 
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
+
+  const { mutateAsync: sendMessageReaction } = useSendMessageReaction();
 
   useEffect(() => {
     if (signedInUser && room) {
@@ -190,6 +193,13 @@ const Room = () => {
                     }}
                     onDeleteClick={messageId => {
                       deleteMessage(messageId);
+                    }}
+                    onReactionClick={reaction => {
+                      sendMessageReaction({
+                        roomId: params.roomId,
+                        messageId: message.id,
+                        reaction,
+                      });
                     }}
                   />
                 </div>

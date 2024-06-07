@@ -23,6 +23,7 @@ export const toMessageWithUserData = (
     replyToId: message.replyTo,
     images: message.images,
     visibility: message.visibility,
+    reactions: message.reactions,
   };
 };
 

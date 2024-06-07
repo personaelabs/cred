@@ -59,6 +59,9 @@ export interface Message {
   visibility: MessageVisibility;
   mentions: string[];
   images: string[];
+  reactions: {
+    [key: string]: string;
+  };
 }
 
 export enum MessageVisibility {

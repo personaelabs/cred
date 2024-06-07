@@ -65,6 +65,7 @@ const sendMessage = async ({
     replyTo,
     images: [],
     visibility,
+    reactions: {},
   };
   const messageDoc = await addDoc(messagesRef, data);
 
