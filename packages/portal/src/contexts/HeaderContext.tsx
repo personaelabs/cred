@@ -9,6 +9,9 @@ export interface HeaderOptions {
   backTo?: string;
 }
 
+/**
+ * Context to manage the header options (e.g. title, description, buttons, etc.)
+ */
 const HeaderContext = createContext<{
   options: HeaderOptions;
   setOptions: React.Dispatch<React.SetStateAction<HeaderOptions>>;

@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
-import { User } from '@cred/shared';
+import { User, userConverter } from '@cred/shared';
 import logger from '@/lib/backend/logger';
 import { User as PrivyUser } from '@privy-io/server-auth';
 import { addWriterToRoom, app } from '@cred/firebase';
@@ -9,8 +9,7 @@ import privy, { isAuthenticated } from '@/lib/backend/privy';
 import * as neynar from '@/lib/backend/neynar';
 import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
 import credddRpcClient from '@/lib/credddRpc';
-import { isValidInviteCode } from '@/lib/backend/inviteCode';
-import { SignInRequestBody } from '@/types';
+import { SignInResponse } from '@/types';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -37,6 +36,7 @@ const initUser = async (user: PrivyUser) => {
     },
     addedCreddd: [],
     connectedAddresses: [],
+    inviteCode: '',
   };
 
   if (user.farcaster) {
@@ -76,13 +76,6 @@ const getFarcasterAddresses = async (fid: number) => {
  */
 export async function POST(req: NextRequest) {
   const verifiedClaims = await isAuthenticated(req);
-  const body = (await req.json()) as SignInRequestBody;
-
-  const isCodeValid = await isValidInviteCode(body.inviteCode);
-
-  if (!isCodeValid) {
-    return Response.json({ error: 'Invalid code' }, { status: 400 });
-  }
 
   const user = await privy.getUser(verifiedClaims.userId);
 
@@ -92,7 +85,11 @@ export async function POST(req: NextRequest) {
     throw new Error('User has not linked a wallet');
   }
 
-  const userExists = await db.collection('users').doc(user.id).get();
+  const userExists = await db
+    .collection('users')
+    .withConverter(userConverter)
+    .doc(user.id)
+    .get();
 
   if (!userExists.exists) {
     await initUser(user);
@@ -135,8 +132,10 @@ export async function POST(req: NextRequest) {
 
   const userData = userExists.data();
 
-  return Response.json(
-    { token, usernameSet: userData ? userData.username !== '' : false },
-    { status: 200 }
-  );
+  const response: SignInResponse = {
+    token,
+    user: userData || null,
+  };
+
+  return Response.json(response, { status: 200 });
 }

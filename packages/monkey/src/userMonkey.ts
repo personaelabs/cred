@@ -30,6 +30,7 @@ const createUser = async () => {
     },
     connectedAddresses: [],
     addedCreddd: [],
+    inviteCode: 'test',
   };
 
   logger.info(`Creating user ${userId}`);

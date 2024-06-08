@@ -8,6 +8,7 @@ export interface User {
   privyAddress: string;
   connectedAddresses: string[];
   addedCreddd: string[];
+  inviteCode: string;
   config: {
     notification: {
       mutedRoomIds: string[];

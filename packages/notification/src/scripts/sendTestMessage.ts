@@ -30,6 +30,7 @@ const registerFid1 = async () => {
     },
     addedCreddd: [],
     connectedAddresses: [],
+    inviteCode: 'test',
   };
 
   await userRef.set(userData);

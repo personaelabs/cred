@@ -1,4 +1,5 @@
 import { app } from '@cred/firebase';
+import { userConverter } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
@@ -13,7 +14,9 @@ export const isValidInviteCode = async (inviteCode: string) => {
     process.env.NODE_ENV === 'development' ||
     process.env.IS_PULL_REQUEST === 'true'
   ) {
-    return inviteCode === 'test';
+    if (inviteCode === 'test') {
+      return true;
+    }
   }
 
   const inviteCodeDoc = await db
@@ -25,10 +28,45 @@ export const isValidInviteCode = async (inviteCode: string) => {
   return inviteCodeDoc.docs.length > 0;
 };
 
+const assignInviteCodeToUser = async ({
+  inviteCode,
+  userId,
+}: {
+  inviteCode: string;
+  userId: string;
+}) => {
+  await db
+    .collection('users')
+    .doc(userId)
+    .withConverter(userConverter)
+    .update({ inviteCode });
+};
+
 /**
  * Mark an invite code as used.
  */
-export const markInviteCodeAsUsed = async (inviteCode: string) => {
+export const markInviteCodeAsUsed = async ({
+  inviteCode,
+  userId,
+}: {
+  inviteCode: string;
+  userId: string;
+}) => {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.IS_PULL_REQUEST === 'true'
+  ) {
+    if (inviteCode === 'test') {
+      // Assign the invite code to the user
+      await assignInviteCodeToUser({
+        inviteCode,
+        userId,
+      });
+      return;
+    }
+  }
+
+  // Mark the invite code as used
   const inviteCodeDoc = await db
     .collection('inviteCodes')
     .where('code', '==', inviteCode)
@@ -41,4 +79,10 @@ export const markInviteCodeAsUsed = async (inviteCode: string) => {
   const doc = inviteCodeDoc.docs[0];
 
   await doc.ref.update({ isUsed: true });
+
+  // Assign the invite code to the user
+  await assignInviteCodeToUser({
+    inviteCode,
+    userId,
+  });
 };
