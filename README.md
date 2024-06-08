@@ -1,29 +1,24 @@
-# Cred
+# creddd.xyz
 
 ## Development
 
-### Frontend
+### portal
 
-1. Run the setup script
-
-```
-sh ./scripts/setup.sh
-```
-
-2. Run the following command to start the database and run migrations. Make sure you have a Docker daemon running.
+### 1. Install dependencies
 
 ```
-pnpm -F db start
+pnpm i
 ```
 
-3. Run the indexer to index the dev Merkle tree.
+### 2. Configure environment variables
+
+Follwoing the instructions [here](https://www.notion.so/personae-labs/Dev-envs-fd0a6e744db741ccb3e91be5e37cdf89).
+
+
+### 3. Start the frontend
 
 ```
-pnpm -F indexer exec ts-node ./src/indexMerkleTree.ts
+pnpm -F portal dev
 ```
 
-4. Start the frontend.
 
-```
-pnpm -F frontend dev
-```
