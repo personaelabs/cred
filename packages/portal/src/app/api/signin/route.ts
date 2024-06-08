@@ -37,6 +37,7 @@ const initUser = async (user: PrivyUser) => {
     addedCreddd: [],
     connectedAddresses: [],
     inviteCode: '',
+    isMod: false,
   };
 
   if (user.farcaster) {
