@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import lakshman from './firebase.lakshman';
 import dan from './firebase.dan';
 import prod from './firebase.prod';
 import staging from './firebase.staging';
@@ -19,6 +20,9 @@ switch (NEXT_PUBLIC_PROJECT_ID) {
     break;
   case staging.projectId:
     config = staging;
+    break;
+  case lakshman.projectId:
+    config = lakshman;
     break;
   default:
     throw new Error(`Unknown project ID: ${NEXT_PUBLIC_PROJECT_ID}`);

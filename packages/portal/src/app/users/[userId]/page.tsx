@@ -1,5 +1,5 @@
 'use client';
-import AvatarWithFallback from '@/components/Avatar';
+import AvatarWithFallback from '@/components/AvatarWithFallback';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useUser from '@/hooks/useUser';
 import { useParams } from 'next/navigation';

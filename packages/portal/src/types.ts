@@ -1,10 +1,13 @@
 import { GetLogsReturnType, Hex } from 'viem';
-import { User } from '@privy-io/react-auth';
+import { User as PrivyUser } from '@privy-io/react-auth';
 import { TRANSFER_SINGLE_EVENT } from './lib/contract';
-import { MessageVisibility } from '@cred/shared';
+import { MessageVisibility, User } from '@cred/shared';
 
-export type SignedInUser = User;
+export type SignedInUser = PrivyUser;
 
+/**
+ * User object used to render a single chat message
+ */
 export interface ChatUser {
   id: string;
   name: string;
@@ -61,19 +64,6 @@ export interface WitnessInput {
   signInSigS: Uint8Array;
 }
 
-export interface UserCredddResponse {
-  groups: {
-    id: string;
-    typeId: string;
-    displayName: string;
-  }[];
-  score: number;
-}
-
-export interface SyncRoomRequestBody {
-  buyTransactionHash: Hex;
-}
-
 export interface MessageInput {
   message: string;
   mentions: string[];
@@ -82,18 +72,6 @@ export interface MessageInput {
 }
 
 export type TradeLog = GetLogsReturnType<typeof TRANSFER_SINGLE_EVENT>[number];
-
-export interface ConnectAddressRequestBody {
-  address: Hex;
-  signature: Hex;
-  groupIds: string[]; // Temporary
-}
-
-export interface AddCredddRequestBody {
-  proof: Hex;
-  privyAddress: Hex;
-  privyAddressSignature: Hex;
-}
 
 export interface NeynarUserResponse {
   fid: number;
@@ -107,26 +85,11 @@ export interface NeynarUserResponse {
   custody_address: Hex;
 }
 
-export enum BottomSheetType {
-  // eslint-disable-next-line no-unused-vars
-  FUND_WALLET = 'FUND_WALLET',
-  // eslint-disable-next-line no-unused-vars
-  PROCESSING_TX = 'PROCESSING_TX',
-}
-
 export enum ModalType {
   // eslint-disable-next-line no-unused-vars
   MESSAGE_AS_BUYER = 'MESSAGE_AS_BUYER',
   // eslint-disable-next-line no-unused-vars
   REPLY_AS_ADMIN = 'REPLY_AS_ADMIN',
-}
-
-export interface SetUsernameRequestBody {
-  username: string;
-}
-
-export interface SignInRequestBody {
-  inviteCode: string;
 }
 
 export enum MobileOS {
@@ -136,4 +99,41 @@ export enum MobileOS {
   ANDROID = 'ANDROID',
   // eslint-disable-next-line no-unused-vars
   WINDOWS = 'WINDOWS',
+}
+
+/**
+ * Request body for the /api/creddd endpoint
+ */
+export interface AddCredddRequestBody {
+  proof: Hex;
+  privyAddress: Hex;
+  privyAddressSignature: Hex;
+}
+
+/**
+ * Request body for the /api/users/{userId} endpoint
+ */
+export interface SetUsernameRequestBody {
+  username: string;
+}
+
+/**
+ * Request body for the /api/rooms/{roomId}/sync endpoint
+ */
+export interface SyncRoomRequestBody {
+  txHash: Hex; // The transaction hash of the trade that will add or remove the user from a room
+}
+
+/**
+ * Request body for the /api/connected-addresses endpoint
+ */
+export interface ConnectAddressRequestBody {
+  address: Hex;
+  signature: Hex;
+  groupIds: string[]; // Temporary
+}
+
+export interface SignInResponse {
+  token: string;
+  user: User | null;
 }

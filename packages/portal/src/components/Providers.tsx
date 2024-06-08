@@ -4,13 +4,13 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MobileFooter from '@/components/MobileFooter';
+import FooterNavigation from '@/components/FooterNavigation';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {
   HeaderContextProvider,
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
-import MobileHeader from '@/components/MobileHeader';
+import Header from '@/components/Header';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import useSignedInUser from '@/hooks/useSignedInUser';
@@ -20,10 +20,10 @@ import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { FooterContextProvider } from '@/contexts/FooterContext';
 import {
-  BottomSheetContextProvider,
-  useBottomSheet,
-} from '@/contexts/BottomSheetContext';
-import { ModalContextProvider } from '@/contexts/ModalContext';
+  DialogContextProvider,
+  DialogType,
+  useDialog,
+} from '@/contexts/DialogContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
@@ -31,11 +31,12 @@ import {
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
-import ProcessingTxSheet from './ProcessingTxSheet';
-import { BottomSheetType } from '@/types';
-import FundWalletSheet from './FundWalletSheet';
+import ProcessingTxSheet from './bottom-sheets/ProcessingTxSheet';
+import FundWalletSheet from './bottom-sheets/FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
+import useIsUsernameSet from '@/hooks/useIsUsernameSet';
+import useInviteCodeSet from '@/hooks/useIsInviteCodeSet';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -62,7 +63,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { data: signedInUser } = useSignedInUser();
   const isPwa = useIsPwa();
   const { isModalOpen } = usePrivy();
-  const { openedSheet, closeSheet } = useBottomSheet();
+  const { openedDialog, closeDialog } = useDialog();
   const isAuthenticated = useIsAuthenticated();
   const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
 
@@ -72,6 +73,28 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
+
+  const isUsernameSet = useIsUsernameSet();
+
+  // Redirect to setup username page if the user hasn't set a username
+  useEffect(() => {
+    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
+      if (isUsernameSet === false) {
+        router.push('/setup-username');
+      }
+    }
+  }, [isUsernameSet, router, pathname]);
+
+  const isInviteCodeSet = useInviteCodeSet();
+
+  // Redirect to setup invite code page if the user hasn't set an invite code
+  useEffect(() => {
+    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
+      if (isInviteCodeSet === false) {
+        router.push('/enter-invite-code');
+      }
+    }
+  }, [isInviteCodeSet, pathname, router]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -140,13 +163,13 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     <>
       <div className="h-full w-full flex flex-col items-center">
         <div className="h-full w-full md:w-[50%]">
-          <MobileHeader
+          <Header
             title={options.title}
             description={options.description}
             showBackButton={options.showBackButton}
             headerRight={options.headerRight}
             backTo={options.backTo}
-          ></MobileHeader>
+          ></Header>
           <div
             style={{
               height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
@@ -154,16 +177,16 @@ const Main = ({ children }: { children: React.ReactNode }) => {
           >
             {children}
           </div>
-          {hideFooter ? <></> : <MobileFooter></MobileFooter>}
+          {hideFooter ? <></> : <FooterNavigation></FooterNavigation>}
         </div>
       </div>
       <ProcessingTxSheet
-        isOpen={openedSheet === BottomSheetType.PROCESSING_TX}
+        isOpen={openedDialog === DialogType.PROCESSING_TX}
       ></ProcessingTxSheet>
       <FundWalletSheet
-        isOpen={openedSheet === BottomSheetType.FUND_WALLET}
+        isOpen={openedDialog === DialogType.FUND_WALLET}
         onClose={() => {
-          closeSheet();
+          closeDialog();
         }}
       ></FundWalletSheet>
     </>
@@ -194,11 +217,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <MediaQueryProvider>
               <HeaderContextProvider>
                 <FooterContextProvider>
-                  <BottomSheetContextProvider>
-                    <ModalContextProvider>
-                      <Main>{children}</Main>
-                    </ModalContextProvider>
-                  </BottomSheetContextProvider>
+                  <DialogContextProvider>
+                    <Main>{children}</Main>
+                  </DialogContextProvider>
                 </FooterContextProvider>
               </HeaderContextProvider>
             </MediaQueryProvider>

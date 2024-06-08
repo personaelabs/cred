@@ -17,8 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
 import useDeleteMessage from '@/hooks/useDeleteMessage';
 import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
-import MessageAsAdminModal from '@/components/MessageAsAdminModal';
-import MessageAsBuyerModal from '@/components/MessageAsBuyerModal';
+import MessageAsAdminModal from '@/components/modals/MessageAsAdminModal';
+import MessageAsBuyerModal from '@/components/modals/MessageAsBuyerModal';
 import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 
 const Room = () => {

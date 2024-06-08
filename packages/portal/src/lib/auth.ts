@@ -1,3 +1,4 @@
+import { SignInResponse } from '@/types';
 import axios from './axios';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
 
@@ -8,16 +9,12 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth';
  */
 export const authSignedInUser = async ({
   accessToken,
-  inviteCode,
 }: {
   accessToken: string;
-  inviteCode: string;
-}): Promise<boolean> => {
-  const { data } = await axios.post<{ token: string; usernameSet: boolean }>(
+}): Promise<SignInResponse> => {
+  const { data } = await axios.post<SignInResponse>(
     '/api/signin',
-    {
-      inviteCode,
-    },
+    {},
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -28,5 +25,5 @@ export const authSignedInUser = async ({
   await getAuth().authStateReady();
   await signInWithCustomToken(getAuth(), data.token);
 
-  return data.usernameSet;
+  return data;
 };

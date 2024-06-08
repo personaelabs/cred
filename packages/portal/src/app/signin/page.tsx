@@ -1,13 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
-import useSignIn, { saveInviteCode } from '@/hooks/useSignIn';
-import useIsInviteCodeValid from '@/hooks/useIsInviteCodeValid';
+import { useEffect } from 'react';
+import useSignIn from '@/hooks/useSignIn';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
-import { Check, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import theme from '@/lib/theme';
 import { Button } from '@/components/ui/button';
-import useDebounce from '@/hooks/useDebounce';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 interface SignInButtonProps {
@@ -44,59 +41,15 @@ const SignInButton = (props: SignInButtonProps) => {
   );
 };
 
-interface CodeValidityIndicatorProps {
-  isInviteCodeValid: boolean | undefined;
-  isLoading: boolean;
-}
-
-const CodeValidityIndicator = (props: CodeValidityIndicatorProps) => {
-  const { isInviteCodeValid, isLoading } = props;
-
-  if (isLoading) {
-    return (
-      <Loader2 className="mr-2 animate-spin text-primary" size={16}></Loader2>
-    );
-  }
-
-  if (isInviteCodeValid === false) {
-    return <div className="text-red-500">Invalid invite code</div>;
-  }
-
-  if (isInviteCodeValid === true) {
-    return (
-      <div className="flex flex-row items-center">
-        <Check className="text-green-500 mr-2 w-4 h-4"></Check>
-        <div className="text-green-500">Valid invite code</div>
-      </div>
-    );
-  }
-
-  return <></>;
-};
-
 const SignIn = () => {
-  const [inviteCode, setInviteCode] = useState<string>('');
   const { mutateAsync: signIn, isSigningIn, error } = useSignIn();
   const { setOptions } = useHeaderOptions();
-  const {
-    mutate: checkInviteCode,
-    isPending: isCheckingValidity,
-    data: isInviteCodeValid,
-  } = useIsInviteCodeValid();
-
-  const { debouncedValue: debouncedInviteCode } = useDebounce(inviteCode, 300);
 
   useEffect(() => {
     if (error) {
       toast.error(`Failed to sign in: ${error.message}`);
     }
   }, [error]);
-
-  useEffect(() => {
-    if (debouncedInviteCode) {
-      checkInviteCode(debouncedInviteCode);
-    }
-  }, [debouncedInviteCode, checkInviteCode]);
 
   useEffect(() => {
     setOptions({
@@ -106,31 +59,12 @@ const SignIn = () => {
     });
   }, [setOptions]);
 
-  // Save the invite code to local storage if it is valid
-  useEffect(() => {
-    if (isInviteCodeValid === true) {
-      saveInviteCode(inviteCode);
-    }
-  }, [isInviteCodeValid, inviteCode]);
-
   return (
     <div className="flex flex-col items-center justify-center h-full bg-background">
       <div className="w-[62.5%] mt-4 flex flex-col items-center">
-        <Input
-          value={inviteCode}
-          onChange={e => setInviteCode(e.target.value)}
-          className="border-gray-600"
-          placeholder="enter invite code"
-        ></Input>
-        <div className="mt-4 flex flex-row items-start w-full">
-          <CodeValidityIndicator
-            isInviteCodeValid={isInviteCodeValid}
-            isLoading={isCheckingValidity}
-          ></CodeValidityIndicator>
-        </div>
         <div className="mt-4">
           <SignInButton
-            disabled={isInviteCodeValid !== true}
+            disabled={false}
             signingIn={isSigningIn}
             onSignInClick={async () => {
               await signIn();

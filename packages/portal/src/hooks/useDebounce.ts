@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 
-function useDebounce<T>(value: T, delay: number) {
+/**
+ * Debounce a value.
+ * Used to throttle the number of times a function is called as the user types in an input field.
+ */
+const useDebounce = <T>(value: T, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [isPending, setIsPending] = useState(false);
 
@@ -17,6 +21,6 @@ function useDebounce<T>(value: T, delay: number) {
   }, [value, delay]);
 
   return { debouncedValue, isPending };
-}
+};
 
 export default useDebounce;

@@ -20,7 +20,7 @@ import { TradeLog } from '@/hooks/useTradeHistory';
 import useRoom from '@/hooks/useRoom';
 import { tokenIdToRoomId } from '@cred/shared';
 import Scrollable from '@/components/Scrollable';
-import WithdrawalSheet from '@/components/WithdrawalSheet';
+import WithdrawalSheet from '@/components/bottom-sheets/WithdrawalSheet';
 import ClickableBox from '@/components/ClickableBox';
 import Link from 'next/link';
 import { baseSepolia } from 'viem/chains';
