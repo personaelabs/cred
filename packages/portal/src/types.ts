@@ -12,6 +12,7 @@ export interface ChatUser {
   id: string;
   name: string;
   avatarUrl: string;
+  isMod: boolean;
 }
 
 export interface MessageWithUserData {

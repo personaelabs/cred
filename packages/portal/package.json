@@ -11,7 +11,7 @@
     "build:proto": "sh ./scripts/build_proto.sh"
   },
   "dependencies": {
-    "@cred/firebase": "workspace:*",
+    "@cred/firebase-admin": "workspace:*",
     "@cred/shared": "workspace:*",
     "@privy-io/react-auth": "^1.65.0",
     "@privy-io/server-auth": "^1.7.3",

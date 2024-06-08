@@ -7,7 +7,7 @@ import {
   messageConverter,
   roomConverter,
 } from '@cred/shared';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
@@ -31,6 +31,7 @@ const registerFid1 = async () => {
     addedCreddd: [],
     connectedAddresses: [],
     inviteCode: 'test',
+    isMod: false,
   };
 
   await userRef.set(userData);

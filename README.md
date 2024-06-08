@@ -23,4 +23,5 @@ Follow the instructions [here](https://www.notion.so/personae-labs/Dev-envs-fd0a
 pnpm -F portal dev
 ```
 
-
+## Contracts
+See [contracts.ts](./packages/shared/src/contracts.ts)

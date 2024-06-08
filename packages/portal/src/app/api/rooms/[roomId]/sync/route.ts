@@ -4,7 +4,7 @@ import {
   addReaderToRoom,
   getUserByAddress,
   removeUserFromRoom,
-} from '@cred/firebase';
+} from '@cred/firebase-admin';
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
 import { PortalAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';

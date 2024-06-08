@@ -8,7 +8,7 @@
     "printInviteCodes": "tsx ./src/printInviteCodes.ts"
   },
   "dependencies": {
-    "@cred/firebase": "workspace:*",
+    "@cred/firebase-admin": "workspace:*",
     "@cred/shared": "workspace:*",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.0",

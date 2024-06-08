@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cred/firebase": "workspace:*",
+    "@cred/firebase-admin": "workspace:*",
     "@cred/shared": "workspace:*",
     "firebase-admin": "^12.1.0",
     "@farcaster/auth-client": "^0.1.0",
