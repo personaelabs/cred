@@ -114,6 +114,138 @@ const MessageReactions = (props: MessageReactionsProps) => {
   );
 };
 
+interface ChatBubbleProps {
+  roomId: string;
+  isSender: boolean;
+  text: string;
+  images: string[];
+  replyToId: string | null;
+  reactions: Record<string, string>;
+  user: {
+    id: string;
+    name: string;
+  };
+  visibility: MessageVisibility;
+  onLongPress: () => void;
+  onViewReplyClick: (_replyId: string) => void;
+}
+
+const ChatBubble = (props: ChatBubbleProps) => {
+  const {
+    roomId,
+    isSender,
+    replyToId,
+    reactions,
+    text,
+    visibility,
+    user,
+    onLongPress,
+    onViewReplyClick,
+  } = props;
+
+  const bind = useLongPress(() => {
+    onLongPress();
+  });
+
+  return (
+    <>
+      <div
+        className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}
+      >
+        {isSender ? (
+          <></>
+        ) : (
+          <div className="text-xs ml-2 text-primary">{user.name}</div>
+        )}
+        {replyToId ? (
+          <ReplyPreview
+            roomId={roomId}
+            replyToId={replyToId}
+            onClickOnPreview={() => {
+              onViewReplyClick(replyToId);
+            }}
+          ></ReplyPreview>
+        ) : (
+          <></>
+        )}
+        <div
+          {...bind()}
+          className={`flex flex-col mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
+          onContextMenu={e => {
+            e.preventDefault();
+            onLongPress();
+          }}
+        >
+          <div
+            className={`${text ? '' : 'hidden'} text-md px-4 py-2 ${visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+            dangerouslySetInnerHTML={{
+              __html: highlightText(text),
+            }}
+          ></div>
+          <div className="mt-4 flex flex-col items-center gap-y-1">
+            {props.images.map((image, i) => (
+              <PhotoProvider key={i}>
+                <PhotoView src={image}>
+                  <img
+                    src={image}
+                    className="rounded-xl"
+                    width={200}
+                    alt="image"
+                  ></img>
+                </PhotoView>
+              </PhotoProvider>
+            ))}
+          </div>
+        </div>
+        <MessageReactions reactions={reactions}></MessageReactions>
+      </div>
+      {
+        // Render link previews
+        extractLinks(text).map((link, index) => (
+          <div className="p-2" key={index}>
+            <LinkPreview url={link}></LinkPreview>
+          </div>
+        ))
+      }
+    </>
+  );
+};
+
+interface ChatMessageAvatarProps {
+  user: MessageWithUserData['user'];
+}
+
+const ChatMessageAvatar = (props: ChatMessageAvatarProps) => {
+  const { user } = props;
+
+  return (
+    <div className="mb-5 ml-1">
+      <Link className="no-underline" href={`/users/${user.id}`}>
+        <AvatarWithFallback
+          size={40}
+          imageUrl={user.avatarUrl}
+          alt="profile image"
+          name={user.name}
+        ></AvatarWithFallback>
+      </Link>
+    </div>
+  );
+};
+
+interface ChatMessageTimestampProps {
+  createdAt: Date;
+}
+
+const ChatMessageTimestamp = (props: ChatMessageTimestampProps) => {
+  return (
+    <div className="flex flex-row items-center justify-between">
+      <div className="opacity-50 px-4 mt-1 text-xs">
+        {new Date(props.createdAt).toLocaleString()}
+      </div>
+    </div>
+  );
+};
+
 type ChatMessageProps = MessageWithUserData & {
   isSender: boolean;
   renderAvatar: boolean;
@@ -128,9 +260,6 @@ const ChatMessage = (props: ChatMessageProps) => {
   const { isSender, roomId, replyToId, onViewReplyClick, user, onDeleteClick } =
     props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const bind = useLongPress(() => {
-    setIsMenuOpen(true);
-  });
 
   const onClickCopyToClipboard = useCallback(async () => {
     await copyTextToClipboard(props.text);
@@ -142,75 +271,25 @@ const ChatMessage = (props: ChatMessageProps) => {
       className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
-        <div className="mb-5 ml-1">
-          <Link className="no-underline" href={`/users/${user.id}`}>
-            <AvatarWithFallback
-              size={40}
-              imageUrl={user.avatarUrl}
-              alt="profile image"
-              name={user.name}
-            ></AvatarWithFallback>
-          </Link>
-        </div>
+        <ChatMessageAvatar user={props.user}></ChatMessageAvatar>
       ) : (
         <></>
       )}
       <div className="max-w-[70%]">
-        <div
-          className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}
-        >
-          {isSender ? (
-            <></>
-          ) : (
-            <div className="text-xs ml-2 text-primary">{user.name}</div>
-          )}
-          {replyToId ? (
-            <ReplyPreview
-              roomId={roomId}
-              replyToId={replyToId}
-              onClickOnPreview={() => {
-                onViewReplyClick(replyToId);
-              }}
-            ></ReplyPreview>
-          ) : (
-            <></>
-          )}
-          <div
-            {...bind()}
-            className={`flex flex-col mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
-            onContextMenu={e => {
-              e.preventDefault();
-              setIsMenuOpen(true);
-            }}
-          >
-            <div
-              className={`${props.text ? '' : 'hidden'} text-md px-4 py-2 ${props.visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
-              dangerouslySetInnerHTML={{
-                __html: highlightText(props.text),
-              }}
-            ></div>
-            <div className="mt-4 flex flex-col items-center gap-y-1">
-              {props.images.map((image, i) => (
-                <PhotoProvider key={i}>
-                  <PhotoView src={image}>
-                    <img
-                      src={image}
-                      className="rounded-xl"
-                      width={200}
-                      alt="image"
-                    ></img>
-                  </PhotoView>
-                </PhotoProvider>
-              ))}
-            </div>
-          </div>
-          <MessageReactions reactions={props.reactions}></MessageReactions>
-        </div>
-        {extractLinks(props.text).map((link, index) => (
-          <div className="p-2" key={index}>
-            <LinkPreview url={link}></LinkPreview>
-          </div>
-        ))}
+        <ChatBubble
+          roomId={roomId}
+          isSender={isSender}
+          text={props.text}
+          images={props.images}
+          replyToId={replyToId}
+          reactions={props.reactions}
+          visibility={props.visibility}
+          user={user}
+          onLongPress={() => {
+            setIsMenuOpen(true);
+          }}
+          onViewReplyClick={onViewReplyClick}
+        ></ChatBubble>
         <DropdownMenu
           open={isMenuOpen}
           onOpenChange={open => {
@@ -238,11 +317,9 @@ const ChatMessage = (props: ChatMessageProps) => {
             ></ChatMessageDropdownContent>
           )}
         </DropdownMenu>
-        <div className="flex flex-row items-center justify-between">
-          <div className="opacity-50 px-4 mt-1 text-xs">
-            {new Date(props.createdAt).toLocaleString()}
-          </div>
-        </div>
+        <ChatMessageTimestamp
+          createdAt={props.createdAt}
+        ></ChatMessageTimestamp>
       </div>
     </div>
   );
