@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { excludePrivyUsers, getRandomElements, sleepForRandom } from './utils';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import {
   MessageVisibility,

@@ -2,7 +2,7 @@ import { Room, roomConverter, createRpcClient } from '@cred/shared';
 import logger from './lib/logger';
 import { sleep } from './lib/utils';
 import { getFirestore } from 'firebase-admin/firestore';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 
 const db = getFirestore(app);
 

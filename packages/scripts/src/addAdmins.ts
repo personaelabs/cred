@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { roomConverter } from '@cred/shared';
 

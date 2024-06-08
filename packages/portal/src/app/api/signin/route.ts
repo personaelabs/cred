@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { User, userConverter } from '@cred/shared';
 import logger from '@/lib/backend/logger';
 import { User as PrivyUser } from '@privy-io/server-auth';
-import { addWriterToRoom, app } from '@cred/firebase';
+import { addWriterToRoom, app } from '@cred/firebase-admin';
 import privy, { isAuthenticated } from '@/lib/backend/privy';
 import * as neynar from '@/lib/backend/neynar';
 import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';

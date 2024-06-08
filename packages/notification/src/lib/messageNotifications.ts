@@ -9,7 +9,7 @@ import {
 } from '@cred/shared';
 import { getMessaging } from 'firebase-admin/messaging';
 import { Timestamp, getFirestore } from 'firebase-admin/firestore';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { notificationTokens } from './notificationTokens';
 import { DRY_RUN } from './utils';
 import { MessageNotificationType } from '../types';
