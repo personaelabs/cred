@@ -41,6 +41,9 @@ export const canShowModal = (dialog: ModalType) => {
   return !localStorage.getItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`);
 };
 
+/**
+ * Returns true if the user is a writer in the room.
+ */
 export const isUserAdminInRoom = ({
   userId,
   room,
