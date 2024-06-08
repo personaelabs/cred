@@ -6,8 +6,8 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from './ui/sheet';
-import { Button } from './ui/button';
+} from '../ui/sheet';
+import { Button } from '../ui/button';
 import Link from 'next/link';
 import { useState } from 'react';
 

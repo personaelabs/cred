@@ -4,13 +4,13 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MobileFooter from '@/components/MobileFooter';
+import FooterNavigation from '@/components/FooterNavigation';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {
   HeaderContextProvider,
   useHeaderOptions,
 } from '@/contexts/HeaderContext';
-import MobileHeader from '@/components/MobileHeader';
+import Header from '@/components/Header';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import useSignedInUser from '@/hooks/useSignedInUser';
@@ -19,7 +19,11 @@ import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
 import useIsPwa from '@/hooks/useIsPwa';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { FooterContextProvider } from '@/contexts/FooterContext';
-import { DialogContextProvider, useDialog } from '@/contexts/DialogContext';
+import {
+  DialogContextProvider,
+  DialogType,
+  useDialog,
+} from '@/contexts/DialogContext';
 import {
   MediaQueryProvider,
   useMediaQuery,
@@ -27,9 +31,8 @@ import {
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
-import ProcessingTxSheet from './ProcessingTxSheet';
-import { DialogType } from '@/types';
-import FundWalletSheet from './FundWalletSheet';
+import ProcessingTxSheet from './bottom-sheets/ProcessingTxSheet';
+import FundWalletSheet from './bottom-sheets/FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 
@@ -136,13 +139,13 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     <>
       <div className="h-full w-full flex flex-col items-center">
         <div className="h-full w-full md:w-[50%]">
-          <MobileHeader
+          <Header
             title={options.title}
             description={options.description}
             showBackButton={options.showBackButton}
             headerRight={options.headerRight}
             backTo={options.backTo}
-          ></MobileHeader>
+          ></Header>
           <div
             style={{
               height: `calc(${height}px - ${HEADER_HEIGHT + footerHeight}px)`,
@@ -150,7 +153,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
           >
             {children}
           </div>
-          {hideFooter ? <></> : <MobileFooter></MobileFooter>}
+          {hideFooter ? <></> : <FooterNavigation></FooterNavigation>}
         </div>
       </div>
       <ProcessingTxSheet

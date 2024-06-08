@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from './ui/sheet';
+} from '../ui/sheet';
 
 interface FundWalletSheetProps {
   isOpen: boolean;

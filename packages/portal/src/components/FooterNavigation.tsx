@@ -29,9 +29,9 @@ const MenuItem = (props: MenuItemProps) => {
   );
 };
 
-interface MobileFooterProps {}
+interface FooterNavigationProps {}
 
-const MobileFooter = (_props: MobileFooterProps) => {
+const FooterNavigation = (_props: FooterNavigationProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const { scrollableRef } = useScrollableRef();
@@ -77,4 +77,4 @@ const MobileFooter = (_props: MobileFooterProps) => {
   );
 };
 
-export default MobileFooter;
+export default FooterNavigation;

@@ -1,21 +1,21 @@
 'use client';
 import {
   Dialog,
-  DialogHeader,
-  DialogTitle,
   DialogContent,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { setDoNotShowAgain } from '@/lib/utils';
 import { ModalType } from '@/types';
 
-interface MessageAsAdminModalProps {
+interface MessageAsBuyerModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
+const MessageAsBuyerModal = (props: MessageAsBuyerModalProps) => {
   const { isOpen, onClose } = props;
   return (
     <Dialog
@@ -33,15 +33,12 @@ const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
         <div>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              You are an admin is this room. You can view all messages in this
-              room.
+              You are a buyer in this room. Your messages will be only visible
+              to admins.
             </li>
             <li>
-              Messages from non-admin are only visible to admins by default.
-            </li>
-            <li>
-              Once you reply to a message sent from a non-admin, it`ll become
-              visible to everyone in the room.
+              Once an admin replies to you message, it`ll become visible to
+              everyone in the room.
             </li>
           </ul>
         </div>
@@ -50,7 +47,7 @@ const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
             variant="ghost"
             className="opacity-60"
             onClick={() => {
-              setDoNotShowAgain(ModalType.REPLY_AS_ADMIN);
+              setDoNotShowAgain(ModalType.MESSAGE_AS_BUYER);
               onClose();
             }}
           >
@@ -69,4 +66,4 @@ const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
   );
 };
 
-export default MessageAsAdminModal;
+export default MessageAsBuyerModal;

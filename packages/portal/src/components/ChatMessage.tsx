@@ -2,7 +2,7 @@
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import { MessageWithUserData } from '@/types';
-import Avatar from './Avatar';
+import AvatarWithFallback from './AvatarWithFallback';
 import { Copy, Reply, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import useMessage from '@/hooks/useMessage';
@@ -144,12 +144,12 @@ const ChatMessage = (props: ChatMessageProps) => {
       {!isSender ? (
         <div className="mb-5 ml-1">
           <Link className="no-underline" href={`/users/${user.id}`}>
-            <Avatar
+            <AvatarWithFallback
               size={40}
               imageUrl={user.avatarUrl}
               alt="profile image"
               name={user.name}
-            ></Avatar>
+            ></AvatarWithFallback>
           </Link>
         </div>
       ) : (

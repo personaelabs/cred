@@ -1,12 +1,12 @@
 import { copyTextToClipboard } from '@/lib/utils';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from './ui/sheet';
+} from '../ui/sheet';
 import { toast } from 'sonner';
 
 interface ConnectFromDifferentDeviceSheetProps {

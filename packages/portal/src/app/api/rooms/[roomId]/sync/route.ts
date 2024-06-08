@@ -45,12 +45,12 @@ export async function POST(
   const body = (await req.json()) as SyncRoomRequestBody;
 
   const result = await viemClient.waitForTransactionReceipt({
-    hash: body.buyTransactionHash,
+    hash: body.txHash,
   });
 
   if (result.logs.length === 0) {
     logger.error('No logs found', {
-      txHash: body.buyTransactionHash,
+      txHash: body.txHash,
     });
     return Response.json(
       {

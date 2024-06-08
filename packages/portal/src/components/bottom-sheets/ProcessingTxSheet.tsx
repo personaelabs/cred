@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import theme from '@/lib/theme';
 
 interface ProcessingTxSheetProps {

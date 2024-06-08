@@ -1,6 +1,6 @@
 'use client';
 
-import AddingCredddModal from '@/components/AddingCredddModal';
+import AddingCredddModal from '@/components/modals/AddingCredddModal';
 import Scrollable from '@/components/Scrollable';
 import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
@@ -16,7 +16,7 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Hex } from 'viem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
-import CredddVerifiedSheet from '@/components/CredddVerifiedSheet';
+import CredddVerifiedSheet from '@/components/bottom-sheets/CredddVerifiedSheet';
 
 const ConnectButton = () => {
   const { connectWallet } = usePrivy();

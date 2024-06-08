@@ -5,9 +5,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from './ui/sheet';
+} from '../ui/sheet';
 import useJoinRoom from '@/hooks/useJoinRoom';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import useJoinedRooms from '@/hooks/useJoinedRooms';

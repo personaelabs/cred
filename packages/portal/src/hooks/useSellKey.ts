@@ -1,7 +1,7 @@
 import { PortalAbi } from '@cred/shared';
 import { Hex, encodeFunctionData, formatEther } from 'viem';
 import axios from '@/lib/axios';
-import { DialogType, SyncRoomRequestBody } from '@/types';
+import { SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@/lib/utils';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
@@ -10,7 +10,7 @@ import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import wagmiConfig from '../lib/wagmiConfig';
 import { readContract } from '@wagmi/core';
-import { useDialog } from '@/contexts/DialogContext';
+import { DialogType, useDialog } from '@/contexts/DialogContext';
 import useSignedInUser from './useSignedInUser';
 
 const sendTransactionId = async ({
@@ -21,7 +21,7 @@ const sendTransactionId = async ({
   txId: Hex;
 }) => {
   const body: SyncRoomRequestBody = {
-    buyTransactionHash: txId,
+    txHash: txId,
   };
 
   await axios.post(`/api/rooms/${roomId}/sync`, body);

@@ -15,7 +15,8 @@ import {
 } from 'firebase/firestore';
 import db from './firestore';
 import { MessageVisibility, Room, messageConverter } from '@cred/shared';
-import { DialogType, MobileOS, ModalType } from '@/types';
+import { MobileOS, ModalType } from '@/types';
+import { DialogType } from '@/contexts/DialogContext';
 
 export const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));

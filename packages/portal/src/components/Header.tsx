@@ -11,7 +11,7 @@ interface MobileHeaderProps {
   headerRight?: React.ReactNode;
 }
 
-const MobileHeader = (props: MobileHeaderProps) => {
+const Header = (props: MobileHeaderProps) => {
   const { headerRight, title, description, showBackButton, backTo } = props;
   const router = useRouter();
 
@@ -45,4 +45,4 @@ const MobileHeader = (props: MobileHeaderProps) => {
   );
 };
 
-export default MobileHeader;
+export default Header;

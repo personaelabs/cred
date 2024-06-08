@@ -14,7 +14,7 @@ import {
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
 import useUsers from '@/hooks/useUsers';
 import useRoom from '@/hooks/useRoom';
-import AvatarWithFallback from './Avatar';
+import AvatarWithFallback from './AvatarWithFallback';
 import ClickableBox from './ClickableBox';
 import { MessageInput } from '@/types';
 

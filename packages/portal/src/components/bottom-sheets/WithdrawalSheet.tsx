@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useCallback, useState } from 'react';
-import { Input } from './ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
+import { Input } from '../ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { Hex, parseEther } from 'viem';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import useWithdrawal from '@/hooks/useWithdrawal';
 import { Loader2 } from 'lucide-react';
 import theme from '@/lib/theme';
