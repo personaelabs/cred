@@ -12,7 +12,7 @@ pnpm i
 
 ### 2. Configure environment variables
 
-Follwoing the instructions [here](https://www.notion.so/personae-labs/Dev-envs-fd0a6e744db741ccb3e91be5e37cdf89).
+Follow the instructions [here](https://www.notion.so/personae-labs/Dev-envs-fd0a6e744db741ccb3e91be5e37cdf89).
 
 
 ### 3. Start the frontend
