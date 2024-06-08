@@ -31,6 +31,7 @@ const createUser = async () => {
     connectedAddresses: [],
     addedCreddd: [],
     inviteCode: 'test',
+    isMod: false,
   };
 
   logger.info(`Creating user ${userId}`);

@@ -16,6 +16,7 @@ export const toMessageWithUserData = (
       id: message.userId.toString(),
       name: '',
       avatarUrl: '',
+      isMod: false,
     },
     id: message.id,
     text: message.body,
@@ -185,6 +186,7 @@ const useMessages = ({ roomId }: { roomId: string }) => {
         ...msg.user,
         name: user?.displayName || '',
         avatarUrl: user?.pfpUrl || '',
+        isMod: user?.isMod || false,
       },
     };
   });

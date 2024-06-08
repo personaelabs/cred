@@ -228,6 +228,16 @@ const ChatMessageAvatar = (props: ChatMessageAvatarProps) => {
           name={user.name}
         ></AvatarWithFallback>
       </Link>
+      {
+        // Render moderator badge
+        user.isMod ? (
+          <div className="text-xs opacity-80 text-primary mt-1 mr-1 text-center">
+            mod
+          </div>
+        ) : (
+          <></>
+        )
+      }
     </div>
   );
 };

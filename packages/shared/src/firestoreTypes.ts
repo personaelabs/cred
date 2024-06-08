@@ -16,6 +16,7 @@ export interface User {
       mutedRoomIds: string[];
     };
   };
+  isMod: boolean;
 }
 
 export interface UserCreddd {
