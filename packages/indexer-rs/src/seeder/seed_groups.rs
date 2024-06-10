@@ -163,14 +163,12 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
-    /*
     groups.push(Group::new(
         "eth salon".to_string(),
         GroupType::EthSalon,
         vec![],
         0,
     ));
-     */
 
     groups
 }

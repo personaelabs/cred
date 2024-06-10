@@ -4,7 +4,7 @@ use crate::{
     Error, GroupId, GroupState, GroupType,
 };
 
-const PREVIEW_GROUP_IDS: [&str; 12] = [
+const PREVIEW_GROUP_IDS: [&str; 13] = [
     "f925c0f578b2c6024c5bbb20947e1af3a0eb944e0c309930e3af644ced5200df", // "Early $PIKA holder",
     "167b42ecc5f95c2c10b5fa08a62929d5e3b4ca43783d96a41e7d014e9d0fd02b", // "$KIBSHI whale",
     "55830aa86161ab70bfd6a96e2abd3b338f13bb1848565c8a23c7c7317b5864a5", // $ticker rug survivor
@@ -16,7 +16,8 @@ const PREVIEW_GROUP_IDS: [&str; 12] = [
     "9aa0652a76f710a10e17ff49c09ba8b04260898a956f4f9d7ee84f6a164d2f8a",
     "0f52c884729bb73f81eafc295e9c8fd492475e28e3cbedba5eed4932049caa70", // base salon
     "b796c128590828f60d84a50abefea8728e3124096614830b371407ab91c86132", // blast salon
-    "6c032e7d80cfcc373749ca12f4c28a664193cdf5a60f76383ebbfa788ab93c68"
+    "6c032e7d80cfcc373749ca12f4c28a664193cdf5a60f76383ebbfa788ab93c68", // $friend bag holder
+    "3c674ad1bf73d3950d1734f4cdc37cd69aec58e9b47c2f19e3784f7e957545a6" // eth salon
 ];
 
 #[derive(Debug, Clone)]
