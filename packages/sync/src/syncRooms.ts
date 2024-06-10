@@ -15,12 +15,11 @@ const upsertRoom = async ({
 }) => {
   const roomData: Omit<
     Room,
-    'joinedUserIds' | 'readerIds' | 'writerIds' | 'isFeatured'
+    'joinedUserIds' | 'readerIds' | 'writerIds' | 'isFeatured' | 'isHidden'
   > = {
     id: groupId,
     name,
     imageUrl: null,
-    isHidden: true,
   };
 
   const groupDoc = await db
@@ -40,6 +39,7 @@ const upsertRoom = async ({
       joinedUserIds: [],
       readerIds: [],
       isFeatured: false,
+      isHidden: true,
     };
     await groupDoc.set(newRoomData);
   }
