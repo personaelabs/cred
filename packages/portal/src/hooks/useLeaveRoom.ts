@@ -27,7 +27,7 @@ const useLeaveRoom = () => {
         throw new Error('User not signed in');
       }
 
-      const confirmed = await window.confirm('Leave chat?');
+      const confirmed = await window.confirm('Leave portal?');
       if (confirmed) {
         await leaveRoom({
           roomId,
