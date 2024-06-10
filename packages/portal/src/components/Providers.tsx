@@ -35,6 +35,8 @@ import ProcessingTxSheet from './bottom-sheets/ProcessingTxSheet';
 import FundWalletSheet from './bottom-sheets/FundWalletSheet';
 import mixpanel from 'mixpanel-browser';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
+import useIsUsernameSet from '@/hooks/useIsUsernameSet';
+import useInviteCodeSet from '@/hooks/useIsInviteCodeSet';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -71,6 +73,28 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
+
+  const isUsernameSet = useIsUsernameSet();
+
+  // Redirect to setup username page if the user hasn't set a username
+  useEffect(() => {
+    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
+      if (isUsernameSet === false) {
+        router.push('/setup-username');
+      }
+    }
+  }, [isUsernameSet, router, pathname]);
+
+  const isInviteCodeSet = useInviteCodeSet();
+
+  // Redirect to setup invite code page if the user hasn't set an invite code
+  useEffect(() => {
+    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
+      if (isInviteCodeSet === false) {
+        router.push('/enter-invite-code');
+      }
+    }
+  }, [isInviteCodeSet, pathname, router]);
 
   useEffect(() => {
     if (signedInUser) {

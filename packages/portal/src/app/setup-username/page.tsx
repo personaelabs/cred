@@ -14,6 +14,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useSetUsername from '@/hooks/useSetUsername';
 import { useRouter } from 'next/navigation';
+import useIsUsernameSet from '@/hooks/useIsUsernameSet';
 
 interface UsernameAvailabilityProps {
   username: string;
@@ -72,6 +73,15 @@ const SetupUsernamePage = () => {
   const { mutateAsync: submitUsername, isPending: isSubmittingUsername } =
     useSetUsername();
   const router = useRouter();
+
+  const isUsernameSet = useIsUsernameSet();
+
+  // Redirect if the username is already set
+  useEffect(() => {
+    if (isUsernameSet === true) {
+      router.replace('/enable-notifications');
+    }
+  }, [isUsernameSet, router]);
 
   // Hook to set the initial username
   useEffect(() => {

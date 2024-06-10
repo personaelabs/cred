@@ -5,7 +5,7 @@ import app from '../firestore';
 import { deleteApp } from 'firebase/app';
 import { roomConverter } from '@cred/shared';
 import { TEST_ROOM_ID, getRoom, joinRoom } from './room';
-import { addWriterToRoom } from '@cred/firebase';
+import { addWriterToRoom } from '@cred/firebase-admin';
 import { signInAnonymously, getAuth } from 'firebase/auth';
 import * as admin from '../adminUtils';
 

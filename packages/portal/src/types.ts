@@ -1,7 +1,7 @@
 import { GetLogsReturnType, Hex } from 'viem';
 import { User as PrivyUser } from '@privy-io/react-auth';
 import { TRANSFER_SINGLE_EVENT } from './lib/contract';
-import { MessageVisibility } from '@cred/shared';
+import { MessageVisibility, User } from '@cred/shared';
 
 export type SignedInUser = PrivyUser;
 
@@ -12,6 +12,7 @@ export interface ChatUser {
   id: string;
   name: string;
   avatarUrl: string;
+  isMod: boolean;
 }
 
 export interface MessageWithUserData {
@@ -111,13 +112,6 @@ export interface AddCredddRequestBody {
 }
 
 /**
- * Request body for the /api/signin endpoint
- */
-export interface SignInRequestBody {
-  inviteCode: string;
-}
-
-/**
  * Request body for the /api/users/{userId} endpoint
  */
 export interface SetUsernameRequestBody {
@@ -138,4 +132,9 @@ export interface ConnectAddressRequestBody {
   address: Hex;
   signature: Hex;
   groupIds: string[]; // Temporary
+}
+
+export interface SignInResponse {
+  token: string;
+  user: User | null;
 }

@@ -18,6 +18,8 @@ export const userConverter = {
       privyAddress: user.privyAddress,
       connectedAddresses: user.connectedAddresses,
       addedCreddd: user.addedCreddd,
+      inviteCode: user.inviteCode,
+      isMod: user.isMod,
     };
   },
   fromFirestore: (doc: DocumentData, options?: SnapshotOptions) => {
@@ -32,6 +34,8 @@ export const userConverter = {
       privyAddress: data.privyAddress || '',
       connectedAddresses: data.connectedAddresses || [],
       addedCreddd: data.addedCreddd || [],
+      inviteCode: data.inviteCode || '',
+      isMod: data.isMod || false,
     };
 
     return user;

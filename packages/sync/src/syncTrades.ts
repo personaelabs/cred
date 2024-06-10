@@ -14,7 +14,7 @@ import {
   addReaderToRoom,
   getUserByAddress,
   removeUserFromRoom,
-} from '@cred/firebase';
+} from '@cred/firebase-admin';
 import logger from './lib/logger';
 
 const chain = getChain();

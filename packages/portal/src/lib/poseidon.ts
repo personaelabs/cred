@@ -1,4 +1,7 @@
-// Poseidon precomputed hashes
+/**
+ * Poseidon precomputed hashes.
+ * This is used to efficiently build a Merkle proof on the client side.
+ */
 export const PRECOMPUTED_HASHES = [
   [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

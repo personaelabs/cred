@@ -5,7 +5,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@cred/firebase": "workspace:*",
+    "@cred/firebase-admin": "workspace:*",
     "@cred/shared": "workspace:*",
     "@faker-js/faker": "^8.4.1",
     "dotenv": "^16.4.5",

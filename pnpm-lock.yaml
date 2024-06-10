@@ -46,7 +46,7 @@ importers:
         specifier: ^5.12.1
         version: 5.12.1
 
-  packages/firebase:
+  packages/firebase-admin:
     dependencies:
       '@cred/shared':
         specifier: workspace:*
@@ -64,9 +64,9 @@ importers:
 
   packages/frontend:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -224,9 +224,9 @@ importers:
 
   packages/monkey:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -252,9 +252,9 @@ importers:
 
   packages/notification:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -277,9 +277,9 @@ importers:
 
   packages/portal:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -485,9 +485,9 @@ importers:
 
   packages/scripts:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -532,9 +532,9 @@ importers:
 
   packages/sync:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared
@@ -560,9 +560,9 @@ importers:
 
   packages/test:
     dependencies:
-      '@cred/firebase':
+      '@cred/firebase-admin':
         specifier: workspace:*
-        version: link:../firebase
+        version: link:../firebase-admin
       '@cred/shared':
         specifier: workspace:*
         version: link:../shared

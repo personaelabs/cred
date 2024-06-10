@@ -5,7 +5,7 @@ import app from '../firestore';
 import { deleteApp } from 'firebase/app';
 import { MessageVisibility } from '@cred/shared';
 import { TEST_ROOM_ID, getRoom, joinRoom } from '../rooms/room';
-import { addReaderToRoom, addWriterToRoom } from '@cred/firebase';
+import { addReaderToRoom, addWriterToRoom } from '@cred/firebase-admin';
 import { signInAnonymously, signOut } from 'firebase/auth';
 import * as admin from '../adminUtils';
 import { createMessage } from './messages';

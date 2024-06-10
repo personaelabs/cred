@@ -19,7 +19,7 @@ import * as circuit from 'circuit-node/circuits_embedded';
 import { addUserCreddd } from '@/lib/backend/userCreddd';
 import privy from '@/lib/backend/privy';
 import credddRpcClient from '@/lib/credddRpc';
-import { addWriterToRoom } from '@cred/firebase';
+import { addWriterToRoom } from '@cred/firebase-admin';
 
 let circuitInitialized = false;
 

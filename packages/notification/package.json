@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@cred/shared": "workspace:*",
-    "@cred/firebase": "workspace:*",
+    "@cred/firebase-admin": "workspace:*",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.0",
     "winston": "^3.13.0"
