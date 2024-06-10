@@ -16,4 +16,4 @@ addr_membership.r1cs
 packages/indexer-rs/db
 !./packages/db
 
-firebase-service-account.json
+firebase-service-account*.json
