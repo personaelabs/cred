@@ -37,6 +37,7 @@ impl GroupIndexer for SalonIndexer {
             GroupType::BaseSalon => "base_salon.csv",
             GroupType::BlastSalon   => "blast_salon.csv",
             GroupType::EthSalon   => "eth_salon.csv",
+            GroupType::FriendBagHolder   => "friend_bag_holder.csv",
             _ => panic!("Invalid group type"),
         };
 

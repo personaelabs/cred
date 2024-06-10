@@ -281,6 +281,9 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::EthSalon => {
             hasher.update(b"EthSalon");
         }
+        GroupType::FriendBagHolder => {
+            hasher.update(b"FriendBagHolder");
+        }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
         }

@@ -100,6 +100,7 @@ enum GroupType {
   BaseSalon
   BlastSalon
   EthSalon
+  FriendBagHolder
 }
 
 enum GroupState {

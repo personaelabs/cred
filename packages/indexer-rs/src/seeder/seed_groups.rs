@@ -156,6 +156,13 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
+    groups.push(Group::new(
+        "$friend bag holder".to_string(),
+        GroupType::FriendBagHolder,
+        vec![],
+        0,
+    ));
+
     /*
     groups.push(Group::new(
         "eth salon".to_string(),

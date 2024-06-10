@@ -121,6 +121,7 @@ pub enum GroupType {
     AllHolders,
     Ticker,
     Believer,
+    FriendBagHolder
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
