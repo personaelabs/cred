@@ -46,6 +46,9 @@ services:
         value: "mainnet"
         previewValue: "sepolia"
       - fromGroup: cred
+      - key: NEXT_PUBLIC_MIXPANEL_TOKEN
+        value: 8e0fce62c1d9b2394989eaef1247cfc2
+        previewValue: 4f57a2e1c29d0e91fe07d1292e325520
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/secrets/firebase-service-account.json
         previewValue: /etc/secrets/firebase-service-account-staging.json
