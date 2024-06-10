@@ -1,5 +1,5 @@
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { userConverter } from '@cred/shared';
 
 const db = getFirestore(app);

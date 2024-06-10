@@ -1,4 +1,4 @@
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { userConverter } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 

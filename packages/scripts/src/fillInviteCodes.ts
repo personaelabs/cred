@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { app } from '@cred/firebase';
+import { app } from '@cred/firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { nanoid } from 'nanoid';
 

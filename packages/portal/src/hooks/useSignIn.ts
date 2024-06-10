@@ -5,14 +5,6 @@ import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { useState } from 'react';
 
-export const saveInviteCode = (inviteCode: string) => {
-  localStorage.setItem('portal.inviteCode', inviteCode);
-};
-
-const getInviteCode = () => {
-  return localStorage.getItem('portal.inviteCode');
-};
-
 const useSignIn = () => {
   const router = useRouter();
   const { getAccessToken, logout } = usePrivy();
@@ -21,25 +13,26 @@ const useSignIn = () => {
   const { login } = useLogin({
     onComplete: async () => {
       setIsSigningIn(true);
-      const inviteCode = getInviteCode();
-
-      if (!inviteCode) {
-        throw new Error('Invite code not found');
-      }
 
       const accessToken = await getAccessToken();
       if (!accessToken) {
         throw new Error('Failed to get access token');
       }
-      const usernameIsSet = await authSignedInUser({
+
+      const signInResponse = await authSignedInUser({
         accessToken,
-        inviteCode,
       });
 
-      if (usernameIsSet) {
-        router.push('/enable-notifications');
-      } else {
+      const user = signInResponse.user;
+      const isInviteCodeSet = user ? user.inviteCode !== '' : false;
+      const isUsernameSet = user ? user.username !== '' : false;
+
+      if (!isInviteCodeSet) {
+        router.push('/enter-invite-code');
+      } else if (!isUsernameSet) {
         router.push('/setup-username');
+      } else {
+        router.push('/enable-notifications');
       }
     },
   });

@@ -1,4 +1,4 @@
-import { addWriterToRoom, app } from '@cred/firebase';
+import { addWriterToRoom, app } from '@cred/firebase-admin';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { faker } from '@faker-js/faker';
 import { User, roomConverter } from '@cred/shared';
@@ -30,6 +30,8 @@ const createUser = async () => {
     },
     connectedAddresses: [],
     addedCreddd: [],
+    inviteCode: 'test',
+    isMod: false,
   };
 
   logger.info(`Creating user ${userId}`);

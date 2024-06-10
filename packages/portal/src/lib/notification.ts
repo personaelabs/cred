@@ -37,6 +37,8 @@ export const getDeviceNotificationToken = async (): Promise<string | null> => {
     const maxRetries = 5;
     let retries = 0;
 
+    // We need to retry because sometimes the service worker is not ready,
+    // and there is no stable way to know if the service worker is ready or not.
     while (maxRetries > retries) {
       try {
         const token = await getToken(messaging, {

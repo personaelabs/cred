@@ -31,6 +31,6 @@
     "dotenv": "^16.4.5",
     "firebase": "^10.11.1",
     "firebase-admin": "^12.1.0",
-    "@cred/firebase": "workspace:*"
+    "@cred/firebase-admin": "workspace:*"
   }
 }
