@@ -26,6 +26,13 @@ const RoomUserListItem = ({ user }: { user: User }) => {
         size={40}
       ></AvatarWithFallback>
       <div className="ml-4 w-[160px]">{user!.displayName}</div>
+      {user.isMod ? (
+        <div className="text-xs opacity-80 text-primary mt-1 mr-1 text-center">
+          mod
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };

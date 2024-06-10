@@ -3,6 +3,7 @@
   "scripts": {
     "lint": "tsc --noEmit",
     "addAdmins": "tsx ./src/addAdmins.ts",
+    "showRooms": "tsx ./src/showRooms.ts",
     "hideAllRooms": "tsx ./src/hideAllRooms.ts",
     "fillEmptyReactions": "tsx ./src/fillEmptyReactions.ts",
     "fillInviteCodes": "tsx ./src/fillInviteCodes.ts",

@@ -10,7 +10,7 @@ const UserPage = () => {
   const userId = params.userId;
   const { setOptions } = useHeaderOptions();
 
-  const { data: user } = useUser(userId);
+  const { data: user } = useUser(decodeURIComponent(userId));
 
   useEffect(() => {
     if (user) {
