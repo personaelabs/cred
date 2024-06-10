@@ -20,6 +20,7 @@ const upsertRoom = async ({
     id: groupId,
     name,
     imageUrl: null,
+    isHidden: true,
   };
 
   const groupDoc = await db

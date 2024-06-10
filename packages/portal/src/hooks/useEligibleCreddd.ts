@@ -8,6 +8,7 @@ import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
 import { fromHexString } from '@/lib/utils';
 import * as Sentry from '@sentry/nextjs';
 import credddKeys from '@/queryKeys/credddKeys';
+import useAllRooms from './useAllRooms';
 
 /**
  * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
@@ -153,6 +154,7 @@ const useAllMerkleTrees = () => {
 const useEligibleCreddd = (address: Hex | null) => {
   const { data: signedInUser } = useSignedInUser();
   const { data: merkleTrees } = useAllMerkleTrees();
+  const { data: allRooms } = useAllRooms();
 
   return useQuery({
     queryKey: credddKeys.eligibleCreddd(address),
@@ -162,9 +164,14 @@ const useEligibleCreddd = (address: Hex | null) => {
         merkleTrees: merkleTrees!,
       });
 
-      return eligibleCreddd;
+      // Filter out the groups which rooms are not available
+      const availableRoomIds = allRooms.map(room => room.id);
+      console.log({ availableRoomIds });
+      return eligibleCreddd.filter(creddd =>
+        availableRoomIds.includes(creddd.id)
+      );
     },
-    enabled: !!signedInUser && !!address && !!merkleTrees,
+    enabled: !!signedInUser && !!address && !!merkleTrees && !!allRooms,
   });
 };
 

@@ -7,7 +7,8 @@ import { query, collection, where, getDocs } from 'firebase/firestore';
 const getJoinedRooms = async (userId: string) => {
   const q = query(
     collection(db, 'rooms').withConverter(roomConverter),
-    where('joinedUserIds', 'array-contains', userId)
+    where('joinedUserIds', 'array-contains', userId),
+    where('isHidden', '==', false)
   );
 
   const docs = await getDocs(q);
