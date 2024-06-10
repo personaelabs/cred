@@ -20,7 +20,7 @@ use rocksdb::DB;
 use serde_json::Value;
 use sha3::Digest;
 use sha3::Keccak256;
-use std::{env, io::Cursor};
+use std::{env, fs::File, io::Cursor};
 pub const MINTER_ADDRESS: Address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 pub fn dev_addresses() -> Vec<Address> {
@@ -272,6 +272,15 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::Believer => {
             hasher.update(b"Believer");
         }
+        GroupType::BaseSalon => {
+            hasher.update(b"BaseSalon");
+        }
+        GroupType::BlastSalon => {
+            hasher.update(b"BlastSalon");
+        }
+        GroupType::EthSalon => {
+            hasher.update(b"EthSalon");
+        }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
         }
@@ -375,6 +384,31 @@ pub fn format_address(address: &str) -> String {
         address.trim_start_matches("0x"),
         width = 64
     )
+}
+
+/// Get a list of addresses from a CSV file
+pub fn get_members_from_csv(file_path: &str) -> Vec<Address> {
+    let file = File::open(file_path).unwrap();
+
+    // Build the CSV reader and iterate over each record.
+    let mut rdr = csv::Reader::from_reader(file);
+
+    let mut addresses = rdr
+        .records()
+        .map(|record| {
+            let record = record.unwrap();
+            let address = record.get(0).unwrap().to_string();
+
+            hex::decode(address.trim_start_matches("0x"))
+                .unwrap()
+                .try_into()
+                .unwrap()
+        })
+        .collect::<Vec<Address>>();
+
+    addresses.sort();
+
+    addresses
 }
 
 #[cfg(test)]

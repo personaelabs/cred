@@ -113,6 +113,9 @@ impl From<IndexerError> for Error {
 pub enum GroupType {
     Static,
     CredddTeam,
+    BaseSalon,
+    BlastSalon,
+    EthSalon,
     EarlyHolder,
     Whale,
     AllHolders,
