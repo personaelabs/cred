@@ -51,7 +51,7 @@ const AddingCredddModal = (props: AddingCredddModalProps) => {
       <DialogContent className="flex flex-col items-center w-[90%]">
         <DialogHeader>
           <DialogDescription>
-            Adding creddd....this may take a minute
+            Adding rep....this may take a minute
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-y-3">

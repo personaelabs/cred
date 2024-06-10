@@ -32,7 +32,7 @@ const CredddPage = () => {
   const { setOptions } = useHeaderOptions();
 
   useEffect(() => {
-    setOptions({ title: 'Your Creddd', showBackButton: true });
+    setOptions({ title: 'Your Rep', showBackButton: true });
   }, [setOptions]);
 
   return (
@@ -40,7 +40,7 @@ const CredddPage = () => {
       <div className="flex flex-col items-center mt-4 pb-[64px]">
         <div className="flex flex-col w-full items-center">
           {user?.addedCreddd.length === 0 ? (
-            <div className="text-center opacity-60">No creddd</div>
+            <div className="text-center opacity-60">No rep</div>
           ) : (
             <></>
           )}
@@ -53,7 +53,7 @@ const CredddPage = () => {
         <div className="flex flex-col gap-y-4 items-center">
           <Link href="/settings/add-creddd">
             <Button className="mt-4">
-              <Plus className="w-4 h-4 mr-2"></Plus> Add creddd
+              <Plus className="w-4 h-4 mr-2"></Plus> Add rep
             </Button>
           </Link>
         </div>

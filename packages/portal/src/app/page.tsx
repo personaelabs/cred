@@ -83,7 +83,7 @@ const EligibleRoomItem = memo(function EligibleRoom(
 
   const onJoinClick = useCallback(async () => {
     await joinRoom(id);
-    router.push(`/rooms/${id}`);
+    router.push(`/chats/${id}`);
   }, [id, joinRoom, router]);
 
   useEffect(() => {
@@ -142,7 +142,7 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
       <div className="flex flex-col px-5">
         <div className="flex flex-row items-center h-full justify-between">
           <Link
-            href={`/rooms/${props.room.id}/roomInfo`}
+            href={`/portals/${props.room.id}`}
             className="no-underline w-full"
           >
             <div className="flex flex-col justify-start w-[70%]">
@@ -176,7 +176,7 @@ const Home = () => {
 
   useEffect(() => {
     setOptions({
-      title: 'Rooms',
+      title: 'Portals',
       showBackButton: false,
     });
   }, [setOptions]);
@@ -224,16 +224,14 @@ const Home = () => {
     >
       <Alert>
         <AlertTitle className="flex flx-row justify-between items-center">
-          <div className="opacity-70">
-            Prove onchain reputation to join rooms
-          </div>
+          <div className="opacity-70">Add reputation to join portals</div>
           <Link href="/settings/creddd">
-            <Button variant="secondary">Prove reputation</Button>
+            <Button variant="secondary">Add rep</Button>
           </Link>
         </AlertTitle>
       </Alert>
       {joinableRooms.length > 0 ? (
-        <div className="px-5 text-center opacity-60 mt-4">Eligible rooms</div>
+        <div className="px-5 text-center opacity-60 mt-4">Eligible portals</div>
       ) : (
         <></>
       )}
@@ -249,7 +247,7 @@ const Home = () => {
       ))}
       {buyableRooms.length > 0 ? (
         <div className="mt-[32px] px-5 text-center opacity-60">
-          Buy access to rooms
+          Buy access to portals
         </div>
       ) : (
         <></>

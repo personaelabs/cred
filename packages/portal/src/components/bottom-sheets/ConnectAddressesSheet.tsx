@@ -28,9 +28,9 @@ const ConnectAddressesSheet = () => {
     <Sheet open={isOpen && showSheet()}>
       <SheetContent side="bottom" className="h-[300px]">
         <SheetHeader>
-          <SheetTitle>Prove your onchain history to join rooms</SheetTitle>
+          <SheetTitle>Prove your onchain history to join portals</SheetTitle>
           <SheetDescription>
-            You can also purchase keys to access rooms.
+            You can also purchase keys to access portals.
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col items-center justify-center mt-[40px] mb-4">

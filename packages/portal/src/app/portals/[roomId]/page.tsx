@@ -86,7 +86,7 @@ const RoomInfo = () => {
                 variant="secondary"
                 onClick={async () => {
                   await sellKey();
-                  router.replace(`/rooms`);
+                  router.replace(`/chats`);
                 }}
               >
                 <KeyRound className="mr-2 w-3 h-3"></KeyRound>

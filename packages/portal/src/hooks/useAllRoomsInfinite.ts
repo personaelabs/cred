@@ -30,7 +30,7 @@ const getRooms = async (lastVisible: Room | null) => {
 
 const useAllRooms = () => {
   return useInfiniteQuery({
-    queryKey: ['all-rooms-2'],
+    queryKey: ['all-rooms'],
     queryFn: async ({ pageParam }: { pageParam: Room | null }) => {
       const allRooms = await getRooms(pageParam);
 
