@@ -98,7 +98,7 @@ const RoomItem = (props: RoomItemProps) => {
   return (
     <>
       <Link
-        href={isMenuOpen ? '' : `/rooms/${id}`}
+        href={isMenuOpen ? '' : `/chats/${id}`}
         className={`w-full no-underline ${isClicked ? 'opacity-60' : ''}`}
         onClick={() => {
           setIsClicked(true);
@@ -193,7 +193,7 @@ const Rooms = () => {
         <div className="text-xl opacity-60">No chats found</div>
         <Button className="mt-4" asChild>
           <Link href="/" className="no-underline">
-            Find rooms
+            Find portals
           </Link>
         </Button>
       </div>

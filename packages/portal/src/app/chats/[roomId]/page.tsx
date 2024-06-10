@@ -107,13 +107,13 @@ const Room = () => {
         description: `${room.joinedUserIds.length} member${room.joinedUserIds.length > 1 ? 's' : ''}`,
         headerRight: (
           <ClickableBox>
-            <Link href={`/rooms/${params.roomId}/roomInfo`}>
+            <Link href={`/portals/${params.roomId}`}>
               <Users className="w-5 h-5"></Users>
             </Link>
           </ClickableBox>
         ),
         showBackButton: true,
-        backTo: '/rooms',
+        backTo: '/chats',
       });
     }
   }, [params.roomId, room, setOptions]);
