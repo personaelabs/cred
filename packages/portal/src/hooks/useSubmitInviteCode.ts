@@ -2,6 +2,7 @@ import axios from '@/lib/axios';
 import { usePrivy } from '@privy-io/react-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
+import userKeys from '@/queryKeys/userKeys';
 
 const submitInviteCode = async ({
   inviteCode,
@@ -43,7 +44,7 @@ const useSubmitInviteCode = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['user', { userId: signedInUser?.id }],
+        queryKey: userKeys.user(signedInUser?.id),
       });
     },
   });

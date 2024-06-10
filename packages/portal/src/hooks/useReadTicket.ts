@@ -3,6 +3,7 @@ import { roomReadTicketConverter } from '@cred/shared';
 import { useQuery } from '@tanstack/react-query';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
+import messageKeys from '@/queryKeys/messageKeys';
 
 export const getReadTicket = async ({
   roomId,
@@ -28,7 +29,7 @@ const useReadTicket = (roomId: string) => {
   const { data: signedInUser } = useSignedInUser();
 
   return useQuery({
-    queryKey: ['read-ticket', { roomId }],
+    queryKey: messageKeys.readTicket(roomId),
     queryFn: async () => {
       if (!signedInUser) {
         throw new Error('User not signed in');

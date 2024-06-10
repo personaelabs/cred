@@ -7,6 +7,7 @@ import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
 import { fromHexString } from '@/lib/utils';
 import * as Sentry from '@sentry/nextjs';
+import credddKeys from '@/queryKeys/credddKeys';
 
 /**
  * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
@@ -142,7 +143,7 @@ const getEligibleCreddd = async ({
 
 const useAllMerkleTrees = () => {
   return useQuery({
-    queryKey: ['merkle-trees'],
+    queryKey: credddKeys.merkleTrees,
     queryFn: async () => {
       return getAllMerkleTrees();
     },
@@ -154,7 +155,7 @@ const useEligibleCreddd = (address: Hex | null) => {
   const { data: merkleTrees } = useAllMerkleTrees();
 
   return useQuery({
-    queryKey: ['eligible-creddd', { address }],
+    queryKey: credddKeys.eligibleCreddd(address),
     queryFn: async () => {
       const eligibleCreddd = await getEligibleCreddd({
         address: address!,

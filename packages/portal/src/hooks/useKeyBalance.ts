@@ -4,6 +4,7 @@ import { Hex } from 'viem';
 import wagmiConfig from '@/lib/wagmiConfig';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { PortalAbi } from '@cred/shared';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const useKeyBalance = ({
   address,
@@ -13,7 +14,10 @@ const useKeyBalance = ({
   tokenId: bigint | null;
 }) => {
   return useQuery({
-    queryKey: ['key-balance', { address }],
+    queryKey: roomKeys.roomKeyBalance({
+      address,
+      tokenId,
+    }),
     queryFn: async () => {
       return await readContract(wagmiConfig, {
         abi: PortalAbi,

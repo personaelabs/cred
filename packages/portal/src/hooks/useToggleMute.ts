@@ -8,6 +8,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import db from '@/lib/firestore';
+import userKeys from '@/queryKeys/userKeys';
 
 const toggleMute = async ({
   roomId,
@@ -46,9 +47,9 @@ const useToggleMute = () => {
         });
       }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['user', { userId: signedInUser!.id }],
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: userKeys.user(signedInUser?.id),
       });
     },
   });

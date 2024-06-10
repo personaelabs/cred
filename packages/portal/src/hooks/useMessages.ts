@@ -7,6 +7,7 @@ import { MessageWithUserData } from '@/types';
 import useRoom from './useRoom';
 import { buildMessageQuery } from '@/lib/utils';
 import useUsers from './useUsers';
+import messageKeys from '@/queryKeys/messageKeys';
 
 export const toMessageWithUserData = (
   message: Message
@@ -121,7 +122,7 @@ const useMessages = ({ roomId }: { roomId: string }) => {
     signedInUser && room ? room.writerIds.includes(signedInUser.id) : false;
 
   const result = useInfiniteQuery({
-    queryKey: ['messages', { roomId }],
+    queryKey: messageKeys.roomMessages(roomId),
     queryFn: async ({
       pageParam,
     }: {

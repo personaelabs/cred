@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import useSignedInUser from './useSignedInUser';
 import useRoom from './useRoom';
 import { buildMessageQuery } from '@/lib/utils';
+import messageKeys from '@/queryKeys/messageKeys';
 
 export const getRoomLatestMessage = async ({
   isSingedInUserAdmin,
@@ -54,7 +55,10 @@ const useRoomLatestMessage = (roomId: string) => {
         if (doc) {
           const message = doc.data();
           // Update the cache with the latest message
-          queryClient.setQueryData(['latest-message', { roomId }], message);
+          queryClient.setQueryData(
+            messageKeys.roomLatestMessage(roomId),
+            message
+          );
         }
       });
 
@@ -65,7 +69,7 @@ const useRoomLatestMessage = (roomId: string) => {
   }, [queryClient, room, roomId, signedInUser]);
 
   return useQuery({
-    queryKey: ['latest-message', { roomId }],
+    queryKey: messageKeys.roomLatestMessage(roomId),
     queryFn: async () => {
       const isSingedInUserAdmin = room!.writerIds.includes(signedInUser!.id);
 

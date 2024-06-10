@@ -6,6 +6,7 @@ import {
   PORTAL_CONTRACT_ADDRESS,
   PORTAL_CONTRACT_DEPLOYED_BLOCK,
 } from '@/lib/contract';
+import settingsKeys from '@/queryKeys/settingsKeys';
 
 const TRANSFER_SINGLE_EVENT = parseAbiItem(
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)'
@@ -49,7 +50,7 @@ const useTradeHistory = () => {
   const account = useAccount();
 
   return useQuery({
-    queryKey: ['trade-history'],
+    queryKey: settingsKeys.tradeHistory,
     queryFn: async () => {
       const trades = await getTradeHistory(client!, account.address!);
       return trades;

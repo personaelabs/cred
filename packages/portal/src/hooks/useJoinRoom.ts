@@ -3,6 +3,7 @@ import { roomConverter } from '@cred/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { arrayUnion, collection, doc, updateDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const joinRoom = async ({
   roomId,
@@ -36,11 +37,11 @@ const useJoinRoom = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['joined-rooms'],
+        queryKey: roomKeys.joinedRooms,
       });
 
       queryClient.invalidateQueries({
-        queryKey: ['all-rooms'],
+        queryKey: roomKeys.all,
       });
     },
   });

@@ -4,12 +4,13 @@ import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useQuery } from '@tanstack/react-query';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const useSellPrice = (roomId: string) => {
   const roomIdBigInt = getRoomTokenId(roomId);
 
   return useQuery({
-    queryKey: ['sell-price', roomId],
+    queryKey: roomKeys.roomKeySellPrice(roomId),
     queryFn: async () => {
       const amount = BigInt(1);
 
