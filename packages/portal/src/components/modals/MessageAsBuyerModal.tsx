@@ -33,11 +33,10 @@ const MessageAsBuyerModal = (props: MessageAsBuyerModalProps) => {
         <div>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              You are a buyer in this room. Your messages will be only visible
-              to admins.
+              Your messages will be only visible to rep holders in this room.
             </li>
             <li>
-              Once an admin replies to you message, it`ll become visible to
+              Once a rep holder replies to you message, it wll become visible to
               everyone in the room.
             </li>
           </ul>
@@ -51,7 +50,7 @@ const MessageAsBuyerModal = (props: MessageAsBuyerModalProps) => {
               onClose();
             }}
           >
-            Don`t show this again
+            Don&apos;t show this again
           </Button>
           <Button
             onClick={() => {
