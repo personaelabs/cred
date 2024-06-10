@@ -81,6 +81,7 @@ export interface Room {
   writerIds: string[];
   imageUrl: string | null;
   isFeatured: boolean;
+  isHidden: boolean;
 }
 
 export interface RoomReadTicket {

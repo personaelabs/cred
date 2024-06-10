@@ -4,6 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { toast } from 'sonner';
+import userKeys from '@/queryKeys/userKeys';
 
 const submitAddress = async ({
   body,
@@ -22,7 +23,7 @@ const submitAddress = async ({
 const useSubmitAddress = () => {
   const { getAccessToken } = usePrivy();
   const queryClient = useQueryClient();
-  const { data: singedInUser } = useSignedInUser();
+  const { data: signedInUser } = useSignedInUser();
 
   return useMutation({
     mutationFn: async (body: ConnectAddressRequestBody) => {
@@ -40,7 +41,7 @@ const useSubmitAddress = () => {
     onSuccess: () => {
       toast.success('Verified address');
       queryClient.invalidateQueries({
-        queryKey: ['user', { userId: singedInUser?.id }],
+        queryKey: userKeys.user(signedInUser?.id),
       });
     },
   });

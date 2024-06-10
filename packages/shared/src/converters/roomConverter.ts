@@ -11,6 +11,7 @@ export const roomConverter = {
       name: room.name,
       imageUrl: room.imageUrl,
       isFeatured: room.isFeatured,
+      isHidden: room.isHidden,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
@@ -24,6 +25,7 @@ export const roomConverter = {
       name: data.name,
       imageUrl: data.imageUrl,
       isFeatured: data.isFeatured || false,
+      isHidden: data.isHidden || false,
     };
 
     return room;

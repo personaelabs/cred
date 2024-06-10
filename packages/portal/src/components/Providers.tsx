@@ -12,7 +12,7 @@ import {
 } from '@/contexts/HeaderContext';
 import Header from '@/components/Header';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useSignedInUser from '@/hooks/useSignedInUser';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { WagmiProvider, useSetActiveWallet } from '@privy-io/wagmi';
@@ -33,10 +33,10 @@ import theme from '@/lib/theme';
 import { getChain } from '@/lib/utils';
 import ProcessingTxSheet from './bottom-sheets/ProcessingTxSheet';
 import FundWalletSheet from './bottom-sheets/FundWalletSheet';
-import mixpanel from 'mixpanel-browser';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 import useIsUsernameSet from '@/hooks/useIsUsernameSet';
 import useInviteCodeSet from '@/hooks/useIsInviteCodeSet';
+import useMixpanel from '@/hooks/useMixpanel';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -65,11 +65,11 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const { isModalOpen } = usePrivy();
   const { openedDialog, closeDialog } = useDialog();
   const isAuthenticated = useIsAuthenticated();
-  const [mixpanelInitialized, setMixpanelInitialized] = useState(false);
+  useMixpanel();
 
   const hideFooter =
     ['/signin', '/install-pwa'].includes(pathname) ||
-    pathname.startsWith('/rooms/') ||
+    pathname.startsWith('/chats/') ||
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
@@ -95,27 +95,6 @@ const Main = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, [isInviteCodeSet, pathname, router]);
-
-  useEffect(() => {
-    if (signedInUser) {
-      mixpanel.init('4f57a2e1c29d0e91fe07d1292e325520', {
-        debug: process.env.NODE_ENV === 'development',
-        track_pageview: false,
-        persistence: 'localStorage',
-      });
-
-      mixpanel.identify(signedInUser.id);
-      setMixpanelInitialized(true);
-    }
-  }, [signedInUser]);
-
-  useEffect(() => {
-    if (mixpanelInitialized) {
-      mixpanel.track('page_view', {
-        pathname,
-      });
-    }
-  }, [mixpanelInitialized, pathname]);
 
   useEffect(() => {
     (async () => {

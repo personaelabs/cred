@@ -11,7 +11,7 @@ import useRoom from './useRoom';
 import wagmiConfig from '../lib/wagmiConfig';
 import { readContract } from '@wagmi/core';
 import { DialogType, useDialog } from '@/contexts/DialogContext';
-import useSignedInUser from './useSignedInUser';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const sendTransactionId = async ({
   roomId,
@@ -52,7 +52,6 @@ const useSellKey = (roomId: string) => {
   const { data: room } = useRoom(roomId);
   const { wallets } = useWallets();
   const { setOpenedSheet, closeDialog } = useDialog();
-  const { data: signedInUser } = useSignedInUser();
 
   const result = useMutation({
     mutationFn: async () => {
@@ -100,12 +99,14 @@ const useSellKey = (roomId: string) => {
       closeDialog();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['key-price', roomId] });
       queryClient.invalidateQueries({
-        queryKey: ['key-balance', { address: signedInUser?.wallet?.address }],
+        queryKey: roomKeys.roomKeySellPrice(roomId),
       });
-      queryClient.invalidateQueries({ queryKey: ['joined-rooms'] });
-      queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
+      queryClient.invalidateQueries({
+        queryKey: roomKeys.roomKeyBuyPrice(roomId),
+      });
+      queryClient.invalidateQueries({ queryKey: roomKeys.joinedRooms });
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
 
       toast.success('Sold key');
     },

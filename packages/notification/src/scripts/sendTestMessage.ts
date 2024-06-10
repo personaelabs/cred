@@ -46,6 +46,7 @@ const createNotificationTestRoom = async () => {
     joinedUserIds: ADMIN_FIDS,
     imageUrl: '',
     isFeatured: false,
+    isHidden: false,
   };
 
   await db

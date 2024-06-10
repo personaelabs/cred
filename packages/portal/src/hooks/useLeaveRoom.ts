@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { arrayRemove, doc, updateDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
 import db from '@/lib/firestore';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const leaveRoom = async ({
   roomId,
@@ -26,7 +27,7 @@ const useLeaveRoom = () => {
         throw new Error('User not signed in');
       }
 
-      const confirmed = await window.confirm('Leave room?');
+      const confirmed = await window.confirm('Leave chat?');
       if (confirmed) {
         await leaveRoom({
           roomId,
@@ -36,7 +37,7 @@ const useLeaveRoom = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['joined-rooms'],
+        queryKey: roomKeys.joinedRooms,
       });
     },
   });

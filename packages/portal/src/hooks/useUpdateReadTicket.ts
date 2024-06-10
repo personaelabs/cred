@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import useSignedInUser from './useSignedInUser';
 import { useState } from 'react';
+import messageKeys from '@/queryKeys/messageKeys';
 
 const updateReadTicket = async ({
   roomId,
@@ -52,7 +53,10 @@ const useUpdateReadTicket = (roomId: string) => {
         latestReadMessageCreatedAt,
       });
 
-      await queryClient.setQueryData(['read-ticket', { roomId }], updatedData);
+      await queryClient.setQueryData(
+        messageKeys.readTicket(roomId),
+        updatedData
+      );
     },
     onSuccess: () => {
       if (!signedInUser) {

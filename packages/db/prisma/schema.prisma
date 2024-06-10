@@ -97,6 +97,10 @@ enum GroupType {
   AllHolders
   Ticker
   Believer
+  BaseSalon
+  BlastSalon
+  EthSalon
+  FriendBagHolder
 }
 
 enum GroupState {

@@ -2,6 +2,7 @@ import { useQueries } from '@tanstack/react-query';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import db from '@/lib/firestore';
 import { userConverter, User } from '@cred/shared';
+import userKeys from '@/queryKeys/userKeys';
 
 const getUser = async (userId: string) => {
   const userDoc = doc(
@@ -16,7 +17,7 @@ const getUser = async (userId: string) => {
 const useUsers = (userIds: string[]) => {
   return useQueries({
     queries: userIds.map(id => ({
-      queryKey: ['user', { userId: id }],
+      queryKey: userKeys.user(id),
       queryFn: async () => {
         return await getUser(id);
       },

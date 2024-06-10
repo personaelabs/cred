@@ -113,11 +113,15 @@ impl From<IndexerError> for Error {
 pub enum GroupType {
     Static,
     CredddTeam,
+    BaseSalon,
+    BlastSalon,
+    EthSalon,
     EarlyHolder,
     Whale,
     AllHolders,
     Ticker,
     Believer,
+    FriendBagHolder
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]

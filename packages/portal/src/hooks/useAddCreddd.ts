@@ -13,6 +13,8 @@ import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useCallback, useState } from 'react';
 import axios from '@/lib/axios';
 import { constructProofSigMessage } from '@/lib/eip712';
+import userKeys from '@/queryKeys/userKeys';
+import credddKeys from '@/queryKeys/credddKeys';
 
 const submitProof = async (body: AddCredddRequestBody) => {
   await axios.post('/api/creddd', body);
@@ -144,13 +146,10 @@ const useAddCreddd = (proverAddress: Hex | null) => {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['user-creddd'],
+        queryKey: credddKeys.eligibleCreddd(proverAddress),
       });
       await queryClient.invalidateQueries({
-        queryKey: ['eligible-creddd', { address: proverAddress }],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['user', { userId: signedInUser?.id }],
+        queryKey: userKeys.user(signedInUser?.id),
       });
     },
   });

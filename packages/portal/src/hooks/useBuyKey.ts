@@ -13,6 +13,7 @@ import { useSendTransaction, useWallets } from '@privy-io/react-auth';
 import useRoom from './useRoom';
 import { useBalance } from 'wagmi';
 import { DialogType, useDialog } from '@/contexts/DialogContext';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const sendTransactionId = async ({
   roomId,
@@ -113,9 +114,13 @@ const useBuyKey = (roomId: string) => {
       }
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['buy-price', roomId] });
-      queryClient.invalidateQueries({ queryKey: ['sell-price', roomId] });
-      queryClient.invalidateQueries({ queryKey: ['all-rooms'] });
+      queryClient.invalidateQueries({
+        queryKey: roomKeys.roomKeyBuyPrice(roomId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: roomKeys.roomKeySellPrice(roomId),
+      });
+      queryClient.invalidateQueries({ queryKey: roomKeys.all });
     },
   });
 

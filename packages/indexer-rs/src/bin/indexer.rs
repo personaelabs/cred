@@ -11,6 +11,7 @@ use indexer_rs::processors::all_holders::AllHoldersIndexer;
 use indexer_rs::processors::believer::BelieverIndexer;
 use indexer_rs::processors::creddd_team::CredddTeamIndexer;
 use indexer_rs::processors::early_holders::EarlyHolderIndexer;
+use indexer_rs::processors::salon::SalonIndexer;
 use indexer_rs::processors::ticker::TickerIndexer;
 use indexer_rs::processors::whales::WhaleIndexer;
 use indexer_rs::processors::GroupIndexer;
@@ -132,7 +133,20 @@ async fn main() {
                 GroupType::Static => panic!("Static group type is deprecated"),
                 GroupType::Believer => {
                     Box::new(BelieverIndexer::new(group.clone(), resources.clone()))
+                },
+                GroupType::BaseSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
+                GroupType::BlastSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::EthSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::FriendBagHolder => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+               
             };
 
             // Initialize the tree sync engine for the group

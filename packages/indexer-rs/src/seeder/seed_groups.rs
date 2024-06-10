@@ -141,5 +141,34 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
+    // Add fixed groups
+    groups.push(Group::new(
+        "base salon".to_string(),
+        GroupType::BaseSalon,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "blast salon".to_string(),
+        GroupType::BlastSalon,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "$friend bag holder".to_string(),
+        GroupType::FriendBagHolder,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "eth salon".to_string(),
+        GroupType::EthSalon,
+        vec![],
+        0,
+    ));
+
     groups
 }

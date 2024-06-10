@@ -1,4 +1,5 @@
 import credddRpc from '@/lib/credddRpc';
+import credddKeys from '@/queryKeys/credddKeys';
 import { useQuery } from '@tanstack/react-query';
 
 const getCreddd = async (credddId: string) => {
@@ -8,7 +9,7 @@ const getCreddd = async (credddId: string) => {
 
 const useCreddd = (credddId: string) => {
   return useQuery({
-    queryKey: ['creddd', { credddId }],
+    queryKey: credddKeys.creddd(credddId),
     queryFn: () => getCreddd(credddId),
   });
 };

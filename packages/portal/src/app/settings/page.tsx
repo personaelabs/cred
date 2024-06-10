@@ -85,7 +85,7 @@ const Settings = () => {
         <div className="flex flex-col items-center mt-10 w-full gap-y-2">
           <SettingsMenuItem
             icon="Link2"
-            text="My creddd"
+            text="My rep"
             to="/settings/creddd"
             iconColor={theme.orange}
           ></SettingsMenuItem>

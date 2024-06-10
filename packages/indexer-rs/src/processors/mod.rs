@@ -12,6 +12,7 @@ pub mod creddd_team;
 pub mod early_holders;
 pub mod ticker;
 pub mod whales;
+pub mod salon;
 
 pub const SYNC_WINDOW_SECS: u64 = 300; // 5 minutes
 

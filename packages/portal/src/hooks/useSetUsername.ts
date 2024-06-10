@@ -2,6 +2,7 @@ import axios from '@/lib/axios';
 import { SetUsernameRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
+import userKeys from '@/queryKeys/userKeys';
 
 const setUsername = async ({
   userId,
@@ -30,12 +31,7 @@ const useSetUsername = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'user',
-          {
-            userId: signedInUser?.id,
-          },
-        ],
+        queryKey: userKeys.user(signedInUser?.id),
       });
     },
   });

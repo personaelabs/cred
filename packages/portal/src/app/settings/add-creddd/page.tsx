@@ -81,14 +81,14 @@ const AddCredddPage = () => {
 
   useEffect(() => {
     setOptions({
-      title: 'Add creddd',
+      title: 'Add rep',
       showBackButton: true,
     });
   }, [setOptions]);
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success(`creddd added`, {
+      toast.success(`rep added`, {
         duration: 60000,
         closeButton: true,
       });
@@ -118,14 +118,14 @@ const AddCredddPage = () => {
                   className="mr-2 w-4 h-4 animate-spin"
                   color={theme.orange}
                 ></Loader2>
-                <div>Searching eligible creddd...</div>
+                <div>Searching eligible rep...</div>
               </div>
             ) : (
               <></>
             )}
             {!isSearchingCreddd && eligibleCreddd?.length === 0 ? (
               <div className="flex flex-row items-center justify-center mt-3 opacity-60">
-                <div>No eligible creddd found</div>
+                <div>No eligible rep found</div>
               </div>
             ) : (
               <></>

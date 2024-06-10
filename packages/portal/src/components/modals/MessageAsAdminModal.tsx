@@ -33,15 +33,16 @@ const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
         <div>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              You are an admin is this room. You can view all messages in this
-              room.
+              You are a rep holder is this room. You can view all messages in
+              this room.
             </li>
             <li>
-              Messages from non-admin are only visible to admins by default.
+              Messages from non-rep-holders are only visible to rep holders by
+              default.
             </li>
             <li>
-              Once you reply to a message sent from a non-admin, it`ll become
-              visible to everyone in the room.
+              Once you reply to a message sent from a non-rep-holder, it will
+              become visible to everyone in the room.
             </li>
           </ul>
         </div>
@@ -54,7 +55,7 @@ const MessageAsAdminModal = (props: MessageAsAdminModalProps) => {
               onClose();
             }}
           >
-            Don`t show this again
+            Don&apos;t show this again
           </Button>
           <Button
             onClick={() => {
