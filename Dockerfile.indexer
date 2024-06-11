@@ -25,6 +25,10 @@ COPY --from=builder /usr/src/app/target/release/checkpoint /usr/local/bin/checkp
 COPY --from=builder /usr/src/app/target/release/delete_logs /usr/local/bin/delete_logs
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/seed_contracts.json seed_contracts.json
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_prices.json assets_with_prices.json
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/base_salon.csv base_salon.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/blast_salon.csv blast_salon.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/eth_salon.csv eth_salon.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/friend_bag_holder.csv friend_bag_holder.csv
 
 RUN apt-get update -y
 RUN apt-get install libcurl4 -y

@@ -171,7 +171,7 @@ const Rooms = () => {
 
   useEffect(() => {
     setOptions({
-      title: 'Chats',
+      title: 'My Portals',
       showBackButton: false,
       headerRight: null,
     });
@@ -190,10 +190,10 @@ const Rooms = () => {
   if (rooms.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-full bg-background">
-        <div className="text-xl opacity-60">No chats found</div>
+        <div className="text-xl opacity-60">No portals found</div>
         <Button className="mt-4" asChild>
           <Link href="/" className="no-underline">
-            Find portals
+            Browse portals
           </Link>
         </Button>
       </div>

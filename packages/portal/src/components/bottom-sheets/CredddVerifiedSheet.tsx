@@ -82,7 +82,7 @@ const CredddVerifiedSheet = (props: CredddVerifiedSheetProps) => {
             Creddd verified
           </SheetTitle>
           <SheetDescription className="text-center">
-            You can start chatting in the following room
+            You can start chatting in the following portal
           </SheetDescription>
         </SheetHeader>
         {joinableRoom ? (
