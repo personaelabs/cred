@@ -100,7 +100,7 @@ const AddCredddPage = () => {
       await addCreddd(creddd);
       setShowJoinableRoom({
         id: creddd.id,
-        displayName: creddd.displayName,
+        displayName: creddd.display_name,
       });
       reset();
     },
@@ -140,7 +140,7 @@ const AddCredddPage = () => {
                     className="flex flex-row items-center justify-center w-full border-b-2 py-3"
                   >
                     <div className="w-[50%] text-center">
-                      {creddd.displayName}
+                      {creddd.display_name}
                     </div>
                     <Button
                       disabled={alreadyAdded}

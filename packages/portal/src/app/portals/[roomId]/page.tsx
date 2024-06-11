@@ -106,7 +106,7 @@ const RoomInfo = () => {
         </div>
         <div className="mt-8">
           {credddHolders.length > 0 ? (
-            <div className="text-center text-gray-400">credddd holders</div>
+            <div className="text-center text-gray-400">rep holders</div>
           ) : (
             <></>
           )}
