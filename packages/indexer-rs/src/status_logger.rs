@@ -1,4 +1,4 @@
-use log::{error, info};
+use log::{debug, error, info};
 use std::sync::Arc;
 
 use crate::{group::get_all_groups, BlockNum, Error};
@@ -43,7 +43,7 @@ async fn log_group_block_heights(pg_client: Arc<tokio_postgres::Client>) -> Resu
                 group.id, block_num
             );
         } else {
-            error!("[STATUS] Group {} has no merkle tree", group.id);
+            debug!("[STATUS] Group {} has no merkle tree", group.id);
         }
     }
 
