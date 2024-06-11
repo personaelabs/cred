@@ -37,6 +37,7 @@ import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 import useIsUsernameSet from '@/hooks/useIsUsernameSet';
 import useInviteCodeSet from '@/hooks/useIsInviteCodeSet';
 import useMixpanel from '@/hooks/useMixpanel';
+import { mainnet } from 'viem/chains';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -178,8 +179,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <PrivyProvider
         appId="clw1tqoyj02yh110vokuu7yc5"
         config={{
-          defaultChain: getChain(),
-          supportedChains: [getChain()],
+          supportedChains: [getChain(), mainnet],
           appearance: {
             theme: 'dark',
             accentColor: theme.orange as `#${string}`,

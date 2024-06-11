@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 import { Hex, hexToBytes, toHex } from 'viem';
-import { EligibleCreddd, MerkleProof, MerkleTree } from '@/types';
-import { getAllMerkleTrees, getGroupLatestMerkleTree } from '@/lib/credddApi';
+import { EligibleCreddd, MerkleProof } from '@/types';
 import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
 import { fromHexString } from '@/lib/utils';
-import * as Sentry from '@sentry/nextjs';
 import credddKeys from '@/queryKeys/credddKeys';
 import useAllRooms from './useAllRooms';
+import rpcClient from '@/lib/credddRpc';
+import { GetLatestMerkleTreesReturnType } from '@cred/shared';
 
 /**
  * Get the Merkle pro of for an address. Returns null if the address is not in the tree.
@@ -72,7 +72,7 @@ const getEligibleCreddd = async ({
   merkleTrees,
 }: {
   address: Hex;
-  merkleTrees: MerkleTree[];
+  merkleTrees: GetLatestMerkleTreesReturnType;
 }) => {
   const circuitWeb = await import('circuit-web');
   circuitWeb.init_panic_hook();
@@ -81,45 +81,38 @@ const getEligibleCreddd = async ({
   const bloomFilterMatchedGroups = new Set<string>();
 
   for (const merkleTree of merkleTrees) {
-    if (
-      merkleTree.bloomFilter &&
-      merkleTree.bloomNumBits &&
-      merkleTree.bloomNumHashes &&
-      merkleTree.bloomSipKeys
-    ) {
-      const sipKeys = Buffer.concat([
-        Buffer.from(merkleTree.bloomSipKeys[0]),
-        Buffer.from(merkleTree.bloomSipKeys[1]),
-      ]);
+    const sipKeys = Buffer.concat([
+      Buffer.from(merkleTree.bloom_sip_keys[0]),
+      Buffer.from(merkleTree.bloom_sip_keys[1]),
+    ]);
 
-      const addressBytes = hexToBytes(address);
+    const addressBytes = hexToBytes(address);
 
-      // Check if the address is a member using the bloom filter
-      const isMember = circuitWeb.bloom_check(
-        // @ts-ignore
-        merkleTree.bloomFilter.data,
-        BigInt(merkleTree.bloomNumBits),
-        merkleTree.bloomNumHashes,
-        sipKeys,
-        addressBytes
-      );
+    // Check if the address is a member using the bloom filter
+    const isMember = circuitWeb.bloom_check(
+      merkleTree.bloom_filter,
+      BigInt(merkleTree.bloom_num_bits),
+      merkleTree.bloom_num_hashes,
+      sipKeys,
+      addressBytes
+    );
 
-      if (isMember) {
-        // Add the address to the list of matched addresses for the tree
-        bloomFilterMatchedGroups.add(merkleTree.Group.id);
-      }
-    } else {
-      Sentry.captureException(
-        new Error(`Bloom filter not available for tree ${merkleTree.id}`)
-      );
-      console.error('Bloom filter not available');
+    if (isMember) {
+      // Add the address to the list of matched addresses for the tree
+      bloomFilterMatchedGroups.add(merkleTree.group.id);
     }
   }
 
   const eligibleGroups: EligibleCreddd[] = [];
 
   for (const groupId of Array.from(bloomFilterMatchedGroups)) {
-    const groupLatestMerkleTree = await getGroupLatestMerkleTree(groupId);
+    const result = await rpcClient.getGroupLatestMerkleTree(groupId);
+    console.log({ result });
+
+    const groupLatestMerkleTree = MerkleTreeProto.deserializeBinary(
+      new Uint8Array(result)
+    );
+
     // Check for false positives
     const merkleProof = getMerkleProof(groupLatestMerkleTree, address);
 
@@ -129,7 +122,7 @@ const getEligibleCreddd = async ({
       // It's now confirmed that the address is in the tree
 
       // Get the `Group` object
-      const group = merkleTrees.find(tree => tree.Group.id === groupId)!.Group;
+      const group = merkleTrees.find(tree => tree.group.id === groupId)!.group;
 
       eligibleGroups.push({
         ...group,
@@ -146,7 +139,7 @@ const useAllMerkleTrees = () => {
   return useQuery({
     queryKey: credddKeys.merkleTrees,
     queryFn: async () => {
-      return getAllMerkleTrees();
+      return rpcClient.getLatestMerkleTrees();
     },
   });
 };

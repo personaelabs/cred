@@ -1,7 +1,11 @@
 import { GetLogsReturnType, Hex } from 'viem';
 import { User as PrivyUser } from '@privy-io/react-auth';
 import { TRANSFER_SINGLE_EVENT } from './lib/contract';
-import { MessageVisibility, User } from '@cred/shared';
+import {
+  MerkleTreeWithBloomFilter,
+  MessageVisibility,
+  User,
+} from '@cred/shared';
 
 export type SignedInUser = PrivyUser;
 
@@ -26,27 +30,13 @@ export interface MessageWithUserData {
   reactions: Record<string, string>;
 }
 
-export interface MerkleTree {
-  id: number;
-  bloomFilter: Buffer | null;
-  treeProtoBuf?: Buffer;
-  bloomSipKeys?: Buffer[];
-  bloomNumHashes?: number;
-  bloomNumBits?: number;
-  Group: {
-    id: string;
-    displayName: string;
-    score: number;
-  };
-}
-
 export interface MerkleProof {
   root: Uint8Array;
   path: Hex[];
   pathIndices: number[];
 }
 
-export type EligibleCreddd = MerkleTree['Group'] & {
+export type EligibleCreddd = MerkleTreeWithBloomFilter['group'] & {
   address: Hex;
   merkleProof: MerkleProof;
 };

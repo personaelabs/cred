@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import {
   GetCredddReturnType,
+  GetLatestMerkleTreesReturnType,
   GetGroupMerkleTreeReturnType,
   Group,
 } from './types';
@@ -79,5 +80,16 @@ class JsonRpcClient {
 
   public async getGroups(): Promise<Group[]> {
     return await this.call<Group[]>('getGroups', []);
+  }
+
+  public async getLatestMerkleTrees(): Promise<GetLatestMerkleTreesReturnType> {
+    return await this.call<GetLatestMerkleTreesReturnType>(
+      'getLatestMerkleTrees',
+      []
+    );
+  }
+
+  public async getGroupLatestMerkleTree(groupId: string) {
+    return await this.call<ArrayBuffer>('getGroupLatestMerkleTree', [groupId]);
   }
 }
