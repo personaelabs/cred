@@ -32,16 +32,22 @@ impl GroupIndexer for SalonIndexer {
     }
 
     async fn get_members(&self, _block_number: BlockNum) -> Result<HashSet<Address>, Error> {
-        let cargo_manifest_dir = env!("CARGO_MANIFEST_DIR");
         let file_name = match self.group.group_type {
             GroupType::BaseSalon => "base_salon.csv",
-            GroupType::BlastSalon   => "blast_salon.csv",
-            GroupType::EthSalon   => "eth_salon.csv",
-            GroupType::FriendBagHolder   => "friend_bag_holder.csv",
+            GroupType::BlastSalon => "blast_salon.csv",
+            GroupType::EthSalon => "eth_salon.csv",
+            GroupType::FriendBagHolder => "friend_bag_holder.csv",
             _ => panic!("Invalid group type"),
         };
 
-        let file_path = format!("{}/src/fixed_groups/{}", cargo_manifest_dir, file_name);
+        let cargo_manifest_dir = std::env::var("CARGO_MANIFEST_DIR");
+        let file_path = if cargo_manifest_dir.is_err() {
+            format!("./{}", file_name)
+        } else {
+            format!("{}/src/fixed_groups/{}", cargo_manifest_dir.unwrap(), file_name)
+        };
+
+        println!("Reading members from file: {}", file_path);
 
         let addresses = get_members_from_csv(&file_path);
 
