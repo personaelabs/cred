@@ -74,7 +74,7 @@ const sendMessage = async ({
     createdAt: FieldValue.serverTimestamp(),
     readBy: [],
     replyTo: null,
-    mentions: ['did:privy:clw1w6dar0fdfmhd5ae1rfna6'],
+    mentions: [],
     images: [],
     visibility: MessageVisibility.PUBLIC,
     reactions: {},
