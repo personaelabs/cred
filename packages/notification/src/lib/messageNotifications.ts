@@ -108,7 +108,7 @@ const sendMentionNotification = async ({
       token: token,
       webpush: {
         fcmOptions: {
-          link: `/rooms/${room.id}`,
+          link: `/chats/${room.id}`,
         },
       },
     });
@@ -140,7 +140,7 @@ const sendReplyNotification = async ({
     token: token,
     webpush: {
       fcmOptions: {
-        link: `/rooms/${room.id}`,
+        link: `/chats/${room.id}`,
       },
     },
   });
@@ -168,7 +168,7 @@ const sendNewMessageNotification = async ({
     token: token,
     webpush: {
       fcmOptions: {
-        link: `/rooms/${room.id}`,
+        link: `/chats/${room.id}`,
       },
     },
   });
