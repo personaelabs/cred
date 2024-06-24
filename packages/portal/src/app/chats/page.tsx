@@ -62,6 +62,7 @@ type RoomItemProps = {
   id: string;
   name: string;
   imageUrl: string | null;
+  pinnedMessage: string | null;
   isMuted: boolean;
   showMuteToggle: boolean;
   isPurchasedRoom: boolean;
@@ -111,6 +112,7 @@ const RoomItem = (props: RoomItemProps) => {
             >
               {name}
             </div>
+            <div className="opacity-80">{props.pinnedMessage}</div>
             <div className="opacity-60 mt-1">
               {roomLatestMessage
                 ? `${cutoffMessage(roomLatestMessage.body, 75)}`
@@ -209,6 +211,8 @@ const Rooms = () => {
       !room.writerIds.includes(signedInUser.id)
   );
 
+  console.log(writableRooms, purchasedRooms);
+
   return (
     <Scrollable>
       <div
@@ -220,6 +224,7 @@ const Rooms = () => {
             id={room.id}
             key={room.id}
             name={room.name}
+            pinnedMessage={room.pinnedMessage}
             imageUrl={room.imageUrl}
             showMuteToggle={isNotificationsEnabled !== null}
             isMuted={singedInUserData.config.notification.mutedRoomIds.includes(

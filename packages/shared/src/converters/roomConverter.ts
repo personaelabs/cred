@@ -1,6 +1,6 @@
 import { DocumentData } from 'firebase/firestore';
 
-import { Room } from '../types';
+import { FirestoreTimestamp, Room } from '../types';
 
 export const roomConverter = {
   toFirestore: (room: Room) => {
@@ -12,10 +12,16 @@ export const roomConverter = {
       imageUrl: room.imageUrl,
       isFeatured: room.isFeatured,
       isHidden: room.isHidden,
+      pinnedMessage: room.pinnedMessage,
+      isOpenUntil: room.isOpenUntil,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
     const data = snapshot.data();
+
+    const isOpenUntil = data.isOpenUntil
+      ? new Date((data.isOpenUntil as FirestoreTimestamp).seconds * 1000)
+      : null;
 
     const room: Room = {
       id: snapshot.id,
@@ -26,6 +32,8 @@ export const roomConverter = {
       imageUrl: data.imageUrl,
       isFeatured: data.isFeatured || false,
       isHidden: data.isHidden || false,
+      pinnedMessage: data.pinnedMessage,
+      isOpenUntil,
     };
 
     return room;

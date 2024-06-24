@@ -76,7 +76,7 @@ type EligibleRoomItemProps = {
 const EligibleRoomItem = memo(function EligibleRoom(
   props: EligibleRoomItemProps
 ) {
-  const { name, id } = props.room;
+  const { name, id, pinnedMessage } = props.room;
   const { isPurchased } = props;
   const { mutateAsync: joinRoom, isPending: isJoining, error } = useJoinRoom();
   const router = useRouter();
@@ -103,6 +103,7 @@ const EligibleRoomItem = memo(function EligibleRoom(
             >
               {name}
             </div>
+            <div className="opacity-60">{pinnedMessage || ''}</div>
           </div>
           <div className="text-center w-[30%]">
             <Button onClick={onJoinClick} disabled={isJoining} variant="link">
@@ -147,6 +148,7 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
           >
             <div className="flex flex-col justify-start w-[70%]">
               <div className="text-lg text-wrap w-full">{name}</div>
+              <div className="opacity-60">{props.room.pinnedMessage || ''}</div>
               <div className="mt-3 w-full">
                 <RoomMembersList room={props.room}></RoomMembersList>
               </div>
@@ -182,17 +184,19 @@ const Home = () => {
   }, [setOptions]);
 
   const { data: allRooms } = useAllRooms();
-  const renderRooms = allRooms
-    .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
-    .slice(0, renderPages);
 
   const buyableRooms = signedInUser
-    ? renderRooms.filter(
-        room =>
-          !room.joinedUserIds.includes(signedInUser.id) &&
-          !room.writerIds.includes(signedInUser.id) &&
-          !room.readerIds.includes(signedInUser.id)
-      )
+    ? allRooms
+        .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
+        .filter(
+          room =>
+            room.isOpenUntil &&
+            new Date(room.isOpenUntil).getTime() > Date.now() &&
+            !room.joinedUserIds.includes(signedInUser.id) &&
+            !room.writerIds.includes(signedInUser.id) &&
+            !room.readerIds.includes(signedInUser.id)
+        )
+        .slice(0, renderPages)
     : [];
 
   const joinableRooms = signedInUser
@@ -250,7 +254,9 @@ const Home = () => {
           Buy access to portals
         </div>
       ) : (
-        <></>
+        <div className="mt-[32px] px-5 text-center opacity-60">
+          No portals open
+        </div>
       )}
       {buyableRooms.map(room => (
         <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
