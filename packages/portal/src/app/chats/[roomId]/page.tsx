@@ -20,6 +20,7 @@ import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
 import MessageAsAdminModal from '@/components/modals/MessageAsAdminModal';
 import MessageAsBuyerModal from '@/components/modals/MessageAsBuyerModal';
 import useSendMessageReaction from '@/hooks/useSendMessageReaction';
+import PinnedMessage from '@/components/PinnedMessage';
 
 const Room = () => {
   const params = useParams<{ roomId: string }>();
@@ -140,6 +141,7 @@ const Room = () => {
   return (
     <div className="h-full">
       <div className="bg-background h-full flex flex-col justify-end">
+        <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
         {isFetchingNextPage ? (
           <div className="space-y-2 w-full flex flex-col items-center mt-2">
             <Skeleton className="h-[30px] px-2 w-[96%]" />

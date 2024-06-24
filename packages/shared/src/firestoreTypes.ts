@@ -82,6 +82,8 @@ export interface Room {
   imageUrl: string | null;
   isFeatured: boolean;
   isHidden: boolean;
+  pinnedMessage: string | null;
+  isOpenUntil: Date | null;
 }
 
 export interface RoomReadTicket {

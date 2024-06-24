@@ -27,7 +27,7 @@ const getRoom = async (roomId: string) => {
   return roomDoc.data();
 };
 
-const getMessage = async ({
+const _getMessage = async ({
   roomId,
   messageId,
 }: {
@@ -108,7 +108,7 @@ const sendMentionNotification = async ({
       token: token,
       webpush: {
         fcmOptions: {
-          link: `/rooms/${room.id}`,
+          link: `/chats/${room.id}`,
         },
       },
     });
@@ -140,12 +140,40 @@ const sendReplyNotification = async ({
     token: token,
     webpush: {
       fcmOptions: {
-        link: `/rooms/${room.id}`,
+        link: `/chats/${room.id}`,
       },
     },
   });
 
   logger.info(`Reply notification sent`, {
+    messageId,
+    roomId: room.id,
+  });
+};
+
+const sendNewMessageNotification = async ({
+  body,
+  token,
+  room,
+}: {
+  body: string;
+  token: string;
+  room: Room;
+}) => {
+  const messageId = await messaging.send({
+    notification: {
+      title: `New message in ${room.name}`,
+      body,
+    },
+    token: token,
+    webpush: {
+      fcmOptions: {
+        link: `/chats/${room.id}`,
+      },
+    },
+  });
+
+  logger.info(`New message notification sent`, {
     messageId,
     roomId: room.id,
   });
@@ -225,6 +253,12 @@ const notifyUserAboutMessage = async ({
             token: token.token,
             room,
           });
+        } else if (messageType === MessageNotificationType.NEW_MESSAGE) {
+          await sendNewMessageNotification({
+            body: message.body,
+            token: token.token,
+            room,
+          });
         } else {
           logger.error(`Unknown message type ${messageType}`);
         }
@@ -269,6 +303,22 @@ export const sendMessageNotifications = async () => {
             continue;
           }
 
+          // Notify all users in the room about the new message
+          for (const userId of room.joinedUserIds) {
+            if (userId === message.userId) {
+              logger.debug(`Skipping self message for ${userId}`);
+              continue;
+            }
+
+            await notifyUserAboutMessage({
+              userId,
+              messageType: MessageNotificationType.NEW_MESSAGE,
+              room,
+              message,
+            });
+          }
+
+          /*
           // Notify users who were mentioned in the message
           for (const userId of message.mentions) {
             if (userId === message.userId) {
@@ -302,6 +352,7 @@ export const sendMessageNotifications = async () => {
               });
             }
           }
+            */
         }
       }
     });
