@@ -62,7 +62,8 @@
     "uuid": "^9.0.1",
     "vaul": "^0.8.0",
     "viem": "2.x",
-    "wagmi": "^2.9.2"
+    "wagmi": "^2.9.2",
+    "nanoid": "^5.0.7"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.3",

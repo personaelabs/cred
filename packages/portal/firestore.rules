@@ -147,5 +147,13 @@ service cloud.firestore {
       isOnlyUpdatingFieldsInData(request.resource.data["config"]["notification"], resource.data["config"]["notification"], ["mutedRoomIds"]) &&
       request.resource.data["config"]["notification"]["mutedRoomIds"] is list;
     }
+
+    match /inviteCodes/{inviteCode} {
+      allow read: if 
+      request.auth.uid != null && 
+      resource.data.inviterId == request.auth.uid;
+
+      allow write: if false;
+    }
   }
 }

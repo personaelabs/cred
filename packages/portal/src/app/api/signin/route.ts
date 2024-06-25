@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
-import { User, userConverter } from '@cred/shared';
+import { User, inviteCodeConverter, userConverter } from '@cred/shared';
 import logger from '@/lib/backend/logger';
 import { User as PrivyUser } from '@privy-io/server-auth';
 import { addWriterToRoom, app } from '@cred/firebase-admin';
@@ -10,6 +10,7 @@ import * as neynar from '@/lib/backend/neynar';
 import { addUserConnectedAddress } from '@/lib/backend/connectedAddress';
 import credddRpcClient from '@/lib/credddRpc';
 import { SignInResponse } from '@/types';
+import { nanoid } from 'nanoid';
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -55,6 +56,29 @@ const initUser = async (user: PrivyUser) => {
   await db.collection('users').doc(user.id).set(userData);
 };
 
+const NUM_INVITE_CODES_PER_USER = 5;
+/**
+ *  Assign invite codes that the user can use to invite others.
+ */
+const assignInviteCodesToUser = async (userId: string) => {
+  const batch = db.batch();
+
+  for (let i = 0; i < NUM_INVITE_CODES_PER_USER; i++) {
+    const code = nanoid(21);
+
+    batch.set(
+      db.collection('inviteCodes').withConverter(inviteCodeConverter).doc(code),
+      {
+        code,
+        isUsed: false,
+        inviterId: userId,
+      }
+    );
+  }
+
+  await batch.commit();
+};
+
 /**
  * Get the custody address and verified addresses for an Farcaster user.
  */
@@ -94,6 +118,7 @@ export async function POST(req: NextRequest) {
 
   if (!userExists.exists) {
     await initUser(user);
+    await assignInviteCodesToUser(user.id);
   }
 
   // If the user logged in with Farcaster, pull their connected addresses

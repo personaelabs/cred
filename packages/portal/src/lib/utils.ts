@@ -18,6 +18,14 @@ import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { MobileOS, ModalType } from '@/types';
 import { DialogType } from '@/contexts/DialogContext';
 
+/**
+ * Returns the number of hours until the portal closes.
+ */
+export const getPortalClosesIn = (openUntil: Date): number => {
+  const now = new Date();
+  return Math.max(openUntil.getHours() - now.getHours(), 0);
+};
+
 export const sleep = (ms: number): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };

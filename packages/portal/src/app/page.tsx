@@ -16,6 +16,7 @@ import { formatEther } from 'viem';
 import { Room, User } from '@cred/shared';
 import useUsers from '@/hooks/useUsers';
 import AvatarWithFallback from '@/components/AvatarWithFallback';
+import { getPortalClosesIn } from '@/lib/utils';
 
 interface RoomMemberListItemProps {
   user: User;
@@ -148,7 +149,16 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
           >
             <div className="flex flex-col justify-start w-[70%]">
               <div className="text-lg text-wrap w-full">{name}</div>
-              <div className="opacity-60">{props.room.pinnedMessage || ''}</div>
+              <div className="opacity-60 flex flex-row justify-between">
+                <div>{props.room.pinnedMessage || ''}</div>
+                <div>
+                  {props.room.isOpenUntil ? (
+                    `closes in ${getPortalClosesIn(props.room.isOpenUntil)}h`
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
               <div className="mt-3 w-full">
                 <RoomMembersList room={props.room}></RoomMembersList>
               </div>
