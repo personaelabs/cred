@@ -7,6 +7,7 @@ export const inviteCodeConverter = {
     return {
       code: inviteCode.code,
       isUsed: inviteCode.isUsed,
+      inviterId: inviteCode.inviterId,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
@@ -15,6 +16,7 @@ export const inviteCodeConverter = {
     const room: InviteCode = {
       code: data.code,
       isUsed: data.isUsed,
+      inviterId: data.inviterId || '',
     };
 
     return room;

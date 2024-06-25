@@ -30,6 +30,7 @@ export interface UserCreddd {
 
 export interface InviteCode {
   code: string;
+  inviterId: string; // The user who can use this invite code to invite others
   isUsed: boolean;
 }
 
