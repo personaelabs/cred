@@ -1,5 +1,5 @@
 import { app } from '@cred/firebase-admin';
-import { userConverter } from '@cred/shared';
+import { inviteCodeConverter, userConverter } from '@cred/shared';
 import { getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
@@ -21,6 +21,7 @@ export const isValidInviteCode = async (inviteCode: string) => {
 
   const inviteCodeDoc = await db
     .collection('inviteCodes')
+    .withConverter(inviteCodeConverter)
     .where('code', '==', inviteCode)
     .where('isUsed', '==', false)
     .get();

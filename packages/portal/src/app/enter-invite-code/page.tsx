@@ -2,7 +2,7 @@
 import { Input } from '@/components/ui/input';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useDebounce from '@/hooks/useDebounce';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useIsInviteCodeValid from '@/hooks/useIsInviteCodeValid';
 import { Check, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,7 @@ import useSubmitInviteCode from '@/hooks/useSubmitInviteCode';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
 import useIsInviteCodeSet from '@/hooks/useIsInviteCodeSet';
+import { Button } from '@/components/ui/button';
 
 interface CodeValidityIndicatorProps {
   isInviteCodeValid: boolean | undefined;
@@ -79,18 +80,16 @@ const EnterInviteCodePage = () => {
     }
   }, [debouncedInviteCode, checkInviteCode]);
 
-  useEffect(() => {
-    (async () => {
-      if (isInviteCodeValid === true && user) {
-        await submitInviteCode(inviteCode);
+  const onNextClick = useCallback(async () => {
+    if (isInviteCodeValid === true && user) {
+      await submitInviteCode(inviteCode);
 
-        if (user.username === '') {
-          router.push('/setup-username');
-        } else {
-          router.push('/enable-notifications');
-        }
+      if (user.username === '') {
+        router.push('/setup-username');
+      } else {
+        router.push('/enable-notifications');
       }
-    })();
+    }
   }, [inviteCode, isInviteCodeValid, router, submitInviteCode, user]);
 
   return (
@@ -102,6 +101,7 @@ const EnterInviteCodePage = () => {
           className="border-gray-600"
           placeholder="enter invite code"
         ></Input>
+
         <div className="mt-4 flex flex-row items-start w-full">
           <CodeValidityIndicator
             isInviteCodeValid={isInviteCodeValid}
@@ -117,6 +117,15 @@ const EnterInviteCodePage = () => {
           ) : (
             <></>
           )}
+        </div>
+        <div className="w-full text-right">
+          <Button
+            onClick={onNextClick}
+            disabled={!isInviteCodeValid || isSubmitting}
+            className="mt-4"
+          >
+            Next
+          </Button>
         </div>
       </div>
     </div>
