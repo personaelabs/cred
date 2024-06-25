@@ -31,6 +31,10 @@ const useSubmitInviteCode = () => {
 
   return useMutation({
     mutationFn: async (inviteCode: string) => {
+      if (!signedInUser) {
+        throw new Error('User is not signed in');
+      }
+
       const accessToken = await getAccessToken();
 
       if (!accessToken) {
@@ -41,10 +45,9 @@ const useSubmitInviteCode = () => {
         inviteCode,
         accessToken,
       });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: userKeys.user(signedInUser?.id),
+
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.user(signedInUser.id),
       });
     },
   });
