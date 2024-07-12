@@ -143,6 +143,12 @@ async fn main() {
                 GroupType::EthSalon => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
+                GroupType::ArbSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::OpSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
                 GroupType::FriendBagHolder => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }

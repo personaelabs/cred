@@ -116,6 +116,8 @@ pub enum GroupType {
     BaseSalon,
     BlastSalon,
     EthSalon,
+    ArbSalon,
+    OpSalon,
     EarlyHolder,
     Whale,
     AllHolders,

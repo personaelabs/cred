@@ -170,5 +170,19 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
+    groups.push(Group::new(
+        "arbitrum salon".to_string(),
+        GroupType::ArbSalon,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "optimism salon".to_string(),
+        GroupType::ArbSalon,
+        vec![],
+        0,
+    ));
+
     groups
 }
