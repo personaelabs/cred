@@ -28,6 +28,8 @@ COPY --from=builder /usr/src/app/packages/indexer-rs/src/seeder/assets_with_pric
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/base_salon.csv base_salon.csv
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/blast_salon.csv blast_salon.csv
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/eth_salon.csv eth_salon.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/arb_salon.csv arb_salon.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/op_salon.csv op_salon.csv
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/friend_bag_holder.csv friend_bag_holder.csv
 
 RUN apt-get update -y
