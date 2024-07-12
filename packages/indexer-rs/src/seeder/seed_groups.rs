@@ -179,7 +179,7 @@ pub fn get_seed_groups() -> Vec<Group> {
 
     groups.push(Group::new(
         "optimism salon".to_string(),
-        GroupType::ArbSalon,
+        GroupType::OpSalon,
         vec![],
         0,
     ));
