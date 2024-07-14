@@ -33,7 +33,7 @@ const InstallPwaPage = () => {
   useEffect(() => {
     setOptions({
       title: 'Install app',
-      showBackButton: false,
+      showBackButton: true,
       headerRight: <></>,
     });
   }, [setOptions]);

@@ -69,7 +69,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   useMixpanel();
 
   const hideFooter =
-    ['/signin', '/install-pwa'].includes(pathname) ||
+    ['/signin', '/install-pwa', '/about'].includes(pathname) ||
     pathname.startsWith('/chats/') ||
     isModalOpen;
 
@@ -99,8 +99,8 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     (async () => {
-      if (isPwa === false && isMobile === true) {
-        router.push('/install-pwa');
+      if (isPwa === false && isMobile === true && pathname !== '/install-pwa') {
+        router.push('/about');
       } else if (isAuthenticated === false) {
         if (pathname !== '/signin') {
           router.replace('/signin');
