@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 'use client';
 import { Input } from '@/components/ui/input';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
@@ -43,6 +45,14 @@ const CodeValidityIndicator = (props: CodeValidityIndicatorProps) => {
 };
 
 const EnterInviteCodePage = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/enable-notifications');
+  }, [router]);
+
+  return <></>;
+  /*
   const { setOptions } = useHeaderOptions();
   const { data: signedInUser } = useSignedInUser();
   const router = useRouter();
@@ -130,6 +140,7 @@ const EnterInviteCodePage = () => {
       </div>
     </div>
   );
+  */
 };
 
 export default EnterInviteCodePage;
