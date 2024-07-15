@@ -101,7 +101,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       if (isPwa === false && isMobile === true && pathname !== '/install-pwa') {
         router.push('/about');
-      } else if (isAuthenticated === false) {
+      } else if (isAuthenticated === false && pathname !== '/install-pwa') {
         if (pathname !== '/signin') {
           router.replace('/signin');
         } else {
