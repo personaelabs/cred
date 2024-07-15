@@ -3,6 +3,19 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')();
 
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'none',
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
