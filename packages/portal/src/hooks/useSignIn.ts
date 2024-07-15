@@ -25,7 +25,7 @@ const useSignIn = () => {
 
       const user = signInResponse.user;
       const isInviteCodeSet = user ? user.inviteCode !== '' : false;
-      const isUsernameSet = user ? !user.username : false;
+      const isUsernameSet = user ? user.username !== '' : false;
 
       if (!isInviteCodeSet) {
         router.push('/enter-invite-code');
