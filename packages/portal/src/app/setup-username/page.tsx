@@ -131,7 +131,7 @@ const SetupUsernamePage = () => {
     return <></>;
   }
 
-  const canGoNext = usernameAvailable && isValidUsername(username);
+  const canGoNext = usernameAvailable && username && isValidUsername(username);
 
   return (
     <div className="w-full h-full flex-col">
