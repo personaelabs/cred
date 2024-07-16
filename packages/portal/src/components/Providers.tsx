@@ -174,10 +174,16 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+      throw new Error('NEXT_PUBLIC_PRIVY_APP_ID is not set');
+    }
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <PrivyProvider
-        appId="clw1tqoyj02yh110vokuu7yc5"
+        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
         config={{
           supportedChains: [getChain(), mainnet],
           appearance: {
