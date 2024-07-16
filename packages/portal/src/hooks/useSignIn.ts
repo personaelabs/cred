@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authSignedInUser } from '@/lib/auth';
 import { useLogin } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ const useSignIn = () => {
   const router = useRouter();
   const { getAccessToken, logout } = usePrivy();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const queryClient = useQueryClient();
 
   const { login } = useLogin({
     onComplete: async () => {
@@ -23,13 +24,14 @@ const useSignIn = () => {
         accessToken,
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ['signed-in-user'],
+      });
+
       const user = signInResponse.user;
-      const isInviteCodeSet = user ? user.inviteCode !== '' : false;
       const isUsernameSet = user ? user.username !== '' : false;
 
-      if (!isInviteCodeSet) {
-        router.push('/enter-invite-code');
-      } else if (!isUsernameSet) {
+      if (!isUsernameSet) {
         router.push('/setup-username');
       } else {
         router.push('/enable-notifications');
