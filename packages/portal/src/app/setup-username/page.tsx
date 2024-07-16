@@ -63,7 +63,7 @@ const UsernameAvailability = (props: UsernameAvailabilityProps) => {
 
 const SetupUsernamePage = () => {
   const { data: signedInUser } = useSignedInUser();
-  const [username, setUsername] = useState<null | string>(null);
+  const [username, setUsername] = useState<null | string | undefined>(null);
   const { setOptions } = useHeaderOptions();
   const { debouncedValue: debouncedUsername, isPending } = useDebounce(
     username,
@@ -145,7 +145,7 @@ const SetupUsernamePage = () => {
           ></Input>
           <div className="mt-3 h-[32px] ml-1 flex flex-col justify-start">
             <UsernameAvailability
-              username={username}
+              username={username || ''}
               isAvailable={usernameAvailable}
               isPending={isPending}
             ></UsernameAvailability>
