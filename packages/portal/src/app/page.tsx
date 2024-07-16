@@ -153,7 +153,7 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
                 <div>{props.room.pinnedMessage || ''}</div>
                 <div>
                   {props.room.isOpenUntil ? (
-                    `closes in ${getPortalClosesIn(props.room.isOpenUntil)}h`
+                    `closes in ${getPortalClosesIn(new Date(props.room.isOpenUntil))}h`
                   ) : (
                     <></>
                   )}
