@@ -22,6 +22,17 @@ const useIsAuthenticated = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
+    (async () => {
+      const auth = getAuth();
+      await auth.authStateReady();
+
+      if (!auth.currentUser) {
+        setIsAuthenticated(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     if (!isPrivyReady) {
       console.log('Privy not ready');
       return;
