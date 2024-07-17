@@ -133,7 +133,7 @@ async fn main() {
                 GroupType::Static => panic!("Static group type is deprecated"),
                 GroupType::Believer => {
                     Box::new(BelieverIndexer::new(group.clone(), resources.clone()))
-                },
+                }
                 GroupType::BaseSalon => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
@@ -143,10 +143,13 @@ async fn main() {
                 GroupType::EthSalon => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
+                GroupType::ArbSalon => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::OpSalon => Box::new(SalonIndexer::new(group.clone(), resources.clone())),
                 GroupType::FriendBagHolder => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
-               
             };
 
             // Initialize the tree sync engine for the group
@@ -171,7 +174,7 @@ async fn main() {
     let intrinsic_creddd_sync_engine =
         IntrinsicCredddSyncEngine::new(fc_replica_db, pg_client.clone());
 
-    let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
+        let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
     let _pg_client = pg_client.clone();
     let sever_thread = tokio::spawn(async move {

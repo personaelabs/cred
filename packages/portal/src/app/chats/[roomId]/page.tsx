@@ -209,15 +209,17 @@ const Room = () => {
             </InfiniteScroll>
           )}
         </div>
-        <ChatMessageInput
-          inputRef={inputRef}
-          roomId={params.roomId}
-          replyToText={replyTo ? replyTo.text : undefined}
-          onSend={onSendClick}
-          onCancelReply={() => {
-            setReplyTo(null);
-          }}
-        ></ChatMessageInput>
+        <div className="mb-[6px]">
+          <ChatMessageInput
+            inputRef={inputRef}
+            roomId={params.roomId}
+            replyToText={replyTo ? replyTo.text : undefined}
+            onSend={onSendClick}
+            onCancelReply={() => {
+              setReplyTo(null);
+            }}
+          ></ChatMessageInput>
+        </div>
       </div>
       <MessageAsAdminModal
         isOpen={isMessageAsAdminModalOpen}

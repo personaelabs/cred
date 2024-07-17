@@ -17,7 +17,7 @@ const PREVIEW_GROUP_IDS: [&str; 13] = [
     "0f52c884729bb73f81eafc295e9c8fd492475e28e3cbedba5eed4932049caa70", // base salon
     "b796c128590828f60d84a50abefea8728e3124096614830b371407ab91c86132", // blast salon
     "6c032e7d80cfcc373749ca12f4c28a664193cdf5a60f76383ebbfa788ab93c68", // $friend bag holder
-    "3c674ad1bf73d3950d1734f4cdc37cd69aec58e9b47c2f19e3784f7e957545a6" // eth salon
+    "3c674ad1bf73d3950d1734f4cdc37cd69aec58e9b47c2f19e3784f7e957545a6", // eth salon
 ];
 
 #[derive(Debug, Clone)]
@@ -101,7 +101,23 @@ pub async fn get_all_groups(pg_client: &tokio_postgres::Client) -> Result<Vec<Gr
     // Get all groups from the storage
     let result = pg_client
         .query(
-            r#"SELECT "id", "displayName", "typeId", "contractInputs", "score", "state" FROM "Group" where "contractInputs" is not null AND "state" = 'Recordable' "#,
+            r#"
+            SELECT
+            "id",
+            "displayName",
+            "typeId",
+            "contractInputs",
+            "score",
+            "state"
+        FROM
+            "Group"
+        WHERE
+            "contractInputs" IS NOT NULL
+            AND "state" = 'Recordable'
+            AND "typeId" != 'EarlyHolder'
+            AND "typeId" != 'Whale'
+            and "typeId" != 'AllHolders'
+            "#,
             &[],
         )
         .await?;

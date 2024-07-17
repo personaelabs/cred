@@ -15,7 +15,13 @@ const upsertRoom = async ({
 }) => {
   const roomData: Omit<
     Room,
-    'joinedUserIds' | 'readerIds' | 'writerIds' | 'isFeatured' | 'isHidden'
+    | 'joinedUserIds'
+    | 'readerIds'
+    | 'writerIds'
+    | 'isFeatured'
+    | 'isHidden'
+    | 'pinnedMessage'
+    | 'isOpenUntil'
   > = {
     id: groupId,
     name,
@@ -40,6 +46,8 @@ const upsertRoom = async ({
       readerIds: [],
       isFeatured: false,
       isHidden: true,
+      pinnedMessage: null,
+      isOpenUntil: null,
     };
     await groupDoc.set(newRoomData);
   }

@@ -58,6 +58,9 @@ services:
       - key: NEXT_PUBLIC_VAPID_KEY
         value: BHaVlakB8SbeMEprNB2e6FQtlPMFjyWEhMnBH8dKn-q2epYPi--NNCWM2EZmsjaXUQ0FbKpPuppmC-Od6xL0M88
         previewValue: BKF9U_p1O5RChiFe30w4bq-IcVTh-i0LcXHSpBUsELHuzfxsQlqhlqL9QfzjuavM_k1aWksZRbEuWQHkTid6J70
+      - key: NEXT_PUBLIC_PRIVY_APP_ID
+        value: clw1tqoyj02yh110vokuu7yc5
+        previewValue: clyo1taco03wrv74xdboukyxi
   - type: web
     name: cred-indexer
     plan: pro max

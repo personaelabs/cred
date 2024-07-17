@@ -22,6 +22,7 @@ import { DialogType } from '@/contexts/DialogContext';
  * Returns the number of hours until the portal closes.
  */
 export const getPortalClosesIn = (openUntil: Date): number => {
+  console.log('openUntil', openUntil);
   const now = new Date();
   return Math.max(openUntil.getHours() - now.getHours(), 0);
 };
@@ -160,6 +161,8 @@ export const getRoomTokenId = (roomId: string) => {
       return BigInt(1);
     case 'test-notification':
       return BigInt(2);
+    case 'ethcc-2024':
+      return BigInt(3);
     default:
       return BigInt(`0x${roomId}`);
   }

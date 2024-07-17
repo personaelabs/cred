@@ -1,7 +1,13 @@
 import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
-import { User, inviteCodeConverter, userConverter } from '@cred/shared';
+import {
+  ETH_CC_ROOM_CREDDD,
+  ETH_CC_ROOM_ID,
+  User,
+  inviteCodeConverter,
+  userConverter,
+} from '@cred/shared';
 import logger from '@/lib/backend/logger';
 import { User as PrivyUser } from '@privy-io/server-auth';
 import { addWriterToRoom, app } from '@cred/firebase-admin';
@@ -145,6 +151,15 @@ export async function POST(req: NextRequest) {
           // Add the user to the eligible groups
           await Promise.all(
             groups.map(async group => {
+              // If the user is eligible for the ETHCC room, add them to the room
+              if (ETH_CC_ROOM_CREDDD.includes(group.id)) {
+                console.log('Adding user to ETHCC room on sign in');
+                await addWriterToRoom({
+                  roomId: ETH_CC_ROOM_ID,
+                  userId: user.id,
+                });
+              }
+
               await addWriterToRoom({
                 roomId: group.id,
                 userId: user.id,

@@ -182,7 +182,9 @@ impl IntrinsicCredddSyncEngine {
 
     /// Sync the intrinsic creddd every 10 minutes
     pub async fn sync(&self) {
+        /*
         loop {
+
             let result = self.sync_once().await;
 
             if result.is_err() {
@@ -191,5 +193,6 @@ impl IntrinsicCredddSyncEngine {
 
             tokio::time::sleep(std::time::Duration::from_secs(600)).await;
         }
+        */
     }
 }

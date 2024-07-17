@@ -47,6 +47,8 @@ const createNotificationTestRoom = async () => {
     imageUrl: '',
     isFeatured: false,
     isHidden: false,
+    pinnedMessage: null,
+    isOpenUntil: null,
   };
 
   await db

@@ -35,7 +35,6 @@ import ProcessingTxSheet from './bottom-sheets/ProcessingTxSheet';
 import FundWalletSheet from './bottom-sheets/FundWalletSheet';
 import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 import useIsUsernameSet from '@/hooks/useIsUsernameSet';
-import useInviteCodeSet from '@/hooks/useIsInviteCodeSet';
 import useMixpanel from '@/hooks/useMixpanel';
 import { mainnet } from 'viem/chains';
 
@@ -69,7 +68,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   useMixpanel();
 
   const hideFooter =
-    ['/signin', '/install-pwa'].includes(pathname) ||
+    ['/signin', '/install-pwa', '/about'].includes(pathname) ||
     pathname.startsWith('/chats/') ||
     isModalOpen;
 
@@ -77,39 +76,29 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   const isUsernameSet = useIsUsernameSet();
 
-  // Redirect to setup username page if the user hasn't set a username
-  useEffect(() => {
-    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
-      if (isUsernameSet === false) {
-        router.push('/setup-username');
-      }
-    }
-  }, [isUsernameSet, router, pathname]);
-
-  const isInviteCodeSet = useInviteCodeSet();
-
-  // Redirect to setup invite code page if the user hasn't set an invite code
-  useEffect(() => {
-    if (pathname !== '/setup-username' && pathname !== '/enter-invite-code') {
-      if (isInviteCodeSet === false) {
-        router.push('/enter-invite-code');
-      }
-    }
-  }, [isInviteCodeSet, pathname, router]);
-
   useEffect(() => {
     (async () => {
-      if (isPwa === false && isMobile === true) {
-        router.push('/install-pwa');
-      } else if (isAuthenticated === false) {
-        if (pathname !== '/signin') {
-          router.replace('/signin');
-        } else {
-          // Already on the sign in page
-        }
+      if (
+        isPwa === false &&
+        isMobile === true &&
+        pathname !== '/install-pwa' &&
+        pathname !== '/about'
+      ) {
+        router.push('/about');
+      } else if (
+        isAuthenticated === false &&
+        pathname !== '/install-pwa' &&
+        pathname !== '/about' &&
+        pathname !== '/signin'
+      ) {
+        // Here we can assume that the user has installed the app as an PWA,
+        // or the user is accessing from desktop.
+        router.push('/signin');
+      } else if (pathname !== '/setup-username' && isUsernameSet === false) {
+        router.push('/setup-username');
       }
     })();
-  }, [isPwa, router, isMobile, isAuthenticated, pathname]);
+  }, [isPwa, router, isMobile, isAuthenticated, pathname, isUsernameSet]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({
@@ -119,7 +108,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     persistQueryClient({
       queryClient,
       persister: localStoragePersister,
-      buster: '4',
+      buster: '5',
     });
   }, []);
 
@@ -174,10 +163,16 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+      throw new Error('NEXT_PUBLIC_PRIVY_APP_ID is not set');
+    }
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
       <PrivyProvider
-        appId="clw1tqoyj02yh110vokuu7yc5"
+        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
         config={{
           supportedChains: [getChain(), mainnet],
           appearance: {

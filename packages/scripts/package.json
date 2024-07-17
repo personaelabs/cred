@@ -7,7 +7,9 @@
     "hideAllRooms": "tsx ./src/hideAllRooms.ts",
     "fillEmptyReactions": "tsx ./src/fillEmptyReactions.ts",
     "fillInviteCodes": "tsx ./src/fillInviteCodes.ts",
-    "printInviteCodes": "tsx ./src/printInviteCodes.ts"
+    "printInviteCodes": "tsx ./src/printInviteCodes.ts",
+    "createRoom": "tsx ./src/createRoom.ts",
+    "fillEthCCRoom": "tsx ./src/fillEthCCRoom.ts"
   },
   "dependencies": {
     "@cred/firebase-admin": "workspace:*",

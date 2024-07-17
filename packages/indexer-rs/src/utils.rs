@@ -281,6 +281,12 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::EthSalon => {
             hasher.update(b"EthSalon");
         }
+        GroupType::ArbSalon => {
+            hasher.update(b"ArbSalon");
+        }
+        GroupType::OpSalon => {
+            hasher.update(b"OpSalon");
+        }
         GroupType::FriendBagHolder => {
             hasher.update(b"FriendBagHolder");
         }
