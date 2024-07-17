@@ -61,6 +61,9 @@ services:
       - key: NEXT_PUBLIC_PRIVY_APP_ID
         value: clw1tqoyj02yh110vokuu7yc5
         previewValue: clyo1taco03wrv74xdboukyxi
+      - key: PRIVY_APP_SECRET
+        value: PRIVY_APP_SECRET
+        previewValue: PRIVY_APP_SECRET_DEV
   - type: web
     name: cred-indexer
     plan: pro max

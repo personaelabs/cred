@@ -178,6 +178,7 @@ const Room = () => {
                   ref={i === messages.length - 1 ? bottomRef : null}
                 >
                   <ChatMessage
+                    messageId={message.id}
                     roomId={params.roomId}
                     {...message}
                     isSender={message.user.id === signedInUser.id.toString()}
