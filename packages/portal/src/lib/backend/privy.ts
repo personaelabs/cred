@@ -1,9 +1,13 @@
 import { PrivyClient } from '@privy-io/server-auth';
 import { NextRequest } from 'next/server';
 
-const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET;
 const NEXT_PUBLIC_PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
-console.log('NEXT_PUBLIC_PRIVY_APP_ID', NEXT_PUBLIC_PRIVY_APP_ID);
+
+// Use the development secret if the app ID is the development app ID
+const PRIVY_APP_SECRET =
+  NEXT_PUBLIC_PRIVY_APP_ID === 'clw1tqoyj02yh110vokuu7yc5'
+    ? process.env.PRIVY_APP_SECRET
+    : process.env.PRIVY_APP_SECRET_DEV;
 
 if (!PRIVY_APP_SECRET) {
   throw new Error('PRIVY_APP_SECRET is not set');
