@@ -2,10 +2,15 @@ import useSignedInUser from './useSignedInUser';
 import useUser from './useUser';
 
 const useIsUsernameSet = () => {
-  const { data: signedInUser } = useSignedInUser();
-  const { data: user } = useUser(signedInUser?.id || null);
+  const { data: signedInUser, isLoading: isLoadingSingedInUser } =
+    useSignedInUser();
+  const { data: user, isLoading } = useUser(signedInUser?.id || null);
 
-  return user ? !!user.username : false;
+  if (isLoading || isLoadingSingedInUser) {
+    return null;
+  }
+
+  return user?.username ? true : false;
 };
 
 export default useIsUsernameSet;

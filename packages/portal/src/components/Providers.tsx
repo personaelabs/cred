@@ -76,29 +76,40 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   const isUsernameSet = useIsUsernameSet();
 
+  // Redirect to install page if the user is on mobile,
+  // and the app is not installed as a PWA.
+  const redirectToInstallPage =
+    isPwa === false &&
+    isMobile === true &&
+    pathname !== '/install-pwa' &&
+    pathname !== '/about';
+
+  // Redirect to sign in page if the user is not authenticated.
+  const redirectToSignIn =
+    !redirectToInstallPage &&
+    isAuthenticated === false &&
+    pathname !== '/signin';
+
   useEffect(() => {
     (async () => {
-      if (
-        isPwa === false &&
-        isMobile === true &&
-        pathname !== '/install-pwa' &&
-        pathname !== '/about'
-      ) {
+      if (redirectToInstallPage) {
+        console.log('Redirecting to install page');
         router.push('/about');
-      } else if (
-        isAuthenticated === false &&
-        pathname !== '/install-pwa' &&
-        pathname !== '/about' &&
-        pathname !== '/signin'
-      ) {
-        // Here we can assume that the user has installed the app as an PWA,
-        // or the user is accessing from desktop.
+      } else if (redirectToSignIn) {
+        console.log('Redirecting to sign in page');
         router.push('/signin');
-      } else if (pathname !== '/setup-username' && isUsernameSet === false) {
-        router.push('/setup-username');
       }
     })();
-  }, [isPwa, router, isMobile, isAuthenticated, pathname, isUsernameSet]);
+  }, [
+    isPwa,
+    router,
+    isMobile,
+    isAuthenticated,
+    pathname,
+    isUsernameSet,
+    redirectToInstallPage,
+    redirectToSignIn,
+  ]);
 
   useEffect(() => {
     const localStoragePersister = createSyncStoragePersister({
