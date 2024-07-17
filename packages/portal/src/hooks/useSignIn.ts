@@ -29,7 +29,7 @@ const useSignIn = () => {
       });
 
       const user = signInResponse.user;
-      const isUsernameSet = user ? user.username !== '' : false;
+      const isUsernameSet = user ? !!user.username : false;
 
       if (!isUsernameSet) {
         router.push('/setup-username');
