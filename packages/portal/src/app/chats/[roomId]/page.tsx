@@ -156,7 +156,11 @@ const Room = () => {
   return (
     <div className="h-full">
       <div className="bg-background h-full flex flex-col justify-end">
-        <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
+        {room?.pinnedMessage ? (
+          <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
+        ) : (
+          <></>
+        )}
         {isFetchingNextPage ? (
           <div className="space-y-2 w-full flex flex-col items-center mt-2">
             <Skeleton className="h-[30px] px-2 w-[96%]" />
