@@ -1,5 +1,5 @@
 import { PortalAbi } from '@cred/shared';
-import { getRoomTokenId } from '@/lib/utils';
+import { getRoomTokenId } from '@cred/shared';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useQuery } from '@tanstack/react-query';
 import { readContract } from '@wagmi/core';
