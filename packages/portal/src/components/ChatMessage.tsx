@@ -180,6 +180,7 @@ interface ChatBubbleProps {
   visibility: MessageVisibility;
   onLongPress: () => void;
   onViewReplyClick: (_replyId: string) => void;
+  isFocused: boolean;
 }
 
 const ChatBubble = (props: ChatBubbleProps) => {
@@ -194,6 +195,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
     user,
     onLongPress,
     onViewReplyClick,
+    isFocused,
   } = props;
 
   const bind = useLongPress(() => {
@@ -230,7 +232,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
           }}
         >
           <div
-            className={`${text ? '' : 'hidden'} text-md px-4 py-2 ${visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+            className={`select-none ${text ? '' : 'hidden'} ${isFocused ? 'animate-pulse-once' : ''} text-md px-4 py-2 ${visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
             dangerouslySetInnerHTML={{
               __html: highlightText(text),
             }}
@@ -316,6 +318,7 @@ const ChatMessageTimestamp = (props: ChatMessageTimestampProps) => {
 type ChatMessageProps = MessageWithUserData & {
   isSender: boolean;
   messageId: string;
+  isFocused: boolean;
   renderAvatar: boolean;
   onReplySelect: (_message: MessageWithUserData) => void;
   onViewReplyClick: (_replyId: string) => void;
@@ -329,6 +332,7 @@ const ChatMessage = (props: ChatMessageProps) => {
     isSender,
     roomId,
     messageId,
+    isFocused,
     replyToId,
     onViewReplyClick,
     user,
@@ -354,6 +358,7 @@ const ChatMessage = (props: ChatMessageProps) => {
         <ChatBubble
           roomId={roomId}
           messageId={messageId}
+          isFocused={isFocused}
           isSender={isSender}
           text={props.text}
           images={props.images}

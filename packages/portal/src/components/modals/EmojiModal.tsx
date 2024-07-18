@@ -22,9 +22,8 @@ const EmojiModal = (props: EmojiModalProps) => {
           onClose();
         }
       }}
-      modal={false}
     >
-      <DialogContent className="w-fit h-fit bg-transparent border-0 items-center justify-center">
+      <DialogContent className="bg-transparent border-0 items-center justify-center">
         <Picker
           data={data}
           onEmojiSelect={(e: any) => {
