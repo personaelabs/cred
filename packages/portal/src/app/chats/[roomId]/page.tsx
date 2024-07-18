@@ -4,7 +4,7 @@ import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ChatMessage from '@/components/ChatMessage';
+import ChatMessage from '@/components/ChatMessage/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import Link from 'next/link';
@@ -41,11 +41,8 @@ const Room = () => {
   }, []);
 
   const { data: signedInUser } = useSignedInUser();
-  const {
-    mutate: sendMessage,
-    isSuccess,
-    reset,
-  } = useSendMessage(params.roomId);
+  const { mutateAsync: sendMessage, reset: resetSendMessageState } =
+    useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
     useState(false);
@@ -134,19 +131,17 @@ const Room = () => {
     }
   }, [params.roomId, room, setOptions]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-      reset();
-    }
-  }, [isSuccess, reset]);
-
   const onSendClick = useCallback(
-    (input: Omit<MessageInput, 'replyTo'>) => {
-      sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
+    async (input: Omit<MessageInput, 'replyTo'>) => {
+      await sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
+
+      // Scroll to the sent message
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+      resetSendMessageState();
     },
-    [replyTo, sendMessage]
+    [replyTo, resetSendMessageState, sendMessage]
   );
 
   if (!signedInUser || !messages) {
@@ -198,17 +193,17 @@ const Room = () => {
                     if (el) {
                       chatMessageRefs.current.set(message.id, el);
                     }
+                    if (i === messages.length - 1) {
+                      // bottomRef.current = el;
+                    }
                   }}
                 >
                   <ChatMessage
-                    messageId={message.id}
+                    message={message}
                     roomId={params.roomId}
                     isFocused={scrollToMessageId === message.id}
                     {...message}
                     isSender={message.user.id === signedInUser.id.toString()}
-                    renderAvatar={
-                      i === 0 || message.user.id !== messages[i - 1].user.id
-                    }
                     onReplySelect={message => {
                       const index = messages.length - i;
                       if (index > PAGE_SIZE) {
@@ -236,6 +231,7 @@ const Room = () => {
                   />
                 </div>
               ))}
+              <div ref={bottomRef}></div>
             </InfiniteScroll>
           )}
         </div>

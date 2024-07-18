@@ -1,5 +1,5 @@
 import { getDocs, onSnapshot } from 'firebase/firestore';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Message } from '@cred/shared';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
@@ -66,7 +66,6 @@ const useListenToMessages = ({
   signedInUserId: string | null;
   enabled: boolean;
 }) => {
-  const queryClient = useQueryClient();
   const [newMessages, setNewMessages] = useState<MessageWithUserData[]>([]);
   const [removedMessages, setRemovedMessages] = useState<string[]>([]);
   const [updatedMessages, setUpdatedMessages] = useState<MessageWithUserData[]>(
@@ -109,7 +108,7 @@ const useListenToMessages = ({
         unsubscribe();
       };
     }
-  }, [roomId, queryClient, isSingedInUserAdmin, signedInUserId, enabled]);
+  }, [roomId, isSingedInUserAdmin, signedInUserId, enabled]);
 
   return { newMessages, removedMessages, updatedMessages };
 };
