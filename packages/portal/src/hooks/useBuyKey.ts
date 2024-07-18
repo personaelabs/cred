@@ -5,7 +5,7 @@ import { Hex, encodeFunctionData } from 'viem';
 import axios from '@/lib/axios';
 import { SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getRoomTokenId } from '@/lib/utils';
+import { getRoomTokenId } from '@cred/shared';
 import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useState } from 'react';
 import { toast } from 'sonner';

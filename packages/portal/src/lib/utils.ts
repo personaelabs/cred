@@ -155,19 +155,6 @@ export const getChain = () => {
   return base;
 };
 
-export const getRoomTokenId = (roomId: string) => {
-  switch (roomId) {
-    case 'test':
-      return BigInt(1);
-    case 'test-notification':
-      return BigInt(2);
-    case 'ethcc-2024':
-      return BigInt(3);
-    default:
-      return BigInt(`0x${roomId}`);
-  }
-};
-
 export const highlightText = (text: string) => {
   return DOMPurify.sanitize(
     text
