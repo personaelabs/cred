@@ -180,6 +180,38 @@ const PurchasableRoomItem = memo(function PurchasableRoomItem(
   );
 });
 
+/**
+ * Returns true if the user can buy the room key
+ */
+const canBuyRoomKey = ({
+  room,
+  userId,
+}: {
+  room: Room;
+  userId: string;
+}): boolean => {
+  return !!(
+    room.isOpenUntil &&
+    new Date(room.isOpenUntil).getTime() > Date.now() &&
+    !room.joinedUserIds.includes(userId) &&
+    !room.writerIds.includes(userId) &&
+    !room.readerIds.includes(userId)
+  );
+};
+
+const canJoinRoom = ({
+  room,
+  userId,
+}: {
+  room: Room;
+  userId: string;
+}): boolean => {
+  return !!(
+    !room.joinedUserIds.includes(userId) &&
+    (room.writerIds.includes(userId) || room.readerIds.includes(userId))
+  );
+};
+
 const Home = () => {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
@@ -197,25 +229,27 @@ const Home = () => {
 
   const buyableRooms = signedInUser
     ? allRooms
+        // Sort by the number of users in the room
         .sort((a, b) => b.joinedUserIds.length - a.joinedUserIds.length)
-        .filter(
-          room =>
-            room.isOpenUntil &&
-            new Date(room.isOpenUntil).getTime() > Date.now() &&
-            !room.joinedUserIds.includes(signedInUser.id) &&
-            !room.writerIds.includes(signedInUser.id) &&
-            !room.readerIds.includes(signedInUser.id)
+        // Get rooms the user can buy
+        .filter(room =>
+          canBuyRoomKey({
+            room,
+            userId: signedInUser.id,
+          })
         )
         .slice(0, renderPages)
     : [];
 
   const joinableRooms = signedInUser
-    ? allRooms.filter(
-        room =>
-          !room.joinedUserIds.includes(signedInUser.id) &&
-          (room.writerIds.includes(signedInUser.id) ||
-            room.readerIds.includes(signedInUser.id))
-      )
+    ? allRooms
+        // Get rooms the user can join
+        .filter(room =>
+          canJoinRoom({
+            room,
+            userId: signedInUser.id,
+          })
+        )
     : [];
 
   if (!signedInUser) {
@@ -249,16 +283,19 @@ const Home = () => {
       ) : (
         <></>
       )}
-      {joinableRooms.map(room => (
-        <EligibleRoomItem
-          key={room.id}
-          room={room}
-          isPurchased={
-            room.readerIds.includes(signedInUser.id) &&
-            !room.writerIds.includes(signedInUser.id)
-          }
-        ></EligibleRoomItem>
-      ))}
+      {
+        // Render the joinable rooms
+        joinableRooms.map(room => (
+          <EligibleRoomItem
+            key={room.id}
+            room={room}
+            isPurchased={
+              room.readerIds.includes(signedInUser.id) &&
+              !room.writerIds.includes(signedInUser.id)
+            }
+          ></EligibleRoomItem>
+        ))
+      }
       {buyableRooms.length > 0 ? (
         <div className="mt-[32px] px-5 text-center opacity-60">
           Buy access to portals
@@ -268,9 +305,12 @@ const Home = () => {
           No portals open
         </div>
       )}
-      {buyableRooms.map(room => (
-        <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
-      ))}
+      {
+        // Render the buyable rooms
+        buyableRooms.map(room => (
+          <PurchasableRoomItem room={room} key={room.id}></PurchasableRoomItem>
+        ))
+      }
     </div>
   );
 };

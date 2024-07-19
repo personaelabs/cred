@@ -147,6 +147,10 @@ const Chat = () => {
     [replyTo, resetSendMessageState, sendMessage]
   );
 
+  const isPortalClosed = room?.isOpenUntil
+    ? room.isOpenUntil < new Date()
+    : false;
+
   if (!signedInUser || !messages) {
     return <div className="bg-background h-full"></div>;
   }
@@ -202,6 +206,7 @@ const Chat = () => {
                   }}
                 >
                   <ChatMessage
+                    isReadOnly={isPortalClosed}
                     message={message}
                     roomId={params.roomId}
                     isFocused={scrollToMessageId === message.id}
@@ -239,15 +244,19 @@ const Chat = () => {
           )}
         </div>
         <div className="mb-[6px]">
-          <ChatMessageInput
-            inputRef={inputRef}
-            roomId={params.roomId}
-            replyToText={replyTo ? replyTo.text : undefined}
-            onSend={onSendClick}
-            onCancelReply={() => {
-              setReplyTo(null);
-            }}
-          ></ChatMessageInput>
+          {!isPortalClosed ? (
+            <ChatMessageInput
+              inputRef={inputRef}
+              roomId={params.roomId}
+              replyToText={replyTo ? replyTo.text : undefined}
+              onSend={onSendClick}
+              onCancelReply={() => {
+                setReplyTo(null);
+              }}
+            ></ChatMessageInput>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
       <MessageAsAdminModal

@@ -12,6 +12,7 @@ import MessageReactions from './MessageReactions';
 type ChatMessageProps = {
   message: MessageWithUserData;
   isSender: boolean;
+  isReadOnly: boolean;
   isFocused: boolean;
   onReplySelect: (_message: MessageWithUserData) => void;
   onViewReplyClick: (_replyId: string) => void;
@@ -21,7 +22,8 @@ type ChatMessageProps = {
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, roomId, isFocused, onViewReplyClick, message } = props;
+  const { isSender, isReadOnly, roomId, isFocused, onViewReplyClick, message } =
+    props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -68,6 +70,7 @@ const ChatMessage = (props: ChatMessageProps) => {
           reactions={message.reactions}
         ></MessageReactions>
         <ChatMessageDropdownMenu
+          isReadOnly={isReadOnly}
           isOpen={isMenuOpen}
           onClose={() => {
             setIsMenuOpen(false);
@@ -78,7 +81,6 @@ const ChatMessage = (props: ChatMessageProps) => {
           onDeleteClick={props.onDeleteClick}
           onReactionClick={props.onReactionClick}
         ></ChatMessageDropdownMenu>
-
         <ChatMessageTimestamp
           createdAt={message.createdAt}
         ></ChatMessageTimestamp>

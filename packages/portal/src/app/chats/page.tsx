@@ -21,6 +21,7 @@ import useReadTicket from '@/hooks/useReadTicket';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import useRoomLatestMessage from '@/hooks/useRoomLatestMessage';
+import { Badge } from '@/components/ui/badge';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
@@ -66,10 +67,11 @@ type RoomItemProps = {
   isMuted: boolean;
   showMuteToggle: boolean;
   isPurchasedRoom: boolean;
+  isOpen: boolean;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { id, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
+  const { id, isOpen, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const { data: singedInUser } = useSignedInUser();
@@ -106,7 +108,9 @@ const RoomItem = (props: RoomItemProps) => {
         }}
       >
         <div className="flex flex-row justify-between w-full h-full border-b-2">
-          <div className="flex flex-col items-start px-5 py-2">
+          <div
+            className={`flex flex-col items-start px-5 py-2 ${isOpen ? '' : 'opacity-60'}`}
+          >
             <div
               className={`text-lg ${isPurchasedRoom ? '' : 'font-bold text-primary'}`}
             >
@@ -118,6 +122,12 @@ const RoomItem = (props: RoomItemProps) => {
                 ? `${cutoffMessage(roomLatestMessage.body, 75)}`
                 : ''}
             </div>
+            <Badge
+              variant="outline"
+              className={`mt-2 ${isOpen ? 'hidden' : ''}`}
+            >
+              closed
+            </Badge>
           </div>
           <div className="flex justify-center items-center">
             {unreadMessageExists ? (
@@ -215,8 +225,6 @@ const Chats = () => {
       !room.writerIds.includes(signedInUser.id)
   );
 
-  console.log(writableRooms, purchasedRooms);
-
   return (
     <Scrollable>
       <div
@@ -238,6 +246,7 @@ const Chats = () => {
               room.readerIds.includes(signedInUser.id) &&
               !room.writerIds.includes(signedInUser.id)
             }
+            isOpen={room.isOpenUntil ? room.isOpenUntil > new Date() : false}
           ></RoomItem>
         ))}
       </div>

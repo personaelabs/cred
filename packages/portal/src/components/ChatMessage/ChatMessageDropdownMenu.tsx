@@ -13,6 +13,7 @@ import EmojiModal from '../modals/EmojiModal';
 import { MessageWithUserData } from '@/types';
 
 interface ReceivedMessageDropdownContentProps {
+  isReadOnly: boolean;
   onReplyClick: () => void;
   onCopyClick: () => void;
   onReactClick: (_reaction: string) => void;
@@ -22,20 +23,23 @@ const reactions = ['👍', '❤️', '🔥', '🙏'];
 const ReceivedMessageDropdownContent = (
   props: ReceivedMessageDropdownContentProps
 ) => {
-  const { onReplyClick, onCopyClick, onReactClick } = props;
+  const { isReadOnly, onReplyClick, onCopyClick, onReactClick } = props;
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
   return (
     <DropdownMenuContent className="bg-background mt-[-20px] ml-[40px]">
-      <DropdownMenuItem onClick={onReplyClick}>
-        <Reply className="mr-2 w-4 h-4"></Reply>
+      <DropdownMenuItem
+        onClick={onReplyClick}
+        className={`${isReadOnly ? 'hidden' : ''}`}
+      >
+        <Reply className={`mr-2 w-4 h-4 `}></Reply>
         <div>Reply</div>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
       </DropdownMenuItem>
-      <div className="flex flex-row p-2">
+      <div className={`flex flex-row p-2 ${isReadOnly ? 'hidden' : ''}`}>
         {reactions.map((reaction, i) => (
           <div
             key={i}
@@ -63,11 +67,16 @@ const ReceivedMessageDropdownContent = (
   );
 };
 
-const SenderMessageDropdownContent = (props: {
+interface SenderMessageDropdownContentProps {
+  isReadOnly: boolean;
   onCopyClick: () => void;
   onDeleteClick: () => void;
-}) => {
-  const { onCopyClick, onDeleteClick } = props;
+}
+
+const SenderMessageDropdownContent = (
+  props: SenderMessageDropdownContentProps
+) => {
+  const { isReadOnly, onCopyClick, onDeleteClick } = props;
 
   return (
     <DropdownMenuContent className="bg-background mt-[-30px]">
@@ -75,7 +84,10 @@ const SenderMessageDropdownContent = (props: {
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={onDeleteClick} className="text-red-500">
+      <DropdownMenuItem
+        onClick={onDeleteClick}
+        className={`text-red-500 ${isReadOnly ? 'hidden' : ''}`}
+      >
         <Trash2 className="mr-2 w-4 h-4"></Trash2>
         <div>Delete</div>
       </DropdownMenuItem>
@@ -85,6 +97,7 @@ const SenderMessageDropdownContent = (props: {
 
 interface ChatMessageDropdownMenuProps {
   isOpen: boolean;
+  isReadOnly: boolean;
   isSender: boolean;
   message: MessageWithUserData;
   onClose: () => void;
@@ -94,7 +107,7 @@ interface ChatMessageDropdownMenuProps {
 }
 
 const ChatMessageDropdownMenu = (props: ChatMessageDropdownMenuProps) => {
-  const { isOpen, isSender, onClose } = props;
+  const { isOpen, isReadOnly, isSender, onClose } = props;
 
   const onClickCopyToClipboard = useCallback(async () => {
     await copyTextToClipboard(props.message.text);
@@ -114,6 +127,7 @@ const ChatMessageDropdownMenu = (props: ChatMessageDropdownMenuProps) => {
       <DropdownMenuTrigger disabled></DropdownMenuTrigger>
       {isSender ? (
         <SenderMessageDropdownContent
+          isReadOnly={isReadOnly}
           onCopyClick={onClickCopyToClipboard}
           onDeleteClick={() => {
             props.onDeleteClick(props.message.id);
@@ -121,6 +135,7 @@ const ChatMessageDropdownMenu = (props: ChatMessageDropdownMenuProps) => {
         ></SenderMessageDropdownContent>
       ) : (
         <ReceivedMessageDropdownContent
+          isReadOnly={isReadOnly}
           onReplyClick={() => {
             props.onReplySelect(props.message);
           }}
