@@ -85,7 +85,7 @@ const useSellKey = (roomId: string) => {
         },
         {
           header: `Sell ${room?.name} key`,
-          description: `You will receive ${formattedSalesValue} ETH (estimated)  (1% protocol fee)`,
+          description: `You will receive ${formattedSalesValue} ETH (estimated)  (5% protocol fee)`,
           buttonText: 'Sell key',
         }
       );

@@ -95,7 +95,7 @@ const useBuyKey = (roomId: string) => {
           },
           {
             header: `Buy ${room?.name} key`,
-            description: `1% protocol fee`,
+            description: `5% protocol fee`,
             buttonText: 'Buy key',
           }
         );

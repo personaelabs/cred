@@ -18,13 +18,22 @@ import { MessageVisibility, Room, messageConverter } from '@cred/shared';
 import { MobileOS, ModalType } from '@/types';
 import { DialogType } from '@/contexts/DialogContext';
 
+const pad = (num: number): string => {
+  return num < 10 ? `0${num}` : `${num}`;
+};
+
 /**
- * Returns the number of hours until the portal closes.
+ * Returns the time remaining until the portal closes in the format "HH:MM".
  */
-export const getPortalClosesIn = (openUntil: Date): number => {
+export const getPortalClosesIn = (openUntil: Date): string => {
   console.log('openUntil', openUntil);
   const now = new Date();
-  return Math.max(openUntil.getHours() - now.getHours(), 0);
+
+  const timeRemaining = openUntil.getTime() - now.getTime();
+  const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+  const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
+  return `${pad(hours)}h${pad(minutes)}min`;
 };
 
 export const sleep = (ms: number): Promise<void> => {
