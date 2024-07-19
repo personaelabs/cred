@@ -40,7 +40,7 @@ const EnterPortalModal = (props: EnterPortalModalProps) => {
     onClose();
   }, [buyKey, onClose, resetBuyKey]);
 
-  if (!signedInUser) {
+  if (!signedInUser || buyPrice === null) {
     return <></>;
   }
 

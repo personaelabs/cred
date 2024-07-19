@@ -30,6 +30,11 @@ export const getPortalClosesIn = (openUntil: Date): string => {
   const now = new Date();
 
   const timeRemaining = openUntil.getTime() - now.getTime();
+
+  if (timeRemaining < 0) {
+    return '0';
+  }
+
   const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
   const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
 

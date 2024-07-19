@@ -21,7 +21,6 @@ import useReadTicket from '@/hooks/useReadTicket';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import useRoomLatestMessage from '@/hooks/useRoomLatestMessage';
-import { Badge } from '@/components/ui/badge';
 
 interface RoomItemDropdownContentProps {
   onLeaveClick: () => void;
@@ -101,6 +100,10 @@ const RoomItem = (props: RoomItemProps) => {
 
   const isOpen = isOpenUntil ? isOpenUntil > new Date() : false;
 
+  const portalClosesIn = isOpenUntil
+    ? getPortalClosesIn(new Date(isOpenUntil))
+    : '';
+
   return (
     <>
       <Link
@@ -119,21 +122,16 @@ const RoomItem = (props: RoomItemProps) => {
             >
               {name}
             </div>
-            <div className="opacity-60 mt-1">
-              closes in{' '}
-              {isOpenUntil ? getPortalClosesIn(new Date(isOpenUntil)) : ''}
+            <div className="opacity-60">
+              {portalClosesIn === '0'
+                ? 'closed'
+                : `closes in ${portalClosesIn}`}
             </div>
-            <div className="opacity-60 mt-1">
+            <div className="opacity-60 mt-2">
               {roomLatestMessage
                 ? `${cutoffMessage(roomLatestMessage.body, 75)}`
                 : ''}
             </div>
-            <Badge
-              variant="outline"
-              className={`mt-2 ${isOpen ? 'hidden' : ''}`}
-            >
-              closed
-            </Badge>
           </div>
           <div className="flex justify-center items-center">
             {unreadMessageExists ? (
