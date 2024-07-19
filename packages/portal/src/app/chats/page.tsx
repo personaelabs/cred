@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
 import Scrollable from '@/components/Scrollable';
 import { useScrollableRef } from '@/contexts/FooterContext';
-import { cutoffMessage } from '@/lib/utils';
+import { cutoffMessage, getPortalClosesIn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,11 +67,12 @@ type RoomItemProps = {
   isMuted: boolean;
   showMuteToggle: boolean;
   isPurchasedRoom: boolean;
-  isOpen: boolean;
+  isOpenUntil: Date | null;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { id, isOpen, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
+  const { id, isOpenUntil, name, isMuted, showMuteToggle, isPurchasedRoom } =
+    props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const { data: singedInUser } = useSignedInUser();
@@ -98,6 +99,8 @@ const RoomItem = (props: RoomItemProps) => {
     setUnreadMessageExists(_unreadMessageExists);
   }, [roomLatestMessage, readTicket, singedInUser]);
 
+  const isOpen = isOpenUntil ? isOpenUntil > new Date() : false;
+
   return (
     <>
       <Link
@@ -116,7 +119,10 @@ const RoomItem = (props: RoomItemProps) => {
             >
               {name}
             </div>
-            <div className="opacity-80">{props.pinnedMessage}</div>
+            <div className="opacity-60 mt-1">
+              closes in{' '}
+              {isOpenUntil ? getPortalClosesIn(new Date(isOpenUntil)) : ''}
+            </div>
             <div className="opacity-60 mt-1">
               {roomLatestMessage
                 ? `${cutoffMessage(roomLatestMessage.body, 75)}`
@@ -246,7 +252,7 @@ const Chats = () => {
               room.readerIds.includes(signedInUser.id) &&
               !room.writerIds.includes(signedInUser.id)
             }
-            isOpen={room.isOpenUntil ? room.isOpenUntil > new Date() : false}
+            isOpenUntil={room.isOpenUntil}
           ></RoomItem>
         ))}
       </div>
