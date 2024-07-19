@@ -15,6 +15,7 @@ interface PreviewData {
 
 const getLinkPreview = async (url: string): Promise<PreviewData | null> => {
   try {
+    // We need to use a proxy to fetch the url because of CORS
     const response = await fetch('/api/url-proxy?url=' + url);
     const data = await response.text();
 
@@ -42,8 +43,13 @@ const getLinkPreview = async (url: string): Promise<PreviewData | null> => {
   }
 };
 
+/**
+ * Component to show a preview of a link.
+ * The component fetches the link ogp data and shows the title and image.
+ */
 const LinkPreview = (props: LinkPreviewProps) => {
   const { url } = props;
+
   // State to hold the link preview data and loading status
   const { data: previewData } = useQuery({
     queryKey: ['link-preview', url],

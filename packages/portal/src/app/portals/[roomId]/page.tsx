@@ -37,6 +37,10 @@ const RoomUserListItem = ({ user }: { user: User }) => {
   );
 };
 
+/**
+ * Room info page.
+ * Shows the room name, key sell price, rep holders and purchasers.
+ */
 const RoomInfo = () => {
   const params = useParams<{ roomId: string }>();
 

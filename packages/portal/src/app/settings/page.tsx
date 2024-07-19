@@ -38,6 +38,9 @@ const SettingsMenuItem = (props: SettingsMenuItemProps) => {
   );
 };
 
+/**
+ * Settings page
+ */
 const Settings = () => {
   const { data: signedInUser } = useSignedInUser();
   const { mutateAsync: signOut } = useSignOut();

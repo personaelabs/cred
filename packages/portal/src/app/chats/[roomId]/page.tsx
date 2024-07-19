@@ -23,7 +23,10 @@ import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 import PinnedMessage from '@/components/PinnedMessage';
 import { toast } from 'sonner';
 
-const Room = () => {
+/**
+ * Chat room page
+ */
+const Chat = () => {
   const params = useParams<{ roomId: string }>();
 
   const chatMessageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -267,4 +270,4 @@ const Room = () => {
   );
 };
 
-export default Room;
+export default Chat;
