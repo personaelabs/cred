@@ -6,6 +6,8 @@ export enum DialogType {
   FUND_WALLET = 'FUND_WALLET',
   // eslint-disable-next-line no-unused-vars
   PROCESSING_TX = 'PROCESSING_TX',
+  // eslint-disable-next-line no-unused-vars
+  MESSAGE_REACTIONS = 'MESSAGE_REACTIONS',
 }
 
 /**

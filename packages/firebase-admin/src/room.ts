@@ -26,7 +26,7 @@ export const addWriterToRoom = async ({
       });
     }
   } else {
-    throw new Error(`Room not found: ${roomId}`);
+    console.error(`Room not found: ${roomId}`);
   }
 };
 
@@ -52,7 +52,7 @@ export const addReaderToRoom = async ({
       });
     }
   } else {
-    throw new Error(`Room not found: ${roomId}`);
+    console.error(`Room not found: ${roomId}`);
   }
 };
 
@@ -79,6 +79,6 @@ export const removeUserFromRoom = async ({
       });
     }
   } else {
-    throw new Error(`Room not found: ${roomId}`);
+    console.error(`Room not found: ${roomId}`);
   }
 };

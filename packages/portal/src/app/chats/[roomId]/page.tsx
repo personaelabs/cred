@@ -1,5 +1,5 @@
 'use client';
-import useMessages from '@/hooks/useMessages';
+import useMessages, { PAGE_SIZE } from '@/hooks/useMessages';
 import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
@@ -21,9 +21,27 @@ import MessageAsAdminModal from '@/components/modals/MessageAsAdminModal';
 import MessageAsBuyerModal from '@/components/modals/MessageAsBuyerModal';
 import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 import PinnedMessage from '@/components/PinnedMessage';
+import { toast } from 'sonner';
 
-const Room = () => {
+/**
+ * Chat room page
+ */
+const Chat = () => {
   const params = useParams<{ roomId: string }>();
+
+  const chatMessageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(
+    null
+  );
+
+  // Function to scroll to a specific index
+  const scrollToMessage = useCallback((messageId: string) => {
+    const messageRef = chatMessageRefs.current.get(messageId);
+    if (messageRef) {
+      messageRef.scrollIntoView({ behavior: 'smooth' });
+      setScrollToMessageId(messageId);
+    }
+  }, []);
 
   const { data: signedInUser } = useSignedInUser();
   const {
@@ -141,7 +159,11 @@ const Room = () => {
   return (
     <div className="h-full">
       <div className="bg-background h-full flex flex-col justify-end">
-        <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
+        {room?.pinnedMessage ? (
+          <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
+        ) : (
+          <></>
+        )}
         {isFetchingNextPage ? (
           <div className="space-y-2 w-full flex flex-col items-center mt-2">
             <Skeleton className="h-[30px] px-2 w-[96%]" />
@@ -175,23 +197,34 @@ const Room = () => {
                 <div
                   key={message.id}
                   className="w-full"
-                  ref={i === messages.length - 1 ? bottomRef : null}
+                  ref={el => {
+                    if (el) {
+                      chatMessageRefs.current.set(message.id, el);
+                    }
+                  }}
                 >
                   <ChatMessage
+                    messageId={message.id}
                     roomId={params.roomId}
+                    isFocused={scrollToMessageId === message.id}
                     {...message}
                     isSender={message.user.id === signedInUser.id.toString()}
                     renderAvatar={
                       i === 0 || message.user.id !== messages[i - 1].user.id
                     }
                     onReplySelect={message => {
-                      setReplyTo(message);
-                      inputRef.current?.focus();
+                      const index = messages.length - i;
+                      if (index > PAGE_SIZE) {
+                        toast.warning(
+                          `You can only reply to the last ${PAGE_SIZE} messages`
+                        );
+                      } else {
+                        setReplyTo(message);
+                        inputRef.current?.focus();
+                      }
                     }}
-                    onViewReplyClick={_message => {
-                      // setFromMessage(toMessageWithUserData(_message));
-                      // const snapshot =  QueryDocumentSnapshot()
-                      // setFromMessage(message.id);
+                    onViewReplyClick={messageId => {
+                      scrollToMessage(messageId);
                     }}
                     onDeleteClick={messageId => {
                       deleteMessage(messageId);
@@ -237,4 +270,4 @@ const Room = () => {
   );
 };
 
-export default Room;
+export default Chat;

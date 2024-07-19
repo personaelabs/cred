@@ -161,7 +161,11 @@ const RoomItem = (props: RoomItemProps) => {
   );
 };
 
-const Rooms = () => {
+/**
+ * Chats page.
+ * Render all chats the user has joined.
+ */
+const Chats = () => {
   const { data: signedInUser } = useSignedInUser();
   const { data: singedInUserData } = useUser(signedInUser?.id || null);
   const { data: rooms } = useJoinedRooms(signedInUser?.id!.toString() || null);
@@ -241,4 +245,4 @@ const Rooms = () => {
   );
 };
 
-export default Rooms;
+export default Chats;

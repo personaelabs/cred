@@ -23,6 +23,9 @@ import { toast } from 'sonner';
 import { useLongPress } from 'use-long-press';
 import LinkPreview from './LinkPreview';
 import { MessageVisibility } from '@cred/shared';
+import { ChevronDown } from 'lucide-react';
+import EmojiModal from './modals/EmojiModal';
+import MessageReactionsModal from './modals/MessageReactionsModal';
 
 interface ChatMessageDropdownContentProps {
   onReplyClick: () => void;
@@ -30,8 +33,10 @@ interface ChatMessageDropdownContentProps {
   onReactClick: (_reaction: string) => void;
 }
 
+const reactions = ['👍', '❤️', '🔥', '🙏'];
 const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
-  const { onReplyClick, onCopyClick } = props;
+  const { onReplyClick, onCopyClick, onReactClick } = props;
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
   return (
     <DropdownMenuContent className="bg-background mt-[-20px] ml-[40px]">
@@ -43,6 +48,30 @@ const ChatMessageDropdownContent = (props: ChatMessageDropdownContentProps) => {
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
       </DropdownMenuItem>
+      <div className="flex flex-row p-2">
+        {reactions.map((reaction, i) => (
+          <div
+            key={i}
+            onClick={() => onReactClick(reaction)}
+            className="hover:bg-slate-700 px-2 rounded-md"
+          >
+            {reaction}
+          </div>
+        ))}
+        <ChevronDown
+          className="hover:bg-slate-700 rounded-md opacity-70"
+          onClick={() => {
+            setIsEmojiPickerOpen(true);
+          }}
+        />
+      </div>
+      <EmojiModal
+        isOpen={isEmojiPickerOpen}
+        onClose={() => {
+          setIsEmojiPickerOpen(false);
+        }}
+        onEmojiSelect={onReactClick}
+      ></EmojiModal>
     </DropdownMenuContent>
   );
 };
@@ -95,27 +124,50 @@ const ReplyPreview = (props: ReplyPreviewProps) => {
 };
 
 interface MessageReactionsProps {
+  roomId: string;
+  messageId: string;
   reactions: {
     [key: string]: string;
   };
 }
 
 const MessageReactions = (props: MessageReactionsProps) => {
-  const { reactions } = props;
+  const { roomId, messageId, reactions } = props;
+  const [isReactionsModalOpen, setIsReactionsModalOpen] = useState(false);
 
   return (
-    <div className="flex flex-row gap-x-2">
-      {Object.entries(reactions).map(([_userId, reaction], i) => (
-        <div key={i} className="px-2">
-          {reaction}
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        className="mt-[-16px] flex flex-row"
+        onClick={() => {
+          setIsReactionsModalOpen(true);
+        }}
+      >
+        {Object.entries(reactions).map(([_userId, reaction], i) => (
+          <div
+            key={i}
+            className={`flex flex-row items-center ${i !== 0 ? 'ml-[-4px]' : 'ml-[2px]'}`}
+          >
+            {reaction}
+          </div>
+        ))}
+      </div>
+      <MessageReactionsModal
+        isOpen={isReactionsModalOpen}
+        onClose={() => {
+          setIsReactionsModalOpen(false);
+        }}
+        roomId={roomId}
+        messageId={messageId}
+        reactions={reactions}
+      ></MessageReactionsModal>
+    </>
   );
 };
 
 interface ChatBubbleProps {
   roomId: string;
+  messageId: string;
   isSender: boolean;
   text: string;
   images: string[];
@@ -128,11 +180,13 @@ interface ChatBubbleProps {
   visibility: MessageVisibility;
   onLongPress: () => void;
   onViewReplyClick: (_replyId: string) => void;
+  isFocused: boolean;
 }
 
 const ChatBubble = (props: ChatBubbleProps) => {
   const {
     roomId,
+    messageId,
     isSender,
     replyToId,
     reactions,
@@ -141,6 +195,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
     user,
     onLongPress,
     onViewReplyClick,
+    isFocused,
   } = props;
 
   const bind = useLongPress(() => {
@@ -177,7 +232,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
           }}
         >
           <div
-            className={`${text ? '' : 'hidden'} text-md px-4 py-2 ${visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+            className={`select-none ${text ? '' : 'hidden'} ${isFocused ? 'animate-pulse-once' : ''} text-md px-4 py-2 ${visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
             dangerouslySetInnerHTML={{
               __html: highlightText(text),
             }}
@@ -196,8 +251,12 @@ const ChatBubble = (props: ChatBubbleProps) => {
               </PhotoProvider>
             ))}
           </div>
+          <MessageReactions
+            roomId={roomId}
+            messageId={messageId}
+            reactions={reactions}
+          ></MessageReactions>
         </div>
-        <MessageReactions reactions={reactions}></MessageReactions>
       </div>
       {
         // Render link previews
@@ -258,6 +317,8 @@ const ChatMessageTimestamp = (props: ChatMessageTimestampProps) => {
 
 type ChatMessageProps = MessageWithUserData & {
   isSender: boolean;
+  messageId: string;
+  isFocused: boolean;
   renderAvatar: boolean;
   onReplySelect: (_message: MessageWithUserData) => void;
   onViewReplyClick: (_replyId: string) => void;
@@ -267,8 +328,16 @@ type ChatMessageProps = MessageWithUserData & {
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, roomId, replyToId, onViewReplyClick, user, onDeleteClick } =
-    props;
+  const {
+    isSender,
+    roomId,
+    messageId,
+    isFocused,
+    replyToId,
+    onViewReplyClick,
+    user,
+    onDeleteClick,
+  } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const onClickCopyToClipboard = useCallback(async () => {
@@ -288,6 +357,8 @@ const ChatMessage = (props: ChatMessageProps) => {
       <div className="max-w-[70%]">
         <ChatBubble
           roomId={roomId}
+          messageId={messageId}
+          isFocused={isFocused}
           isSender={isSender}
           text={props.text}
           images={props.images}
@@ -323,6 +394,9 @@ const ChatMessage = (props: ChatMessageProps) => {
               onCopyClick={onClickCopyToClipboard}
               onReactClick={reaction => {
                 props.onReactionClick(reaction);
+                // We need to explicitly close the dropdown after reacting,
+                // since the reactions aren't wrapped in a `DropdownMenuItem` component
+                setIsMenuOpen(false);
               }}
             ></ChatMessageDropdownContent>
           )}

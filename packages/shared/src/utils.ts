@@ -6,6 +6,8 @@ export const getRoomTokenId = (roomId: string) => {
       return BigInt(2);
     case 'ethcc-2024':
       return BigInt(3);
+    case 'personae':
+      return BigInt(4);
     default:
       return BigInt(`0x${roomId}`);
   }
@@ -19,6 +21,8 @@ export const tokenIdToRoomId = (tokenId: bigint) => {
       return 'test-notification';
     case BigInt(3):
       return 'ethcc-2024';
+    case BigInt(4):
+      return 'personae';
     default:
       return tokenId.toString(16).padStart(64, '0');
   }

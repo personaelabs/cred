@@ -2,6 +2,9 @@
 import { cn } from '@/lib/utils';
 import { MotionProps, motion } from 'framer-motion';
 
+/**
+ * A clickable box component which animates when clicked.
+ */
 const ClickableBox = (
   props: React.HTMLAttributes<HTMLDivElement> & MotionProps
 ) => {

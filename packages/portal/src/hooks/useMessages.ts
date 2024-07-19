@@ -29,7 +29,7 @@ export const toMessageWithUserData = (
   };
 };
 
-const PAGE_SIZE = 20;
+export const PAGE_SIZE = 100;
 const getMessages = async ({
   isSingedInUserAdmin,
   signedInUserId,
@@ -79,7 +79,7 @@ const useListenToMessages = ({
         isAdminView: isSingedInUserAdmin,
         viewerId: signedInUserId,
         roomId,
-        pageSize: 10,
+        pageSize: PAGE_SIZE,
       });
 
       const unsubscribe = onSnapshot(
@@ -121,7 +121,7 @@ const useMessages = ({ roomId }: { roomId: string }) => {
   const isSingedInUserAdmin =
     signedInUser && room ? room.writerIds.includes(signedInUser.id) : false;
 
-  const result = useInfiniteQuery({
+  const infiniteQueryResult = useInfiniteQuery({
     queryKey: messageKeys.roomMessages(roomId),
     queryFn: async ({
       pageParam,
@@ -147,12 +147,12 @@ const useMessages = ({ roomId }: { roomId: string }) => {
       roomId,
       isSingedInUserAdmin,
       signedInUserId: signedInUser?.id || null,
-      enabled: !!result.data,
+      enabled: !!infiniteQueryResult.data,
     }
   );
 
-  // Merge the new messages to the existing messages
-  const fetchedMessages = result.data?.pages.flat() || [];
+  // Merge the new messages to the messages from the infinite query
+  const fetchedMessages = infiniteQueryResult.data?.pages.flat() || [];
 
   const _allMessages = newMessages
     ? [...fetchedMessages, ...newMessages]
@@ -192,7 +192,7 @@ const useMessages = ({ roomId }: { roomId: string }) => {
     };
   });
 
-  return { ...result, messages: messagesWithUserData };
+  return { ...infiniteQueryResult, messages: messagesWithUserData };
 };
 
 export default useMessages;
