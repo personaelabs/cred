@@ -39,7 +39,7 @@ const RoomUserListItem = ({ user }: { user: User }) => {
 
 /**
  * Room info page.
- * Shows the room name, key sell price, rep holders and purchasers.
+ * Shows the room name, key sell price, rep holders and lurkers.
  */
 const RoomInfo = () => {
   const params = useParams<{ roomId: string }>();
@@ -70,10 +70,10 @@ const RoomInfo = () => {
     return <></>;
   }
 
-  const credddHolders = roomUsersResult?.data.filter(user =>
+  const insiders = roomUsersResult?.data.filter(user =>
     room.writerIds.includes(user.id)
   );
-  const purchasers = roomUsersResult?.data.filter(
+  const lurkers = roomUsersResult?.data.filter(
     user =>
       room.readerIds.includes(user.id) && !room.writerIds.includes(user.id)
   );
@@ -109,13 +109,13 @@ const RoomInfo = () => {
           )}
         </div>
         <div className="mt-8">
-          {credddHolders.length > 0 ? (
-            <div className="text-center text-gray-400">rep holders</div>
+          {insiders.length > 0 ? (
+            <div className="text-center text-gray-400">insiders</div>
           ) : (
             <></>
           )}
           <div className="mt-2">
-            {credddHolders.map(user => {
+            {insiders.map(user => {
               return (
                 <div key={user!.id}>
                   <RoomUserListItem user={user}></RoomUserListItem>
@@ -125,13 +125,13 @@ const RoomInfo = () => {
           </div>
         </div>
         <div className="mt-8">
-          {purchasers.length ? (
-            <div className="text-center text-gray-400">Purchasers</div>
+          {lurkers.length ? (
+            <div className="text-center text-gray-400">lurkers</div>
           ) : (
             <></>
           )}
           <div className="mt-2">
-            {purchasers.map(user => {
+            {lurkers.map(user => {
               return (
                 <div key={user!.id}>
                   <RoomUserListItem user={user}></RoomUserListItem>
