@@ -14,6 +14,7 @@ export const roomConverter = {
       isHidden: room.isHidden,
       pinnedMessage: room.pinnedMessage,
       isOpenUntil: room.isOpenUntil,
+      eligibility: room.eligibility,
     };
   },
   fromFirestore: (snapshot: DocumentData) => {
@@ -34,6 +35,7 @@ export const roomConverter = {
       isHidden: data.isHidden || false,
       pinnedMessage: data.pinnedMessage,
       isOpenUntil,
+      eligibility: data.eligibility,
     };
 
     return room;

@@ -62,7 +62,7 @@ const EnterPortalModal = (props: EnterPortalModalProps) => {
         <div className="flex flex-col gap-y-6">
           <div className="text-center">
             <div className="opacity-60">Eligibility</div>
-            <div className="italic">Bridged over $10k to Polygon</div>
+            <div className="italic">{room.eligibility}</div>
           </div>
           <div className="flex flex-col gap-y-2">
             {canUserEnter ? (
