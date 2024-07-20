@@ -8,7 +8,6 @@ import messageKeys from '@/queryKeys/messageKeys';
 
 export const getRoomLatestMessage = async ({
   isSingedInUserAdmin,
-  signedInUserId,
   roomId,
 }: {
   isSingedInUserAdmin: boolean;
@@ -17,7 +16,6 @@ export const getRoomLatestMessage = async ({
 }) => {
   const q = buildMessageQuery({
     isAdminView: isSingedInUserAdmin,
-    viewerId: signedInUserId,
     roomId,
     pageSize: 1,
   });
@@ -45,7 +43,6 @@ const useRoomLatestMessage = (roomId: string) => {
     if (room && signedInUser) {
       const q = buildMessageQuery({
         isAdminView: room.writerIds.includes(signedInUser.id),
-        viewerId: signedInUser.id,
         roomId,
         pageSize: 1,
       });

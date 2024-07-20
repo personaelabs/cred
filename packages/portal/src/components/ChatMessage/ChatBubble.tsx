@@ -1,6 +1,5 @@
 import { highlightText } from '@/lib/utils';
 import { useLongPress } from 'use-long-press';
-import { MessageVisibility } from '@cred/shared';
 import { MessageWithUserData } from '@/types';
 
 interface ChatBubbleProps {
@@ -33,7 +32,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
       }}
     >
       <div
-        className={`select-none ${message.text ? '' : 'hidden'} ${isFocused ? 'animate-pulse-once' : ''} text-md px-4 py-2 ${message.visibility === MessageVisibility.PUBLIC ? 'bg-primary' : 'bg-gray-500'} text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
+        className={`select-none ${message.text ? '' : 'hidden'} ${isFocused ? 'animate-pulse-once' : ''} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline`}
         dangerouslySetInnerHTML={{
           // Highlight the text in the message and render
           __html: highlightText(message.text),

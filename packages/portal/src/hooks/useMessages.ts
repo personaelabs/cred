@@ -32,18 +32,15 @@ export const toMessageWithUserData = (
 export const PAGE_SIZE = 100;
 const getMessages = async ({
   isSingedInUserAdmin,
-  signedInUserId,
   roomId,
   lastMessage,
 }: {
   isSingedInUserAdmin: boolean;
-  signedInUserId: string;
   roomId: string;
   lastMessage: MessageWithUserData | null;
 }) => {
   const q = buildMessageQuery({
     isAdminView: isSingedInUserAdmin,
-    viewerId: signedInUserId,
     roomId,
     pageSize: PAGE_SIZE,
     from: lastMessage?.createdAt ? new Date(lastMessage.createdAt) : undefined,
@@ -76,7 +73,6 @@ const useListenToMessages = ({
     if (signedInUserId && enabled) {
       const q = buildMessageQuery({
         isAdminView: isSingedInUserAdmin,
-        viewerId: signedInUserId,
         roomId,
         pageSize: PAGE_SIZE,
       });
@@ -128,7 +124,6 @@ const useMessages = ({ roomId }: { roomId: string }) => {
       pageParam: MessageWithUserData | null;
     }) => {
       const messages = await getMessages({
-        signedInUserId: signedInUser!.id,
         roomId,
         lastMessage: pageParam,
         isSingedInUserAdmin,

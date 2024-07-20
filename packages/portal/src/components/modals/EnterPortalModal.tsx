@@ -44,6 +44,8 @@ const EnterPortalModal = (props: EnterPortalModalProps) => {
     return <></>;
   }
 
+  const isUserInsider = room.writerIds.includes(signedInUser.id);
+
   const canUserEnter =
     room.writerIds.includes(signedInUser.id) ||
     room.readerIds.includes(signedInUser.id);
@@ -67,7 +69,7 @@ const EnterPortalModal = (props: EnterPortalModalProps) => {
           <div className="flex flex-col gap-y-2">
             {canUserEnter ? (
               <Button disabled={isJoining} onClick={onEnterClick}>
-                Enter portal
+                Enter as {isUserInsider ? 'insider' : 'lurker'}
               </Button>
             ) : (
               <>

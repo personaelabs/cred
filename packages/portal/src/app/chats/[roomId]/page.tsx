@@ -10,15 +10,12 @@ import { useHeaderOptions } from '@/contexts/HeaderContext';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { MessageInput, MessageWithUserData, ModalType } from '@/types';
+import { MessageInput, MessageWithUserData } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
 import useDeleteMessage from '@/hooks/useDeleteMessage';
-import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
-import MessageAsAdminModal from '@/components/modals/MessageAsAdminModal';
-import MessageAsBuyerModal from '@/components/modals/MessageAsBuyerModal';
 import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 import PinnedMessage from '@/components/PinnedMessage';
 import { toast } from 'sonner';
@@ -47,10 +44,6 @@ const Chat = () => {
   const { mutateAsync: sendMessage, reset: resetSendMessageState } =
     useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
-    useState(false);
-  const [isMessageAsBuyerModalOpen, setIsMessageAsBuyerModalOpen] =
-    useState(false);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -74,25 +67,6 @@ const Chat = () => {
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   const { mutateAsync: sendMessageReaction } = useSendMessageReaction();
-
-  useEffect(() => {
-    if (signedInUser && room) {
-      const isSignedInUserAdmin = isUserAdminInRoom({
-        room,
-        userId: signedInUser.id,
-      });
-
-      if (isSignedInUserAdmin) {
-        if (canShowModal(ModalType.REPLY_AS_ADMIN)) {
-          setIsMessageAsAdminModalOpen(true);
-        }
-      } else {
-        if (canShowModal(ModalType.MESSAGE_AS_BUYER)) {
-          setIsMessageAsBuyerModalOpen(true);
-        }
-      }
-    }
-  }, [signedInUser, room]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -154,6 +128,8 @@ const Chat = () => {
   if (!signedInUser || !messages) {
     return <div className="bg-background h-full"></div>;
   }
+
+  const isReadOnly = !room?.writerIds.includes(signedInUser?.id || '');
 
   return (
     <div className="h-full">
@@ -244,7 +220,9 @@ const Chat = () => {
           )}
         </div>
         <div className="mb-[6px]">
-          {!isPortalClosed ? (
+          {isPortalClosed || isReadOnly ? (
+            <></>
+          ) : (
             <ChatMessageInput
               inputRef={inputRef}
               roomId={params.roomId}
@@ -254,23 +232,9 @@ const Chat = () => {
                 setReplyTo(null);
               }}
             ></ChatMessageInput>
-          ) : (
-            <></>
           )}
         </div>
       </div>
-      <MessageAsAdminModal
-        isOpen={isMessageAsAdminModalOpen}
-        onClose={() => {
-          setIsMessageAsAdminModalOpen(false);
-        }}
-      ></MessageAsAdminModal>
-      <MessageAsBuyerModal
-        isOpen={isMessageAsBuyerModalOpen}
-        onClose={() => {
-          setIsMessageAsBuyerModalOpen(false);
-        }}
-      ></MessageAsBuyerModal>
     </div>
   );
 };
