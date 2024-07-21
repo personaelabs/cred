@@ -8,6 +8,7 @@ import ChatMessageAvatar from './ChatMessageAvatar';
 import ChatMessageDropdownMenu from './ChatMessageDropdownMenu';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import MessageReactions from './MessageReactions';
+import ReplyPreview from './ReplyPreview';
 
 type ChatMessageProps = {
   message: MessageWithUserData;
@@ -26,6 +27,8 @@ const ChatMessage = (props: ChatMessageProps) => {
     props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const replyToId = message.replyToId;
+
   return (
     <div
       className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
@@ -36,6 +39,17 @@ const ChatMessage = (props: ChatMessageProps) => {
         <></>
       )}
       <div className="max-w-[70%]">
+        {replyToId ? (
+          <ReplyPreview
+            roomId={roomId}
+            replyToId={replyToId}
+            onClickOnPreview={() => {
+              onViewReplyClick(replyToId);
+            }}
+          ></ReplyPreview>
+        ) : (
+          <></>
+        )}
         <ChatBubble
           roomId={roomId}
           isFocused={isFocused}
