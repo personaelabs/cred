@@ -18,8 +18,6 @@ if (process.env.RENDER !== 'true') {
   DRY_RUN = true;
 }
 
-DRY_RUN = false;
-
 export { DRY_RUN };
 
 logger.info(`Google Cloud project ID: ${projectId}`);
