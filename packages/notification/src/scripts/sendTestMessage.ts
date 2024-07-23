@@ -12,7 +12,11 @@ import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
 const db = getFirestore(app);
 
-const ADMIN_FIDS = ['1', 'did:privy:clw1w6dar0fdfmhd5ae1rfna6'];
+const ADMIN_FIDS = [
+  '1',
+  'did:privy:clw1w6dar0fdfmhd5ae1rfna6',
+  'did:privy:clypxiz420jc59tu2r9bhxcw5',
+];
 
 const registerFid1 = async () => {
   const USER_ID = '1';
@@ -49,6 +53,7 @@ const createNotificationTestRoom = async () => {
     isHidden: false,
     pinnedMessage: null,
     isOpenUntil: null,
+    eligibility: '',
   };
 
   await db

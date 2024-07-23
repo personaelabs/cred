@@ -70,20 +70,29 @@ const ReceivedMessageDropdownContent = (
 interface SenderMessageDropdownContentProps {
   isReadOnly: boolean;
   onCopyClick: () => void;
+  onReplyClick: () => void;
   onDeleteClick: () => void;
 }
 
 const SenderMessageDropdownContent = (
   props: SenderMessageDropdownContentProps
 ) => {
-  const { isReadOnly, onCopyClick, onDeleteClick } = props;
+  const { isReadOnly, onCopyClick, onReplyClick, onDeleteClick } = props;
 
   return (
     <DropdownMenuContent className="bg-background mt-[-30px]">
+      <DropdownMenuItem
+        onClick={onReplyClick}
+        className={`${isReadOnly ? 'hidden' : ''}`}
+      >
+        <Reply className={`mr-2 w-4 h-4 `}></Reply>
+        <div>Reply</div>
+      </DropdownMenuItem>
       <DropdownMenuItem onClick={onCopyClick}>
         <Copy className="mr-2 w-4 h-4"></Copy>
         <div>Copy</div>
       </DropdownMenuItem>
+
       <DropdownMenuItem
         onClick={onDeleteClick}
         className={`text-red-500 ${isReadOnly ? 'hidden' : ''}`}
@@ -129,6 +138,9 @@ const ChatMessageDropdownMenu = (props: ChatMessageDropdownMenuProps) => {
         <SenderMessageDropdownContent
           isReadOnly={isReadOnly}
           onCopyClick={onClickCopyToClipboard}
+          onReplyClick={() => {
+            props.onReplySelect(props.message);
+          }}
           onDeleteClick={() => {
             props.onDeleteClick(props.message.id);
           }}
