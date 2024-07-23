@@ -7,24 +7,36 @@ import {
   Timestamp,
   collection,
   limit,
-  or,
   orderBy,
   query,
   startAt,
-  where,
 } from 'firebase/firestore';
 import db from './firestore';
-import { MessageVisibility, Room, messageConverter } from '@cred/shared';
+import { Room, messageConverter } from '@cred/shared';
 import { MobileOS, ModalType } from '@/types';
 import { DialogType } from '@/contexts/DialogContext';
 
+const pad = (num: number): string => {
+  return num < 10 ? `0${num}` : `${num}`;
+};
+
 /**
- * Returns the number of hours until the portal closes.
+ * Returns the time remaining until the portal closes in the format "HH:MM".
  */
-export const getPortalClosesIn = (openUntil: Date): number => {
+export const getPortalClosesIn = (openUntil: Date): string => {
   console.log('openUntil', openUntil);
   const now = new Date();
-  return Math.max(openUntil.getHours() - now.getHours(), 0);
+
+  const timeRemaining = openUntil.getTime() - now.getTime();
+
+  if (timeRemaining < 0) {
+    return '0';
+  }
+
+  const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+  const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
+  return `${pad(hours)}h${pad(minutes)}min`;
 };
 
 export const sleep = (ms: number): Promise<void> => {
@@ -44,10 +56,6 @@ const DO_NOT_SHOW_AGAIN_PREFIX = 'creddd.DO_NOT_SHOW_AGAIN:';
 
 export const setDoNotShowAgain = (dialog: ModalType | DialogType) => {
   localStorage.setItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`, 'true');
-};
-
-export const canShowModal = (dialog: ModalType) => {
-  return !localStorage.getItem(`${DO_NOT_SHOW_AGAIN_PREFIX}:${dialog}`);
 };
 
 /**
@@ -70,13 +78,11 @@ export const isUserAdminInRoom = ({
  */
 export const buildMessageQuery = ({
   isAdminView,
-  viewerId,
   roomId,
   pageSize,
   from,
 }: {
   isAdminView: boolean;
-  viewerId: string;
   roomId: string;
   pageSize: number;
   from?: Date;
@@ -97,27 +103,14 @@ export const buildMessageQuery = ({
       : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
   }
 
-  const onlyPublic = or(
-    where('visibility', '==', MessageVisibility.PUBLIC),
-    where('userId', '==', viewerId)
-  );
-
-  // Only get public messages and messages from the viewer
-  // if the user is not an admin
   return from
     ? query(
         messagesRef,
-        onlyPublic,
         orderBy('createdAt', 'desc'),
         startAt(Timestamp.fromDate(from)),
         limit(pageSize)
       )
-    : query(
-        messagesRef,
-        onlyPublic,
-        orderBy('createdAt', 'desc'),
-        limit(pageSize)
-      );
+    : query(messagesRef, orderBy('createdAt', 'desc'), limit(pageSize));
 };
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

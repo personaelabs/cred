@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import useLeaveRoom from '@/hooks/useLeaveRoom';
 import Scrollable from '@/components/Scrollable';
 import { useScrollableRef } from '@/contexts/FooterContext';
-import { cutoffMessage } from '@/lib/utils';
+import { cutoffMessage, getPortalClosesIn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,10 +66,12 @@ type RoomItemProps = {
   isMuted: boolean;
   showMuteToggle: boolean;
   isPurchasedRoom: boolean;
+  isOpenUntil: Date | null;
 };
 
 const RoomItem = (props: RoomItemProps) => {
-  const { id, name, isMuted, showMuteToggle, isPurchasedRoom } = props;
+  const { id, isOpenUntil, name, isMuted, showMuteToggle, isPurchasedRoom } =
+    props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const { data: singedInUser } = useSignedInUser();
@@ -96,6 +98,12 @@ const RoomItem = (props: RoomItemProps) => {
     setUnreadMessageExists(_unreadMessageExists);
   }, [roomLatestMessage, readTicket, singedInUser]);
 
+  const isOpen = isOpenUntil ? isOpenUntil > new Date() : false;
+
+  const portalClosesIn = isOpenUntil
+    ? getPortalClosesIn(new Date(isOpenUntil))
+    : '';
+
   return (
     <>
       <Link
@@ -106,14 +114,20 @@ const RoomItem = (props: RoomItemProps) => {
         }}
       >
         <div className="flex flex-row justify-between w-full h-full border-b-2">
-          <div className="flex flex-col items-start px-5 py-2">
+          <div
+            className={`flex flex-col items-start px-5 py-2 ${isOpen ? '' : 'opacity-60'}`}
+          >
             <div
               className={`text-lg ${isPurchasedRoom ? '' : 'font-bold text-primary'}`}
             >
               {name}
             </div>
-            <div className="opacity-80">{props.pinnedMessage}</div>
-            <div className="opacity-60 mt-1">
+            <div className="opacity-60">
+              {portalClosesIn === '0'
+                ? 'closed'
+                : `closes in ${portalClosesIn}`}
+            </div>
+            <div className="opacity-60 mt-2">
               {roomLatestMessage
                 ? `${cutoffMessage(roomLatestMessage.body, 75)}`
                 : ''}
@@ -215,8 +229,6 @@ const Chats = () => {
       !room.writerIds.includes(signedInUser.id)
   );
 
-  console.log(writableRooms, purchasedRooms);
-
   return (
     <Scrollable>
       <div
@@ -238,6 +250,7 @@ const Chats = () => {
               room.readerIds.includes(signedInUser.id) &&
               !room.writerIds.includes(signedInUser.id)
             }
+            isOpenUntil={room.isOpenUntil}
           ></RoomItem>
         ))}
       </div>

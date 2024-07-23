@@ -3,7 +3,6 @@ import useSignedInUser from './useSignedInUser';
 import {
   addDoc,
   collection,
-  doc,
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore';
@@ -13,23 +12,6 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import useRoom from './useRoom';
-
-const makeMessagePublic = async ({
-  roomId,
-  messageId,
-}: {
-  roomId: string;
-  messageId: string;
-}) => {
-  const messageRef = doc(
-    collection(db, 'rooms', roomId, 'messages').withConverter(messageConverter),
-    messageId
-  );
-
-  await updateDoc(messageRef, {
-    visibility: MessageVisibility.PUBLIC,
-  });
-};
 
 const sendMessage = async ({
   roomId,
@@ -117,12 +99,6 @@ const useSendMessage = (roomId: string) => {
         throw new Error('Room not found');
       }
 
-      const isSingedInUserAdmin = room.writerIds.includes(signedInUser.id);
-      // If the user is a writer, the message can be public
-      const visibility = isSingedInUserAdmin
-        ? MessageVisibility.PUBLIC
-        : MessageVisibility.ONLY_ADMINS;
-
       await sendMessage({
         roomId,
         message,
@@ -130,13 +106,8 @@ const useSendMessage = (roomId: string) => {
         replyTo,
         senderId: signedInUser.id,
         imageUris,
-        visibility,
+        visibility: MessageVisibility.PUBLIC,
       });
-
-      // If the user is an admin and the message is a reply, make the replied public
-      if (isSingedInUserAdmin && replyTo) {
-        await makeMessagePublic({ roomId, messageId: replyTo });
-      }
     },
     onSuccess: () => {},
   });

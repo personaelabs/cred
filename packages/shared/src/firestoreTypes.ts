@@ -84,6 +84,7 @@ export interface Room {
   isFeatured: boolean;
   isHidden: boolean;
   pinnedMessage: string | null;
+  eligibility: string | null;
   isOpenUntil: Date | null;
 }
 

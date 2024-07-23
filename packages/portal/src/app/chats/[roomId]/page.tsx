@@ -4,21 +4,18 @@ import useSendMessage from '@/hooks/useSendMessage';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ChatMessage from '@/components/ChatMessage';
+import ChatMessage from '@/components/ChatMessage/ChatMessage';
 import ChatMessageInput from '@/components/ChatMessageInput';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { MessageInput, MessageWithUserData, ModalType } from '@/types';
+import { MessageInput, MessageWithUserData } from '@/types';
 import { Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
 import useDeleteMessage from '@/hooks/useDeleteMessage';
-import { canShowModal, isUserAdminInRoom } from '@/lib/utils';
-import MessageAsAdminModal from '@/components/modals/MessageAsAdminModal';
-import MessageAsBuyerModal from '@/components/modals/MessageAsBuyerModal';
 import useSendMessageReaction from '@/hooks/useSendMessageReaction';
 import PinnedMessage from '@/components/PinnedMessage';
 import { toast } from 'sonner';
@@ -44,16 +41,9 @@ const Chat = () => {
   }, []);
 
   const { data: signedInUser } = useSignedInUser();
-  const {
-    mutate: sendMessage,
-    isSuccess,
-    reset,
-  } = useSendMessage(params.roomId);
+  const { mutateAsync: sendMessage, reset: resetSendMessageState } =
+    useSendMessage(params.roomId);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [isMessageAsAdminModalOpen, setIsMessageAsAdminModalOpen] =
-    useState(false);
-  const [isMessageAsBuyerModalOpen, setIsMessageAsBuyerModalOpen] =
-    useState(false);
 
   const { mutate: updateReadTicket, latestReadMessageCreatedAt } =
     useUpdateReadTicket(params.roomId);
@@ -77,25 +67,6 @@ const Chat = () => {
   const { mutateAsync: deleteMessage } = useDeleteMessage(params.roomId);
 
   const { mutateAsync: sendMessageReaction } = useSendMessageReaction();
-
-  useEffect(() => {
-    if (signedInUser && room) {
-      const isSignedInUserAdmin = isUserAdminInRoom({
-        room,
-        userId: signedInUser.id,
-      });
-
-      if (isSignedInUserAdmin) {
-        if (canShowModal(ModalType.REPLY_AS_ADMIN)) {
-          setIsMessageAsAdminModalOpen(true);
-        }
-      } else {
-        if (canShowModal(ModalType.MESSAGE_AS_BUYER)) {
-          setIsMessageAsBuyerModalOpen(true);
-        }
-      }
-    }
-  }, [signedInUser, room]);
 
   useEffect(() => {
     if (signedInUser) {
@@ -137,24 +108,28 @@ const Chat = () => {
     }
   }, [params.roomId, room, setOptions]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-      reset();
-    }
-  }, [isSuccess, reset]);
-
   const onSendClick = useCallback(
-    (input: Omit<MessageInput, 'replyTo'>) => {
-      sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
+    async (input: Omit<MessageInput, 'replyTo'>) => {
+      await sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
+
+      // Scroll to the sent message
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+      resetSendMessageState();
     },
-    [replyTo, sendMessage]
+    [replyTo, resetSendMessageState, sendMessage]
   );
+
+  const isPortalClosed = room?.isOpenUntil
+    ? room.isOpenUntil < new Date()
+    : false;
 
   if (!signedInUser || !messages) {
     return <div className="bg-background h-full"></div>;
   }
+
+  const isReadOnly = !room?.writerIds.includes(signedInUser?.id || '');
 
   return (
     <div className="h-full">
@@ -201,17 +176,18 @@ const Chat = () => {
                     if (el) {
                       chatMessageRefs.current.set(message.id, el);
                     }
+                    if (i === messages.length - 1) {
+                      // bottomRef.current = el;
+                    }
                   }}
                 >
                   <ChatMessage
-                    messageId={message.id}
+                    isReadOnly={isPortalClosed}
+                    message={message}
                     roomId={params.roomId}
                     isFocused={scrollToMessageId === message.id}
                     {...message}
                     isSender={message.user.id === signedInUser.id.toString()}
-                    renderAvatar={
-                      i === 0 || message.user.id !== messages[i - 1].user.id
-                    }
                     onReplySelect={message => {
                       const index = messages.length - i;
                       if (index > PAGE_SIZE) {
@@ -239,33 +215,26 @@ const Chat = () => {
                   />
                 </div>
               ))}
+              <div ref={bottomRef}></div>
             </InfiniteScroll>
           )}
         </div>
         <div className="mb-[6px]">
-          <ChatMessageInput
-            inputRef={inputRef}
-            roomId={params.roomId}
-            replyToText={replyTo ? replyTo.text : undefined}
-            onSend={onSendClick}
-            onCancelReply={() => {
-              setReplyTo(null);
-            }}
-          ></ChatMessageInput>
+          {isPortalClosed || isReadOnly ? (
+            <></>
+          ) : (
+            <ChatMessageInput
+              inputRef={inputRef}
+              roomId={params.roomId}
+              replyToText={replyTo ? replyTo.text : undefined}
+              onSend={onSendClick}
+              onCancelReply={() => {
+                setReplyTo(null);
+              }}
+            ></ChatMessageInput>
+          )}
         </div>
       </div>
-      <MessageAsAdminModal
-        isOpen={isMessageAsAdminModalOpen}
-        onClose={() => {
-          setIsMessageAsAdminModalOpen(false);
-        }}
-      ></MessageAsAdminModal>
-      <MessageAsBuyerModal
-        isOpen={isMessageAsBuyerModalOpen}
-        onClose={() => {
-          setIsMessageAsBuyerModalOpen(false);
-        }}
-      ></MessageAsBuyerModal>
     </div>
   );
 };

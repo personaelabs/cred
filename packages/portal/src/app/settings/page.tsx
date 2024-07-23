@@ -104,12 +104,6 @@ const Settings = () => {
             to="/settings/notification"
             iconColor="#65f7b5"
           ></SettingsMenuItem>
-          <SettingsMenuItem
-            icon="Users"
-            text="Invite"
-            to="/settings/invite"
-            iconColor="#65a7f7"
-          ></SettingsMenuItem>
         </div>
         <Button variant="link" className="mt-10" onClick={onSignOutClick}>
           Sign out

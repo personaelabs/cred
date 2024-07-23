@@ -24,6 +24,7 @@ import WithdrawalSheet from '@/components/bottom-sheets/WithdrawalSheet';
 import ClickableBox from '@/components/ClickableBox';
 import Link from 'next/link';
 import { baseSepolia } from 'viem/chains';
+import firebaseProd from '@/lib/firebase/firebase.prod';
 
 interface TradeHistoryListItemProps {
   log: TradeLog;
@@ -83,7 +84,9 @@ const DepositButton = (props: { address: Hex | undefined }) => {
       <div className="text-md flex flex-row items-center">
         Deposit on{' '}
         <img src="/base.png" alt="base" className="w-4 h-4 mx-1"></img>
-        Base
+        {process.env.NEXT_PUBLIC_PROJECT_ID === firebaseProd.projectId
+          ? 'Base'
+          : 'Base Sepolia'}
       </div>
     </ClickableBox>
   );

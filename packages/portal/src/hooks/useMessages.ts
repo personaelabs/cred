@@ -1,5 +1,5 @@
 import { getDocs, onSnapshot } from 'firebase/firestore';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Message } from '@cred/shared';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
@@ -32,18 +32,15 @@ export const toMessageWithUserData = (
 export const PAGE_SIZE = 100;
 const getMessages = async ({
   isSingedInUserAdmin,
-  signedInUserId,
   roomId,
   lastMessage,
 }: {
   isSingedInUserAdmin: boolean;
-  signedInUserId: string;
   roomId: string;
   lastMessage: MessageWithUserData | null;
 }) => {
   const q = buildMessageQuery({
     isAdminView: isSingedInUserAdmin,
-    viewerId: signedInUserId,
     roomId,
     pageSize: PAGE_SIZE,
     from: lastMessage?.createdAt ? new Date(lastMessage.createdAt) : undefined,
@@ -66,7 +63,6 @@ const useListenToMessages = ({
   signedInUserId: string | null;
   enabled: boolean;
 }) => {
-  const queryClient = useQueryClient();
   const [newMessages, setNewMessages] = useState<MessageWithUserData[]>([]);
   const [removedMessages, setRemovedMessages] = useState<string[]>([]);
   const [updatedMessages, setUpdatedMessages] = useState<MessageWithUserData[]>(
@@ -77,7 +73,6 @@ const useListenToMessages = ({
     if (signedInUserId && enabled) {
       const q = buildMessageQuery({
         isAdminView: isSingedInUserAdmin,
-        viewerId: signedInUserId,
         roomId,
         pageSize: PAGE_SIZE,
       });
@@ -109,7 +104,7 @@ const useListenToMessages = ({
         unsubscribe();
       };
     }
-  }, [roomId, queryClient, isSingedInUserAdmin, signedInUserId, enabled]);
+  }, [roomId, isSingedInUserAdmin, signedInUserId, enabled]);
 
   return { newMessages, removedMessages, updatedMessages };
 };
@@ -129,7 +124,6 @@ const useMessages = ({ roomId }: { roomId: string }) => {
       pageParam: MessageWithUserData | null;
     }) => {
       const messages = await getMessages({
-        signedInUserId: signedInUser!.id,
         roomId,
         lastMessage: pageParam,
         isSingedInUserAdmin,
