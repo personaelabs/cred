@@ -93,6 +93,8 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   const redirectToSignIn =
     !redirectToInstallPage &&
     isAuthenticated === false &&
+    pathname !== '/install-pwa' &&
+    pathname !== '/about' &&
     pathname !== '/signin' &&
     pathname !== '/signin-as';
 
