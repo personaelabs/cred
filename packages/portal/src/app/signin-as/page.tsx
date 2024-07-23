@@ -6,8 +6,10 @@ import { useSignInMethod } from '@/contexts/SignInMethodContext';
 import useSignIn from '@/hooks/useSignIn';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
+import { Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { Suspense } from 'react';
 
 type SignInMethod = 'google' | 'farcaster' | 'twitter';
 
@@ -17,7 +19,13 @@ const SignInAs = () => {
   const signInMethod = searchParams.get('signInMethod') as SignInMethod;
   const { data: user } = useUser(userId);
   const { setSignInMethod } = useSignInMethod();
-  const { mutateAsync: signIn } = useSignIn();
+  const {
+    mutateAsync: signIn,
+    isSigningIn,
+    isSuccess: isSignSuccess,
+  } = useSignIn({
+    redirectToAddRep: true,
+  });
   const { data: signedInUser } = useSignedInUser();
   const router = useRouter();
 
@@ -25,10 +33,10 @@ const SignInAs = () => {
 
   useEffect(() => {
     // Redirect to home if user is already signed in
-    if (signedInUser) {
+    if (signedInUser && !isSignSuccess) {
       router.push('/');
     }
-  }, [signedInUser, router]);
+  }, [signedInUser, router, isSignSuccess]);
 
   useEffect(() => {
     if (signInMethod) {
@@ -65,15 +73,27 @@ const SignInAs = () => {
         <div className="opacity-80 mt-4">Sign in to add rep</div>
       </div>
       <Button
+        disabled={isSigningIn}
         className="mt-4"
-        onClick={() => {
-          signIn();
+        onClick={async () => {
+          await signIn();
         }}
       >
+        {isSigningIn && (
+          <Loader2 className="mr-2 w-4 h-4 animate-spin"></Loader2>
+        )}
         Sign in
       </Button>
     </div>
   );
 };
 
-export default SignInAs;
+const WithSuspense = () => {
+  return (
+    <Suspense>
+      <SignInAs />
+    </Suspense>
+  );
+};
+
+export default WithSuspense;

@@ -42,7 +42,13 @@ const SignInButton = (props: SignInButtonProps) => {
 };
 
 const SignIn = () => {
-  const { mutateAsync: signIn, isSigningIn, error } = useSignIn();
+  const {
+    mutateAsync: signIn,
+    isSigningIn,
+    error,
+  } = useSignIn({
+    redirectToAddRep: false,
+  });
   const { setOptions } = useHeaderOptions();
 
   useEffect(() => {

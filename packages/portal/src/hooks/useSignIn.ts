@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { useState } from 'react';
 
-const useSignIn = () => {
+const useSignIn = ({ redirectToAddRep }: { redirectToAddRep: boolean }) => {
   const router = useRouter();
   const { getAccessToken, logout } = usePrivy();
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -28,13 +28,17 @@ const useSignIn = () => {
         queryKey: ['signed-in-user'],
       });
 
-      const user = signInResponse.user;
-      const isUsernameSet = user?.username ? true : false;
-
-      if (!isUsernameSet) {
-        router.push('/setup-username');
+      if (redirectToAddRep) {
+        router.push('/settings/add-creddd');
       } else {
-        router.push('/enable-notifications');
+        const user = signInResponse.user;
+        const isUsernameSet = user?.username ? true : false;
+
+        if (!isUsernameSet) {
+          router.push('/setup-username');
+        } else {
+          router.push('/enable-notifications');
+        }
       }
     },
   });
