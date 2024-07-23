@@ -82,13 +82,17 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isPwa === false &&
     isMobile === true &&
     pathname !== '/install-pwa' &&
-    pathname !== '/about';
+    pathname !== '/about' &&
+    pathname !== '/signin-as';
 
   // Redirect to sign in page if the user is not authenticated.
   const redirectToSignIn =
     !redirectToInstallPage &&
     isAuthenticated === false &&
-    pathname !== '/signin';
+    pathname !== '/install-pwa' &&
+    pathname !== '/about' &&
+    pathname !== '/signin' &&
+    pathname !== '/signin-as';
 
   useEffect(() => {
     (async () => {
