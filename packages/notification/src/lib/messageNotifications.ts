@@ -27,7 +27,7 @@ const getRoom = async (roomId: string) => {
   return roomDoc.data();
 };
 
-const _getMessage = async ({
+const getMessage = async ({
   roomId,
   messageId,
 }: {
@@ -89,21 +89,28 @@ const getLatestIdempotencyKey = async () => {
 };
 
 const sendMentionNotification = async ({
-  body,
+  message,
   token,
   room,
   userId,
 }: {
-  body: string;
+  message: Message;
   token: string;
   room: Room;
   userId: string;
 }) => {
   try {
+    const sender = await getUser(message.userId);
+
+    if (!sender) {
+      logger.error(`Sender ${message.userId} not found`);
+      return;
+    }
+
     const messageId = await messaging.send({
       notification: {
-        title: `Mentioned in ${room.name}`,
-        body,
+        title: `${sender.displayName} mentioned you in ${room.name}`,
+        body: message.body,
       },
       token: token,
       webpush: {
@@ -124,59 +131,44 @@ const sendMentionNotification = async ({
 };
 
 const sendReplyNotification = async ({
-  body,
+  message,
   token,
   room,
+  userId,
 }: {
-  body: string;
+  message: Message;
   token: string;
   room: Room;
+  userId: string;
 }) => {
-  const messageId = await messaging.send({
-    notification: {
-      title: `Reply in ${room.name}`,
-      body,
-    },
-    token: token,
-    webpush: {
-      fcmOptions: {
-        link: `/chats/${room.id}`,
+  try {
+    const sender = await getUser(message.userId);
+
+    if (!sender) {
+      logger.error(`Sender ${message.userId} not found`);
+      return;
+    }
+
+    const messageId = await messaging.send({
+      notification: {
+        title: `${sender.displayName} replied to you in ${room.name}`,
+        body: message.body,
       },
-    },
-  });
-
-  logger.info(`Reply notification sent`, {
-    messageId,
-    roomId: room.id,
-  });
-};
-
-const sendNewMessageNotification = async ({
-  body,
-  token,
-  room,
-}: {
-  body: string;
-  token: string;
-  room: Room;
-}) => {
-  const messageId = await messaging.send({
-    notification: {
-      title: `New message in ${room.name}`,
-      body,
-    },
-    token: token,
-    webpush: {
-      fcmOptions: {
-        link: `/chats/${room.id}`,
+      token: token,
+      webpush: {
+        fcmOptions: {
+          link: `/chats/${room.id}`,
+        },
       },
-    },
-  });
+    });
 
-  logger.info(`New message notification sent`, {
-    messageId,
-    roomId: room.id,
-  });
+    logger.info(`Reply notification sent`, {
+      messageId,
+      roomId: room.id,
+    });
+  } catch (err) {
+    logger.error(`Error sending notification to ${userId}`, err);
+  }
 };
 
 /**
@@ -242,22 +234,17 @@ const notifyUserAboutMessage = async ({
       try {
         if (messageType === MessageNotificationType.MENTION) {
           await sendMentionNotification({
-            body: message.body,
+            message,
             token: token.token,
             room,
             userId,
           });
         } else if (messageType === MessageNotificationType.REPLY) {
           await sendReplyNotification({
-            body: message.body,
+            message,
             token: token.token,
             room,
-          });
-        } else if (messageType === MessageNotificationType.NEW_MESSAGE) {
-          await sendNewMessageNotification({
-            body: message.body,
-            token: token.token,
-            room,
+            userId,
           });
         } else {
           logger.error(`Unknown message type ${messageType}`);
@@ -303,22 +290,6 @@ export const sendMessageNotifications = async () => {
             continue;
           }
 
-          // Notify all users in the room about the new message
-          for (const userId of room.joinedUserIds) {
-            if (userId === message.userId) {
-              logger.debug(`Skipping self message for ${userId}`);
-              continue;
-            }
-
-            await notifyUserAboutMessage({
-              userId,
-              messageType: MessageNotificationType.NEW_MESSAGE,
-              room,
-              message,
-            });
-          }
-
-          /*
           // Notify users who were mentioned in the message
           for (const userId of message.mentions) {
             if (userId === message.userId) {
@@ -343,6 +314,8 @@ export const sendMessageNotifications = async () => {
 
             if (!repliedMessage) {
               logger.error(`Replied message ${message.replyTo} not found`);
+            } else if (repliedMessage.userId === message.userId) {
+              logger.debug(`Skipping self reply for ${message.userId}`);
             } else {
               await notifyUserAboutMessage({
                 userId: repliedMessage.userId,
@@ -352,7 +325,6 @@ export const sendMessageNotifications = async () => {
               });
             }
           }
-            */
         }
       }
     });
