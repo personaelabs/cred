@@ -37,6 +37,10 @@ import useIsAuthenticated from '@/hooks/useIsAuthenticated';
 import useIsUsernameSet from '@/hooks/useIsUsernameSet';
 import useMixpanel from '@/hooks/useMixpanel';
 import { mainnet } from 'viem/chains';
+import {
+  SignInMethodContextProvider,
+  useSignInMethod,
+} from '@/contexts/SignInMethodContext';
 
 const NODE_ENV = process.env.NODE_ENV;
 
@@ -68,7 +72,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   useMixpanel();
 
   const hideFooter =
-    ['/signin', '/install-pwa', '/about'].includes(pathname) ||
+    ['/signin', '/signin-as', '/install-pwa', '/about'].includes(pathname) ||
     pathname.startsWith('/chats/') ||
     isModalOpen;
 
@@ -82,13 +86,15 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     isPwa === false &&
     isMobile === true &&
     pathname !== '/install-pwa' &&
-    pathname !== '/about';
+    pathname !== '/about' &&
+    pathname !== '/signin-as';
 
   // Redirect to sign in page if the user is not authenticated.
   const redirectToSignIn =
     !redirectToInstallPage &&
     isAuthenticated === false &&
-    pathname !== '/signin';
+    pathname !== '/signin' &&
+    pathname !== '/signin-as';
 
   useEffect(() => {
     (async () => {
@@ -173,6 +179,43 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const WithPrivy = ({ children }: { children: React.ReactNode }) => {
+  const { signInMethod } = useSignInMethod();
+
+  return (
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
+      config={{
+        loginMethods: signInMethod ? [signInMethod] : undefined,
+        supportedChains: [getChain(), mainnet],
+        appearance: {
+          theme: 'dark',
+          accentColor: theme.orange as `#${string}`,
+          logo: 'https://creddd.xyz/personae-logo.svg',
+        },
+        // Create embedded wallets for users who don't have a wallet
+        embeddedWallets: {
+          createOnLogin: 'users-without-wallets',
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig}>
+          <MediaQueryProvider>
+            <HeaderContextProvider>
+              <FooterContextProvider>
+                <DialogContextProvider>
+                  <Main>{children}</Main>
+                </DialogContextProvider>
+              </FooterContextProvider>
+            </HeaderContextProvider>
+          </MediaQueryProvider>
+        </WagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
+  );
+};
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
@@ -182,35 +225,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <PrivyProvider
-        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
-        config={{
-          supportedChains: [getChain(), mainnet],
-          appearance: {
-            theme: 'dark',
-            accentColor: theme.orange as `#${string}`,
-            logo: 'https://creddd.xyz/personae-logo.svg',
-          },
-          // Create embedded wallets for users who don't have a wallet
-          embeddedWallets: {
-            createOnLogin: 'users-without-wallets',
-          },
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <WagmiProvider config={wagmiConfig}>
-            <MediaQueryProvider>
-              <HeaderContextProvider>
-                <FooterContextProvider>
-                  <DialogContextProvider>
-                    <Main>{children}</Main>
-                  </DialogContextProvider>
-                </FooterContextProvider>
-              </HeaderContextProvider>
-            </MediaQueryProvider>
-          </WagmiProvider>
-        </QueryClientProvider>
-      </PrivyProvider>
+      <SignInMethodContextProvider>
+        <WithPrivy>{children}</WithPrivy>
+      </SignInMethodContextProvider>
       <Toaster richColors expand></Toaster>
     </ThemeProvider>
   );

@@ -17,6 +17,7 @@ import { Hex } from 'viem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
 import CredddVerifiedSheet from '@/components/bottom-sheets/CredddVerifiedSheet';
+import AddRepFromAnotherDeviceModal from '@/components/modals/AddRepFromAnotherDeviceModal';
 
 const ConnectButton = () => {
   const { connectWallet } = usePrivy();
@@ -67,6 +68,10 @@ const AddCredddPage = () => {
     id: string;
     displayName: string;
   } | null>(null);
+  const [isAddFromAnotherDeviceModalOpen, setIsAddFromAnotherDeviceModalOpen] =
+    useState(false);
+  const [loginFromAnotherDeviceLink, setLoginFromAnotherDeviceLink] =
+    useState('');
 
   const { setOptions } = useHeaderOptions();
   const {
@@ -94,6 +99,18 @@ const AddCredddPage = () => {
       });
     }
   }, [isSuccess]);
+
+  useEffect(() => {
+    const userSignInMethod = signedInUser?.farcaster
+      ? 'farcaster'
+      : signedInUser?.twitter
+        ? 'twitter'
+        : 'google';
+
+    setLoginFromAnotherDeviceLink(
+      `${window.location.origin}/signin-as?userId=${signedInUser?.id}&signInMethod=${userSignInMethod}`
+    );
+  }, [signedInUser?.farcaster, signedInUser?.id, signedInUser?.twitter]);
 
   const onAddClick = useCallback(
     async (creddd: EligibleCreddd) => {
@@ -174,6 +191,16 @@ const AddCredddPage = () => {
                 <ConnectButton></ConnectButton>
               )}
             </div>
+            <div className="text-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAddFromAnotherDeviceModalOpen(true);
+                }}
+              >
+                Add rep from another device
+              </Button>
+            </div>
           </div>
         </div>
       </Scrollable>
@@ -190,6 +217,13 @@ const AddCredddPage = () => {
           setShowJoinableRoom(null);
         }}
       ></CredddVerifiedSheet>
+      <AddRepFromAnotherDeviceModal
+        isOpen={isAddFromAnotherDeviceModalOpen}
+        onClose={() => {
+          setIsAddFromAnotherDeviceModalOpen(false);
+        }}
+        link={loginFromAnotherDeviceLink}
+      ></AddRepFromAnotherDeviceModal>
     </>
   );
 };
