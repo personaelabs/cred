@@ -32,7 +32,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
       }}
     >
       <div
-        className={`select-none ${message.text ? '' : 'hidden'} ${isFocused ? 'animate-pulse-once' : ''} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline  whitespace-pre-wrap`}
+        className={`select-none ${message.text ? '' : 'hidden'} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline  whitespace-pre-wrap ${isFocused ? 'animate-pulse-once border-white border-2' : ''}`}
         dangerouslySetInnerHTML={{
           // Highlight the text in the message and render
           __html: highlightText(message.text),
