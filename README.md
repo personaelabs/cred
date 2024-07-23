@@ -1,5 +1,5 @@
 # Cred
-*staging
+*staging2
 # creddd.xyz
 
 ## Development
