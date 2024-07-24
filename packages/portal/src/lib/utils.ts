@@ -155,7 +155,11 @@ export const highlightText = (text: string) => {
       .replace(
         /(https?:\/\/[^\s/$.?#].[^\s]*)/g,
         '<a href="$1" class="text-blue-800 break-all" target="_blank" rel="noopener noreferrer">$1</a>'
-      )
+      ),
+    {
+      // Need to pass this config to preserve target="_blank" after sanitization
+      ADD_ATTR: ['target'],
+    }
   );
 };
 
