@@ -59,6 +59,11 @@ const ChatMessage = (props: ChatMessageProps) => {
         <></>
       )}
       <div className="max-w-[70%]">
+        {!isSender && (
+          <div className="text-xs text-primary px-[8px]">
+            {message.user.name}
+          </div>
+        )}
         {replyToId ? (
           <ReplyPreview
             roomId={roomId}

@@ -23,7 +23,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
         // Bind the long press event to the ChatBubble component
         ...bind()
       }
-      className={`flex flex-col mx-2 mt-2 ${isSender ? 'items-end' : 'items-start'}`}
+      className={`flex flex-col mx-2 mt-1 ${isSender ? 'items-end' : 'items-start'}`}
       // This is triggered when the user right-clicks on the ChatBubble on desktop
       onContextMenu={e => {
         e.preventDefault();
