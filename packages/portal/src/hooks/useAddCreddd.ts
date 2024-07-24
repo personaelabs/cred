@@ -82,6 +82,8 @@ const useAddCreddd = (proverAddress: Hex | null) => {
         throw new Error('Prover wallet not found');
       }
 
+      await proverWallet.switchChain(message.domain.chainId);
+
       await prover.prepare();
 
       const provider = await proverWallet.getEthersProvider();
