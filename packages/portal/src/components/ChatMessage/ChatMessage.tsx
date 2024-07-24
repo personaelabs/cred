@@ -51,7 +51,7 @@ const ChatMessage = (props: ChatMessageProps) => {
 
   return (
     <div
-      className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
+      className={`flex ${showFocusIndicator ? 'bg-gray-300 bg-opacity-30' : ''} items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
         <ChatMessageAvatar user={message.user}></ChatMessageAvatar>
@@ -72,7 +72,6 @@ const ChatMessage = (props: ChatMessageProps) => {
         )}
         <ChatBubble
           roomId={roomId}
-          isFocused={showFocusIndicator}
           isSender={isSender}
           message={message}
           onLongPress={() => {

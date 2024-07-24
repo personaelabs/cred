@@ -8,11 +8,10 @@ interface ChatBubbleProps {
   isSender: boolean;
   onLongPress: () => void;
   onViewReplyClick: (_replyId: string) => void;
-  isFocused: boolean;
 }
 
 const ChatBubble = (props: ChatBubbleProps) => {
-  const { isSender, message, onLongPress, isFocused } = props;
+  const { isSender, message, onLongPress } = props;
 
   const bind = useLongPress(() => {
     onLongPress();
@@ -32,7 +31,7 @@ const ChatBubble = (props: ChatBubbleProps) => {
       }}
     >
       <div
-        className={`select-none ${message.text ? '' : 'hidden'} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline  whitespace-pre-wrap border-2 ${isFocused ? 'border-white fade-out-border' : ''} fade-out-border`}
+        className={`select-none ${message.text ? '' : 'hidden'} text-md px-4 py-2 bg-primary text-[#000000] text-opacity-80 rounded-lg shadow-md text-left inline  whitespace-pre-wrap`}
         dangerouslySetInnerHTML={{
           // Highlight the text in the message and render
           __html: highlightText(message.text),
