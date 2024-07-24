@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import 'react-photo-view/dist/react-photo-view.css';
 import { MessageWithUserData } from '@/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatBubble from './ChatBubble';
 import ChatMessageTimestamp from './ChatMessageTimestamp';
 import ChatMessageAvatar from './ChatMessageAvatar';
@@ -19,15 +19,35 @@ type ChatMessageProps = {
   onViewReplyClick: (_replyId: string) => void;
   onDeleteClick: (_messageId: string) => void;
   onReactionClick: (_reaction: string) => void;
+  resetFocus: () => void;
   roomId: string;
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, isReadOnly, roomId, isFocused, onViewReplyClick, message } =
-    props;
+  const {
+    isSender,
+    isReadOnly,
+    roomId,
+    isFocused,
+    resetFocus,
+    onViewReplyClick,
+    message,
+  } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showFocusIndicator, setShowFocusIndicator] = useState(false);
 
   const replyToId = message.replyToId;
+
+  useEffect(() => {
+    if (isFocused) {
+      setShowFocusIndicator(true);
+      resetFocus();
+
+      setTimeout(() => {
+        setShowFocusIndicator(false);
+      }, 1500);
+    }
+  }, [isFocused, resetFocus]);
 
   return (
     <div
@@ -52,7 +72,7 @@ const ChatMessage = (props: ChatMessageProps) => {
         )}
         <ChatBubble
           roomId={roomId}
-          isFocused={isFocused}
+          isFocused={showFocusIndicator}
           isSender={isSender}
           message={message}
           onLongPress={() => {

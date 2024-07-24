@@ -20,7 +20,7 @@ const ReplyPreview = (props: ReplyPreviewProps) => {
         className="opacity-70 p-2 border-l-2 border-[#FDA174]"
         onClick={onClickOnPreview}
       >
-        <div className="w-full">
+        <div className="whitespace-pre-wrap overflow-x-hidden">
           {cutoffMessage(replyToMessage?.body || '', 80)}
         </div>
       </div>
