@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import 'react-photo-view/dist/react-photo-view.css';
 import { MessageWithUserData } from '@/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChatBubble from './ChatBubble';
 import ChatMessageTimestamp from './ChatMessageTimestamp';
 import ChatMessageAvatar from './ChatMessageAvatar';
@@ -19,19 +19,39 @@ type ChatMessageProps = {
   onViewReplyClick: (_replyId: string) => void;
   onDeleteClick: (_messageId: string) => void;
   onReactionClick: (_reaction: string) => void;
+  resetFocus: () => void;
   roomId: string;
 };
 
 const ChatMessage = (props: ChatMessageProps) => {
-  const { isSender, isReadOnly, roomId, isFocused, onViewReplyClick, message } =
-    props;
+  const {
+    isSender,
+    isReadOnly,
+    roomId,
+    isFocused,
+    resetFocus,
+    onViewReplyClick,
+    message,
+  } = props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showFocusIndicator, setShowFocusIndicator] = useState(false);
 
   const replyToId = message.replyToId;
 
+  useEffect(() => {
+    if (isFocused) {
+      setShowFocusIndicator(true);
+      resetFocus();
+
+      setTimeout(() => {
+        setShowFocusIndicator(false);
+      }, 1500);
+    }
+  }, [isFocused, resetFocus]);
+
   return (
     <div
-      className={`flex items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
+      className={`flex ${showFocusIndicator ? 'bg-gray-300 bg-opacity-30' : ''} items-start mb-5 ${isSender ? 'flex-row-reverse' : 'flex-row'} mt-2`}
     >
       {!isSender ? (
         <ChatMessageAvatar user={message.user}></ChatMessageAvatar>
@@ -39,6 +59,11 @@ const ChatMessage = (props: ChatMessageProps) => {
         <></>
       )}
       <div className="max-w-[70%]">
+        {!isSender && (
+          <div className="text-xs text-primary px-[8px]">
+            {message.user.name}
+          </div>
+        )}
         {replyToId ? (
           <ReplyPreview
             roomId={roomId}
@@ -52,7 +77,6 @@ const ChatMessage = (props: ChatMessageProps) => {
         )}
         <ChatBubble
           roomId={roomId}
-          isFocused={isFocused}
           isSender={isSender}
           message={message}
           onLongPress={() => {

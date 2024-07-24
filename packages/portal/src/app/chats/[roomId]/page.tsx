@@ -11,7 +11,7 @@ import Link from 'next/link';
 import useRoom from '@/hooks/useRoom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { MessageInput, MessageWithUserData } from '@/types';
-import { Users } from 'lucide-react';
+import { ChevronDown, Users } from 'lucide-react';
 import useUpdateReadTicket from '@/hooks/useUpdateReadTicket';
 import { Skeleton } from '@/components/ui/skeleton';
 import ClickableBox from '@/components/ClickableBox';
@@ -24,6 +24,7 @@ import { toast } from 'sonner';
  * Chat room page
  */
 const Chat = () => {
+  const [showBackToBottomButton, setShowBackToBottomButton] = useState(false);
   const params = useParams<{ roomId: string }>();
 
   const chatMessageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -108,18 +109,25 @@ const Chat = () => {
     }
   }, [params.roomId, room, setOptions]);
 
+  const scrollToBottom = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
   const onSendClick = useCallback(
     async (input: Omit<MessageInput, 'replyTo'>) => {
       await sendMessage({ ...input, replyTo: replyTo ? replyTo.id : null });
       setReplyTo(null);
 
-      // Scroll to the sent message
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      scrollToBottom();
 
       resetSendMessageState();
     },
-    [replyTo, resetSendMessageState, sendMessage]
+    [replyTo, resetSendMessageState, scrollToBottom, sendMessage]
   );
+
+  const resetFocusedMessage = useCallback(() => {
+    setScrollToMessageId(null);
+  }, []);
 
   const isPortalClosed = room?.isOpenUntil
     ? room.isOpenUntil < new Date()
@@ -132,7 +140,7 @@ const Chat = () => {
   const isReadOnly = !room?.writerIds.includes(signedInUser?.id || '');
 
   return (
-    <div className="h-full">
+    <div className="relative h-full">
       <div className="bg-background h-full flex flex-col justify-end">
         {room?.pinnedMessage ? (
           <PinnedMessage message={room?.pinnedMessage || ''}></PinnedMessage>
@@ -150,6 +158,16 @@ const Chat = () => {
         <div
           className="flex flex-col-reverse bg-background py-4 overflow-auto w-full h-full"
           id="scrollableDiv"
+          onScroll={e => {
+            if (e.currentTarget.scrollTop < -700 && !showBackToBottomButton) {
+              setShowBackToBottomButton(true);
+            } else if (
+              e.currentTarget.scrollTop >= -700 &&
+              showBackToBottomButton
+            ) {
+              setShowBackToBottomButton(false);
+            }
+          }}
         >
           {!isFetching && messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
@@ -186,6 +204,7 @@ const Chat = () => {
                     message={message}
                     roomId={params.roomId}
                     isFocused={scrollToMessageId === message.id}
+                    resetFocus={resetFocusedMessage}
                     {...message}
                     isSender={message.user.id === signedInUser.id.toString()}
                     onReplySelect={message => {
@@ -235,6 +254,14 @@ const Chat = () => {
           )}
         </div>
       </div>
+      {showBackToBottomButton && (
+        <div
+          className="absolute p-1 right-[10px] bottom-20 rounded-full border-2 border-white bg-secondary"
+          onClick={scrollToBottom}
+        >
+          <ChevronDown />
+        </div>
+      )}
     </div>
   );
 };
