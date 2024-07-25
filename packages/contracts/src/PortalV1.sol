@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
-import { ERC1155 } from '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 import 'forge-std/console.sol';
 
-contract PortalV1 is ERC1155, Ownable {
-  uint256 public feePercentage = 5; // 5%
-  uint256 public price = 0.0001 ether;
+contract PortalV1 is Ownable {
+  mapping(uint256 => uint256) public keyIdToPrice;
+  mapping(address => mapping(uint256 => bool)) public addressToKeys;
 
-  address public feeRecipient;
+  event KeyPriceSet(uint256 indexed keyId, uint256 price);
+  event KeyPurchased(address indexed purchaser, uint256 indexed keyId);
+
+  address public paymentRecipient;
 
   bool public isPaused = false;
 
-  constructor()
-    ERC1155('https://creddd.xyz/api/cred/{id}.json')
-    Ownable(msg.sender)
-  {
-    feeRecipient = msg.sender;
+  constructor(address owner) Ownable(owner) {
+    paymentRecipient = owner;
   }
 
   modifier whenNotPaused() {
@@ -32,59 +31,38 @@ contract PortalV1 is ERC1155, Ownable {
     isPaused = false;
   }
 
-  function setFeeRecipient(address _feeRecipient) public onlyOwner {
-    feeRecipient = _feeRecipient;
+  function setPaymentRecipient(address _paymentRecipient) public onlyOwner {
+    paymentRecipient = _paymentRecipient;
   }
 
-  function setFeePercentage(uint256 _feePercentage) public onlyOwner {
-    feePercentage = _feePercentage;
+  function setPrice(uint256 keyId, uint256 price) public onlyOwner {
+    keyIdToPrice[keyId] = price;
+
+    emit KeyPriceSet(keyId, price);
   }
 
-  function setPrice(uint256 _price) public onlyOwner {
-    price = _price;
-  }
-
-  function collectFee(uint256 fee) internal {
-    (bool success, ) = feeRecipient.call{ value: fee }('');
-    require(success, 'Failed to collect fee');
-  }
-
-  /**
-   * @dev Get the protocol fee for a given price of trade
-   */
-  function getProtocolFee(uint256 _price) public view returns (uint256) {
-    return (_price * feePercentage) / 100;
+  function collectPayment(uint256 payment) internal {
+    (bool success, ) = paymentRecipient.call{ value: payment }('');
+    require(success, 'Failed to collect payment');
   }
 
   /**
-   * @dev Buy a key for the given tokenId
+   * @dev Buy a key for the given keyId
    */
   function buyKey(
-    address to,
-    uint256 tokenId,
-    bytes calldata data
+    address purchaser,
+    uint256 keyId
   ) public payable whenNotPaused {
-    uint256 fee = getProtocolFee(price);
+    require(keyIdToPrice[keyId] > 0, 'Key not found');
+    require(addressToKeys[purchaser][keyId] == false, 'Key already owned');
 
-    require(msg.value >= price + fee, 'Insufficient payment');
+    uint256 price = keyIdToPrice[keyId];
+    require(msg.value == price, 'Invalid payment');
 
-    collectFee(fee);
-    _mint(to, tokenId, 1, data);
-  }
+    addressToKeys[purchaser][keyId] = true;
 
-  /**
-   * @dev Sell a key for the given tokenId
-   */
-  function sellKey(uint256 tokenId) public whenNotPaused {
-    require(balanceOf(msg.sender, tokenId) >= 1, 'Insufficient balance');
+    collectPayment(price);
 
-    uint256 fee = getProtocolFee(price);
-
-    _burn(msg.sender, tokenId, 1);
-
-    collectFee(fee);
-
-    (bool success, ) = msg.sender.call{ value: price - fee }('');
-    require(success, 'Transfer failed');
+    emit KeyPurchased(purchaser, keyId);
   }
 }

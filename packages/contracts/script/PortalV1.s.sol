@@ -10,7 +10,10 @@ contract PortalV1Script is Script {
   function run() public {
     vm.startBroadcast();
 
-    PortalV1 portal = new PortalV1();
+    address owner = 0xbE6beda42FC2f31444385E92371a2ACF1ACBE8D6;
+    PortalV1 portal = new PortalV1{ salt: 0 }(owner);
     vm.stopBroadcast();
+
+    console.log('PortalV1 deployed at:', address(portal));
   }
 }

@@ -1,6 +1,5 @@
-import { GetLogsReturnType, Hex } from 'viem';
+import { Hex } from 'viem';
 import { User as PrivyUser } from '@privy-io/react-auth';
-import { TRANSFER_SINGLE_EVENT } from './lib/contract';
 import {
   MerkleTreeWithBloomFilter,
   MessageVisibility,
@@ -63,8 +62,6 @@ export interface MessageInput {
   replyTo: string | null;
   imageUris: string[];
 }
-
-export type TradeLog = GetLogsReturnType<typeof TRANSFER_SINGLE_EVENT>[number];
 
 export interface NeynarUserResponse {
   fid: number;

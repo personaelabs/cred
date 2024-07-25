@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Hex, formatEther, keccak256 } from 'viem';
+import { Chain, Hex, formatEther, keccak256 } from 'viem';
 import DOMPurify from 'isomorphic-dompurify';
 import { base, baseSepolia } from 'viem/chains';
 import {
@@ -137,7 +137,7 @@ export const formatEthBalance = (balance: bigint) => {
   return balanceNumber.toPrecision(3);
 };
 
-export const getChain = () => {
+export const getChain = (): Chain => {
   if (
     process.env.NODE_ENV === 'development' ||
     process.env.NEXT_PUBLIC_CHAIN === 'sepolia'

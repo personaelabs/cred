@@ -58,13 +58,6 @@ const FooterNavigation = (_props: FooterNavigationProps) => {
             path="/"
           ></MenuItem>
           <MenuItem
-            icon="MessageCircleMore"
-            onClick={() => {
-              onClickMenuItem('/chats');
-            }}
-            path="/chats"
-          ></MenuItem>
-          <MenuItem
             icon="Settings"
             onClick={() => {
               onClickMenuItem('/settings');
