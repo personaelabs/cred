@@ -1,67 +1,15 @@
 'use client';
 import { CircleCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useAllRooms from '@/hooks/useAllRooms';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useScrollableRef } from '@/contexts/FooterContext';
-import { Room, User } from '@cred/shared';
-import useUsers from '@/hooks/useUsers';
-import AvatarWithFallback from '@/components/AvatarWithFallback';
+import { Room } from '@cred/shared';
 import { getPortalClosesIn } from '@/lib/utils';
 import EnterPortalModal from '@/components/modals/EnterPortalModal';
-
-interface RoomMemberListItemProps {
-  user: User;
-  isFirst: boolean;
-}
-
-const RoomMemberListItem = memo(function RoomMemberListItem(
-  props: RoomMemberListItemProps
-) {
-  const { user, isFirst } = props;
-  return (
-    <div className={`${isFirst ? '' : 'ml-[-6px]'}`}>
-      <AvatarWithFallback
-        imageUrl={user?.pfpUrl || null}
-        alt={user?.displayName || 'User'}
-        size={22}
-        name={user?.displayName || ''}
-      ></AvatarWithFallback>
-    </div>
-  );
-});
-
-interface RoomMembersListProps {
-  room: Room;
-}
-
-const NUM_USERS_TO_SHOW = 5;
-const RoomMembersList = (props: RoomMembersListProps) => {
-  const { joinedUserIds } = props.room;
-
-  const { data: users } = useUsers(joinedUserIds.slice(0, NUM_USERS_TO_SHOW));
-
-  return (
-    <div className="flex flex-row items-center">
-      {users?.map((user, i) => (
-        <RoomMemberListItem
-          key={i}
-          user={user}
-          isFirst={i === 0}
-        ></RoomMemberListItem>
-      ))}
-      {joinedUserIds.length > NUM_USERS_TO_SHOW ? (
-        <div className="text-sm opacity-80">
-          +{joinedUserIds.length - NUM_USERS_TO_SHOW}
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
-};
+import { useRouter } from 'next/navigation';
+import useJoinRoom from '@/hooks/useJoinRoom';
 
 type RoomItemProps = {
   room: Room;
@@ -74,6 +22,7 @@ const RoomItem = memo(function EligibleRoom(props: RoomItemProps) {
   const { room } = props;
   const { name } = room;
   const { isPurchased, onEnterClick } = props;
+  const [isClicked, setIsClicked] = useState(false);
 
   if (!signedInUser) {
     return <></>;
@@ -84,7 +33,13 @@ const RoomItem = memo(function EligibleRoom(props: RoomItemProps) {
     room.readerIds.includes(signedInUser.id);
 
   return (
-    <div className="border-b-2 py-4">
+    <div
+      className={`border-b-2 py-4 hover:cursor-pointer ${isClicked ? 'opacity-60' : ''}`}
+      onClick={() => {
+        setIsClicked(true);
+        onEnterClick();
+      }}
+    >
       <div className="flex flex-col px-5">
         <div className="flex flex-row items-center justify-between">
           <div className="w-[70%]">
@@ -107,14 +62,6 @@ const RoomItem = memo(function EligibleRoom(props: RoomItemProps) {
               </div>
             )}
           </div>
-          <div className="text-center w-[30%]">
-            <Button onClick={onEnterClick} variant="link">
-              enter
-            </Button>
-          </div>
-        </div>
-        <div className="mt-3 w-full">
-          <RoomMembersList room={props.room}></RoomMembersList>
         </div>
       </div>
     </div>
@@ -125,19 +72,6 @@ const isRoomOpen = (room: Room): boolean => {
   return room.isOpenUntil ? room.isOpenUntil > new Date() : false;
 };
 
-/**
- * Returns true if the user has already joined the room
- */
-const alreadyJoinedRoom = ({
-  room,
-  userId,
-}: {
-  room: Room;
-  userId: string;
-}): boolean => {
-  return room.joinedUserIds.includes(userId);
-};
-
 const Home = () => {
   const { data: signedInUser } = useSignedInUser();
   const { scrollableRef } = useScrollableRef();
@@ -146,14 +80,46 @@ const Home = () => {
   const [enterPortalModalOpenFor, setEnterPortalModalOpenFor] =
     useState<Room | null>(null);
 
+  const { mutateAsync: joinRoom } = useJoinRoom();
+
+  const router = useRouter();
+
   useEffect(() => {
     setOptions({
-      title: 'Explore',
+      title: 'portals',
       showBackButton: false,
     });
   }, [setOptions]);
 
   const { data: allRooms } = useAllRooms();
+
+  const onEnterClick = useCallback(
+    async (room: Room) => {
+      if (!signedInUser) {
+        throw new Error('User is not signed in');
+      }
+
+      // Set a variable indicating whether the user can enter the room or not.
+      // A user can enter the room if they are a writer or reader.
+      const canEnter =
+        room.writerIds.includes(signedInUser.id) ||
+        room.readerIds.includes(signedInUser.id);
+
+      if (canEnter) {
+        // If the user has not joined the room, join the room
+        if (!room.joinedUserIds.includes(signedInUser.id)) {
+          await joinRoom(room.id);
+        }
+
+        // If user is a writer or reader, redirect to the portal
+        router.push(`/portals/${room.id}`);
+      } else {
+        // If user is not a writer or reader, show the modal to either add creddd or purchase a key
+        setEnterPortalModalOpenFor(room);
+      }
+    },
+    [joinRoom, router, signedInUser]
+  );
 
   if (!signedInUser) {
     return <div className="bg-background h-full"></div>;
@@ -161,15 +127,7 @@ const Home = () => {
 
   const openPortals = allRooms
     // Filter out rooms that are not open
-    .filter(isRoomOpen)
-    // Filter out rooms that the user has already joined
-    .filter(
-      room =>
-        !alreadyJoinedRoom({
-          room,
-          userId: signedInUser.id,
-        })
-    );
+    .filter(isRoomOpen);
 
   return (
     <>
@@ -200,7 +158,7 @@ const Home = () => {
               !room.writerIds.includes(signedInUser.id)
             }
             onEnterClick={() => {
-              setEnterPortalModalOpenFor(room);
+              onEnterClick(room);
             }}
           ></RoomItem>
         ))}

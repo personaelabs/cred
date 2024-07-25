@@ -73,7 +73,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
 
   const hideFooter =
     ['/signin', '/signin-as', '/install-pwa', '/about'].includes(pathname) ||
-    pathname.startsWith('/chats/') ||
+    pathname.startsWith('/portals/') ||
     isModalOpen;
 
   const { isMobile } = useMediaQuery();

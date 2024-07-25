@@ -59,7 +59,7 @@ const AddressVerifiedSheet = (props: AddressVerifiedSheetProps) => {
   const onJoinClick = useCallback(
     async (roomId: string) => {
       await joinRoom(roomId);
-      router.push(`/chats/${roomId}`);
+      router.push(`/portals/${roomId}`);
     },
     [joinRoom, router]
   );
