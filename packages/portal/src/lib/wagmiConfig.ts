@@ -1,6 +1,7 @@
-import { base, baseSepolia } from 'wagmi/chains';
+import { anvil, base, baseSepolia } from 'wagmi/chains';
 import { createConfig } from '@privy-io/wagmi';
 import { http } from 'wagmi';
+import { getChain } from './utils';
 
 const MAINNET_CONFIG = createConfig({
   chains: [base],
@@ -20,10 +21,19 @@ const SEPOLIA_CONFIG = createConfig({
   },
 });
 
+const ANVIL_CONFIG = createConfig({
+  chains: [anvil],
+  transports: {
+    [anvil.id]: http('http://localhost:8545'),
+  },
+});
+
+const chain = getChain();
 const config =
-  process.env.NODE_ENV === 'development' ||
-  process.env.NEXT_PUBLIC_CHAIN === 'sepolia'
-    ? SEPOLIA_CONFIG
-    : MAINNET_CONFIG;
+  chain.id === anvil.id
+    ? ANVIL_CONFIG
+    : chain.id === baseSepolia.id
+      ? SEPOLIA_CONFIG
+      : MAINNET_CONFIG;
 
 export default config;

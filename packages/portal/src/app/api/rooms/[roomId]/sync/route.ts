@@ -1,36 +1,13 @@
 import { NextRequest } from 'next/server';
 import viemClient from '@/lib/backend/viemClient';
-import {
-  addReaderToRoom,
-  getUserByAddress,
-  removeUserFromRoom,
-} from '@cred/firebase-admin';
+import { addReaderToRoom, getUserByAddress } from '@cred/firebase-admin';
 import { SyncRoomRequestBody } from '@/types';
 import { Hex, decodeEventLog, parseAbi, zeroAddress } from 'viem';
-import { PortalAbi, getRoomTokenId, tokenIdToRoomId } from '@cred/shared';
+import { tokenIdToRoomId } from '@cred/shared';
 import logger from '@/lib/backend/logger';
-import client from '@/lib/backend/viemClient';
-import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 
-const TRANSFER_SINGLE_EVENT_SIG =
-  '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
-
-const getBalance = async ({
-  address,
-  tokenId,
-}: {
-  address: Hex;
-  tokenId: bigint;
-}) => {
-  const balance = await client.readContract({
-    abi: PortalAbi,
-    address: PORTAL_CONTRACT_ADDRESS,
-    functionName: 'balanceOf',
-    args: [address, tokenId],
-  });
-
-  return balance;
-};
+const KEY_PURCHASED_EVENT_SIG =
+  '0x226015c06d85264c96d322315dda5847b00015b94f0e0619f813b521dea64883';
 
 export async function POST(
   req: NextRequest,
@@ -61,11 +38,11 @@ export async function POST(
   }
 
   const log = result.logs.find(
-    log => log.topics[0] === TRANSFER_SINGLE_EVENT_SIG
+    log => log.topics[0] === KEY_PURCHASED_EVENT_SIG
   );
 
   if (!log) {
-    logger.error(`No log with TransferSingle event sig`, {
+    logger.error(`No log with KeyPurchased event sig`, {
       txHash: result.transactionHash,
     });
     return Response.json(
@@ -78,29 +55,16 @@ export async function POST(
 
   const eventLog = decodeEventLog({
     abi: parseAbi([
-      'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
+      'event KeyPurchased(address indexed purchaser, uint256 indexed keyId)',
     ]),
     data: log.data,
     topics: log.topics,
   });
 
-  const from = eventLog.args.from;
-  const to = eventLog.args.to;
-  const tokenId = eventLog.args.id;
+  const purchaser = eventLog.args.purchaser;
+  const keyId = eventLog.args.keyId;
 
-  if (!tokenId) {
-    logger.error('No tokenId found in log', {
-      txHash: log.transactionHash,
-    });
-    return Response.json(
-      {
-        error: 'No tokenId found in log',
-      },
-      { status: 400 }
-    );
-  }
-
-  const roomId = tokenIdToRoomId(BigInt(tokenId));
+  const roomId = tokenIdToRoomId(BigInt(keyId));
 
   if (params.roomId !== roomId) {
     logger.error(`Room ID does not match: ${params.roomId} !== ${roomId}`);
@@ -112,16 +76,18 @@ export async function POST(
     );
   }
 
-  if (to !== zeroAddress) {
-    const transferToUser = await getUserByAddress(to.toLowerCase() as Hex);
+  if (purchaser !== zeroAddress) {
+    const purchaserUser = await getUserByAddress(
+      purchaser.toLowerCase() as Hex
+    );
 
-    if (!transferToUser) {
-      logger.error(`"to" User not found: ${from}`, {
+    if (!purchaserUser) {
+      logger.error(`"purchaser" User not found: ${purchaser}`, {
         txHash: log.transactionHash,
       });
       return Response.json(
         {
-          error: '"to" User not found',
+          error: '"purchaser" User not found',
         },
         { status: 400 }
       );
@@ -129,39 +95,8 @@ export async function POST(
 
     await addReaderToRoom({
       roomId,
-      userId: transferToUser.id,
+      userId: purchaserUser.id,
     });
-  }
-
-  if (from !== zeroAddress) {
-    const transferFromUser = await getUserByAddress(from.toLowerCase() as Hex);
-
-    if (!transferFromUser) {
-      logger.error(`"from" User not found: ${from}`, {
-        txHash: log.transactionHash,
-      });
-      return Response.json(
-        {
-          error: '"from" User not found',
-        },
-        { status: 400 }
-      );
-    }
-
-    const balance = await getBalance({
-      address: from,
-      tokenId: getRoomTokenId(roomId),
-    });
-
-    // Remove the user from the room if their balance is 0
-    if (balance === BigInt(0)) {
-      await removeUserFromRoom({
-        roomId,
-        userId: transferFromUser.id,
-      });
-    } else {
-      logger.info(`User ${transferFromUser.id} still has balance`);
-    }
   }
 
   return Response.json({}, { status: 200 });

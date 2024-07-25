@@ -2,12 +2,11 @@
 'use client';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useEffect, useState } from 'react';
-import { ArrowDownToLine, CircleFadingPlus, ExternalLink } from 'lucide-react';
+import { ArrowDownToLine, CircleFadingPlus } from 'lucide-react';
 import theme from '@/lib/theme';
 import {
   copyTextToClipboard,
   formatEthBalance,
-  getChain,
   trimAddress,
 } from '@/lib/utils';
 import { Hex } from 'viem';
@@ -15,59 +14,10 @@ import { toast } from 'sonner';
 import { useAccount, useBalance } from 'wagmi';
 import { Button } from '@/components/ui/button';
 import { usePrivy } from '@privy-io/react-auth';
-import useTradeHistory from '@/hooks/useTradeHistory';
-import { TradeLog } from '@/hooks/useTradeHistory';
-import useRoom from '@/hooks/useRoom';
-import { tokenIdToRoomId } from '@cred/shared';
 import Scrollable from '@/components/Scrollable';
 import WithdrawalSheet from '@/components/bottom-sheets/WithdrawalSheet';
 import ClickableBox from '@/components/ClickableBox';
-import Link from 'next/link';
-import { baseSepolia } from 'viem/chains';
 import firebaseProd from '@/lib/firebase/firebase.prod';
-
-interface TradeHistoryListItemProps {
-  log: TradeLog;
-  userAddress: Hex;
-}
-
-const TradeHistoryListItem = (props: TradeHistoryListItemProps) => {
-  const { log, userAddress } = props;
-
-  const { from, to, id } = log.args;
-  const isPurchase = to === userAddress;
-
-  const { data: room } = useRoom(id ? tokenIdToRoomId(id) : '');
-
-  if (!from || !to) {
-    // TODO: Report error
-    return <></>;
-  }
-
-  return (
-    <div className="flex flex-col py-2 border-b-2">
-      <div
-        className={`text-xs ${isPurchase ? 'text-green-400' : 'text-blue-400'}`}
-      >
-        {isPurchase ? 'Purchased' : 'Sold'}
-      </div>
-      <div className="flex flex-row items-center justify-between">
-        <div>{room?.name || ''}</div>
-        <Link
-          className="px-2 text-xs"
-          href={
-            getChain().id === baseSepolia.id
-              ? `https://sepolia.basescan.org/tx/${log.transactionHash}`
-              : `https://basescan.org/tx/${log.transactionHash}`
-          }
-          target="_blank"
-        >
-          <ExternalLink className="w-4 h-4"></ExternalLink>
-        </Link>
-      </div>
-    </div>
-  );
-};
 
 const DepositButton = (props: { address: Hex | undefined }) => {
   const { address } = props;
@@ -120,7 +70,6 @@ const WalletPage = () => {
     address,
   });
   const { exportWallet } = usePrivy();
-  const { data: tradeHistory } = useTradeHistory();
   const [isWithdrawalSheetOpen, setIsWithdrawalSheetOpen] = useState(false);
 
   useEffect(() => {
@@ -151,22 +100,6 @@ const WalletPage = () => {
               <Button onClick={exportWallet} variant="link">
                 Export wallet
               </Button>
-            </div>
-            {tradeHistory?.length ? (
-              <div className="mt-[32px] opacity-60 text-sm text-center w-full px-4">
-                Activity
-              </div>
-            ) : (
-              <></>
-            )}
-            <div className="flex flex-col mt-[16px]">
-              {tradeHistory?.map((log, index) => (
-                <TradeHistoryListItem
-                  key={index}
-                  log={log}
-                  userAddress={address as Hex}
-                />
-              ))}
             </div>
           </div>
         </div>

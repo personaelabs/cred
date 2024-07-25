@@ -1,4 +1,4 @@
-import { PortalAbi } from '@cred/shared';
+import { PORTAL_V1_CONTRACT_ADDRESS, PortalV1Abi } from '@cred/shared';
 import { readContract } from '@wagmi/core';
 import wagmiConfig from '../lib/wagmiConfig';
 import { Hex, encodeFunctionData } from 'viem';
@@ -6,7 +6,6 @@ import axios from '@/lib/axios';
 import { SyncRoomRequestBody } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRoomTokenId } from '@cred/shared';
-import { PORTAL_CONTRACT_ADDRESS } from '@/lib/contract';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSendTransaction, useWallets } from '@privy-io/react-auth';
@@ -54,48 +53,38 @@ const useBuyKey = (roomId: string) => {
       const privyAddress = privyAccount.address as Hex;
       const roomTokenId = getRoomTokenId(roomId);
 
-      const amount = BigInt(1);
-      const value = await readContract(wagmiConfig, {
-        abi: PortalAbi,
-        address: PORTAL_CONTRACT_ADDRESS,
-        functionName: 'getBuyPrice',
-        args: [roomTokenId, amount],
+      const price = await readContract(wagmiConfig, {
+        abi: PortalV1Abi,
+        address: PORTAL_V1_CONTRACT_ADDRESS,
+        functionName: 'keyIdToPrice',
+        args: [roomTokenId],
       });
 
-      const fee = await readContract(wagmiConfig, {
-        abi: PortalAbi,
-        address: PORTAL_CONTRACT_ADDRESS,
-        functionName: 'getProtocolFee',
-        args: [value],
-      });
-
-      if (!value) {
+      if (!price) {
         throw new Error('Failed to get price of.');
       }
 
-      const totalCost = value + fee;
-
-      if (balance && balance.value < totalCost) {
+      if (balance && balance.value < price) {
         // Show Fund Wallet modal
         // await privyAccount.fund();
         setOpenedSheet(DialogType.FUND_WALLET);
       } else {
         const data = encodeFunctionData({
-          abi: PortalAbi,
-          functionName: 'buyKeys',
-          args: [privyAddress as Hex, roomTokenId, amount, '0x'],
+          abi: PortalV1Abi,
+          functionName: 'buyKey',
+          args: [privyAddress as Hex, roomTokenId],
         });
 
         const txReceipt = await sendTransaction(
           {
             from: privyAddress,
-            to: PORTAL_CONTRACT_ADDRESS,
+            to: PORTAL_V1_CONTRACT_ADDRESS,
             data,
-            value: value + fee,
+            value: price,
           },
           {
             header: `Buy ${room?.name} key`,
-            description: `5% protocol fee`,
+            description: ``,
             buttonText: 'Buy key',
           }
         );

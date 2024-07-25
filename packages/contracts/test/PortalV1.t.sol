@@ -5,48 +5,22 @@ import 'forge-std/console.sol';
 import { ERC1155 } from '@openzeppelin/contracts/token/ERC1155/ERC1155.sol';
 import { IERC1155Receiver } from '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
 
-contract PortalV1Test is Test, IERC1155Receiver {
+contract PortalV1Test is Test {
   PortalV1 portal;
 
-  function onERC1155Received(
-    address operator,
-    address from,
-    uint256 id,
-    uint256 value,
-    bytes calldata data
-  ) external returns (bytes4) {
-    return this.onERC1155Received.selector;
-  }
-
-  function onERC1155BatchReceived(
-    address operator,
-    address from,
-    uint256[] calldata ids,
-    uint256[] calldata values,
-    bytes calldata data
-  ) external returns (bytes4) {
-    return this.onERC1155BatchReceived.selector;
-  }
-
-  function supportsInterface(bytes4 interfaceID) external view returns (bool) {
-    return
-      interfaceID == 0x01ffc9a7 || // ERC-165 support (i.e. `bytes4(keccak256('supportsInterface(bytes4)'))`).
-      interfaceID == 0x4e2312e0; // ERC-1155 `ERC1155TokenReceiver` support (i.e. `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)")) ^ bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
-  }
-
   function setUp() public {
-    portal = new PortalV1();
+    address owner = address(this);
+    portal = new PortalV1(owner);
   }
 
   /**
    ********* Utility functions *********
    */
 
-  function buyKey(address to, uint256 tokenId) public payable {
-    uint256 price = portal.price();
-    uint256 fee = portal.getProtocolFee(price);
+  function buyKey(address to, uint256 keyId) public payable {
+    uint256 price = portal.keyIdToPrice(keyId);
 
-    portal.buyKey{ value: price + fee }(to, tokenId, '');
+    portal.buyKey{ value: price }(to, keyId);
   }
 
   receive() external payable {}
@@ -55,75 +29,62 @@ contract PortalV1Test is Test, IERC1155Receiver {
    ********* Tests *********
    */
 
-  function testFuzz_setFeePercentage(uint8 percentage) public {
-    portal.setFeePercentage(percentage % 100);
-    assertEq(portal.feePercentage(), percentage % 100);
+  function testFuzz_setPaymentRecipient(address recipient) public {
+    portal.setPaymentRecipient(recipient);
+    assertEq(portal.paymentRecipient(), recipient);
 
     vm.prank(address(makeAddr('alice')));
     vm.expectRevert();
-    portal.setFeePercentage(percentage % 100);
+    portal.setPaymentRecipient(recipient);
   }
 
-  function testFuzz_setFeeRecipient(address recipient) public {
-    portal.setFeeRecipient(recipient);
-    assertEq(portal.feeRecipient(), recipient);
+  function testFuzz_setPrice(uint256 keyId, uint256 price) public {
+    portal.setPrice(keyId, price);
+    assertEq(portal.keyIdToPrice(keyId), price);
 
     vm.prank(address(makeAddr('alice')));
     vm.expectRevert();
-    portal.setFeeRecipient(recipient);
+    portal.setPrice(keyId, price);
   }
 
-  function testFuzz_setPrice(uint256 price) public {
-    portal.setPrice(price);
-    assertEq(portal.price(), price);
+  function test_buyKey() public {
+    uint256 keyId = 1;
 
-    vm.prank(address(makeAddr('alice')));
-    vm.expectRevert();
-    portal.setPrice(price);
+    uint256 price = 0.001 ether;
+    portal.setPrice(keyId, price);
+
+    buyKey(address(this), keyId);
+
+    // The address should now own the key
+    assertEq(portal.addressToKeys(address(this), keyId), true);
+
+    // Shouldn't be able to buy the same key again
+    vm.expectRevert('Key already owned');
+    portal.buyKey{ value: price }(address(this), keyId);
+
+    // Shouldn't be able to buy a key that doesn't exist
+    vm.expectRevert('Key not found');
+    portal.buyKey{ value: price }(address(this), 2);
   }
 
-  function test_ProtocolFeeCollection() public {
+  function test_PaymentCollection() public {
+    uint256 keyId = 1;
+    uint256 price = 0.001 ether;
+
+    portal.setPrice(keyId, price);
+
     address recipient = vm.addr(333);
-    portal.setFeeRecipient(recipient);
+    portal.setPaymentRecipient(recipient);
+    buyKey(address(this), keyId);
 
-    uint256 tokenId = 1;
-    buyKey(address(this), tokenId);
-
-    portal.sellKey(tokenId);
-
-    uint256 feePercentage = portal.feePercentage();
-    uint256 price = portal.price();
-
-    uint256 expectedFeeOnBuy = (price * feePercentage) / 100;
-    uint256 expectedFeeOnSell = (price * feePercentage) / 100;
-
-    uint256 expectedFee = expectedFeeOnBuy + expectedFeeOnSell;
-    assertEq(address(recipient).balance, expectedFee);
-  }
-
-  function test_BalanceAfterBuy() public {
-    uint256 tokenId = 1;
-    buyKey(address(this), tokenId);
-    assertEq(portal.balanceOf(address(this), tokenId), 1);
-  }
-
-  function test_BalanceAfterSell() public {
-    uint256 tokenId = 1;
-    buyKey(address(this), tokenId);
-
-    portal.sellKey(tokenId);
-
-    assertEq(portal.balanceOf(address(this), tokenId), 0);
+    assertEq(address(portal.paymentRecipient()).balance, price);
   }
 
   function test_WhenPaused() public {
     portal.pause();
-    uint256 tokenId = 1;
+    uint256 keyId = 1;
 
     vm.expectRevert('Contract is paused');
-    portal.buyKey(address(this), tokenId, '');
-
-    vm.expectRevert('Contract is paused');
-    portal.sellKey(tokenId);
+    portal.buyKey(address(this), keyId);
   }
 }

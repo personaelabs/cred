@@ -11,5 +11,6 @@ export * from './converters/inviteCodeConverter';
 export * from './utils';
 export { createRpcClient } from './jsonrpc';
 export { default as PortalAbi } from './abi/Portal';
+export { default as PortalV1Abi } from './abi/PortalV1';
 export { initLogger } from './logger';
 export * from './contracts';

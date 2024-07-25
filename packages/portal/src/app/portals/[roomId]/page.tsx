@@ -1,19 +1,12 @@
 'use client';
 import AvatarWithFallback from '@/components/AvatarWithFallback';
-import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import useRoom from '@/hooks/useRoom';
-import useSellPrice from '@/hooks/useSellPrice';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUsers from '@/hooks/useUsers';
-import { formatEthBalance } from '@/lib/utils';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import useSellKey from '@/hooks/useSellKey';
-import { KeyRound } from 'lucide-react';
-import useKeyBalance from '@/hooks/useKeyBalance';
-import { User, getRoomTokenId } from '@cred/shared';
-import { Hex } from 'viem';
+import { User } from '@cred/shared';
 import Scrollable from '@/components/Scrollable';
 
 const RoomUserListItem = ({ user }: { user: User }) => {
@@ -48,12 +41,6 @@ const RoomInfo = () => {
   const router = useRouter();
   const { setOptions } = useHeaderOptions();
   const { data: signedInUser } = useSignedInUser();
-  const { data: keySellPrice } = useSellPrice(params.roomId);
-  const { mutateAsync: sellKey } = useSellKey(params.roomId);
-  const { data: keyBalance } = useKeyBalance({
-    address: (signedInUser?.wallet?.address as Hex) || null,
-    tokenId: getRoomTokenId(params.roomId),
-  });
 
   useEffect(() => {
     if (room) {
@@ -82,32 +69,7 @@ const RoomInfo = () => {
     <Scrollable>
       <div className="flex flex-col items-center py-5 h-full w-full overflow-auto">
         <div className="text-xl mt-4 px-4">{room.name}</div>
-        <div className="flex flex-col items-center mt-2">
-          <div>
-            <span className="text-blue-500">Key sell price</span>
-            <span className="ml-2 opacity-60">
-              {keySellPrice !== undefined ? formatEthBalance(keySellPrice) : ''}{' '}
-              ETH
-            </span>
-          </div>
-          {keyBalance && keyBalance > BigInt(0) ? (
-            <div className="mt-1">
-              <Button
-                className="mt-4 text-blue-500"
-                variant="secondary"
-                onClick={async () => {
-                  await sellKey();
-                  router.replace(`/chats`);
-                }}
-              >
-                <KeyRound className="mr-2 w-3 h-3"></KeyRound>
-                Sell key
-              </Button>
-            </div>
-          ) : (
-            <></>
-          )}
-        </div>
+        <div className="flex flex-col items-center mt-2"></div>
         <div className="mt-8">
           {insiders.length > 0 ? (
             <div className="text-center text-gray-400">insiders</div>
