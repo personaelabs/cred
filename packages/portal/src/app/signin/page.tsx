@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import theme from '@/lib/theme';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useSignInMethod } from '@/contexts/SignInMethodContext';
 
 interface SignInButtonProps {
   signingIn: boolean;
@@ -50,6 +51,12 @@ const SignIn = () => {
     redirectToAddRep: false,
   });
   const { setOptions } = useHeaderOptions();
+  const { setSignInMethod } = useSignInMethod();
+
+  useEffect(() => {
+    // By setting to null, all sign in methods are shown
+    setSignInMethod(null);
+  }, [setSignInMethod]);
 
   useEffect(() => {
     if (error) {
@@ -60,7 +67,8 @@ const SignIn = () => {
   useEffect(() => {
     setOptions({
       title: 'Sign In',
-      showBackButton: false,
+      showBackButton: true,
+      backTo: '/onboarding/1',
       headerRight: null,
     });
   }, [setOptions]);
