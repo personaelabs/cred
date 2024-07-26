@@ -206,5 +206,12 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
+    groups.push(Group::new(
+        "farcaster power user".to_string(),
+        GroupType::FarcasterPowerUsers,
+        vec![],
+        0,
+    ));
+
     groups
 }
