@@ -106,6 +106,7 @@ enum GroupType {
   Farcaster1K
   Farcaster10K
   Farcaster100K
+  FarcasterPowerUsers
 }
 
 enum GroupState {

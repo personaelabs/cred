@@ -34,6 +34,7 @@ COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/friend_bag
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/fc_1k.csv fc_1k.csv
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/fc_10k.csv fc_10k.csv
 COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/fc_100k.csv fc_100k.csv
+COPY --from=builder /usr/src/app/packages/indexer-rs/src/fixed_groups/fc_power_users.csv fc_power_users.csv
 
 RUN apt-get update -y
 RUN apt-get install libcurl4 -y

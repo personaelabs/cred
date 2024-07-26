@@ -299,6 +299,9 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::Farcaster100K => {
             hasher.update(b"Farcaster100K");
         }
+        GroupType::FarcasterPowerUsers => {
+            hasher.update(b"FarcasterPowerUsers");
+        }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
         }

@@ -159,6 +159,9 @@ async fn main() {
                 GroupType::Farcaster100K => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
+                GroupType::FarcasterPowerUsers => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
             };
 
             // Initialize the tree sync engine for the group
