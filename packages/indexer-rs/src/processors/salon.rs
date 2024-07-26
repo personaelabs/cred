@@ -42,6 +42,7 @@ impl GroupIndexer for SalonIndexer {
             GroupType::Farcaster1K => "fc_1k.csv",
             GroupType::Farcaster10K => "fc_10k.csv",
             GroupType::Farcaster100K => "fc_100k.csv",
+            GroupType::FarcasterPowerUsers => "fc_power_users.csv",
             _ => panic!("Invalid group type"),
         };
 

@@ -127,6 +127,7 @@ pub enum GroupType {
     Farcaster1K,
     Farcaster10K,
     Farcaster100K,
+    FarcasterPowerUsers
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
