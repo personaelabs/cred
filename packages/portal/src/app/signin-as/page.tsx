@@ -6,12 +6,11 @@ import { useSignInMethod } from '@/contexts/SignInMethodContext';
 import useSignIn from '@/hooks/useSignIn';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useUser from '@/hooks/useUser';
+import { SignInMethod } from '@/types';
 import { Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { Suspense } from 'react';
-
-type SignInMethod = 'google' | 'farcaster' | 'twitter';
 
 const SignInAs = () => {
   const searchParams = useSearchParams();

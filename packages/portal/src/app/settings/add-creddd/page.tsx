@@ -105,7 +105,7 @@ const AddCredddPage = () => {
       ? 'farcaster'
       : signedInUser?.twitter
         ? 'twitter'
-        : 'google';
+        : 'email';
 
     setLoginFromAnotherDeviceLink(
       `${window.location.origin}/signin-as?userId=${signedInUser?.id}&signInMethod=${userSignInMethod}`

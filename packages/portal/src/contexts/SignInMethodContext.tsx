@@ -8,7 +8,7 @@ import React, { createContext, useContext, useState } from 'react';
  */
 const SignInMethodContext = createContext<{
   signInMethod: SignInMethod | null;
-  setSignInMethod: (_sheet: SignInMethod) => void;
+  setSignInMethod: (_sheet: SignInMethod | null) => void;
 }>({
   signInMethod: null,
   setSignInMethod: () => {},
@@ -29,7 +29,7 @@ export function SignInMethodContextProvider({
     <SignInMethodContext.Provider
       value={{
         signInMethod,
-        setSignInMethod: (_signInMethod: SignInMethod) => {
+        setSignInMethod: (_signInMethod: SignInMethod | null) => {
           setSignInMethod(_signInMethod);
         },
       }}

@@ -72,8 +72,15 @@ const Main = ({ children }: { children: React.ReactNode }) => {
   useMixpanel();
 
   const hideFooter =
-    ['/signin', '/signin-as', '/install-pwa', '/about'].includes(pathname) ||
+    [
+      '/onboarding/1',
+      '/signin',
+      '/signin-as',
+      '/install-pwa',
+      '/about',
+    ].includes(pathname) ||
     pathname.startsWith('/portals/') ||
+    pathname.startsWith('/onboarding/') ||
     isModalOpen;
 
   const { isMobile } = useMediaQuery();
@@ -90,22 +97,23 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     pathname !== '/signin-as';
 
   // Redirect to sign in page if the user is not authenticated.
-  const redirectToSignIn =
+  const redirectToOnboarding =
     !redirectToInstallPage &&
     isAuthenticated === false &&
     pathname !== '/install-pwa' &&
     pathname !== '/about' &&
+    pathname !== '/signin-as' &&
     pathname !== '/signin' &&
-    pathname !== '/signin-as';
+    !pathname.startsWith('/onboarding/');
 
   useEffect(() => {
     (async () => {
       if (redirectToInstallPage) {
         console.log('Redirecting to install page');
         router.push('/about');
-      } else if (redirectToSignIn) {
+      } else if (redirectToOnboarding) {
         console.log('Redirecting to sign in page');
-        router.push('/signin');
+        router.push('/onboarding/1');
       }
     })();
   }, [
@@ -116,7 +124,7 @@ const Main = ({ children }: { children: React.ReactNode }) => {
     pathname,
     isUsernameSet,
     redirectToInstallPage,
-    redirectToSignIn,
+    redirectToOnboarding,
   ]);
 
   useEffect(() => {

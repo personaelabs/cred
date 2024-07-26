@@ -8,7 +8,7 @@ import {
 
 export type SignedInUser = PrivyUser;
 
-export type SignInMethod = 'google' | 'farcaster' | 'twitter';
+export type SignInMethod = 'email' | 'farcaster' | 'twitter';
 
 /**
  * User object used to render a single chat message
