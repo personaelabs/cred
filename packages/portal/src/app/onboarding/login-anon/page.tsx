@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useSignInMethod } from '@/contexts/SignInMethodContext';
 import useSignIn from '@/hooks/useSignIn';
+import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 
 const onboardingMessages = [
@@ -14,7 +15,7 @@ const onboardingMessages = [
 
 const OnboardingLoginAnon = () => {
   const { setOptions } = useHeaderOptions();
-  const { mutateAsync: signIn } = useSignIn({
+  const { mutateAsync: signIn, isSigningIn } = useSignIn({
     redirectToAddRep: false,
   });
   const { setSignInMethod } = useSignInMethod();
@@ -39,11 +40,15 @@ const OnboardingLoginAnon = () => {
       </div>
       <div className="mt-8 flex flex-row items-center justify-center">
         <Button
+          disabled={isSigningIn}
           onClick={() => {
             setSignInMethod('email');
             signIn();
           }}
         >
+          {isSigningIn && (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin"></Loader2>
+          )}
           Continue with email
         </Button>
       </div>

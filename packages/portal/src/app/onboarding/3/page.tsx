@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useHeaderOptions } from '@/contexts/HeaderContext';
 import { useSignInMethod } from '@/contexts/SignInMethodContext';
 import useSignIn from '@/hooks/useSignIn';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
@@ -28,11 +29,14 @@ const OnboardingStep3 = () => {
     });
   }, [setOptions]);
 
-  const { mutateAsync: signIn } = useSignIn({
+  const { mutateAsync: signIn, isSigningIn } = useSignIn({
     redirectToAddRep: false,
   });
 
-  const { setSignInMethod } = useSignInMethod();
+  const { setSignInMethod, signInMethod } = useSignInMethod();
+
+  const isSigningInWithFc = signInMethod === 'farcaster' && isSigningIn;
+  const isSigningInWithTwitter = signInMethod === 'twitter' && isSigningIn;
 
   return (
     <div className="flex flex-col">
@@ -52,8 +56,12 @@ const OnboardingStep3 = () => {
             setSignInMethod('farcaster');
             signIn();
           }}
-          className="w-[140px]"
+          className="w-[160px]"
+          disabled={isSigningIn}
         >
+          {isSigningInWithFc && (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin"></Loader2>
+          )}
           <img
             src="/fc-logo.svg"
             alt="farcaster logo"
@@ -63,12 +71,16 @@ const OnboardingStep3 = () => {
         </Button>
         <Button
           variant="outline"
-          className="w-[140px]"
+          className="w-[160px]"
           onClick={() => {
             setSignInMethod('twitter');
             signIn();
           }}
+          disabled={isSigningIn}
         >
+          {isSigningInWithTwitter && (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin"></Loader2>
+          )}
           <img
             src="/x-logo.svg"
             alt="farcaster logo"
@@ -77,7 +89,11 @@ const OnboardingStep3 = () => {
           Twitter
         </Button>
         <Link href="/onboarding/login-anon">
-          <Button variant="outline" className="w-[140px]">
+          <Button
+            variant="outline"
+            className="w-[160px]"
+            disabled={isSigningIn}
+          >
             Continue as anon
           </Button>
         </Link>
