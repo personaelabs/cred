@@ -103,6 +103,9 @@ enum GroupType {
   OpSalon
   ArbSalon
   FriendBagHolder
+  Farcaster1K
+  Farcaster10K
+  Farcaster100K
 }
 
 enum GroupState {
