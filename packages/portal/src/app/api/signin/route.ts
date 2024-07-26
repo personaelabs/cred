@@ -53,6 +53,8 @@ const initUser = async (user: PrivyUser) => {
   } else if (user.twitter) {
     userData.displayName = user.twitter.name || '';
     userData.pfpUrl = user.twitter.profilePictureUrl || '';
+  } else if (user.email) {
+    userData.displayName = '';
   } else {
     throw new Error('User has no linked account');
   }

@@ -93,6 +93,8 @@ const SetupUsernamePage = () => {
       } else if (signedInUser.google) {
         // Use the Google name as the initial username
         setUsername(signedInUser.google.name?.toLowerCase() || '');
+      } else if (signedInUser.email) {
+        setUsername('');
       } else {
         throw new Error('User has no linked account');
       }
