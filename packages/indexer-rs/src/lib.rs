@@ -17,11 +17,11 @@ pub mod processors;
 pub mod rocksdb_key;
 pub mod seeder;
 pub mod server;
+pub mod status_logger;
 pub mod synched_chunks_iterator;
 pub mod tree;
 pub mod tree_sync_engine;
 pub mod utils;
-pub mod status_logger;
 
 #[cfg(test)]
 pub mod test_utils;
@@ -123,7 +123,10 @@ pub enum GroupType {
     AllHolders,
     Ticker,
     Believer,
-    FriendBagHolder
+    FriendBagHolder,
+    Farcaster1K,
+    Farcaster10K,
+    Farcaster100K,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, FromSql, ToSql, Serialize, Deserialize)]
