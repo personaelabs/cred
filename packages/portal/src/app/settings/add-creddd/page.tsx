@@ -64,10 +64,7 @@ const AddCredddPage = () => {
 
   const { data: eligibleCreddd, isFetching: isSearchingCreddd } =
     useEligibleCreddd(address);
-  const [showJoinableRoom, setShowJoinableRoom] = useState<{
-    id: string;
-    displayName: string;
-  } | null>(null);
+  const [showCredddVerifiedSheet, setShowCredddVerifiedSheet] = useState(false);
   const [isAddFromAnotherDeviceModalOpen, setIsAddFromAnotherDeviceModalOpen] =
     useState(false);
   const [loginFromAnotherDeviceLink, setLoginFromAnotherDeviceLink] =
@@ -115,10 +112,7 @@ const AddCredddPage = () => {
   const onAddClick = useCallback(
     async (creddd: EligibleCreddd) => {
       await addCreddd(creddd);
-      setShowJoinableRoom({
-        id: creddd.id,
-        displayName: creddd.display_name,
-      });
+      setShowCredddVerifiedSheet(true);
       reset();
     },
     [addCreddd, reset]
@@ -211,10 +205,9 @@ const AddCredddPage = () => {
         isProofReady={isProofReady}
       ></AddingCredddModal>
       <CredddVerifiedSheet
-        isOpen={showJoinableRoom ? true : false}
-        joinableRoom={showJoinableRoom}
+        isOpen={showCredddVerifiedSheet}
         onClose={() => {
-          setShowJoinableRoom(null);
+          setShowCredddVerifiedSheet(false);
         }}
       ></CredddVerifiedSheet>
       <AddRepFromAnotherDeviceModal
