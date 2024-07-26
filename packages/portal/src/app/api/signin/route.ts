@@ -2,8 +2,8 @@ import { getAuth } from 'firebase-admin/auth';
 import { NextRequest } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import {
-  ETH_CC_ROOM_CREDDD,
-  ETH_CC_ROOM_ID,
+  FARCASTER_1_ROOM_CREDDD,
+  FARCASTER_1_ROOM_ID,
   User,
   userConverter,
 } from '@cred/shared';
@@ -126,10 +126,10 @@ export async function POST(req: NextRequest) {
           await Promise.all(
             groups.map(async group => {
               // If the user is eligible for the ETHCC room, add them to the room
-              if (ETH_CC_ROOM_CREDDD.includes(group.id)) {
-                console.log('Adding user to ETHCC room on sign in');
+              if (FARCASTER_1_ROOM_CREDDD.includes(group.id)) {
+                console.log('Adding user to Farcaster room on sign in');
                 await addWriterToRoom({
-                  roomId: ETH_CC_ROOM_ID,
+                  roomId: FARCASTER_1_ROOM_ID,
                   userId: user.id,
                 });
               }

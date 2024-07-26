@@ -6,7 +6,6 @@ import { MerkleTree as MerkleTreeProto } from '@/proto/merkle_tree_pb';
 import { PRECOMPUTED_HASHES } from '@/lib/poseidon';
 import { fromHexString } from '@/lib/utils';
 import credddKeys from '@/queryKeys/credddKeys';
-import useAllRooms from './useAllRooms';
 import rpcClient from '@/lib/credddRpc';
 import { GetLatestMerkleTreesReturnType } from '@cred/shared';
 
@@ -147,7 +146,6 @@ const useAllMerkleTrees = () => {
 const useEligibleCreddd = (address: Hex | null) => {
   const { data: signedInUser } = useSignedInUser();
   const { data: merkleTrees } = useAllMerkleTrees();
-  const { data: allRooms } = useAllRooms();
 
   return useQuery({
     queryKey: credddKeys.eligibleCreddd(address),
@@ -157,14 +155,9 @@ const useEligibleCreddd = (address: Hex | null) => {
         merkleTrees: merkleTrees!,
       });
 
-      // Filter out the groups which rooms are not available
-      const availableRoomIds = allRooms.map(room => room.id);
-      console.log({ availableRoomIds });
-      return eligibleCreddd.filter(creddd =>
-        availableRoomIds.includes(creddd.id)
-      );
+      return eligibleCreddd;
     },
-    enabled: !!signedInUser && !!address && !!merkleTrees && !!allRooms,
+    enabled: !!signedInUser && !!address && !!merkleTrees,
   });
 };
 

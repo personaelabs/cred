@@ -6,8 +6,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 const db = getFirestore(app);
 
 const createRoom = async () => {
-  const groupId = 'ethcc-2024';
-  const name = 'What happened at EthCC?';
+  const groupId = 'farcaster-1';
+  const name = 'farcaster confidential';
 
   const roomData: Omit<
     Room,
@@ -22,6 +22,7 @@ const createRoom = async () => {
     id: groupId,
     name,
     imageUrl: null,
+    eligibility: '',
   };
 
   const newRoomData: Room = {
