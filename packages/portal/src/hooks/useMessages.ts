@@ -179,7 +179,7 @@ const useMessages = ({ roomId }: { roomId: string }) => {
       ...msg,
       user: {
         ...msg.user,
-        name: user?.displayName || '',
+        name: user?.displayName || user?.username || '',
         avatarUrl: user?.pfpUrl || '',
         isMod: user?.isMod || false,
       },
