@@ -20,11 +20,9 @@ import { addUserCreddd } from '@/lib/backend/userCreddd';
 import privy from '@/lib/backend/privy';
 import credddRpcClient from '@/lib/credddRpc';
 import { addWriterToRoom } from '@cred/firebase-admin';
-import { ETH_CC_ROOM_CREDDD } from '@cred/shared';
+import { FARCASTER_1_ROOM_CREDDD, FARCASTER_1_ROOM_ID } from '@cred/shared';
 
 let circuitInitialized = false;
-
-const ETH_CC_ROOM_ID = 'ethcc-2024';
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as AddCredddRequestBody;
@@ -112,9 +110,9 @@ export async function POST(req: NextRequest) {
   }
 
   // If the user is eligible for the ETHCC room, add them to the room
-  if (ETH_CC_ROOM_CREDDD.includes(group.id)) {
+  if (FARCASTER_1_ROOM_CREDDD.includes(group.id)) {
     await addWriterToRoom({
-      roomId: ETH_CC_ROOM_ID,
+      roomId: FARCASTER_1_ROOM_ID,
       userId: user.id,
     });
   }
