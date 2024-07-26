@@ -290,6 +290,15 @@ pub fn get_group_id(group_type: GroupType, contract_inputs: &[String]) -> String
         GroupType::FriendBagHolder => {
             hasher.update(b"FriendBagHolder");
         }
+        GroupType::Farcaster1K => {
+            hasher.update(b"Farcaster1K");
+        }
+        GroupType::Farcaster10K => {
+            hasher.update(b"Farcaster10K");
+        }
+        GroupType::Farcaster100K => {
+            hasher.update(b"Farcaster100K");
+        }
         _ => {
             panic!("Unsupported group type {:?}", group_type);
         }

@@ -39,6 +39,9 @@ impl GroupIndexer for SalonIndexer {
             GroupType::FriendBagHolder => "friend_bag_holder.csv",
             GroupType::ArbSalon => "arb_salon.csv",
             GroupType::OpSalon => "op_salon.csv",
+            GroupType::Farcaster1K => "fc_1k.csv",
+            GroupType::Farcaster10K => "fc_10k.csv",
+            GroupType::Farcaster100K => "fc_100k.csv",
             _ => panic!("Invalid group type"),
         };
 
@@ -46,7 +49,11 @@ impl GroupIndexer for SalonIndexer {
         let file_path = if cargo_manifest_dir.is_err() {
             format!("./{}", file_name)
         } else {
-            format!("{}/src/fixed_groups/{}", cargo_manifest_dir.unwrap(), file_name)
+            format!(
+                "{}/src/fixed_groups/{}",
+                cargo_manifest_dir.unwrap(),
+                file_name
+            )
         };
 
         println!("Reading members from file: {}", file_path);

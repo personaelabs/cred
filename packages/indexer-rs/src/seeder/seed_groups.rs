@@ -184,5 +184,27 @@ pub fn get_seed_groups() -> Vec<Group> {
         0,
     ));
 
+    // Add farcaster groups
+    groups.push(Group::new(
+        "farcaster 1k".to_string(),
+        GroupType::Farcaster1K,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "farcaster 10k".to_string(),
+        GroupType::Farcaster10K,
+        vec![],
+        0,
+    ));
+
+    groups.push(Group::new(
+        "farcaster 100k".to_string(),
+        GroupType::Farcaster100K,
+        vec![],
+        0,
+    ));
+
     groups
 }

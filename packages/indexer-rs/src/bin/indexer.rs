@@ -150,6 +150,15 @@ async fn main() {
                 GroupType::FriendBagHolder => {
                     Box::new(SalonIndexer::new(group.clone(), resources.clone()))
                 }
+                GroupType::Farcaster1K => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::Farcaster10K => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
+                GroupType::Farcaster100K => {
+                    Box::new(SalonIndexer::new(group.clone(), resources.clone()))
+                }
             };
 
             // Initialize the tree sync engine for the group
@@ -174,7 +183,7 @@ async fn main() {
     let intrinsic_creddd_sync_engine =
         IntrinsicCredddSyncEngine::new(fc_replica_db, pg_client.clone());
 
-        let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
+    let intrinsic_creddd_sync_job = intrinsic_creddd_sync_engine.sync();
 
     let _pg_client = pg_client.clone();
     let sever_thread = tokio::spawn(async move {
