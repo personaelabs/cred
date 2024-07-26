@@ -15,6 +15,7 @@ import axios from '@/lib/axios';
 import { constructProofSigMessage } from '@/lib/eip712';
 import userKeys from '@/queryKeys/userKeys';
 import credddKeys from '@/queryKeys/credddKeys';
+import roomKeys from '@/queryKeys/roomKeys';
 
 const submitProof = async (body: AddCredddRequestBody) => {
   await axios.post('/api/creddd', body);
@@ -152,6 +153,9 @@ const useAddCreddd = (proverAddress: Hex | null) => {
       });
       await queryClient.invalidateQueries({
         queryKey: userKeys.user(signedInUser?.id),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: roomKeys.all,
       });
     },
   });

@@ -3,6 +3,16 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')();
 
 const nextConfig = {
+  async redirects() {
+    return [
+      // Basic redirect
+      {
+        source: '/chats',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
