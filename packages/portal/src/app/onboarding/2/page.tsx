@@ -10,7 +10,7 @@ const onboardingMessages = [
     text: 'ppportals are ephemeral windows into the minds of insiders',
   },
   {
-    text: "they open for a few hours at a time once they close, they're gone forever",
+    text: "they open for a few hours at a time \nonce they close, they're gone forever",
   },
   {
     text: 'pay a fee, see inside',

@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 
 const onboardingMessages = [
   {
-    text: 'first, you must choose your name. how should others see you?',
+    text: 'first, you must choose your name\nhow should others see you?',
   },
   {
     text: `choosing Twitter or Farcaster will automatically bridge any rep you have there`,
